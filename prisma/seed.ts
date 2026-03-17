@@ -1,9 +1,12 @@
 import { PrismaClient } from '@prisma/client'
+import bcrypt from 'bcryptjs'
 
 const prisma = new PrismaClient()
 
 async function main() {
   console.log('Start seeding...')
+  const hash = (pw: string) => bcrypt.hashSync(pw, 10)
+  const defaultPassword = hash('password123')
 
   // CREATE AREAS
   const area1 = await prisma.area.create({
@@ -17,7 +20,7 @@ async function main() {
   const admin = await prisma.user.create({
     data: {
       username: 'admin',
-      password: 'password123',
+      password: defaultPassword,
       name: 'System Admin',
       role: 'ADMIN',
     },
@@ -26,7 +29,7 @@ async function main() {
   const spv = await prisma.user.create({
     data: {
       username: 'spv1',
-      password: 'password123',
+      password: defaultPassword,
       name: 'Supervisor Jatim',
       role: 'SPV',
       areaId: area1.id,
@@ -36,7 +39,7 @@ async function main() {
   const afa = await prisma.user.create({
     data: {
       username: 'afa1',
-      password: 'password123',
+      password: defaultPassword,
       name: 'AFA Jatim 1',
       role: 'AFA',
       areaId: area1.id,
@@ -46,7 +49,7 @@ async function main() {
   const fo1 = await prisma.user.create({
     data: {
       username: 'fo1',
-      password: 'password123',
+      password: defaultPassword,
       name: 'FO Jatim 1A',
       role: 'FO',
       areaId: area1.id,
@@ -57,7 +60,7 @@ async function main() {
   const fo2 = await prisma.user.create({
     data: {
       username: 'fo2',
-      password: 'password123',
+      password: defaultPassword,
       name: 'FO Jatim 1B',
       role: 'FO',
       areaId: area1.id,
