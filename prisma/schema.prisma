@@ -1,0 +1,299 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// =======================
+// MASTER DATA
+// =======================
+
+model User {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String   // Akan di-hash untuk MVP
+  name      String
+  role      String   // "ADMIN", "SPV", "AFA", "FO"
+  
+  // Self-Relation untuk AFA -> FO
+  afaId     String?
+  afa       User?    @relation("AfaToFo", fields: [afaId], references: [id])
+  fos       User[]   @relation("AfaToFo")
+
+  areaId    String?
+  area      Area?    @relation(fields: [areaId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi Transaksional
+  ledgers           Ledger[]
+  requestsAsFo      Request[]  @relation("FoRequests")
+  requestsAsAfa     Request[]  @relation("AfaApprovals")
+  stockOpnames      StockOpname[]
+
+  // Laporan Aktivitas
+  customerBehaviors CustomerBehavior[]
+  visitKios         VisitKios[]
+  farmerGatherings  FarmerGathering[]
+  visitCompanies    VisitCompany[]
+  kpiTargets        KpiTarget[]
+}
+
+model KpiTarget {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  
+  month           Int      // 1-12
+  year            Int
+  
+  targetDemoPlot  Int      @default(0)
+  targetVisitKios Int      @default(0)
+  targetGathering Int      @default(0)
+  targetCompany   Int      @default(0)
+  targetBehavior  Int      @default(0)
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, month, year])
+}
+
+model Area {
+  id        String   @id @default(cuid())
+  name      String
+  users     User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  unit        String   // "ml", "gr"
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  ledgers           Ledger[]
+  requestDetails    RequestDetail[]
+  demoPlotDetails   DemoPlotDetail[]
+  opnameDetails     OpnameDetail[]
+}
+
+model Farmer {
+  id        String   @id @default(cuid())
+  name      String
+  phone     String?
+  address   String?
+  area      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  requests  Request[]
+  demoPlots DemoPlot[]
+}
+
+// =======================
+// CORE ENGINE: LEDGER
+// =======================
+
+model Ledger {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  
+  transactionType String   // "STOCK_IN_GUDANG", "TRANSFER_TO_FO", "RECEIVE_FROM_AFA", "USAGE_DEMOPLOT", "DIRECT_USAGE_AFA", "ADJUSTMENT_PLUS", "ADJUSTMENT_MINUS"
+  quantity        Float    // Nilai bisa positif (masuk) atau negatif (keluar)
+  referenceId     String?  // ID dari Request / DemoPlot / StockOpname
+  notes           String?
+  
+  createdAt       DateTime @default(now())
+}
+
+// =======================
+// TRANSACTIONAL MODELS
+// =======================
+
+model Request {
+  id             String   @id @default(cuid())
+  foId           String
+  fo             User     @relation("FoRequests", fields: [foId], references: [id])
+  afaId          String?
+  afa            User?    @relation("AfaApprovals", fields: [afaId], references: [id])
+  farmerId       String?
+  farmer         Farmer?  @relation(fields: [farmerId], references: [id])
+  
+  area           String?
+  commodity      String?
+  cbReference    String?
+  problem        String?
+  plan           String?
+  status         String   @default("SUBMITTED") // "SUBMITTED", "APPROVED", "REJECTED", "DEMO_PLOT_SELESAI"
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  details        RequestDetail[]
+  demoPlots      DemoPlot[]
+}
+
+model RequestDetail {
+  id             String   @id @default(cuid())
+  requestId      String
+  request        Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  
+  qtyRequested   Float
+  qtyApproved    Float?
+}
+
+model DemoPlot {
+  id             String   @id @default(cuid())
+  requestId      String?
+  request        Request? @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  farmerId       String?
+  farmer         Farmer?  @relation(fields: [farmerId], references: [id])
+  
+  date           DateTime
+  area           String?
+  commodity      String?
+  landSize       Float?
+  resultNotes    String?
+  photos         String?  // JSON stringified array of URLs
+  latitude       Float?
+  longitude      Float?
+  isFinalSession Boolean  @default(false)
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  details        DemoPlotDetail[]
+}
+
+model DemoPlotDetail {
+  id             String   @id @default(cuid())
+  demoPlotId     String
+  demoPlot       DemoPlot @relation(fields: [demoPlotId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  
+  actualUsage    Float
+}
+
+model StockOpname {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  status         String   @default("RECORDED") // "RECORDED", "ADJUSTED"
+  
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  details        OpnameDetail[]
+}
+
+model OpnameDetail {
+  id             String   @id @default(cuid())
+  opnameId       String
+  opname         StockOpname @relation(fields: [opnameId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product  @relation(fields: [productId], references: [id])
+  
+  systemStock    Float
+  physicalStock  Float
+  variance       Float
+  notes          String?
+}
+
+// =======================
+// ACTIVITY REPORTS
+// =======================
+
+model CustomerBehavior {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  
+  farmerName     String
+  age            String?
+  phone          String?
+  address        String?
+  district       String?
+  commodity      String?
+  reasonChoice   String?
+  constraints    String?
+  optTypes       String?  // JSON Array: ["Hama", "Penyakit", "Gulma"]
+  optDetails     String?  // JSON Array: ["Wereng", "Kutu", "Jamur"]
+  usedProducts   String?  // Biotis/Non-biotis
+  buyLocation    String?  // Kios tempat membeli
+  buyReason      String?
+  references     String?
+  notes          String?
+  photos         String?  // URL foto dokumentasi (JSON Array)
+  
+  createdAt      DateTime @default(now())
+}
+
+model VisitKios {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  
+  kiosName       String
+  activityDetail String?
+  visitResult    String?
+  notes          String?
+  photos         String?  // URL foto dokumentasi (JSON Array)
+  
+  createdAt      DateTime @default(now())
+}
+
+model FarmerGathering {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  
+  address        String?
+  district       String?
+  leaderName     String?
+  phone          String?
+  activityDetail String?
+  cost           Float?
+  costDetail     String?
+  photos         String?  // URL foto dokumentasi (JSON Array)
+  
+  createdAt      DateTime @default(now())
+}
+
+model VisitCompany {
+  id               String   @id @default(cuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id])
+  
+  companyName      String
+  district         String?
+  address          String?
+  picName          String?
+  picPosition      String?
+  picPhone         String?
+  landArea         String?
+  commodities      String?  // JSON Array: ["Padi", "Jagung"]
+  products         String?
+  procurementDate  DateTime?
+  paymentTerm      String?  // "COD", "CBD", "TOP<30 HARI", "TOP>30 HARI"
+  photos           String?  // URL foto dokumentasi (JSON Array)
+  
+  createdAt        DateTime @default(now())
+}
+
