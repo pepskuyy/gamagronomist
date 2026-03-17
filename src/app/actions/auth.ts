@@ -25,14 +25,10 @@ export async function login(formData: FormData) {
       return { error: 'Username tidak ditemukan!' }
     }
 
-    // Since our seeder didn't hash passwords initially to be simple, 
-    // let's do a fallback check (for MVP testing ONLY)
-    const isTempMatch = user.password === password;
+    // Verify password with bcrypt
+    const isMatch = await bcrypt.compare(password, user.password)
     
-    // In actual production
-    // const isMatch = await bcrypt.compare(password, user.password)
-    
-    if (!isTempMatch) {
+    if (!isMatch) {
       return { error: 'Password salah!' }
     }
 
