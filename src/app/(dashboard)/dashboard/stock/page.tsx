@@ -143,9 +143,7 @@ export default async function StockDashboardPage() {
                     {foRows.map(({ fo, stocks }) => {
                       const totalQty = stocks.reduce((sum, s) => sum + s.quantity, 0)
                       return (
-                        <tr key={fo.id} style={{ transition: 'background 0.15s' }}
-                          onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-2)')}
-                          onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}>
+                        <tr key={fo.id} className="fo-stock-row">
                           <td style={{ ...tdStyle, fontWeight: 600 }}>{fo.name}</td>
                           {session.role === 'SPV' && (
                             <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '0.8rem' }}>

@@ -301,6 +301,9 @@ p  { color: var(--text-muted); line-height: 1.6; }
 .table-card tbody tr:last-child td { border-bottom: none; }
 .table-card tbody tr:hover { background: var(--surface-2); }
 
+/* FO stock monitoring table row hover */
+.fo-stock-row:hover { background: var(--surface-2); }
+
 /* ─── RESPONSIVE ────────────────────────────────────── */
 @media (max-width: 1024px) {
   .dashboard-container { padding: 1.25rem; }
