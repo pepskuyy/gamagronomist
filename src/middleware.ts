@@ -3,7 +3,8 @@ import type { NextRequest } from 'next/server'
 import { decrypt } from '@/lib/auth'
 
 export async function middleware(request: NextRequest) {
-  const isAuthPage = request.nextUrl.pathname.startsWith('/login')
+  const isAuthPage = request.nextUrl.pathname.startsWith('/login') ||
+                     request.nextUrl.pathname.startsWith('/register')
   
   if (isAuthPage) {
     return NextResponse.next()
