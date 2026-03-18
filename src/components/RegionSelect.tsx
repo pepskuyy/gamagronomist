@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { getRegencies, getDistricts, getVillages } from '@/app/actions/region'
 
 type Region = { id: string; name: string }
 
@@ -43,17 +44,13 @@ export default function RegionSelect({
 
   // 1. Fetch Kabupaten (Regencies)
   useEffect(() => {
-    fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/regencies/${PROVINCE_ID}.json`)
-      .then(r => r.json())
-      .then(data => {
-        setKabupatens(data)
-        // Auto-select if initialKabupaten matches
-        if (initialKabupaten) {
-          const found = data.find((d: Region) => d.name === initialKabupaten)
-          if (found) setSelectedKabId(found.id)
-        }
-      })
-      .catch(() => {})
+    getRegencies(PROVINCE_ID).then(data => {
+      setKabupatens(data)
+      if (initialKabupaten) {
+        const found = data.find((d: Region) => d.name === initialKabupaten)
+        if (found) setSelectedKabId(found.id)
+      }
+    }).catch(console.error)
   }, [initialKabupaten])
 
   // 2. Fetch Kecamatan (Districts) when Kabupaten selected
@@ -64,20 +61,16 @@ export default function RegionSelect({
       setKecName('')
       return
     }
-    fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/districts/${selectedKabId}.json`)
-      .then(r => r.json())
-      .then(data => {
-        setKecamatans(data)
-        // Auto-select if initialKecamatan matches
-        if (initialKecamatan && data.find((d: Region) => d.name === initialKecamatan)) {
-          const found = data.find((d: Region) => d.name === initialKecamatan)
-          if (found) setSelectedKecId(found.id)
-        } else {
-          setSelectedKecId('')
-          setKecName('')
-        }
-      })
-      .catch(() => {})
+    getDistricts(selectedKabId).then(data => {
+      setKecamatans(data)
+      if (initialKecamatan && data.find((d: Region) => d.name === initialKecamatan)) {
+        const found = data.find((d: Region) => d.name === initialKecamatan)
+        if (found) setSelectedKecId(found.id)
+      } else {
+        setSelectedKecId('')
+        setKecName('')
+      }
+    }).catch(console.error)
   }, [selectedKabId, initialKecamatan])
 
   // 3. Fetch Desa (Villages) when Kecamatan selected
@@ -88,20 +81,16 @@ export default function RegionSelect({
       setDesaName('')
       return
     }
-    fetch(`https://emsifa.github.io/api-wilayah-indonesia/api/villages/${selectedKecId}.json`)
-      .then(r => r.json())
-      .then(data => {
-        setDesas(data)
-        // Auto-select if initialDesa matches
-        if (initialDesa && data.find((d: Region) => d.name === initialDesa)) {
-          const found = data.find((d: Region) => d.name === initialDesa)
-          if (found) setSelectedDesaId(found.id)
-        } else {
-          setSelectedDesaId('')
-          setDesaName('')
-        }
-      })
-      .catch(() => {})
+    getVillages(selectedKecId).then(data => {
+      setDesas(data)
+      if (initialDesa && data.find((d: Region) => d.name === initialDesa)) {
+        const found = data.find((d: Region) => d.name === initialDesa)
+        if (found) setSelectedDesaId(found.id)
+      } else {
+        setSelectedDesaId('')
+        setDesaName('')
+      }
+    }).catch(console.error)
   }, [selectedKecId, initialDesa])
 
   // Call onChangeFullString whenever the string changes completely
