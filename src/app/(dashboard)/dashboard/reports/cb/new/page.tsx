@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ImageUploader from '@/components/ImageUploader'
+import RegionSelect from '@/components/RegionSelect'
 import { submitCustomerBehavior } from '@/app/actions/report'
 
 const OPT_TYPES = ['Hama', 'Penyakit', 'Gulma']
@@ -80,13 +81,12 @@ export default function NewCustomerBehaviorRef() {
               <label className="form-label">No. HP</label>
               <input type="tel" name="phone" className="form-control" />
             </div>
-            <div className="form-group">
-              <label className="form-label">Kabupaten/Kota</label>
-              <input type="text" name="district" className="form-control" />
+            <div style={{ gridColumn: '1 / -1', marginBottom: '1rem' }}>
+              <RegionSelect nameKabupaten="district" nameKecamatan="districtKecamatan" nameDesa="districtDesa" />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Alamat Lengkap</label>
-              <textarea name="address" className="form-control" rows={2} />
+              <label className="form-label">Detail Alamat (Jalan / RT / RW)</label>
+              <textarea name="address" className="form-control" rows={2} placeholder="Samping masjid Al-Ikhlas..." />
             </div>
           </div>
         </div>

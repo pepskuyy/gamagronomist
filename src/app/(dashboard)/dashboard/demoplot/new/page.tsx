@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { submitStandaloneDemoPlot } from '@/app/actions/standalone-demoplot'
 import ImageUploader from '@/components/ImageUploader'
+import RegionSelect from '@/components/RegionSelect'
 
 type Product = { id: string; name: string; unit: string }
 type CbFarmer = { id: string; farmerName: string; phone?: string; district?: string; address?: string; commodity?: string; constraints?: string }
@@ -161,10 +162,14 @@ export default function FoDemoPlotDirectPage() {
               <label className="form-label">No. HP</label>
               <input className="form-control" value={farmerPhone} onChange={e => setFarmerPhone(e.target.value)} placeholder="0812xxx" />
             </div>
-            <div>
-              <label className="form-label">Area (Desa/Kecamatan) <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <input className="form-control" value={area} onChange={e => setArea(e.target.value)} required placeholder="Kec. Ngimbang" />
-            </div>
+            {farmerMode === 'manual' && (
+              <div style={{ gridColumn: '1/-1' }}>
+                <RegionSelect onChangeFullString={setArea} />
+                <p style={{ margin: '0.3rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Area yang akan disimpan: <strong>{area || '-'}</strong>
+                </p>
+              </div>
+            )}
             <div>
               <label className="form-label">Komoditas <span style={{ color: 'var(--danger)' }}>*</span></label>
               <input className="form-control" value={commodity} onChange={e => setCommodity(e.target.value)} required placeholder="Padi / Jagung / Cabai" />

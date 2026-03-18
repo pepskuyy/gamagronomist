@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import RegionSelect from '@/components/RegionSelect'
 import { submitAfaSelfPlan } from '@/app/actions/afa-plan'
 
 type Product = { id: string; name: string; unit: string }
@@ -14,6 +15,7 @@ export default function AfaSelfPlanPage() {
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
   const [currentProduct, setCurrentProduct] = useState('')
   const [currentQty, setCurrentQty] = useState('')
+  const [area, setArea] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -77,9 +79,13 @@ export default function AfaSelfPlanPage() {
               <label className="form-label">No. Telepon (Opsional)</label>
               <input name="farmerPhone" type="text" className="form-control" placeholder="0812xxx" />
             </div>
-            <div className="form-group">
-              <label className="form-label">Area (Desa / Kecamatan) <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <input name="area" type="text" className="form-control" required placeholder="Kec. Ngimbang" />
+            <div style={{ gridColumn: '1/-1' }}>
+              <label className="form-label">Area (Provinsi Jawa Tengah) <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <RegionSelect onChangeFullString={setArea} />
+              <input type="hidden" name="area" value={area} />
+              <p style={{ margin: '0.3rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Area yang akan disimpan: <strong>{area || '-'}</strong>
+              </p>
             </div>
           </div>
 

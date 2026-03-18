@@ -18,13 +18,25 @@ export async function submitCustomerBehavior(formData: FormData) {
   if (!session?.userId) return { error: 'Unauthorized' }
 
   try {
+    const district = formData.get('district') as string
+    const kec = formData.get('districtKecamatan') as string
+    const desa = formData.get('districtDesa') as string
+    const detailAddress = formData.get('address') as string
+
+    // Combine desa, kecamatan, and detail into address. District stays as Kabupaten/Kota.
+    const fullAddress = [
+      desa ? `Desa/Kel. ${desa}` : '',
+      kec ? `Kec. ${kec}` : '',
+      detailAddress ? detailAddress : ''
+    ].filter(Boolean).join(', ')
+
     const data = {
       userId: session.userId,
       farmerName: formData.get('farmerName') as string,
       age: formData.get('age') as string,
       phone: formData.get('phone') as string,
-      address: formData.get('address') as string,
-      district: formData.get('district') as string,
+      address: fullAddress,
+      district: district,
       commodity: formData.get('commodity') as string,
       reasonChoice: formData.get('reasonChoice') as string,
       constraints: formData.get('constraints') as string,
