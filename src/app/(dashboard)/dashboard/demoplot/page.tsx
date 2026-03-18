@@ -12,112 +12,188 @@ export default async function DemoPlotIndexPage() {
 
   if (!session?.userId) return null
 
-  // Fetch Requests based on Role
   const include = { fo: true, afa: true, farmer: true, details: { include: { product: true } } }
   let requests: any[] = []
   if (session.role === 'FO') {
-    requests = await prisma.request.findMany({
-      where: { foId: session.userId }, include, orderBy: { createdAt: 'desc' }
-    })
+    requests = await prisma.request.findMany({ where: { foId: session.userId }, include, orderBy: { createdAt: 'desc' } })
   } else if (session.role === 'AFA') {
-    requests = await prisma.request.findMany({
-      where: { OR: [{ afaId: session.userId }, { foId: session.userId }] }, include, orderBy: { createdAt: 'desc' }
-    })
+    requests = await prisma.request.findMany({ where: { OR: [{ afaId: session.userId }, { foId: session.userId }] }, include, orderBy: { createdAt: 'desc' } })
   } else {
     requests = await prisma.request.findMany({ include, orderBy: { createdAt: 'desc' } })
   }
 
   const getStatusBadge = (status: string) => {
-    switch(status) {
-      case 'SUBMITTED': return <span className="badge badge-warning">Menunggu Approval</span>
-      case 'APPROVED': return <span className="badge badge-success">Disetujui</span>
-      case 'REJECTED': return <span className="badge badge-danger">Ditolak</span>
-      case 'DEMO_PLOT_SELESAI': return <span className="badge badge-neutral">Selesai</span>
-      default: return <span className="badge badge-neutral">{status}</span>
+    switch (status) {
+      case 'SUBMITTED':        return <span className="badge badge-warning">Menunggu Approval</span>
+      case 'APPROVED':         return <span className="badge badge-success">Stok Disetujui</span>
+      case 'REJECTED':         return <span className="badge badge-danger">Ditolak</span>
+      case 'DEMO_PLOT_SELESAI':return <span className="badge badge-neutral">Selesai</span>
+      default:                 return <span className="badge badge-neutral">{status}</span>
     }
   }
+
+  // Separate stock requests from actual demo plot records
+  const stockRequests = requests.filter(r => r.commodity === '-' || !r.farmer)
+  const demoPlots     = requests.filter(r => r.commodity !== '-' && r.farmer)
 
   return (
     <div>
       <div className="page-header">
-        <h2>🌾 Aktivitas Demo Plot</h2>
+        <h2 style={{ margin: 0 }}>🌾 Demo Plot</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {/* FO: request stock + direct demo plot */}
           {session.role === 'FO' && (
-            <Link href="/dashboard/demoplot/request">
-              <button className="btn btn-primary">➕ Buat Pengajuan Baru</button>
-            </Link>
+            <>
+              <Link href="/dashboard/demoplot/request">
+                <button className="btn btn-outline">📦 Minta Stok dari AFA</button>
+              </Link>
+              <Link href="/dashboard/demoplot/new">
+                <button className="btn btn-primary">➕ Rekam Demo Plot</button>
+              </Link>
+            </>
           )}
+          {/* AFA: direct demo plot + review stock requests */}
           {session.role === 'AFA' && (
-            <Link href="/dashboard/demoplot/afa-plan">
-              <button className="btn btn-primary">📋 Buat Perencanaan Mandiri</button>
-            </Link>
+            <>
+              <Link href="/dashboard/demoplot/afa-plan">
+                <button className="btn btn-outline">📋 Perencanaan Mandiri</button>
+              </Link>
+              <Link href="/dashboard/demoplot/new">
+                <button className="btn btn-primary">➕ Rekam Demo Plot</button>
+              </Link>
+            </>
           )}
         </div>
       </div>
 
+      {/* Stock Requests Section (AFA approving FO requests) */}
+      {session.role === 'AFA' && stockRequests.length > 0 && (
+        <div style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            📦 Permintaan Stok FO
+            {stockRequests.filter(r => r.status === 'SUBMITTED').length > 0 && (
+              <span style={{ background: 'var(--danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '9999px' }}>
+                {stockRequests.filter(r => r.status === 'SUBMITTED').length} baru
+              </span>
+            )}
+          </h3>
+          <div className="table-card">
+            <div className="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Tanggal</th>
+                    <th>FO Pengaju</th>
+                    <th>Catatan</th>
+                    <th>Produk Diminta</th>
+                    <th>Status</th>
+                    <th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stockRequests.map(req => (
+                    <tr key={req.id}>
+                      <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
+                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
+                      <td style={{ color: 'var(--primary)', fontWeight: 600 }}>{req.fo?.name}</td>
+                      <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
+                      <td style={{ fontSize: '0.82rem' }}>
+                        {req.details?.map((d: any) => `${d.product?.name}: ${d.qtyRequested} ${d.product?.unit}`).join(', ')}
+                      </td>
+                      <td>{getStatusBadge(req.status)}</td>
+                      <td>
+                        <div className="action-row">
+                          {req.status === 'SUBMITTED' && (
+                            <Link href={`/dashboard/demoplot/approve/${req.id}`}>
+                              <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Approve Stok</button>
+                            </Link>
+                          )}
+                          <Link href={`/dashboard/demoplot/detail/${req.id}`}>
+                            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FO: show own stock requests */}
+      {session.role === 'FO' && stockRequests.length > 0 && (
+        <div style={{ marginBottom: '2rem' }}>
+          <h3 style={{ marginBottom: '1rem' }}>📦 Permintaan Stok Saya</h3>
+          <div className="table-card">
+            <div className="table-responsive">
+              <table>
+                <thead>
+                  <tr>
+                    <th>ID</th><th>Tanggal</th><th>Produk Diminta</th><th>Status</th><th>Aksi</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {stockRequests.map(req => (
+                    <tr key={req.id}>
+                      <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
+                      <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
+                      <td style={{ fontSize: '0.82rem' }}>{req.details?.map((d: any) => `${d.product?.name}: ${d.qtyRequested} ${d.product?.unit}`).join(', ')}</td>
+                      <td>{getStatusBadge(req.status)}</td>
+                      <td><Link href={`/dashboard/demoplot/detail/${req.id}`}><button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button></Link></td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Demo Plot Records */}
+      <h3 style={{ marginBottom: '1rem' }}>🌾 Riwayat Realisasi Demo Plot</h3>
       <div className="table-card">
         <div className="table-responsive">
-           <table>
-             <thead>
-               <tr>
-                 <th>ID Request</th>
-                 <th>Tanggal</th>
-                 {session.role !== 'FO' && <th>FO Pengaju</th>}
-                 <th>Petani / Area</th>
-                 <th>Status</th>
-                 <th>Aksi</th>
-               </tr>
-             </thead>
-             <tbody>
-               {requests.map(req => (
-                 <tr key={req.id}>
-                   <td style={{ fontSize: '0.85rem', fontFamily: 'monospace' }}>
-                     {req.id.slice(0, 8).toUpperCase()}
-                   </td>
-                   <td style={{ whiteSpace: 'nowrap' }}>
-                     {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}
-                   </td>
-                   {session.role !== 'FO' && (
-                      <td style={{ color: 'var(--primary)', fontWeight: 500 }}>
-                        {req.fo?.name}
-                      </td>
-                   )}
-                   <td>
-                     <div><strong>{req.farmer?.name}</strong></div>
-                     <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{req.area}</div>
-                   </td>
-                   <td>
-                     {getStatusBadge(req.status)}
-                   </td>
-                   <td>
-                      <div className="action-row">
-                        <Link href={`/dashboard/demoplot/detail/${req.id}`}>
-                          <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
-                        </Link>
-                                                {session.role === 'AFA' && req.status === 'SUBMITTED' && (
-                           <Link href={`/dashboard/demoplot/approve/${req.id}`}>
-                             <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Tinjau &amp; Approve</button>
-                           </Link>
-                         )}
-                         {/* AFA can execute their own self-plans (foId === afaId, status APPROVED) */}
-                         {(session.role === 'FO' || (session.role === 'AFA' && req.foId === session.userId)) && req.status === 'APPROVED' && (
-                           <Link href={`/dashboard/demoplot/execute/${req.id}`}>
-                             <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>📝 Realisasi</button>
-                           </Link>
-                         )}
-                      </div>
-                   </td>
-                 </tr>
-               ))}
-               {requests.length === 0 && (
-                 <tr>
-                   <td colSpan={6} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                     Belum ada data pengajuan demo plot.
-                   </td>
-                 </tr>
-               )}
-             </tbody>
-           </table>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Tanggal</th>
+                {session.role !== 'FO' && <th>Pelaksana</th>}
+                <th>Petani / Area</th>
+                <th>Komoditas</th>
+                <th>Status</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {demoPlots.map(req => (
+                <tr key={req.id}>
+                  <td style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}>{req.id.slice(0, 8).toUpperCase()}</td>
+                  <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
+                  {session.role !== 'FO' && <td style={{ color: 'var(--primary)', fontWeight: 500 }}>{req.fo?.name}</td>}
+                  <td>
+                    <div style={{ fontWeight: 600 }}>{req.farmer?.name}</div>
+                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{req.area}</div>
+                  </td>
+                  <td style={{ fontSize: '0.85rem' }}>{req.commodity}</td>
+                  <td>{getStatusBadge(req.status)}</td>
+                  <td>
+                    <Link href={`/dashboard/demoplot/detail/${req.id}`}>
+                      <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+              {demoPlots.length === 0 && (
+                <tr><td colSpan={7} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  Belum ada realisasi demo plot. Klik "Rekam Demo Plot" untuk memulai.
+                </td></tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
