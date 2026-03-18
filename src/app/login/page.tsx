@@ -65,6 +65,15 @@ export default function LoginPage() {
             {loading ? 'Sedang Masuk...' : 'Masuk'}
           </button>
         </form>
+
+        {/* Register link */}
+        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+          <div style={{ height: '1px', background: 'var(--border)', marginBottom: '1.25rem' }} />
+          <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem' }}>Belum punya akun?</p>
+          <a href="/register" className="btn btn-outline" style={{ width: '100%', display: 'flex', justifyContent: 'center', fontSize: '0.9rem', padding: '0.7rem' }}>
+            ✍️ Buat Akun
+          </a>
+        </div>
       </div>
 
       <style jsx>{`

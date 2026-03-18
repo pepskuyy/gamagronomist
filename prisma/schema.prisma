@@ -74,6 +74,22 @@ model Area {
   updatedAt DateTime @updatedAt
 }
 
+// Permintaan pembuatan akun dari calon user (self-register)
+model AccountRequest {
+  id        String   @id @default(cuid())
+  username  String   @unique
+  password  String
+  name      String
+  role      String   // "AFA", "FO"
+  areaName  String?  // Area yang diminta (nama teks)
+  afaName   String?  // Nama AFA supervisor (untuk FO)
+  notes     String?  // Catatan dari calon user
+  status    String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
+  rejectReason String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
 model Product {
   id          String   @id @default(cuid())
   name        String
