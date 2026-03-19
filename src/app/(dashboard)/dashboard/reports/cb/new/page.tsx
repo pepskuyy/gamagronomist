@@ -6,6 +6,7 @@ import ImageUploader from '@/components/ImageUploader'
 import RegionSelect from '@/components/RegionSelect'
 import { submitCustomerBehavior } from '@/app/actions/report'
 
+// ── Dropdown options ──────────────────────────────────────────────
 const OPT_TYPES = ['Hama', 'Penyakit', 'Gulma']
 const OPT_DETAILS = [
   'Ulat grayak', 'Ulat buah', 'Ulat pelipat daun', 'Uret (ulat tanah)',
@@ -15,26 +16,97 @@ const OPT_DETAILS = [
   'Berdaun lebar', 'Rumput - rumputan', 'Pakis - pakisan', 'Lulangan', 'Teki'
 ]
 
+const COMMODITIES = [
+  'Cabai', 'Bawang Merah', 'Padi', 'Jagung', 'Tomat', 'Semangka',
+  'Tembakau', 'Tebu', 'Kentang', 'Kubis', 'Terong', 'Sawi'
+]
+
+const PRODUCT_BRANDS = [
+  'ADVANTA', 'AGRICON', 'BASF', 'BAYER', 'BIOTIS', 'BISI', 'CORTEVA',
+  'DGW', 'FMC', 'KAPAL TERBANG', 'MMI', 'NUFARM', 'ORGANIK',
+  'PETROSIDA GRESIK', 'POLARCHEM', 'SAKA SAKI', 'SAPROTAN UTAMA',
+  'SINAMYANG', 'SYNGENTA'
+]
+
+const REFERENCES = ['Pengalaman', 'Media Sosial', 'Kelompok Tani', 'Keluarga']
+
+// ── Reusable multi-chip selector ──────────────────────────────────
+function MultiChip({
+  options, selected, onToggle, otherValue, onOtherChange, otherLabel = 'Lainnya...'
+}: {
+  options: string[]
+  selected: string[]
+  onToggle: (val: string) => void
+  otherValue: string
+  onOtherChange: (val: string) => void
+  otherLabel?: string
+}) {
+  const hasOther = selected.includes('Lainnya')
+  return (
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
+      {options.map(opt => (
+        <button key={opt} type="button" onClick={() => onToggle(opt)}
+          style={{
+            padding: '0.35rem 0.9rem', borderRadius: '999px', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer',
+            border: selected.includes(opt) ? '2px solid var(--primary)' : '1px solid var(--border)',
+            background: selected.includes(opt) ? 'var(--primary-light)' : 'var(--surface-hover)',
+            color: selected.includes(opt) ? 'var(--primary)' : 'var(--text-muted)',
+            transition: 'all 0.15s'
+          }}>
+          {selected.includes(opt) ? '✓ ' : ''}{opt}
+        </button>
+      ))}
+      {/* Lainnya chip */}
+      <button type="button" onClick={() => onToggle('Lainnya')}
+        style={{
+          padding: '0.35rem 0.9rem', borderRadius: '999px', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer',
+          border: hasOther ? '2px solid var(--secondary)' : '1px solid var(--border)',
+          background: hasOther ? '#f0fdf4' : 'var(--surface-hover)',
+          color: hasOther ? '#16a34a' : 'var(--text-muted)',
+          transition: 'all 0.15s'
+        }}>
+        {hasOther ? '✓ Lainnya' : '+ Lainnya'}
+      </button>
+      {hasOther && (
+        <input type="text" className="form-control" value={otherValue} onChange={e => onOtherChange(e.target.value)}
+          placeholder={otherLabel} style={{ marginTop: '0.5rem', width: '100%' }} />
+      )}
+    </div>
+  )
+}
+
+// ── Main Form ────────────────────────────────────────────────────
 export default function NewCustomerBehaviorRef() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  
-  // State for complex fields
+
+  // OPT state (unchanged)
   const [selectedOptTypes, setSelectedOptTypes] = useState<string[]>([])
   const [selectedOptDetails, setSelectedOptDetails] = useState<string[]>([])
   const [photos, setPhotos] = useState<string[]>([])
 
-  const toggleOptType = (type: string) => {
-    setSelectedOptTypes(prev => 
-      prev.includes(type) ? prev.filter(t => t !== type) : [...prev, type]
-    )
+  // Commodity multi-chip
+  const [selectedCommodities, setSelectedCommodities] = useState<string[]>([])
+  const [commodityOther, setCommodityOther] = useState('')
+
+  // Product brands multi-chip
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([])
+  const [brandsOther, setBrandsOther] = useState('')
+
+  // References multi-chip
+  const [selectedRefs, setSelectedRefs] = useState<string[]>([])
+  const [refsOther, setRefsOther] = useState('')
+
+  function toggleItem(list: string[], setList: (v: string[]) => void, val: string) {
+    setList(list.includes(val) ? list.filter(x => x !== val) : [...list, val])
   }
 
-  const toggleOptDetail = (detail: string) => {
-    setSelectedOptDetails(prev => 
-      prev.includes(detail) ? prev.filter(d => d !== detail) : [...prev, detail]
-    )
+  function buildMultiValue(selected: string[], otherValue: string) {
+    const all = selected.includes('Lainnya')
+      ? [...selected.filter(x => x !== 'Lainnya'), ...(otherValue ? [otherValue] : [])]
+      : selected
+    return all.join(', ')
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -43,19 +115,23 @@ export default function NewCustomerBehaviorRef() {
     setError(null)
 
     const formData = new FormData(e.currentTarget)
-    formData.append('optTypes', JSON.stringify(selectedOptTypes))
-    formData.append('optDetails', JSON.stringify(selectedOptDetails))
-    formData.append('photos', JSON.stringify(photos))
+    formData.set('commodity', buildMultiValue(selectedCommodities, commodityOther))
+    formData.set('usedProducts', buildMultiValue(selectedBrands, brandsOther))
+    formData.set('references', buildMultiValue(selectedRefs, refsOther))
+    formData.set('optTypes', JSON.stringify(selectedOptTypes))
+    formData.set('optDetails', JSON.stringify(selectedOptDetails))
+    formData.set('photos', JSON.stringify(photos))
 
     const res = await submitCustomerBehavior(formData)
-    
     if (res?.error) {
-       setError(res.error)
-       setLoading(false)
+      setError(res.error)
+      setLoading(false)
     } else {
-       router.push('/dashboard/reports')
+      router.push('/dashboard/reports')
     }
   }
+
+  const toggle = (list: string[], setList: (v: string[]) => void) => (val: string) => toggleItem(list, setList, val)
 
   return (
     <div className="form-container-wide">
@@ -65,9 +141,9 @@ export default function NewCustomerBehaviorRef() {
       </div>
 
       <form onSubmit={handleSubmit}>
+        {/* ── Profil Petani ── */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
           <h3 style={{ marginBottom: '1.5rem' }}>Profil Petani</h3>
-          
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Nama Petani <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -81,8 +157,8 @@ export default function NewCustomerBehaviorRef() {
               <label className="form-label">No. HP</label>
               <input type="tel" name="phone" className="form-control" />
             </div>
-            <div style={{ gridColumn: '1 / -1', marginBottom: '1rem' }}>
-              <RegionSelect nameKabupaten="district" nameKecamatan="districtKecamatan" nameDesa="districtDesa" />
+            <div style={{ gridColumn: '1 / -1', marginBottom: '0.5rem' }}>
+              <RegionSelect nameKabupaten="district" nameKecamatan="districtKecamatan" nameDesa="districtDesa" required={false} />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Detail Alamat (Jalan / RT / RW)</label>
@@ -91,88 +167,99 @@ export default function NewCustomerBehaviorRef() {
           </div>
         </div>
 
+        {/* ── Data Pertanian ── */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-           <h3 style={{ marginBottom: '1.5rem' }}>Data Pertanian & Kendala</h3>
-           
-           <div className="form-grid">
-             <div className="form-group">
-               <label className="form-label">Komoditas</label>
-               <input type="text" name="commodity" className="form-control" placeholder="Contoh: Padi, Jagung, Cabai" />
-             </div>
-             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-               <label className="form-label">Alasan memilih komoditas</label>
-               <input type="text" name="reasonChoice" className="form-control" />
-             </div>
-             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-               <label className="form-label">Kendala yang dialami</label>
-               <textarea name="constraints" className="form-control" rows={2} />
-             </div>
-           </div>
+          <h3 style={{ marginBottom: '1.5rem' }}>Data Pertanian &amp; Kendala</h3>
 
-           <div className="form-group" style={{ marginTop: '1.5rem' }}>
-             <label className="form-label">OPT (Pilih satu atau lebih)</label>
-             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-               {OPT_TYPES.map(type => (
-                 <label key={type} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: selectedOptTypes.includes(type) ? 'var(--primary-light)' : 'var(--surface-hover)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: `1px solid ${selectedOptTypes.includes(type) ? 'var(--primary)' : 'var(--border)'}` }}>
-                   <input 
-                     type="checkbox" 
-                     checked={selectedOptTypes.includes(type)}
-                     onChange={() => toggleOptType(type)}
-                     style={{ width: '1.25rem', height: '1.25rem' }}
-                   />
-                   <span>{type}</span>
-                 </label>
-               ))}
-             </div>
-           </div>
+          <div className="form-group">
+            <label className="form-label">Komoditas (Pilih satu atau lebih)</label>
+            <MultiChip
+              options={COMMODITIES} selected={selectedCommodities}
+              onToggle={toggle(selectedCommodities, setSelectedCommodities)}
+              otherValue={commodityOther} onOtherChange={setCommodityOther}
+              otherLabel="Nama komoditas lainnya..."
+            />
+          </div>
 
-           <div className="form-group" style={{ marginTop: '1.5rem' }}>
-             <label className="form-label">Detail OPT (Pilih satu atau lebih)</label>
-             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
-               {OPT_DETAILS.map(detail => (
-                 <label key={detail} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                   <input 
-                     type="checkbox" 
-                     checked={selectedOptDetails.includes(detail)}
-                     onChange={() => toggleOptDetail(detail)}
-                   />
-                   {detail}
-                 </label>
-               ))}
-             </div>
-           </div>
+          <div className="form-group" style={{ marginTop: '1.5rem', gridColumn: '1 / -1' }}>
+            <label className="form-label">Alasan memilih komoditas</label>
+            <input type="text" name="reasonChoice" className="form-control" />
+          </div>
+          <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+            <label className="form-label">Kendala yang dialami</label>
+            <textarea name="constraints" className="form-control" rows={2} />
+          </div>
+
+          <div className="form-group" style={{ marginTop: '1.5rem' }}>
+            <label className="form-label">OPT (Pilih satu atau lebih)</label>
+            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+              {OPT_TYPES.map(type => (
+                <label key={type} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: selectedOptTypes.includes(type) ? 'var(--primary-light)' : 'var(--surface-hover)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: `1px solid ${selectedOptTypes.includes(type) ? 'var(--primary)' : 'var(--border)'}` }}>
+                  <input type="checkbox" checked={selectedOptTypes.includes(type)} onChange={() => toggleItem(selectedOptTypes, setSelectedOptTypes, type)} style={{ width: '1.25rem', height: '1.25rem' }} />
+                  <span>{type}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-group" style={{ marginTop: '1.5rem' }}>
+            <label className="form-label">Detail OPT (Pilih satu atau lebih)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
+              {OPT_DETAILS.map(detail => (
+                <label key={detail} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                  <input type="checkbox" checked={selectedOptDetails.includes(detail)} onChange={() => toggleItem(selectedOptDetails, setSelectedOptDetails, detail)} />
+                  {detail}
+                </label>
+              ))}
+            </div>
+          </div>
         </div>
 
+        {/* ── Preferensi Produk ── */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-           <h3 style={{ marginBottom: '1.5rem' }}>Preferensi Produk</h3>
+          <h3 style={{ marginBottom: '1.5rem' }}>Preferensi Produk</h3>
 
-           <div className="form-grid">
-             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-               <label className="form-label">Produk yang biasa digunakan petani (Biotis/Non-Biotis)</label>
-               <input type="text" name="usedProducts" className="form-control" />
-             </div>
-             <div className="form-group">
-               <label className="form-label">Kios tempat membeli</label>
-               <input type="text" name="buyLocation" className="form-control" />
-             </div>
-             <div className="form-group">
-               <label className="form-label">Alasan membeli produk</label>
-               <input type="text" name="buyReason" className="form-control" />
-             </div>
-             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-               <label className="form-label">Referensi yang biasa digunakan</label>
-               <input type="text" name="references" className="form-control" placeholder="Contoh: Petugas PPL, Kios, Brosur" />
-             </div>
-             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-               <label className="form-label">Catatan Tambahan (Opsional)</label>
-               <textarea name="notes" className="form-control" rows={3} />
-             </div>
-           </div>
+          <div className="form-group">
+            <label className="form-label">Produk Preferensi Petani (Pilih satu atau lebih)</label>
+            <MultiChip
+              options={PRODUCT_BRANDS} selected={selectedBrands}
+              onToggle={toggle(selectedBrands, setSelectedBrands)}
+              otherValue={brandsOther} onOtherChange={setBrandsOther}
+              otherLabel="Nama merek lainnya..."
+            />
+          </div>
+
+          <div className="form-grid" style={{ marginTop: '1.5rem' }}>
+            <div className="form-group">
+              <label className="form-label">Kios tempat membeli</label>
+              <input type="text" name="buyLocation" className="form-control" />
+            </div>
+            <div className="form-group">
+              <label className="form-label">Alasan membeli produk</label>
+              <input type="text" name="buyReason" className="form-control" />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Referensi yang biasa digunakan (Pilih satu atau lebih)</label>
+              <MultiChip
+                options={REFERENCES} selected={selectedRefs}
+                onToggle={toggle(selectedRefs, setSelectedRefs)}
+                otherValue={refsOther} onOtherChange={setRefsOther}
+                otherLabel="Referensi lainnya..."
+              />
+            </div>
+
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Catatan Tambahan (Opsional)</label>
+              <textarea name="notes" className="form-control" rows={3} />
+            </div>
+          </div>
         </div>
 
+        {/* ── Dokumentasi ── */}
         <div className="card" style={{ marginBottom: '2rem' }}>
-           <h3 style={{ marginBottom: '1.5rem' }}>Dokumentasi</h3>
-           <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} />
+          <h3 style={{ marginBottom: '1.5rem' }}>Dokumentasi</h3>
+          <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} />
         </div>
 
         {error && <div className="alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
