@@ -4,6 +4,7 @@ import { decrypt } from '@/lib/auth'
 import { getSubordinateUsers, getKpiDataForFieldUser } from '@/app/actions/kpi'
 import KpiSection from '@/components/KpiSection'
 import KpiFieldDashboard from '@/components/KpiFieldDashboard'
+import DemoPlotMap from '@/components/DemoPlotMap'
 
 const prisma = new PrismaClient()
 
@@ -172,6 +173,11 @@ export default async function DashboardPage() {
           <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Demo Plot Selesai</p>
           <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--secondary)' }}>{completedDemoPlots}</div>
         </div>
+      </div>
+
+      {/* Demo Plot Map Section */}
+      <div className="card" style={{ marginBottom: '2.5rem' }}>
+        <DemoPlotMap />
       </div>
 
       {/* Stock Summary Table (SPV/AFA only) */}
