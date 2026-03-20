@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ImageUploader from '@/components/ImageUploader'
 import RegionSelect from '@/components/RegionSelect'
+import GpsCapture from '@/components/GpsCapture'
 import { submitCustomerBehavior } from '@/app/actions/report'
 
 // ── Dropdown options ──────────────────────────────────────────────
@@ -85,6 +86,8 @@ export default function NewCustomerBehaviorRef() {
   const [selectedOptTypes, setSelectedOptTypes] = useState<string[]>([])
   const [selectedOptDetails, setSelectedOptDetails] = useState<string[]>([])
   const [photos, setPhotos] = useState<string[]>([])
+  const [lat, setLat] = useState<number | null>(null)
+  const [lng, setLng] = useState<number | null>(null)
 
   // Commodity multi-chip
   const [selectedCommodities, setSelectedCommodities] = useState<string[]>([])
@@ -113,6 +116,7 @@ export default function NewCustomerBehaviorRef() {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    if (lat === null || lng === null) { setError('Lokasi GPS wajib diambil sebelum mengirim laporan.'); setLoading(false); return }
 
     const formData = new FormData(e.currentTarget)
     formData.set('commodity', buildMultiValue(selectedCommodities, commodityOther))
@@ -121,6 +125,8 @@ export default function NewCustomerBehaviorRef() {
     formData.set('optTypes', JSON.stringify(selectedOptTypes))
     formData.set('optDetails', JSON.stringify(selectedOptDetails))
     formData.set('photos', JSON.stringify(photos))
+    formData.set('latitude', String(lat))
+    formData.set('longitude', String(lng))
 
     const res = await submitCustomerBehavior(formData)
     if (res?.error) {
@@ -259,15 +265,18 @@ export default function NewCustomerBehaviorRef() {
         {/* ── Dokumentasi ── */}
         <div className="card" style={{ marginBottom: '2rem' }}>
           <h3 style={{ marginBottom: '1.5rem' }}>Dokumentasi</h3>
-          <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} />
+          <GpsCapture onCapture={(la, lo) => { setLat(la); setLng(lo) }} onClear={() => { setLat(null); setLng(null) }} />
+          <div style={{ marginTop: '1rem' }}>
+            <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} />
+          </div>
         </div>
 
         {error && <div className="alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
           <button type="button" onClick={() => router.back()} className="btn btn-outline" disabled={loading}>Batal</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Menyimpan...' : 'Kirim Laporan Customer Behavior'}
+          <button type="submit" className="btn btn-primary" disabled={loading || lat === null}>
+            {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : 'Kirim Laporan Customer Behavior'}
           </button>
         </div>
       </form>

@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ImageUploader from '@/components/ImageUploader'
+import GpsCapture from '@/components/GpsCapture'
 import { submitVisitKios } from '@/app/actions/report'
 
 export default function NewVisitKios() {
@@ -10,14 +11,19 @@ export default function NewVisitKios() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [photos, setPhotos] = useState<string[]>([])
+  const [lat, setLat] = useState<number | null>(null)
+  const [lng, setLng] = useState<number | null>(null)
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
+    if (lat === null || lng === null) { setError('Lokasi GPS wajib diambil sebelum mengirim laporan.'); setLoading(false); return }
 
     const formData = new FormData(e.currentTarget)
     formData.append('photos', JSON.stringify(photos))
+    formData.append('latitude', String(lat))
+    formData.append('longitude', String(lng))
 
     const res = await submitVisitKios(formData)
     
@@ -58,14 +64,16 @@ export default function NewVisitKios() {
             <textarea name="notes" className="form-control" rows={2} />
          </div>
 
+         <GpsCapture onCapture={(la, lo) => { setLat(la); setLng(lo) }} onClear={() => { setLat(null); setLng(null) }} />
+
          <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} />
 
          {error && <div className="alert-error" style={{ marginBottom: '1.5rem' }}>{error}</div>}
 
          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '2rem' }}>
           <button type="button" onClick={() => router.back()} className="btn btn-outline" disabled={loading}>Batal</button>
-          <button type="submit" className="btn btn-primary" disabled={loading}>
-            {loading ? 'Menyimpan...' : 'Kirim Laporan Visit Kios'}
+           <button type="submit" className="btn btn-primary" disabled={loading || lat === null}>
+             {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : 'Kirim Laporan Visit Kios'}
           </button>
          </div>
       </form>

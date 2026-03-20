@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import RegionSelect from '@/components/RegionSelect'
+import GpsCapture from '@/components/GpsCapture'
 import { submitAfaSelfPlan } from '@/app/actions/afa-plan'
 
 type Product = { id: string; name: string; unit: string }
@@ -18,6 +19,8 @@ export default function AfaSelfPlanPage() {
   const [area, setArea] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [lat, setLat] = useState<number | null>(null)
+  const [lng, setLng] = useState<number | null>(null)
 
   useEffect(() => {
     fetch('/api/products')
@@ -39,9 +42,12 @@ export default function AfaSelfPlanPage() {
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (selectedProducts.length === 0) { setError('Pilih minimal 1 produk.'); return }
+    if (lat === null || lng === null) { setError('Lokasi GPS wajib diambil sebelum mengirim.'); return }
     setLoading(true); setError(null)
     const fd = new FormData(e.currentTarget)
     fd.append('products', JSON.stringify(selectedProducts.map(p => ({ productId: p.productId, qtyRequested: p.qtyRequested }))))
+    fd.append('latitude', String(lat))
+    fd.append('longitude', String(lng))
     const res = await submitAfaSelfPlan(fd)
     if (res?.error) { setError(res.error); setLoading(false) }
     else router.push('/dashboard/demoplot')
@@ -153,8 +159,12 @@ export default function AfaSelfPlanPage() {
           </table>
         </div>
 
-        <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }} disabled={loading}>
-          {loading ? 'Menyimpan Perencanaan...' : '✅ Simpan &amp; Langsung Setujui'}
+        <div style={{ marginBottom: '1rem' }}>
+          <GpsCapture onCapture={(la, lo) => { setLat(la); setLng(lo) }} onClear={() => { setLat(null); setLng(null) }} />
+        </div>
+
+        <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }} disabled={loading || lat === null}>
+          {loading ? 'Menyimpan Perencanaan...' : lat === null ? '📍 Ambil Lokasi GPS Dulu' : '✅ Simpan & Langsung Setujui'}
         </button>
       </form>
     </div>
