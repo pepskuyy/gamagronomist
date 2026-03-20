@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { createProduct, updateProduct, deleteProduct } from '@/app/actions/master'
+import ImportModal from '@/components/ImportModal'
 
 type Product = { id: string; name: string; description: string | null; unit: string }
 
@@ -24,6 +25,7 @@ export default function ProductsMasterPage() {
   const [selected, setSelected] = useState<Product | null>(null)
   const [error, setError]       = useState<string | null>(null)
   const [isPending, start]      = useTransition()
+  const [showImport, setShowImport] = useState(false)
 
   const fetchData = async () => {
     const res = await fetch('/api/master/products')
@@ -63,6 +65,12 @@ export default function ProductsMasterPage() {
 
   return (
     <div>
+      {showImport && (
+        <ImportModal
+          onClose={() => setShowImport(false)}
+          onSuccess={() => { setShowImport(false); fetchData() }}
+        />
+      )}
       {/* Modal */}
       {modal && (
         <div style={overlayStyle} onClick={e => e.target === e.currentTarget && closeModal()}>
@@ -108,7 +116,10 @@ export default function ProductsMasterPage() {
           <Link href="/dashboard/master" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>← Master Data</Link>
           <h2 style={{ margin: 0 }}>🧪 Master Data: Produk</h2>
         </div>
-        <button onClick={openAdd} className="btn btn-primary">➕ Tambah Produk</button>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📥 Import Excel</button>
+          <button onClick={openAdd} className="btn btn-primary">➕ Tambah Produk</button>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
