@@ -181,9 +181,16 @@ export default async function DemoPlotIndexPage() {
                   <td style={{ fontSize: '0.85rem' }}>{req.commodity}</td>
                   <td>{getStatusBadge(req.status)}</td>
                   <td>
-                    <Link href={`/dashboard/demoplot/detail/${req.id}`}>
-                      <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
-                    </Link>
+                    <div className="action-row">
+                      {req.status === 'APPROVED' && (
+                        <Link href={`/dashboard/demoplot/continue/${req.id}`}>
+                          <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
+                        </Link>
+                      )}
+                      <Link href={`/dashboard/demoplot/detail/${req.id}`}>
+                        <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
+                      </Link>
+                    </div>
                   </td>
                 </tr>
               ))}

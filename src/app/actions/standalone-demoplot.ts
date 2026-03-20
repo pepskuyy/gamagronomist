@@ -20,18 +20,18 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     return { error: 'Hanya FO dan AFA yang dapat membuat realisasi demo plot langsung.' }
   }
 
-  const farmerName   = (formData.get('farmerName')   as string)?.trim()
-  const farmerPhone  = (formData.get('farmerPhone')  as string)?.trim() || null
-  const area         = (formData.get('area')         as string)?.trim()
-  const commodity    = (formData.get('commodity')    as string)?.trim()
-  const problem      = (formData.get('problem')      as string)?.trim() || '-'
-  const plan         = (formData.get('plan')         as string)?.trim() || '-'
-  const date         = (formData.get('date')         as string)
-  const landSize     = formData.get('landSize')      ? parseFloat(formData.get('landSize') as string) : null
-  const resultNotes  = (formData.get('resultNotes')  as string)?.trim() || null
-  const latitude     = parseFloat(formData.get('latitude') as string)
-  const longitude    = parseFloat(formData.get('longitude') as string)
-  const isFinalSession = formData.get('isFinalSession') === 'true'
+  const farmerName      = (formData.get('farmerName')   as string)?.trim()
+  const farmerPhone     = (formData.get('farmerPhone')  as string)?.trim() || null
+  const area            = (formData.get('area')         as string)?.trim()
+  const commodity       = (formData.get('commodity')    as string)?.trim()
+  const problem         = (formData.get('problem')      as string)?.trim() || '-'
+  const plan            = (formData.get('plan')         as string)?.trim() || '-'
+  const date            = (formData.get('date')         as string)
+  const landSize        = formData.get('landSize') ? parseFloat(formData.get('landSize') as string) : null
+  const resultNotes     = (formData.get('resultNotes')  as string)?.trim() || null
+  const latitude        = parseFloat(formData.get('latitude') as string)
+  const longitude       = parseFloat(formData.get('longitude') as string)
+  const isFinalSession  = formData.get('isFinalSession') === 'true'
 
   const usagesJSON = formData.get('usages') as string
   const photosJSON = formData.get('photos') as string
@@ -62,7 +62,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     const req = await prisma.request.create({
       data: {
         foId: session.userId,
-        afaId: session.role === 'FO' ? session.afaId : session.userId,
+        afaId: session.role === 'AFA' ? session.userId : (session as any).afaId ?? null,
         farmerId: farmer.id,
         area,
         commodity,
@@ -85,7 +85,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
         data: {
           userId: session.userId,
           productId: u.productId,
-          transactionType: 'USAGE_DEMO_PLOT',
+          transactionType: 'USAGE_DEMOPLOT',
           quantity: -u.actualUsage,
           referenceId: req.id,
           notes: `Demo plot: ${farmerName} - ${commodity}`,
@@ -93,26 +93,137 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
       })
     }
 
-    // Save demo plot session record
-    await (prisma as any).demoPlot.create({
+    // ✅ Save demo plot session record with CORRECT field names from schema
+    const demoPlot = await prisma.demoPlot.create({
       data: {
         requestId: req.id,
-        executedById: session.userId,
-        sessionDate: new Date(date),
+        farmerId: farmer.id,
+        date: new Date(date),
+        area,
+        commodity,
         landSize,
         resultNotes,
         latitude,
         longitude,
+        isFinalSession,
         photos: JSON.stringify(photos),
       },
-    }).catch(() => {
-      // DemoPlot model may not have this exact shape — graceful skip
     })
+
+    // ✅ Save DemoPlotDetail entries
+    const validUsages = usages.filter(u => u.actualUsage > 0)
+    if (validUsages.length > 0) {
+      await prisma.demoPlotDetail.createMany({
+        data: validUsages.map(u => ({
+          demoPlotId: demoPlot.id,
+          productId: u.productId,
+          actualUsage: u.actualUsage,
+        })),
+      })
+    }
+
+    revalidatePath('/dashboard/demoplot')
+    return { success: true, requestId: req.id }
+  } catch (err: any) {
+    console.error('Standalone demo plot error:', err)
+    return { error: `Gagal menyimpan realisasi demo plot: ${err.message}` }
+  }
+}
+
+/**
+ * Continues an existing demo plot session (creates a new DemoPlot record linked to same Request).
+ */
+export async function submitContinueDemoPlot(requestId: string, formData: FormData) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  if (!session?.userId || !['FO', 'AFA'].includes(session.role)) {
+    return { error: 'Hanya FO dan AFA yang dapat menambah sesi demo plot.' }
+  }
+
+  const date           = (formData.get('date')        as string)
+  const landSize       = formData.get('landSize') ? parseFloat(formData.get('landSize') as string) : null
+  const resultNotes    = (formData.get('resultNotes') as string)?.trim() || null
+  const latitude       = parseFloat(formData.get('latitude') as string)
+  const longitude      = parseFloat(formData.get('longitude') as string)
+  const isFinalSession = formData.get('isFinalSession') === 'true'
+
+  const usagesJSON = formData.get('usages') as string
+  const photosJSON = formData.get('photos') as string
+  let usages: { productId: string; actualUsage: number }[] = []
+  let photos: string[] = []
+  try {
+    if (usagesJSON) usages = JSON.parse(usagesJSON)
+    if (photosJSON) photos = JSON.parse(photosJSON)
+  } catch { return { error: 'Gagal membaca data.' } }
+
+  if (isNaN(latitude) || isNaN(longitude)) {
+    return { error: 'GPS wajib diaktifkan sebelum menyimpan sesi.' }
+  }
+
+  try {
+    const req = await prisma.request.findUnique({
+      where: { id: requestId },
+      include: { farmer: true }
+    })
+    if (!req) return { error: 'Data demo plot tidak ditemukan.' }
+
+    // Create new DemoPlot session
+    const demoPlot = await prisma.demoPlot.create({
+      data: {
+        requestId,
+        farmerId: req.farmerId ?? undefined,
+        date: new Date(date),
+        area: req.area ?? undefined,
+        commodity: req.commodity ?? undefined,
+        landSize,
+        resultNotes,
+        latitude,
+        longitude,
+        isFinalSession,
+        photos: JSON.stringify(photos),
+      },
+    })
+
+    // Save DemoPlotDetail entries
+    const validUsages = usages.filter(u => u.actualUsage > 0)
+    if (validUsages.length > 0) {
+      await prisma.demoPlotDetail.createMany({
+        data: validUsages.map(u => ({
+          demoPlotId: demoPlot.id,
+          productId: u.productId,
+          actualUsage: u.actualUsage,
+        })),
+      })
+
+      // Deduct stock
+      for (const u of validUsages) {
+        await prisma.ledger.create({
+          data: {
+            userId: session.userId,
+            productId: u.productId,
+            transactionType: 'USAGE_DEMOPLOT',
+            quantity: -u.actualUsage,
+            referenceId: req.id,
+            notes: `Sesi lanjutan demo plot: ${req.farmer?.name ?? ''} - ${req.commodity ?? ''}`,
+          },
+        })
+      }
+    }
+
+    // If final — mark request as done
+    if (isFinalSession) {
+      await prisma.request.update({
+        where: { id: requestId },
+        data: { status: 'DEMO_PLOT_SELESAI' }
+      })
+    }
 
     revalidatePath('/dashboard/demoplot')
     return { success: true }
   } catch (err: any) {
-    console.error('Standalone demo plot error', err)
-    return { error: 'Gagal menyimpan realisasi demo plot. Coba lagi.' }
+    console.error('Continue demo plot error:', err)
+    return { error: `Gagal menyimpan sesi lanjutan: ${err.message}` }
   }
 }
