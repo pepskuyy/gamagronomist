@@ -85,44 +85,48 @@ export default async function StockDashboardPage() {
 
   return (
     <div>
-      {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-        <h2 style={{ margin: 0 }}>📦 Saldo Stok Saat Ini</h2>
-        <div style={{ display: 'flex', gap: '0.5rem' }}>
-          {session.role === 'AFA' && (
-            <Link href="/dashboard/stock/in">
-              <button className="btn btn-primary">➕ Input Stok Masuk</button>
-            </Link>
-          )}
-          <Link href="/dashboard/stock/history">
-            <button className="btn btn-outline">🕒 Histori Ledger</button>
-          </Link>
-        </div>
-      </div>
+      {session.role !== 'SPV' && (
+        <>
+          {/* Header */}
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
+            <h2 style={{ margin: 0 }}>📦 Saldo Stok Saat Ini</h2>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {session.role === 'AFA' && (
+                <Link href="/dashboard/stock/in">
+                  <button className="btn btn-primary">➕ Pengajuan Stok</button>
+                </Link>
+              )}
+              <Link href="/dashboard/stock/history">
+                <button className="btn btn-outline">🕒 Histori Ledger</button>
+              </Link>
+            </div>
+          </div>
 
-      {/* My stock cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
-        {myStocks.map((stock) => (
-          <div key={stock.product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
-            <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
-              {stock.product.name}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
-              <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
-                {stock.quantity.toLocaleString()}
-              </span>
-              <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                {stock.product.unit}
-              </span>
-            </div>
+          {/* My stock cards */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
+            {myStocks.map((stock) => (
+              <div key={stock.product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
+                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                  {stock.product.name}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
+                  <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
+                    {stock.quantity.toLocaleString()}
+                  </span>
+                  <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
+                    {stock.product.unit}
+                  </span>
+                </div>
+              </div>
+            ))}
+            {myStocks.length === 0 && (
+              <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2.5rem', marginBottom: '1.5rem' }}>
+                <p>Saldo stok Anda saat ini kosong.</p>
+              </div>
+            )}
           </div>
-        ))}
-        {myStocks.length === 0 && (
-          <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2.5rem' }}>
-            <p>Saldo stok Anda saat ini kosong.</p>
-          </div>
-        )}
-      </div>
+        </>
+      )}
 
       {/* AFA Stock Requests Section (SPV & AFA only) */}
       {['SPV', 'AFA'].includes(session.role) && (
