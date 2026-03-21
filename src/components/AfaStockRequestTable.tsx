@@ -3,8 +3,6 @@
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { approveAfaStockRequest } from '@/app/actions/afa-stock'
-import jsPDF from 'jspdf'
-import 'jspdf-autotable'
 
 type RequestProps = {
   id: string
@@ -48,46 +46,54 @@ export default function AfaStockRequestTable({
     })
   }
 
-  const handleDownloadPdf = (req: RequestProps) => {
-    const doc = new jsPDF()
+  const handleDownloadPdf = async (req: RequestProps) => {
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      await import('jspdf-autotable')
 
-    // Title
-    doc.setFontSize(16)
-    doc.setFont('helvetica', 'bold')
-    doc.text('BUKTI PENERIMAAN STOK (AFA)', 14, 20)
+      const doc = new jsPDF()
 
-    // Form Details
-    doc.setFontSize(11)
-    doc.setFont('helvetica', 'normal')
-    doc.text(`ID Referensi : ${req.id.toUpperCase()}`, 14, 32)
-    doc.text(`Tanggal         : ${new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date(req.createdAt))}`, 14, 38)
-    doc.text(`AFA Pemohon: ${req.fo?.name || 'Tidak diketahui'}`, 14, 44)
-    doc.text(`Disetujui Oleh : ${req.afa?.name || 'SPV'}`, 14, 50)
-    doc.text(`Keterangan    : ${req.plan || '-'}`, 14, 56)
+      // Title
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.text('BUKTI PENERIMAAN STOK (AFA)', 14, 20)
 
-    // Table Data
-    const tableBody = req.details.map((d, index) => [
-      index + 1,
-      d.product.name,
-      d.qtyRequested,
-      d.qtyApproved || d.qtyRequested,
-      d.product.unit
-    ])
+      // Form Details
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`ID Referensi : ${req.id.toUpperCase()}`, 14, 32)
+      doc.text(`Tanggal         : ${new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date(req.createdAt))}`, 14, 38)
+      doc.text(`AFA Pemohon: ${req.fo?.name || 'Tidak diketahui'}`, 14, 44)
+      doc.text(`Disetujui Oleh : ${req.afa?.name || 'SPV'}`, 14, 50)
+      doc.text(`Keterangan    : ${req.plan || '-'}`, 14, 56)
 
-    // @ts-ignore
-    doc.autoTable({
-      startY: 65,
-      head: [['No', 'Produk', 'Qty Diminta', 'Qty Disetujui', 'Satuan']],
-      body: tableBody,
-      theme: 'grid',
-      headStyles: { fillColor: [41, 128, 185], textColor: 255 }
-    })
+      // Table Data
+      const tableBody = req.details.map((d, index) => [
+        index + 1,
+        d.product.name,
+        d.qtyRequested,
+        d.qtyApproved || d.qtyRequested,
+        d.product.unit
+      ])
 
-    // Footer
-    const finalY = (doc as any).lastAutoTable.finalY || 65
-    doc.text('Dokumen ini dibuat secara otomatis oleh sistem Gamagronomist dan sah tanpa tanda tangan fisik.', 14, finalY + 20)
+      // @ts-ignore
+      doc.autoTable({
+        startY: 65,
+        head: [['No', 'Produk', 'Qty Diminta', 'Qty Disetujui', 'Satuan']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 }
+      })
 
-    doc.save(`Bukti_Stok_${req.id.slice(0, 8).toUpperCase()}.pdf`)
+      // Footer
+      const finalY = (doc as any).lastAutoTable.finalY || 65
+      doc.text('Dokumen ini dibuat secara otomatis oleh sistem Gamagronomist dan sah tanpa tanda tangan fisik.', 14, finalY + 20)
+
+      doc.save(`Bukti_Stok_${req.id.slice(0, 8).toUpperCase()}.pdf`)
+    } catch (err) {
+      console.error('PDF generation error:', err)
+      alert('Gagal mengunduh dokumen PDF. Silakan coba lagi.')
+    }
   }
 
   const getStatusBadge = (status: string) => {
