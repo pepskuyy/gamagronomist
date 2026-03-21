@@ -182,7 +182,7 @@ export default async function DemoPlotIndexPage() {
                   <td>{getStatusBadge(req.status)}</td>
                   <td>
                     <div className="action-row">
-                      {req.status === 'APPROVED' && (session.role === 'FO' || session.role === 'AFA') && (
+                      {req.status === 'APPROVED' && req.foId === session.userId && (
                         <Link href={`/dashboard/demoplot/continue/${req.id}`}>
                           <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
                         </Link>
