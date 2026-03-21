@@ -9,14 +9,14 @@ const VALID_UNITS = ['ml', 'gr', 'kg', 'liter', 'pcs', 'sachet', 'botol']
 function downloadTemplate() {
   const wb = XLSX.utils.book_new()
   const data = [
-    ['nama_produk', 'satuan', 'deskripsi'],
-    ['Pupuk Cair Bintang', 'ml', 'Pupuk cair serbaguna'],
-    ['Pestisida Andalan', 'liter', 'Untuk hama wereng'],
-    ['Granul Spesifik', 'gr', ''],
+    ['id_produk', 'nama_produk', 'satuan', 'deskripsi'],
+    ['P001', 'Pupuk Cair Bintang', 'ml', 'Pupuk cair serbaguna'],
+    ['', 'Pestisida Andalan', 'liter', 'Untuk hama wereng'],
+    ['P003', 'Granul Spesifik', 'gr', ''],
   ]
   const ws = XLSX.utils.aoa_to_sheet(data)
   // Column comment / validation hints — widen columns
-  ws['!cols'] = [{ wch: 30 }, { wch: 12 }, { wch: 40 }]
+  ws['!cols'] = [{ wch: 15 }, { wch: 30 }, { wch: 12 }, { wch: 40 }]
   XLSX.utils.book_append_sheet(wb, ws, 'Produk')
   XLSX.writeFile(wb, 'template_import_produk.xlsx')
 }
@@ -57,6 +57,7 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
             return acc
           }, {} as any)
           return {
+            code:        String(keys['id_produk'] ?? keys['id'] ?? keys['code'] ?? '').trim() || undefined,
             name:        String(keys['nama_produk'] ?? keys['name'] ?? '').trim(),
             unit:        String(keys['satuan'] ?? keys['unit'] ?? '').trim().toLowerCase(),
             description: String(keys['deskripsi'] ?? keys['description'] ?? '').trim() || undefined,
@@ -98,7 +99,7 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
         {step === 'upload' && (
           <>
             <h3 style={{ marginBottom: '0.25rem' }}>📥 Import Produk dari Excel</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Upload file .xlsx atau .xls dengan kolom: <code>nama_produk</code>, <code>satuan</code>, <code>deskripsi</code></p>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Upload file .xlsx atau .xls dengan kolom (opsional ditandai *): <br/><code>id_produk*</code>, <code>nama_produk</code>, <code>satuan</code>, <code>deskripsi*</code></p>
 
             <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', fontSize: '0.85rem', color: '#1e40af' }}>
               <strong>Satuan yang valid:</strong> {VALID_UNITS.join(', ')}
@@ -131,6 +132,7 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
                 <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                   <tr>
                     <th style={{ ...th, width: 40 }}>#</th>
+                    <th style={th}>ID Produk</th>
                     <th style={th}>Nama Produk</th>
                     <th style={th}>Satuan</th>
                     <th style={th}>Deskripsi</th>
@@ -145,6 +147,7 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
                     return (
                       <tr key={i} style={{ background: ok ? 'transparent' : '#fff7ed' }}>
                         <td style={td}>{i + 2}</td>
+                        <td style={{ ...td, color: 'var(--primary)', fontFamily: 'monospace', fontSize: '0.75rem' }}>{row.code || '—'}</td>
                         <td style={td}><strong>{row.name || <em style={{ color: '#9ca3af' }}>kosong</em>}</strong></td>
                         <td style={td}>
                           <span style={{ padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: unitOk ? '#dcfce7' : '#fee2e2', color: unitOk ? '#166534' : '#b91c1c' }}>

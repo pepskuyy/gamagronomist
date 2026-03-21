@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { createProduct, updateProduct, deleteProduct } from '@/app/actions/master'
 import ImportModal from '@/components/ImportModal'
 
-type Product = { id: string; name: string; description: string | null; unit: string }
+type Product = { id: string; code: string | null; name: string; description: string | null; unit: string }
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
@@ -78,6 +78,10 @@ export default function ProductsMasterPage() {
             <h3 style={{ marginBottom: '1.5rem' }}>{modal === 'add' ? '➕ Tambah Produk' : '✏️ Edit Produk'}</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
+                <label style={labelStyle}>ID Produk</label>
+                <input name="code" style={inputStyle} defaultValue={selected?.code || ''} placeholder="contoh: P001 (opsional)" />
+              </div>
+              <div>
                 <label style={labelStyle}>Nama Produk <span style={{ color: 'red' }}>*</span></label>
                 <input name="name" style={inputStyle} required defaultValue={selected?.name} placeholder="contoh: Pupuk Cair Bintang" />
               </div>
@@ -127,7 +131,10 @@ export default function ProductsMasterPage() {
           <div key={p.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                <h3 style={{ fontSize: '1.05rem', color: 'var(--primary)', margin: 0 }}>{p.name}</h3>
+                <div>
+                  <h3 style={{ fontSize: '1.05rem', color: 'var(--primary)', margin: 0 }}>{p.name}</h3>
+                  {p.code && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '0.1rem' }}>ID: {p.code}</div>}
+                </div>
                 <span className="badge badge-neutral">{p.unit}</span>
               </div>
               <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>

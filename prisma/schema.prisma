@@ -92,6 +92,7 @@ model AccountRequest {
 
 model Product {
   id          String   @id @default(cuid())
+  code        String?
   name        String
   description String?
   unit        String   // "ml", "gr"

@@ -7,6 +7,7 @@ import { decrypt } from '@/lib/auth'
 const prisma = new PrismaClient()
 
 export type BulkProductRow = {
+  code?: string
   name: string
   unit: string
   description?: string
@@ -64,6 +65,7 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
     try {
       await prisma.product.create({
         data: {
+          code: row.code?.trim() || null,
           name: normalizedName,
           unit: row.unit.trim().toLowerCase(),
           description: row.description?.trim() || null,
