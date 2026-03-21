@@ -1,95 +1,114 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { submitStockIn } from '@/app/actions/stock'
+import { submitAfaStockRequest } from '@/app/actions/afa-stock'
 
 type Product = { id: string, name: string, unit: string }
 
 export default function StockInPage() {
   const router = useRouter()
   const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(false)
+  const [quantities, setQuantities] = useState<Record<string, number>>({})
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
+  const [isPending, startTransition] = useTransition()
 
-  // Fetch products inside useEffect for demonstration (in real app can use RSC)
   useEffect(() => {
-    fetch('/api/products') // We will create this simple API route
+    fetch('/api/products')
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(e => console.error(e))
   }, [])
 
-  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+  function handleQuantityChange(productId: string, val: string) {
+    const num = parseFloat(val) || 0
+    setQuantities(prev => ({ ...prev, [productId]: num }))
+  }
+
+  function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
-    setLoading(true)
     setError(null)
-    setSuccess(false)
     
-    const formData = new FormData(e.currentTarget)
-    const res = await submitStockIn(formData)
-    
-    if (res?.error) {
-      setError(res.error)
-    } else {
-      setSuccess(true)
-      e.currentTarget.reset()
-      setTimeout(() => {
-         router.push('/dashboard/stock')
-      }, 1500)
+    // Construct the payload
+    const payload = products
+      .filter(p => quantities[p.id] > 0)
+      .map(p => ({
+        productId: p.id,
+        qtyRequested: quantities[p.id]
+      }))
+
+    if (payload.length === 0) {
+      setError('Masukkan jumlah minimal untuk satu produk.')
+      return
     }
-    setLoading(false)
+
+    const formData = new FormData(e.currentTarget)
+    formData.append('products', JSON.stringify(payload))
+
+    startTransition(async () => {
+      const res = await submitAfaStockRequest(formData)
+      if (res?.error) {
+        setError(res.error)
+      } else {
+        router.push('/dashboard/stock')
+      }
+    })
   }
 
   return (
-    <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+    <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
-        <h2 style={{ margin: 0 }}>Input Stok Masuk (Dari Gudang)</h2>
+        <div>
+          <h2 style={{ margin: 0 }}>Ajukan Stok Masuk (Ke SPV)</h2>
+          <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>Minta persetujuan tambahan stok dari SPV area Anda.</p>
+        </div>
       </div>
 
       <div className="card">
-        {error && <div className="alert-error" style={{ marginBottom: '1rem', color: 'red' }}>{error}</div>}
-        {success && <div className="badge badge-success" style={{ marginBottom: '1rem', display: 'block', textAlign: 'center', padding: '1rem' }}>✅ Stok berhasil ditambahkan ke Ledger! Mengalihkan...</div>}
+        {error && <div className="alert-error" style={{ marginBottom: '1rem', color: 'var(--danger)', background: '#fee2e2', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>{error}</div>}
         
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label className="form-label">Produk</label>
-            <select name="productId" className="form-control" required disabled={products.length === 0}>
-              <option value="">-- Pilih Produk --</option>
+          <div style={{ marginBottom: '1.5rem' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>📦 Pilih Produk & Jumlah</h3>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {products.map(p => (
-                <option key={p.id} value={p.id}>{p.name} ({p.unit})</option>
+                <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '1rem', padding: '0.75rem 1rem', background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600 }}>{p.name}</div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <input 
+                      type="number" 
+                      min="0" step="0.01" 
+                      className="form-control" 
+                      style={{ width: '100px', textAlign: 'right' }}
+                      placeholder="0"
+                      value={quantities[p.id] || ''}
+                      onChange={(e) => handleQuantityChange(p.id, e.target.value)}
+                    />
+                    <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)', minWidth: '40px' }}>{p.unit}</span>
+                  </div>
+                </div>
               ))}
-            </select>
+              {products.length === 0 && <div style={{ color: 'var(--text-muted)' }}>Memuat produk...</div>}
+            </div>
           </div>
           
-          <div className="form-group">
-            <label className="form-label">Kuantitas</label>
-            <input 
-              type="number" 
-              name="quantity" 
-              className="form-control" 
-              min="1"
-              step="0.01"
-              required 
-              placeholder="Contoh: 100"
-            />
-          </div>
-          
-          <div className="form-group">
-            <label className="form-label">Catatan (Opsional)</label>
+          <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+            <label className="form-label">Catatan Pengajuan</label>
             <textarea 
               name="notes" 
               className="form-control" 
               rows={3}
-              placeholder="Misal: Batch 003 dari Gudang Pusat"
+              placeholder="Contoh: Stok untuk persiapan musim tanam bulan depan..."
+              required
             />
           </div>
           
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? 'Menyimpan...' : 'Simpan Transaksi Stok'}
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.8rem' }} disabled={isPending}>
+            {isPending ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Stok ke SPV'}
           </button>
         </form>
       </div>

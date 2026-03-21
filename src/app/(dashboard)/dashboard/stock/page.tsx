@@ -3,6 +3,7 @@ import { decrypt } from '@/lib/auth'
 import { getStockBalance } from '@/lib/ledger/stock'
 import { PrismaClient } from '@prisma/client'
 import Link from 'next/link'
+import AfaStockRequestTable from '@/components/AfaStockRequestTable'
 
 const prisma = new PrismaClient()
 
@@ -60,6 +61,25 @@ export default async function StockDashboardPage() {
 
   const foRows = session.role === 'AFA' ? foStockData : spvFoData
 
+  // Fetch AFA Stock Requests (Pengajuan Stok AFA)
+  let afaStockRequests: any[] = []
+  if (session.role === 'AFA') {
+    afaStockRequests = await prisma.request.findMany({
+      where: { foId: session.userId, commodity: 'AFA_STOCK_IN' },
+      include: { afa: true, details: { include: { product: true } } },
+      orderBy: { createdAt: 'desc' }
+    })
+  } else if (session.role === 'SPV') {
+    afaStockRequests = await prisma.request.findMany({
+      where: {
+        commodity: 'AFA_STOCK_IN',
+        fo: { area: { is: session.areaId ? { id: session.areaId } : undefined } }
+      },
+      include: { fo: true, afa: true, details: { include: { product: true } } },
+      orderBy: { createdAt: 'desc' }
+    })
+  }
+
   const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
   const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
 
@@ -103,6 +123,11 @@ export default async function StockDashboardPage() {
           </div>
         )}
       </div>
+
+      {/* AFA Stock Requests Section (SPV & AFA only) */}
+      {['SPV', 'AFA'].includes(session.role) && (
+        <AfaStockRequestTable requests={afaStockRequests} role={session.role} />
+      )}
 
       {/* FO Monitoring Table (AFA & SPV only) */}
       {['SPV', 'AFA'].includes(session.role) && (
