@@ -37,6 +37,14 @@ export default function MasterDataIndex() {
             <p style={{ fontSize: '0.9rem' }}>Tinjau dan setujui permintaan pembuatan akun dari calon pengguna.</p>
           </div>
         </Link>
+
+        <Link href="/dashboard/master/import" style={{ textDecoration: 'none' }}>
+          <div className="card" style={{ cursor: 'pointer', height: '100%', borderColor: '#93c5fd', background: 'linear-gradient(135deg, #eff6ff 0%, #fff 100%)' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>📦</div>
+            <h3 style={{ marginBottom: '0.5rem', color: '#1d4ed8' }}>Migrasi Data (Import)</h3>
+            <p style={{ fontSize: '0.9rem' }}>Import data dari spreadsheet: Area, User, Petani, Customer Behavior, dan Demo Plot.</p>
+          </div>
+        </Link>
       </div>
     </div>
   )

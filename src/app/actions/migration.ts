@@ -1,0 +1,226 @@
+'use server'
+
+import { PrismaClient } from '@prisma/client'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
+import bcrypt from 'bcryptjs'
+
+const prisma = new PrismaClient()
+
+async function requireAdmin() {
+  const cookieStore = await cookies()
+  const session = await decrypt(cookieStore.get('session')?.value as string)
+  if (session?.role !== 'ADMIN') throw new Error('Akses ditolak.')
+  return session
+}
+
+// ─── AREA ──────────────────────────────────────
+export type AreaRow = { name: string }
+
+export async function bulkImportAreas(rows: AreaRow[]) {
+  await requireAdmin()
+  let inserted = 0, skipped = 0
+  const errors: { row: number; name: string; reason: string }[] = []
+  const existing = await prisma.area.findMany({ select: { name: true } })
+  const existingNames = new Set(existing.map(a => a.name.toLowerCase().trim()))
+
+  for (let i = 0; i < rows.length; i++) {
+    const name = rows[i].name?.trim()
+    if (!name) { errors.push({ row: i + 2, name: '-', reason: 'Nama area kosong.' }); skipped++; continue }
+    if (existingNames.has(name.toLowerCase())) { errors.push({ row: i + 2, name, reason: 'Sudah ada.' }); skipped++; continue }
+    try {
+      await prisma.area.create({ data: { name } })
+      existingNames.add(name.toLowerCase())
+      inserted++
+    } catch { errors.push({ row: i + 2, name, reason: 'Gagal disimpan.' }); skipped++ }
+  }
+  return { success: true, inserted, skipped, errors }
+}
+
+// ─── USER ──────────────────────────────────────
+export type UserRow = { username: string; password: string; name: string; role: string; areaName?: string; afaName?: string }
+
+export async function bulkImportUsers(rows: UserRow[]) {
+  await requireAdmin()
+  let inserted = 0, skipped = 0
+  const errors: { row: number; name: string; reason: string }[] = []
+
+  const areas = await prisma.area.findMany({ select: { id: true, name: true } })
+  const areaMap = new Map(areas.map(a => [a.name.toLowerCase().trim(), a.id]))
+
+  const afas = await prisma.user.findMany({ where: { role: 'AFA' }, select: { id: true, name: true } })
+  const afaMap = new Map(afas.map(a => [a.name.toLowerCase().trim(), a.id]))
+
+  const existingUsernames = new Set((await prisma.user.findMany({ select: { username: true } })).map(u => u.username.toLowerCase()))
+  const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'FO']
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    const rowNum = i + 2
+    if (!r.username?.trim() || !r.name?.trim() || !r.password?.trim() || !r.role?.trim()) {
+      errors.push({ row: rowNum, name: r.name || '-', reason: 'username, password, nama, dan role wajib diisi.' }); skipped++; continue
+    }
+    const role = r.role.trim().toUpperCase()
+    if (!VALID_ROLES.includes(role)) {
+      errors.push({ row: rowNum, name: r.name, reason: `Role "${r.role}" tidak valid. Gunakan: ${VALID_ROLES.join(', ')}` }); skipped++; continue
+    }
+    if (existingUsernames.has(r.username.trim().toLowerCase())) {
+      errors.push({ row: rowNum, name: r.name, reason: 'Username sudah terdaftar.' }); skipped++; continue
+    }
+
+    const areaId = r.areaName ? areaMap.get(r.areaName.trim().toLowerCase()) || null : null
+    const afaId = r.afaName && role === 'FO' ? afaMap.get(r.afaName.trim().toLowerCase()) || null : null
+
+    try {
+      const hashed = await bcrypt.hash(r.password.trim(), 10)
+      const user = await prisma.user.create({ data: { username: r.username.trim(), password: hashed, name: r.name.trim(), role, areaId, afaId } })
+      existingUsernames.add(r.username.trim().toLowerCase())
+      if (role === 'AFA') afaMap.set(r.name.trim().toLowerCase(), user.id)
+      inserted++
+    } catch (e: any) {
+      errors.push({ row: rowNum, name: r.name, reason: e?.code === 'P2002' ? 'Username duplikat.' : 'Gagal disimpan.' }); skipped++
+    }
+  }
+  return { success: true, inserted, skipped, errors }
+}
+
+// ─── FARMER ────────────────────────────────────
+export type FarmerRow = { name: string; phone?: string; address?: string; area?: string }
+
+export async function bulkImportFarmers(rows: FarmerRow[]) {
+  await requireAdmin()
+  let inserted = 0, skipped = 0
+  const errors: { row: number; name: string; reason: string }[] = []
+  const existing = await prisma.farmer.findMany({ select: { name: true, phone: true } })
+  const existingKeys = new Set(existing.map(f => `${f.name.toLowerCase().trim()}|${(f.phone || '').trim()}`))
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    const rowNum = i + 2
+    const name = r.name?.trim()
+    if (!name) { errors.push({ row: rowNum, name: '-', reason: 'Nama petani kosong.' }); skipped++; continue }
+    const key = `${name.toLowerCase()}|${(r.phone || '').trim()}`
+    if (existingKeys.has(key)) { errors.push({ row: rowNum, name, reason: 'Sudah ada (nama+telepon sama).' }); skipped++; continue }
+    try {
+      await prisma.farmer.create({ data: { name, phone: r.phone?.trim() || null, address: r.address?.trim() || null, area: r.area?.trim() || null } })
+      existingKeys.add(key)
+      inserted++
+    } catch { errors.push({ row: rowNum, name, reason: 'Gagal disimpan.' }); skipped++ }
+  }
+  return { success: true, inserted, skipped, errors }
+}
+
+// ─── CUSTOMER BEHAVIOR ─────────────────────────
+export type CBRow = {
+  username: string; farmerName: string; age?: string; phone?: string; address?: string;
+  district?: string; commodity?: string; reasonChoice?: string; constraints?: string;
+  optTypes?: string; optDetails?: string; usedProducts?: string; buyLocation?: string;
+  buyReason?: string; references?: string; notes?: string
+}
+
+export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
+  await requireAdmin()
+  let inserted = 0, skipped = 0
+  const errors: { row: number; name: string; reason: string }[] = []
+
+  const users = await prisma.user.findMany({ select: { id: true, username: true } })
+  const userMap = new Map(users.map(u => [u.username.toLowerCase().trim(), u.id]))
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    const rowNum = i + 2
+    if (!r.username?.trim()) { errors.push({ row: rowNum, name: r.farmerName || '-', reason: 'username_pelapor kosong.' }); skipped++; continue }
+    if (!r.farmerName?.trim()) { errors.push({ row: rowNum, name: '-', reason: 'nama_petani kosong.' }); skipped++; continue }
+    const userId = userMap.get(r.username.trim().toLowerCase())
+    if (!userId) { errors.push({ row: rowNum, name: r.farmerName, reason: `User "${r.username}" tidak ditemukan.` }); skipped++; continue }
+
+    try {
+      await prisma.customerBehavior.create({
+        data: {
+          userId,
+          farmerName: r.farmerName.trim(),
+          age: r.age?.trim() || null,
+          phone: r.phone?.trim() || null,
+          address: r.address?.trim() || null,
+          district: r.district?.trim() || null,
+          commodity: r.commodity?.trim() || null,         // comma-separated for chart
+          reasonChoice: r.reasonChoice?.trim() || null,
+          constraints: r.constraints?.trim() || null,
+          optTypes: r.optTypes?.trim() || null,
+          optDetails: r.optDetails?.trim() || null,
+          usedProducts: r.usedProducts?.trim() || null,   // comma-separated for chart
+          buyLocation: r.buyLocation?.trim() || null,
+          buyReason: r.buyReason?.trim() || null,
+          references: r.references?.trim() || null,
+          notes: r.notes?.trim() || null,
+        }
+      })
+      inserted++
+    } catch (e: any) {
+      errors.push({ row: rowNum, name: r.farmerName, reason: 'Gagal disimpan: ' + e.message }); skipped++
+    }
+  }
+  return { success: true, inserted, skipped, errors }
+}
+
+// ─── DEMO PLOT ─────────────────────────────────
+export type DemoPlotRow = {
+  date: string; area?: string; commodity?: string; landSize?: string;
+  resultNotes?: string; farmerName?: string; isFinalSession?: string;
+  latitude?: string; longitude?: string
+}
+
+export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
+  await requireAdmin()
+  let inserted = 0, skipped = 0
+  const errors: { row: number; name: string; reason: string }[] = []
+
+  const farmers = await prisma.farmer.findMany({ select: { id: true, name: true } })
+  const farmerMap = new Map(farmers.map(f => [f.name.toLowerCase().trim(), f.id]))
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    const rowNum = i + 2
+    if (!r.date?.trim()) { errors.push({ row: rowNum, name: r.farmerName || '-', reason: 'Tanggal kosong.' }); skipped++; continue }
+
+    let parsedDate: Date
+    try {
+      // Support DD/MM/YYYY or YYYY-MM-DD
+      const d = r.date.trim()
+      if (d.includes('/')) {
+        const [day, month, year] = d.split('/')
+        parsedDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`)
+      } else {
+        parsedDate = new Date(d)
+      }
+      if (isNaN(parsedDate.getTime())) throw new Error('Invalid')
+    } catch {
+      errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Format tanggal "${r.date}" tidak valid. Gunakan DD/MM/YYYY atau YYYY-MM-DD.` }); skipped++; continue
+    }
+
+    const farmerId = r.farmerName ? farmerMap.get(r.farmerName.trim().toLowerCase()) || null : null
+    const lat = r.latitude ? parseFloat(r.latitude) : null
+    const lng = r.longitude ? parseFloat(r.longitude) : null
+    const isFinal = r.isFinalSession?.trim().toLowerCase()
+
+    try {
+      await prisma.demoPlot.create({
+        data: {
+          date: parsedDate,
+          area: r.area?.trim() || null,
+          commodity: r.commodity?.trim() || null,
+          landSize: r.landSize ? parseFloat(r.landSize) || null : null,
+          resultNotes: r.resultNotes?.trim() || null,
+          farmerId,
+          isFinalSession: isFinal === 'ya' || isFinal === 'true' || isFinal === '1' || isFinal === 'yes',
+          latitude: isNaN(lat as number) ? null : lat,
+          longitude: isNaN(lng as number) ? null : lng,
+        }
+      })
+      inserted++
+    } catch (e: any) {
+      errors.push({ row: rowNum, name: r.farmerName || '-', reason: 'Gagal disimpan: ' + e.message }); skipped++
+    }
+  }
+  return { success: true, inserted, skipped, errors }
+}
