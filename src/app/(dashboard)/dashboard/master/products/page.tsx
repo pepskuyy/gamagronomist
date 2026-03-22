@@ -26,6 +26,10 @@ export default function ProductsMasterPage() {
   const [error, setError]       = useState<string | null>(null)
   const [isPending, start]      = useTransition()
   const [showImport, setShowImport] = useState(false)
+  const [search, setSearch]       = useState('')
+
+  const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
+  const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
 
   const fetchData = async () => {
     const res = await fetch('/api/master/products')
@@ -62,6 +66,11 @@ export default function ProductsMasterPage() {
   }
 
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Memuat data...</div>
+
+  const filteredProducts = products.filter(p => 
+    p.name.toLowerCase().includes(search.toLowerCase()) || 
+    p.code?.toLowerCase().includes(search.toLowerCase())
+  )
 
   return (
     <div>
@@ -120,38 +129,55 @@ export default function ProductsMasterPage() {
           <Link href="/dashboard/master" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>← Master Data</Link>
           <h2 style={{ margin: 0 }}>🧪 Master Data: Produk</h2>
         </div>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+          <input 
+             type="text" 
+             placeholder="Cari produk (nama / ID)..." 
+             className="form-control" 
+             style={{ minWidth: '250px' }} 
+             value={search}
+             onChange={e => setSearch(e.target.value)}
+          />
           <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📥 Import Excel</button>
           <button onClick={openAdd} className="btn btn-primary">➕ Tambah Produk</button>
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '1.5rem' }}>
-        {products.map(p => (
-          <div key={p.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                <div>
-                  <h3 style={{ fontSize: '1.05rem', color: 'var(--primary)', margin: 0 }}>{p.name}</h3>
-                  {p.code && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace', marginTop: '0.1rem' }}>ID: {p.code}</div>}
-                </div>
-                <span className="badge badge-neutral">{p.unit}</span>
-              </div>
-              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                {p.description || <em>Tidak ada deskripsi.</em>}
-              </p>
-            </div>
-            <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1rem', marginTop: 'auto', display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
-              <button onClick={() => openEdit(p)} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>✏️ Edit</button>
-              <button onClick={() => handleDelete(p.id, p.name)} style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: 'none', border: '1px solid var(--border)', borderRadius: '0.4rem', color: 'var(--danger)', cursor: 'pointer' }}>🗑️ Hapus</button>
-            </div>
-          </div>
-        ))}
-        {products.length === 0 && (
-          <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-            <p>Belum ada data produk. Klik "Tambah Produk" untuk menambahkan.</p>
-          </div>
-        )}
+      <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
+            <thead>
+              <tr>
+                <th style={{...thStyle, width: '15%'}}>ID Produk</th>
+                <th style={{...thStyle, width: '30%'}}>Nama Produk</th>
+                <th style={{...thStyle, width: '15%'}}>Satuan</th>
+                <th style={{...thStyle, width: '25%'}}>Deskripsi</th>
+                <th style={{...thStyle, width: '15%', textAlign: 'center'}}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredProducts.map(p => (
+                <tr key={p.id} className="fo-stock-row">
+                  <td style={{...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)'}}>{p.code || '—'}</td>
+                  <td style={{...tdStyle, fontWeight: 600, color: 'var(--primary)'}}>{p.name}</td>
+                  <td style={{...tdStyle}}><span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>{p.unit}</span></td>
+                  <td style={{...tdStyle, color: 'var(--text-muted)'}}>{p.description || '—'}</td>
+                  <td style={{...tdStyle, textAlign: 'center', whiteSpace: 'nowrap'}}>
+                    <button onClick={() => openEdit(p)} className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', marginRight: '0.4rem' }}>✏️ Edit</button>
+                    <button onClick={() => handleDelete(p.id, p.name)} style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '0.4rem', color: '#b91c1c', cursor: 'pointer' }}>🗑️</button>
+                  </td>
+                </tr>
+              ))}
+              {filteredProducts.length === 0 && (
+                <tr>
+                  <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    Belum ada data produk atau produk tidak ditemukan.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   )
