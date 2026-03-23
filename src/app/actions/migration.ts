@@ -54,6 +54,12 @@ export async function bulkImportUsers(rows: UserRow[]) {
   const existingUsernames = new Set((await prisma.user.findMany({ select: { username: true } })).map(u => u.username.toLowerCase()))
   const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN']
 
+  // Phase 1: Validate all rows and pre-hash passwords in parallel
+  type ValidatedRow = { rowNum: number; username: string; password: string; name: string; role: string; areaId: string | null; afaId: string | null; isActive: boolean }
+  const validRows: ValidatedRow[] = []
+  const hashPromises: Promise<string>[] = []
+  const hashIndices: number[] = []
+
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
     const rowNum = i + 2
@@ -70,16 +76,31 @@ export async function bulkImportUsers(rows: UserRow[]) {
 
     const areaId = r.areaName ? areaMap.get(r.areaName.trim().toLowerCase()) || null : null
     const afaId = r.afaName && (role === 'FO' || role === 'INTERN') ? afaMap.get(r.afaName.trim().toLowerCase()) || null : null
+    const isActive = r.status ? !['nonaktif', 'inactive', 'false', '0', 'tidak'].includes(r.status.trim().toLowerCase()) : true
 
+    // Queue the hash and mark this row's index
+    hashIndices.push(validRows.length)
+    hashPromises.push(bcrypt.hash(r.password.trim(), 6))
+    validRows.push({ rowNum, username: r.username.trim(), password: '', name: r.name.trim(), role, areaId, afaId, isActive })
+    existingUsernames.add(r.username.trim().toLowerCase())
+  }
+
+  // Phase 2: Await all hashes in parallel (much faster than sequential)
+  const hashes = await Promise.all(hashPromises)
+  for (let i = 0; i < hashes.length; i++) {
+    validRows[hashIndices[i]].password = hashes[i]
+  }
+
+  // Phase 3: Insert all validated rows
+  for (const vr of validRows) {
     try {
-      const hashed = await bcrypt.hash(r.password.trim(), 10)
-      const isActive = r.status ? !['nonaktif', 'inactive', 'false', '0', 'tidak'].includes(r.status.trim().toLowerCase()) : true
-      const user = await prisma.user.create({ data: { username: r.username.trim(), password: hashed, name: r.name.trim(), role, areaId, afaId, isActive } })
-      existingUsernames.add(r.username.trim().toLowerCase())
-      if (role === 'AFA') afaMap.set(r.name.trim().toLowerCase(), user.id)
+      const user = await prisma.user.create({
+        data: { username: vr.username, password: vr.password, name: vr.name, role: vr.role, areaId: vr.areaId, afaId: vr.afaId, isActive: vr.isActive }
+      })
+      if (vr.role === 'AFA') afaMap.set(vr.name.toLowerCase(), user.id)
       inserted++
     } catch (e: any) {
-      errors.push({ row: rowNum, name: r.name, reason: e?.code === 'P2002' ? 'Username duplikat.' : 'Gagal disimpan.' }); skipped++
+      errors.push({ row: vr.rowNum, name: vr.name, reason: e?.code === 'P2002' ? 'Username duplikat.' : 'Gagal disimpan.' }); skipped++
     }
   }
   return { success: true, inserted, skipped, errors }
