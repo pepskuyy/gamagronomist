@@ -10,7 +10,7 @@ const prisma = new PrismaClient()
 async function requireAdmin() {
   const cookieStore = await cookies()
   const session = await decrypt(cookieStore.get('session')?.value as string)
-  if (session?.role !== 'ADMIN') throw new Error('Akses ditolak.')
+  if (!['ADMIN', 'SPV'].includes(session?.role ?? '')) throw new Error('Akses ditolak.')
   return session
 }
 

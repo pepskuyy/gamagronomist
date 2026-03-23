@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies()
     const session = await decrypt(cookieStore.get('session')?.value as string)
-    if (session?.role !== 'ADMIN') {
+    if (!['ADMIN', 'SPV'].includes(session?.role ?? '')) {
       return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 })
     }
 
