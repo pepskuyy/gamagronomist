@@ -38,7 +38,7 @@ export async function bulkImportAreas(rows: AreaRow[]) {
 }
 
 // ─── USER ──────────────────────────────────────
-export type UserRow = { username: string; password: string; name: string; role: string; areaName?: string; afaName?: string }
+export type UserRow = { username: string; password: string; name: string; role: string; areaName?: string; afaName?: string; status?: string }
 
 export async function bulkImportUsers(rows: UserRow[]) {
   await requireAdmin()
@@ -52,7 +52,7 @@ export async function bulkImportUsers(rows: UserRow[]) {
   const afaMap = new Map(afas.map(a => [a.name.toLowerCase().trim(), a.id]))
 
   const existingUsernames = new Set((await prisma.user.findMany({ select: { username: true } })).map(u => u.username.toLowerCase()))
-  const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'FO']
+  const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN']
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
@@ -69,11 +69,12 @@ export async function bulkImportUsers(rows: UserRow[]) {
     }
 
     const areaId = r.areaName ? areaMap.get(r.areaName.trim().toLowerCase()) || null : null
-    const afaId = r.afaName && role === 'FO' ? afaMap.get(r.afaName.trim().toLowerCase()) || null : null
+    const afaId = r.afaName && (role === 'FO' || role === 'INTERN') ? afaMap.get(r.afaName.trim().toLowerCase()) || null : null
 
     try {
       const hashed = await bcrypt.hash(r.password.trim(), 10)
-      const user = await prisma.user.create({ data: { username: r.username.trim(), password: hashed, name: r.name.trim(), role, areaId, afaId } })
+      const isActive = r.status ? !['nonaktif', 'inactive', 'false', '0', 'tidak'].includes(r.status.trim().toLowerCase()) : true
+      const user = await prisma.user.create({ data: { username: r.username.trim(), password: hashed, name: r.name.trim(), role, areaId, afaId, isActive } })
       existingUsernames.add(r.username.trim().toLowerCase())
       if (role === 'AFA') afaMap.set(r.name.trim().toLowerCase(), user.id)
       inserted++

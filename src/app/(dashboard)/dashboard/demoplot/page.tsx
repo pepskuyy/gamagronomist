@@ -14,7 +14,7 @@ export default async function DemoPlotIndexPage() {
 
   const include = { fo: true, afa: true, farmer: true, details: { include: { product: true } } }
   let requests: any[] = []
-  if (session.role === 'FO') {
+  if (session.role === 'FO' || session.role === 'INTERN') {
     requests = await prisma.request.findMany({ where: { foId: session.userId }, include, orderBy: { createdAt: 'desc' } })
   } else if (session.role === 'AFA') {
     requests = await prisma.request.findMany({ where: { OR: [{ afaId: session.userId }, { foId: session.userId }] }, include, orderBy: { createdAt: 'desc' } })
@@ -42,7 +42,7 @@ export default async function DemoPlotIndexPage() {
         <h2 style={{ margin: 0 }}>🌾 Demo Plot</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {/* FO: request stock + direct demo plot */}
-          {session.role === 'FO' && (
+          {(session.role === 'FO' || session.role === 'INTERN') && (
             <>
               <Link href="/dashboard/demoplot/request">
                 <button className="btn btn-outline">📦 Minta Stok dari AFA</button>
@@ -124,7 +124,7 @@ export default async function DemoPlotIndexPage() {
       )}
 
       {/* FO: show own stock requests */}
-      {session.role === 'FO' && stockRequests.length > 0 && (
+      {(session.role === 'FO' || session.role === 'INTERN') && stockRequests.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
           <h3 style={{ marginBottom: '1rem' }}>📦 Permintaan Stok Saya</h3>
           <div className="table-card">
@@ -161,7 +161,7 @@ export default async function DemoPlotIndexPage() {
               <tr>
                 <th>ID</th>
                 <th>Tanggal</th>
-                {session.role !== 'FO' && <th>Pelaksana</th>}
+                {session.role !== 'FO' && session.role !== 'INTERN' && <th>Pelaksana</th>}
                 <th>Petani / Area</th>
                 <th>Komoditas</th>
                 <th>Status</th>
@@ -173,7 +173,7 @@ export default async function DemoPlotIndexPage() {
                 <tr key={req.id}>
                   <td style={{ fontSize: '0.8rem', fontFamily: 'monospace' }}>{req.id.slice(0, 8).toUpperCase()}</td>
                   <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
-                  {session.role !== 'FO' && <td style={{ color: 'var(--primary)', fontWeight: 500 }}>{req.fo?.name}</td>}
+                  {session.role !== 'FO' && session.role !== 'INTERN' && <td style={{ color: 'var(--primary)', fontWeight: 500 }}>{req.fo?.name}</td>}
                   <td>
                     <div style={{ fontWeight: 600 }}>{req.farmer?.name}</div>
                     <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{req.area}</div>

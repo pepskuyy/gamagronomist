@@ -21,7 +21,7 @@ export default async function StockDashboardPage() {
 
   if (session.role === 'AFA') {
     const fos = await prisma.user.findMany({
-      where: { afaId: session.userId, role: 'FO' },
+      where: { afaId: session.userId, role: { in: ['FO', 'INTERN'] } },
       select: { id: true, name: true },
       orderBy: { name: 'asc' },
     })
@@ -38,7 +38,7 @@ export default async function StockDashboardPage() {
 
   if (session.role === 'SPV') {
     const fos = await prisma.user.findMany({
-      where: { role: 'FO', area: { is: session.areaId ? { id: session.areaId } : undefined } },
+      where: { role: { in: ['FO', 'INTERN'] }, area: { is: session.areaId ? { id: session.areaId } : undefined } },
       include: { afa: { select: { name: true } } },
       orderBy: { name: 'asc' },
     })

@@ -19,7 +19,8 @@ model User {
   username  String   @unique
   password  String   // Akan di-hash untuk MVP
   name      String
-  role      String   // "ADMIN", "SPV", "AFA", "FO"
+  role      String   // "ADMIN", "SPV", "AFA", "FO", "INTERN"
+  isActive  Boolean  @default(true)
   
   // Self-Relation untuk AFA -> FO
   afaId     String?

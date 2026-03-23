@@ -76,11 +76,13 @@ export async function updateUser(id: string, formData: FormData) {
   const role     = formData.get('role')     as string
   const areaId   = (formData.get('areaId')   as string) || null
   const afaId    = (formData.get('afaId')    as string) || null
+  const isActiveRaw = formData.get('isActive') as string
 
   if (!name || !role) return { error: 'Nama dan role wajib diisi.' }
   try {
     const data: any = { name, role, areaId: areaId || null, afaId: afaId || null }
     if (password) data.password = await bcrypt.hash(password, 10)
+    if (isActiveRaw !== null && isActiveRaw !== undefined) data.isActive = isActiveRaw === 'true'
     await prisma.user.update({ where: { id }, data })
     revalidatePath('/dashboard/master/users')
     return { success: true }

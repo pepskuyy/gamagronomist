@@ -16,7 +16,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (!session?.userId || !['FO', 'AFA'].includes(session.role)) {
+  if (!session?.userId || !['FO', 'AFA', 'INTERN'].includes(session.role)) {
     return { error: 'Hanya FO dan AFA yang dapat membuat realisasi demo plot langsung.' }
   }
 
@@ -138,7 +138,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (!session?.userId || !['FO', 'AFA'].includes(session.role)) {
+  if (!session?.userId || !['FO', 'AFA', 'INTERN'].includes(session.role)) {
     return { error: 'Hanya FO dan AFA yang dapat menambah sesi demo plot.' }
   }
 

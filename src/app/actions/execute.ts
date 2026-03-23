@@ -43,7 +43,7 @@ export async function submitDemoPlotSession(formData: FormData) {
        return { error: 'Pengajuan tidak berada dalam status APPROVED' }
     }
 
-    const transactionType = session.role === 'FO' ? 'USAGE_DEMOPLOT' : 'DIRECT_USAGE_AFA'
+    const transactionType = (session.role === 'FO' || session.role === 'INTERN') ? 'USAGE_DEMOPLOT' : 'DIRECT_USAGE_AFA'
 
     // Gunakan transaksi untuk memastikan ledger dan demo plot tersimpan sekaligus
     await prisma.$transaction(async (tx) => {

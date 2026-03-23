@@ -81,6 +81,7 @@ export default function RegisterPage() {
                 <option value="">-- Pilih Role --</option>
                 <option value="AFA">AFA (Asisten Field Agronomi)</option>
                 <option value="FO">FO (Field Officer)</option>
+                <option value="INTERN">INTERN (Magang)</option>
               </select>
             </div>
 
@@ -91,10 +92,10 @@ export default function RegisterPage() {
             </div>
 
             {/* AFA name (only for FO) */}
-            {role === 'FO' && (
+            {(role === 'FO' || role === 'INTERN') && (
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">Nama Supervisor AFA <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <input name="afaName" type="text" className="form-control" required={role === 'FO'} placeholder="Nama AFA yang jadi supervisor Anda" />
+                <input name="afaName" type="text" className="form-control" required={role === 'FO' || role === 'INTERN'} placeholder="Nama AFA yang jadi supervisor Anda" />
               </div>
             )}
 

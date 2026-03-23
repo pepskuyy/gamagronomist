@@ -28,7 +28,7 @@ const categories: ImportCategory[] = [
     importFn: (rows) => bulkImportAreas(rows as AreaRow[])
   },
   {
-    id: 'user', icon: '👤', title: 'User (SPV/AFA/FO)', description: 'Import akun pengguna. Pastikan Area sudah di-import terlebih dahulu.', order: 2,
+    id: 'user', icon: '👤', title: 'User (SPV/AFA/FO/INTERN)', description: 'Import akun pengguna. Pastikan Area sudah di-import terlebih dahulu. Role yang valid: ADMIN, SPV, AFA, FO, INTERN.', order: 2,
     columns: [
       { key: 'username', label: 'username', required: true },
       { key: 'password', label: 'password', required: true },
@@ -36,6 +36,7 @@ const categories: ImportCategory[] = [
       { key: 'role', label: 'role', required: true },
       { key: 'areaName', label: 'nama_area' },
       { key: 'afaName', label: 'nama_afa' },
+      { key: 'status', label: 'status' },
     ],
     importFn: (rows) => bulkImportUsers(rows as UserRow[])
   },

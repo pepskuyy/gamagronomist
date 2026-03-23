@@ -14,7 +14,7 @@ export async function GET() {
 
     // Build role filter
     let whereClause: any = {}
-    if (session.role === 'FO') {
+    if (session.role === 'FO' || session.role === 'INTERN') {
       whereClause = { userId: session.userId }
     } else if (session.role === 'AFA') {
       // Find all FOs under this AFA

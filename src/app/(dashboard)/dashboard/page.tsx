@@ -23,7 +23,7 @@ export default async function DashboardPage() {
   
   // Build filter based on role
   const requestFilter: any = {}
-  if (session.role === 'FO') requestFilter.foId = session.userId
+  if (session.role === 'FO' || session.role === 'INTERN') requestFilter.foId = session.userId
   else if (session.role === 'AFA') requestFilter.afaId = session.userId
 
   const [
@@ -64,7 +64,7 @@ export default async function DashboardPage() {
 
   // ----- KPI DATA (for AFA / FO) — shows target set by SPV -----
   let fieldKpi: Awaited<ReturnType<typeof getKpiDataForFieldUser>> | null = null
-  if (session.role === 'AFA' || session.role === 'FO') {
+  if (session.role === 'AFA' || session.role === 'FO' || session.role === 'INTERN') {
     fieldKpi = await getKpiDataForFieldUser(session.userId, session.role, currentMonth, currentYear)
   }
 
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
     }
     
     const users = await prisma.user.findMany({
-      where: Object.keys(userFilter).length ? userFilter : { role: { in: ['AFA', 'FO'] } },
+      where: Object.keys(userFilter).length ? userFilter : { role: { in: ['AFA', 'FO', 'INTERN'] } },
       select: { id: true, name: true, role: true }
     })
 
@@ -146,7 +146,7 @@ export default async function DashboardPage() {
       )}
 
       {/* AFA / FO KPI Section — full card layout, read-only */}
-      {(session.role === 'AFA' || session.role === 'FO') && (
+      {(session.role === 'AFA' || session.role === 'FO' || session.role === 'INTERN') && (
         <div className="card" style={{ marginBottom: '2.5rem' }}>
           <KpiFieldDashboard
             userId={session.userId}

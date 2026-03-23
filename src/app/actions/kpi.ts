@@ -78,7 +78,7 @@ export async function getKpiData(
 /** Get all subordinate users visible to the SPV (AFA + FO) */
 export async function getSubordinateUsers() {
   const users = await prisma.user.findMany({
-    where: { role: { in: ['AFA', 'FO'] } },
+    where: { role: { in: ['AFA', 'FO', 'INTERN'] } },
     select: { id: true, username: true, name: true, role: true, afaId: true },
     orderBy: [{ role: 'asc' }, { name: 'asc' }]
   })

@@ -4,11 +4,11 @@ import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { createUser, updateUser, deleteUser } from '@/app/actions/master'
 
-type User = { id: string; name: string; username: string; role: string; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
+type User = { id: string; name: string; username: string; role: string; isActive: boolean; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
 type Area = { id: string; name: string }
 
-const ROLES = ['ADMIN', 'SPV', 'AFA', 'FO']
-const roleBadge: Record<string, string> = { ADMIN: 'badge-danger', SPV: 'badge-warning', AFA: 'badge-success', FO: 'badge-neutral' }
+const ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN']
+const roleBadge: Record<string, string> = { ADMIN: 'badge-danger', SPV: 'badge-warning', AFA: 'badge-success', FO: 'badge-neutral', INTERN: 'badge-neutral' }
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
@@ -110,12 +110,21 @@ export default function UsersMasterPage() {
                 </select>
               </div>
               <div>
-                <label style={labelStyle}>Supervisor AFA <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>(khusus role FO)</span></label>
+                <label style={labelStyle}>Supervisor AFA <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>(khusus role FO/INTERN)</span></label>
                 <select name="afaId" style={inputStyle} defaultValue={selected?.afa?.id || ''}>
                   <option value="">-- Tanpa Supervisor --</option>
                   {afas.map(a => <option key={a.id} value={a.id}>{a.name}</option>)}
                 </select>
               </div>
+              {modal === 'edit' && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                  <label style={{ ...labelStyle, marginBottom: 0 }}>Status Aktif</label>
+                  <select name="isActive" style={{ ...inputStyle, width: 'auto' }} defaultValue={selected?.isActive ? 'true' : 'false'}>
+                    <option value="true">Aktif</option>
+                    <option value="false">Tidak Aktif</option>
+                  </select>
+                </div>
+              )}
               {error && <div style={{ color: '#dc2626', fontSize: '0.875rem', background: '#fee2e2', padding: '0.6rem 0.9rem', borderRadius: '0.5rem' }}>{error}</div>}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button type="submit" className="btn btn-primary" disabled={isPending} style={{ flex: 1 }}>
@@ -142,7 +151,7 @@ export default function UsersMasterPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ background: 'var(--surface-hover)', borderBottom: '2px solid var(--border)' }}>
               <tr>
-                {['Nama', 'Username', 'Role', 'Area', 'Supervisor AFA', 'Aksi'].map(h => (
+                {['Nama', 'Username', 'Role', 'Status', 'Area', 'Supervisor AFA', 'Aksi'].map(h => (
                   <th key={h} style={{ padding: '0.85rem 1rem', fontWeight: 600, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{h}</th>
                 ))}
               </tr>
@@ -155,6 +164,11 @@ export default function UsersMasterPage() {
                   <td style={{ padding: '0.85rem 1rem' }}>
                     <span className={`badge ${roleBadge[u.role] ?? 'badge-neutral'}`}>{u.role}</span>
                   </td>
+                  <td style={{ padding: '0.85rem 1rem' }}>
+                    <span style={{ padding: '0.15rem 0.5rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, background: u.isActive ? '#dcfce7' : '#fee2e2', color: u.isActive ? '#166534' : '#991b1b' }}>
+                      {u.isActive ? 'Aktif' : 'Nonaktif'}
+                    </span>
+                  </td>
                   <td style={{ padding: '0.85rem 1rem' }}>{u.area?.name || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
                   <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)' }}>{u.afa?.name || '-'}</td>
                   <td style={{ padding: '0.85rem 1rem' }}>
@@ -166,7 +180,7 @@ export default function UsersMasterPage() {
                 </tr>
               ))}
               {users.length === 0 && (
-                <tr><td colSpan={6} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada data pengguna.</td></tr>
+                <tr><td colSpan={7} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada data pengguna.</td></tr>
               )}
             </tbody>
           </table>

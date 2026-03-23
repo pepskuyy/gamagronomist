@@ -15,7 +15,7 @@ export async function submitRequestDemoPlot(formData: FormData) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (session?.role !== 'FO') {
+  if (session?.role !== 'FO' && session?.role !== 'INTERN') {
     return { error: 'Hanya FO yang dapat membuat request pengambilan stok.' }
   }
 
