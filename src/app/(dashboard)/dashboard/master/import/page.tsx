@@ -5,7 +5,6 @@ import Link from 'next/link'
 import MigrationImportModal from '@/components/MigrationImportModal'
 import {
   bulkImportAreas, AreaRow,
-  bulkImportFarmers, FarmerRow,
   bulkImportCustomerBehaviors, CBRow,
   bulkImportDemoPlots, DemoPlotRow
 } from '@/app/actions/migration'
@@ -49,24 +48,15 @@ const categories: ImportCategory[] = [
     }
   },
   {
-    id: 'farmer', icon: '🧑‍🌾', title: 'Petani', description: 'Import data petani. Duplikat akan dilewati secara otomatis.', order: 3,
-    columns: [
-      { key: 'name', label: 'nama_petani', required: true },
-      { key: 'phone', label: 'telepon' },
-      { key: 'address', label: 'alamat' },
-      { key: 'area', label: 'area' },
-    ],
-    importFn: (rows) => bulkImportFarmers(rows as FarmerRow[])
-  },
-  {
-    id: 'cb', icon: '📝', title: 'Customer Behavior', description: 'Import data CB. Pastikan User sudah di-import terlebih dahulu. Kolom komoditas dan produk_preferensi dipisah koma.', order: 4,
+    id: 'cb', icon: '📝', title: 'Customer Behavior', description: 'Import data CB. Pastikan User sudah di-import terlebih dahulu. Data petani akan otomatis dibuat dari CB. Kolom komoditas dan produk_preferensi dipisah koma.', order: 3,
     columns: [
       { key: 'username', label: 'username_pelapor', required: true },
       { key: 'farmerName', label: 'nama_petani', required: true },
       { key: 'age', label: 'umur' },
       { key: 'phone', label: 'telepon' },
-      { key: 'address', label: 'alamat' },
-      { key: 'district', label: 'kecamatan' },
+      { key: 'kabupaten', label: 'kabupaten' },
+      { key: 'kecamatan', label: 'kecamatan' },
+      { key: 'desa', label: 'desa' },
       { key: 'commodity', label: 'komoditas' },
       { key: 'reasonChoice', label: 'alasan_pilih' },
       { key: 'constraints', label: 'kendala' },
@@ -81,7 +71,7 @@ const categories: ImportCategory[] = [
     importFn: (rows) => bulkImportCustomerBehaviors(rows as CBRow[])
   },
   {
-    id: 'demoplot', icon: '🌱', title: 'Demo Plot', description: 'Import data demo plot. Pastikan Petani sudah di-import agar bisa di-link otomatis. Sertakan lat/long agar muncul di peta.', order: 5,
+    id: 'demoplot', icon: '🌱', title: 'Demo Plot', description: 'Import data demo plot. Petani dari CB sudah otomatis tersedia. Sertakan lat/long agar muncul di peta.', order: 4,
     columns: [
       { key: 'date', label: 'tanggal', required: true },
       { key: 'area', label: 'area' },
@@ -118,7 +108,7 @@ export default function MigrationHubPage() {
       </div>
 
       <div style={{ padding: '1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', marginBottom: '2rem', fontSize: '0.875rem', color: '#1e40af' }}>
-        <strong>⚠️ Penting — Urutan Import:</strong> Lakukan import secara berurutan: <strong>Area → User → Petani → Customer Behavior → Demo Plot</strong>, karena setiap data bergantung pada data sebelumnya.
+        <strong>⚠️ Penting — Urutan Import:</strong> Lakukan import secara berurutan: <strong>Area → User → Customer Behavior → Demo Plot</strong>. Data petani akan otomatis dibuat dari data CB.
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>

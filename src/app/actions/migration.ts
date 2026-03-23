@@ -134,8 +134,9 @@ export async function bulkImportFarmers(rows: FarmerRow[]) {
 
 // ─── CUSTOMER BEHAVIOR ─────────────────────────
 export type CBRow = {
-  username: string; farmerName: string; age?: string; phone?: string; address?: string;
-  district?: string; commodity?: string; reasonChoice?: string; constraints?: string;
+  username: string; farmerName: string; age?: string; phone?: string;
+  kabupaten?: string; kecamatan?: string; desa?: string;
+  commodity?: string; reasonChoice?: string; constraints?: string;
   optTypes?: string; optDetails?: string; usedProducts?: string; buyLocation?: string;
   buyReason?: string; references?: string; notes?: string
 }
@@ -143,10 +144,15 @@ export type CBRow = {
 export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
   await requireAdmin()
   let inserted = 0, skipped = 0
+  let farmersCreated = 0
   const errors: { row: number; name: string; reason: string }[] = []
 
   const users = await prisma.user.findMany({ select: { id: true, username: true } })
   const userMap = new Map(users.map(u => [u.username.toLowerCase().trim(), u.id]))
+
+  // Load existing farmers to avoid duplicates
+  const existingFarmers = await prisma.farmer.findMany({ select: { name: true, phone: true } })
+  const farmerKeys = new Set(existingFarmers.map(f => f.name.toLowerCase().trim()))
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
@@ -156,21 +162,40 @@ export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
     const userId = userMap.get(r.username.trim().toLowerCase())
     if (!userId) { errors.push({ row: rowNum, name: r.farmerName, reason: `User "${r.username}" tidak ditemukan.` }); skipped++; continue }
 
+    // Build address from kabupaten/kecamatan/desa
+    const parts = [r.desa, r.kecamatan, r.kabupaten].filter(p => p?.trim()).map(p => p!.trim())
+    const address = parts.length > 0 ? parts.join(', ') : null
+
     try {
+      // Auto-create Farmer if not exists
+      const farmerName = r.farmerName.trim()
+      if (!farmerKeys.has(farmerName.toLowerCase())) {
+        await prisma.farmer.create({
+          data: {
+            name: farmerName,
+            phone: r.phone?.trim() || null,
+            address,
+            area: r.kabupaten?.trim() || null,
+          }
+        })
+        farmerKeys.add(farmerName.toLowerCase())
+        farmersCreated++
+      }
+
       await prisma.customerBehavior.create({
         data: {
           userId,
-          farmerName: r.farmerName.trim(),
+          farmerName,
           age: r.age?.trim() || null,
           phone: r.phone?.trim() || null,
-          address: r.address?.trim() || null,
-          district: r.district?.trim() || null,
-          commodity: r.commodity?.trim() || null,         // comma-separated for chart
+          address,
+          district: r.kecamatan?.trim() || null,
+          commodity: r.commodity?.trim() || null,
           reasonChoice: r.reasonChoice?.trim() || null,
           constraints: r.constraints?.trim() || null,
           optTypes: r.optTypes?.trim() || null,
           optDetails: r.optDetails?.trim() || null,
-          usedProducts: r.usedProducts?.trim() || null,   // comma-separated for chart
+          usedProducts: r.usedProducts?.trim() || null,
           buyLocation: r.buyLocation?.trim() || null,
           buyReason: r.buyReason?.trim() || null,
           references: r.references?.trim() || null,
@@ -182,7 +207,7 @@ export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
       errors.push({ row: rowNum, name: r.farmerName, reason: 'Gagal disimpan: ' + e.message }); skipped++
     }
   }
-  return { success: true, inserted, skipped, errors }
+  return { success: true, inserted, skipped, errors, farmersCreated }
 }
 
 // ─── DEMO PLOT ─────────────────────────────────
