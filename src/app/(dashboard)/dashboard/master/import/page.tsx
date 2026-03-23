@@ -5,7 +5,6 @@ import Link from 'next/link'
 import MigrationImportModal from '@/components/MigrationImportModal'
 import {
   bulkImportAreas, AreaRow,
-  bulkImportUsers, UserRow,
   bulkImportFarmers, FarmerRow,
   bulkImportCustomerBehaviors, CBRow,
   bulkImportDemoPlots, DemoPlotRow
@@ -38,7 +37,16 @@ const categories: ImportCategory[] = [
       { key: 'afaName', label: 'nama_afa' },
       { key: 'status', label: 'status' },
     ],
-    importFn: (rows) => bulkImportUsers(rows as UserRow[])
+    importFn: async (rows) => {
+      const res = await fetch('/api/migration/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ rows }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Import gagal')
+      return data
+    }
   },
   {
     id: 'farmer', icon: '🧑‍🌾', title: 'Petani', description: 'Import data petani. Duplikat akan dilewati secara otomatis.', order: 3,

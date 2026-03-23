@@ -63,13 +63,26 @@ export default function MigrationImportModal({ title, columns, onImport, onClose
     reader.readAsBinaryString(file)
   }
 
+  const [importError, setImportError] = useState<string | null>(null)
+
   async function handleImport() {
     setLoading(true)
-    const res = await onImport(preview)
-    setResult(res)
-    setStep('done')
-    setLoading(false)
-    if (res.inserted > 0) onSuccess()
+    setImportError(null)
+    try {
+      const res = await onImport(preview)
+      setResult(res)
+      setStep('done')
+      if (res.inserted > 0) onSuccess()
+    } catch (err: any) {
+      console.error('Import error:', err)
+      setImportError(
+        err?.message?.includes('timed out') || err?.message?.includes('FUNCTION_INVOCATION_TIMEOUT')
+          ? '⏱️ Server timeout! Data terlalu banyak untuk diproses sekaligus. Coba import dengan jumlah data yang lebih kecil (misal 5-10 baris).'
+          : `❌ Terjadi kesalahan saat import: ${err?.message || 'Unknown error'}. Silakan coba lagi.`
+      )
+    } finally {
+      setLoading(false)
+    }
   }
 
   const th: React.CSSProperties = { padding: '0.6rem 0.75rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', background: 'var(--surface-hover)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
@@ -131,8 +144,14 @@ export default function MigrationImportModal({ title, columns, onImport, onClose
               </table>
             </div>
 
+            {importError && (
+              <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '0.5rem', fontSize: '0.85rem', color: '#991b1b' }}>
+                {importError}
+              </div>
+            )}
+
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button onClick={() => { setStep('upload'); setPreview([]); if (fileRef.current) fileRef.current.value = '' }} className="btn btn-outline" style={{ flex: 1 }}>← Ganti File</button>
+              <button onClick={() => { setStep('upload'); setPreview([]); setImportError(null); if (fileRef.current) fileRef.current.value = '' }} className="btn btn-outline" style={{ flex: 1 }}>← Ganti File</button>
               <button onClick={handleImport} disabled={loading} className="btn btn-primary" style={{ flex: 2 }}>
                 {loading ? '⏳ Sedang Mengimpor...' : `✅ Import ${preview.length} Data`}
               </button>
