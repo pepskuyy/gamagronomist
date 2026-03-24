@@ -24,7 +24,7 @@ export default function ContinueDemoPlotPage() {
   const [reqData, setReqData]   = useState<RequestData | null>(null)
   const [products, setProducts] = useState<Product[]>([])
   const [stockBalance, setStock] = useState<Record<string, number>>({})
-  const [usages, setUsages]     = useState<Record<string, number>>({})
+  const [usageList, setUsageList] = useState<{ id: string, productId: string, qty: string }[]>([])
   const [lat, setLat]           = useState<number | null>(null)
   const [lng, setLng]           = useState<number | null>(null)
   const [photos, setPhotos]     = useState<string[]>([])
@@ -49,9 +49,11 @@ export default function ContinueDemoPlotPage() {
     const fd = new FormData(e.currentTarget)
     fd.append('latitude', String(lat))
     fd.append('longitude', String(lng))
-    fd.append('usages', JSON.stringify(
-      Object.entries(usages).filter(([, v]) => v > 0).map(([productId, actualUsage]) => ({ productId, actualUsage }))
-    ))
+    const actualUsages = usageList
+      .filter(u => u.productId && parseFloat(u.qty) > 0)
+      .map(u => ({ productId: u.productId, actualUsage: parseFloat(u.qty) }))
+      
+    fd.append('usages', JSON.stringify(actualUsages))
     fd.append('photos', JSON.stringify(photos))
 
     start(async () => {
@@ -107,28 +109,70 @@ export default function ContinueDemoPlotPage() {
             Stok akan dikurangi otomatis. Isi 0 jika tidak digunakan pada sesi ini.
           </p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-            {products.map(p => {
-              const onHand = stockBalance[p.id] || 0
+            {usageList.map((usage, idx) => {
+              const selectedProduct = products.find(p => p.id === usage.productId)
+              const onHand = selectedProduct ? stockBalance[selectedProduct.id] || 0 : 0
+              
               return (
-                <div key={p.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '0.75rem', alignItems: 'center', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
+                <div key={usage.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 120px auto', gap: '0.75rem', alignItems: 'center', padding: '1rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
                   <div>
-                    <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{p.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)' }}>
-                      Stok: <strong>{onHand} {p.unit}</strong>
-                    </div>
+                    <select 
+                      className="form-control"
+                      value={usage.productId}
+                      onChange={e => {
+                        const newList = [...usageList]
+                        newList[idx].productId = e.target.value
+                        setUsageList(newList)
+                      }}
+                      required
+                    >
+                      <option value="">-- Pilih Produk --</option>
+                      {products.map(p => (
+                        <option key={p.id} value={p.id}>{p.name}</option>
+                      ))}
+                    </select>
+                    {selectedProduct && (
+                      <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
+                        Tersedia: <strong>{onHand} {selectedProduct.unit}</strong>
+                      </div>
+                    )}
                   </div>
-                  <input
-                    type="number" min="0" step="0.01"
-                    className="form-control"
-                    style={{ width: 100, textAlign: 'right' }}
-                    value={usages[p.id] || ''}
-                    onChange={e => setUsages(prev => ({ ...prev, [p.id]: parseFloat(e.target.value) || 0 }))}
-                    placeholder="0"
-                  />
-                  <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', minWidth: 30 }}>{p.unit}</span>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      type="number" min="0" step="0.01"
+                      className="form-control"
+                      value={usage.qty}
+                      onChange={e => {
+                        const newList = [...usageList]
+                        newList[idx].qty = e.target.value
+                        setUsageList(newList)
+                      }}
+                      placeholder="0"
+                      required
+                    />
+                    {selectedProduct && <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{selectedProduct.unit}</span>}
+                  </div>
+                  <button 
+                    type="button" 
+                    onClick={() => setUsageList(usageList.filter(u => u.id !== usage.id))}
+                    className="btn btn-outline"
+                    style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: '#fecaca', background: '#fef2f2' }}
+                    title="Hapus Produk"
+                  >
+                    🗑️
+                  </button>
                 </div>
               )
             })}
+            
+            <button 
+              type="button" 
+              onClick={() => setUsageList([...usageList, { id: Math.random().toString(36).substr(2, 9), productId: '', qty: '' }])}
+              className="btn btn-outline" 
+              style={{ padding: '0.75rem', borderStyle: 'dashed', borderWidth: '2px', background: 'transparent' }}
+            >
+              + Tambah Penggunaan Produk
+            </button>
           </div>
         </div>
 
