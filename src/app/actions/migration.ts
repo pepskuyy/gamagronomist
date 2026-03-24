@@ -134,7 +134,7 @@ export async function bulkImportFarmers(rows: FarmerRow[]) {
 
 // ─── CUSTOMER BEHAVIOR ─────────────────────────
 export type CBRow = {
-  username: string; farmerName: string; age?: string; phone?: string;
+  tanggal?: string; username: string; farmerName: string; age?: string; phone?: string;
   kabupaten?: string; kecamatan?: string; desa?: string;
   commodity?: string; reasonChoice?: string; constraints?: string;
   optTypes?: string; optDetails?: string; usedProducts?: string; buyLocation?: string;
@@ -166,6 +166,23 @@ export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
     const parts = [r.desa, r.kecamatan, r.kabupaten].filter(p => p?.trim()).map(p => p!.trim())
     const address = parts.length > 0 ? parts.join(', ') : null
 
+    // Date parsing
+    let parsedDate: Date | undefined
+    if (r.tanggal?.trim()) {
+      try {
+        const d = r.tanggal.trim()
+        if (d.includes('/')) {
+          const [day, month, year] = d.split('/')
+          parsedDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`)
+        } else {
+          parsedDate = new Date(d)
+        }
+        if (isNaN(parsedDate.getTime())) parsedDate = undefined
+      } catch {
+        parsedDate = undefined
+      }
+    }
+
     try {
       // Auto-create Farmer if not exists
       const farmerName = r.farmerName.trim()
@@ -184,6 +201,7 @@ export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
 
       await prisma.customerBehavior.create({
         data: {
+          ...(parsedDate ? { createdAt: parsedDate } : {}),
           userId,
           farmerName,
           age: r.age?.trim() || null,
@@ -274,6 +292,7 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
       // Create a mock Request for this Demo Plot so it's tied to an FO
       const req = await prisma.request.create({
         data: {
+          createdAt: parsedDate,
           foId,
           farmerId,
           area: r.area?.trim() || null,

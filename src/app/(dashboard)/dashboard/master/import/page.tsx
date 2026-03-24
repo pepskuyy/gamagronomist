@@ -50,6 +50,7 @@ const categories: ImportCategory[] = [
   {
     id: 'cb', icon: '📝', title: 'Customer Behavior', description: 'Import data CB. Pastikan User sudah di-import terlebih dahulu. Data petani akan otomatis dibuat dari CB. Kolom komoditas dan produk_preferensi dipisah koma.', order: 3,
     columns: [
+      { key: 'tanggal', label: 'tanggal', required: true },
       { key: 'username', label: 'username_pelapor', required: true },
       { key: 'farmerName', label: 'nama_petani', required: true },
       { key: 'age', label: 'umur' },
