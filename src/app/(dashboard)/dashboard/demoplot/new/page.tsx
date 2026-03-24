@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { submitStandaloneDemoPlot } from '@/app/actions/standalone-demoplot'
 import ImageUploader from '@/components/ImageUploader'
 import RegionSelect from '@/components/RegionSelect'
+import SearchableSelect from '@/components/SearchableSelect'
 
 type Product = { id: string; name: string; unit: string }
 type CbFarmer = { id: string; farmerName: string; phone?: string; district?: string; address?: string; commodity?: string; constraints?: string }
@@ -134,12 +135,18 @@ export default function FoDemoPlotDirectPage() {
             <div style={fc}>
               <div>
                 <label className="form-label">Pilih Petani dari CB <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <select className="form-control" value={selectedCb?.id || ''} onChange={e => selectCbFarmer(e.target.value)} required={farmerMode === 'cb'}>
-                  <option value="">-- Pilih petani dari database CB --</option>
-                  {cbFarmers.map(f => (
-                    <option key={f.id} value={f.id}>{f.farmerName} {f.district ? `— ${f.district}` : ''}</option>
-                  ))}
-                </select>
+                <SearchableSelect
+                  options={[
+                    ...cbFarmers.map(f => ({
+                      value: f.id,
+                      label: `${f.farmerName} ${f.district ? `— ${f.district}` : ''}`
+                    }))
+                  ]}
+                  value={selectedCb?.id || ''}
+                  onChange={selectCbFarmer}
+                  placeholder="-- Ketik nama petani / area --"
+                  required={farmerMode === 'cb'}
+                />
               </div>
               {selectedCb && (
                 <div style={{ background: 'var(--primary-light)', border: '1px solid var(--primary)', borderRadius: 'var(--radius-sm)', padding: '1rem', fontSize: '0.875rem' }}>
