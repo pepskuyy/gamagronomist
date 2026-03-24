@@ -5,40 +5,60 @@ import Link from 'next/link'
 
 const prisma = new PrismaClient()
 
-export default async function ReportsPage() {
+export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, start?: string, end?: string }> }) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
   if (!session?.userId) return <div>Unauthorized</div>
 
-  const isSPV = session.role === 'ADMIN' || session.role === 'SPV'
-  const userFilter = isSPV ? {} : { userId: session.userId }
+  const resolvedParams = await searchParams
+  const page = parseInt(resolvedParams.page || '1')
+  const take = 10
+  const skip = (page - 1) * take
+
+  const search = resolvedParams.search || ''
+  const startParam = resolvedParams.start || ''
+  const endParam = resolvedParams.end || ''
+  
+  const startDate = startParam ? new Date(startParam) : undefined
+  const endDate = endParam ? new Date(endParam) : undefined
+  if (endDate) endDate.setHours(23, 59, 59, 999)
+
+  const dateFilter = startDate || endDate ? {
+    createdAt: {
+      ...(startDate ? { gte: startDate } : {}),
+      ...(endDate ? { lte: endDate } : {})
+    }
+  } : {}
+
+  let userFilter: any = {}
+  if (['ADMIN', 'SPV'].includes(session.role)) {
+    userFilter = {}
+  } else if (session.role === 'AFA') {
+    const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
+    const userIds = [session.userId, ...fos.map(u => u.id)]
+    userFilter = { userId: { in: userIds } }
+  } else {
+    userFilter = { userId: session.userId }
+  }
 
   const [cbReports, kiosReports, gatheringReports, companyReports] = await Promise.all([
     prisma.customerBehavior.findMany({
-      where: userFilter,
-      include: { user: true },
-      orderBy: { createdAt: 'desc' },
-      take: 10
+      where: { ...userFilter, ...dateFilter, ...(search ? { farmerName: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
     }),
     prisma.visitKios.findMany({
-      where: userFilter,
-      include: { user: true },
-      orderBy: { createdAt: 'desc' },
-      take: 10
+      where: { ...userFilter, ...dateFilter, ...(search ? { kiosName: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
     }),
     prisma.farmerGathering.findMany({
-      where: userFilter,
-      include: { user: true },
-      orderBy: { createdAt: 'desc' },
-      take: 10
+      where: { ...userFilter, ...dateFilter, ...(search ? { leaderName: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
     }),
     prisma.visitCompany.findMany({
-      where: userFilter,
-      include: { user: true },
-      orderBy: { createdAt: 'desc' },
-      take: 10
+      where: { ...userFilter, ...dateFilter, ...(search ? { companyName: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
     }),
   ])
 
@@ -46,6 +66,9 @@ export default async function ReportsPage() {
   const thStyle = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem', textTransform: 'uppercase' as const }
 
   const formatDate = (d: Date) => new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(d)
+
+  const hasMore = cbReports.length === take || kiosReports.length === take || gatheringReports.length === take || companyReports.length === take
+  const queryStr = `&search=${encodeURIComponent(search)}&start=${startParam}&end=${endParam}`
 
   return (
     <div>
@@ -59,6 +82,27 @@ export default async function ReportsPage() {
           <Link href="/dashboard/reports/company/new"   className="btn btn-outline"  style={{ fontSize: '0.85rem' }}>+ 🏢 Visit Company</Link>
         </div>
       </div>
+
+      <form method="GET" action="/dashboard/reports" className="card" style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '2rem', alignItems: 'flex-end', background: 'var(--surface-2)' }}>
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <label className="form-label">Cari Nama (Petani/Kios/Dll)</label>
+          <input type="text" name="search" className="form-control" defaultValue={search} placeholder="Ketik nama..." />
+        </div>
+        <div>
+          <label className="form-label">Tanggal Mulai</label>
+          <input type="date" name="start" className="form-control" defaultValue={startParam} />
+        </div>
+        <div>
+          <label className="form-label">Tanggal Akhir</label>
+          <input type="date" name="end" className="form-control" defaultValue={endParam} />
+        </div>
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button type="submit" className="btn btn-primary" style={{ padding: '0.65rem 1.5rem' }}>🔍 Filter</button>
+          {(search || startParam || endParam) && (
+            <Link href="/dashboard/reports" className="btn btn-outline" style={{ padding: '0.65rem 1rem' }}>Reset</Link>
+          )}
+        </div>
+      </form>
 
       {/* Customer Behavior Table */}
       <div className="card" style={{ marginBottom: '2rem' }}>
@@ -87,7 +131,7 @@ export default async function ReportsPage() {
                 </tr>
               ))}
               {cbReports.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan.</td></tr>
+                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
               )}
             </tbody>
           </table>
@@ -121,7 +165,7 @@ export default async function ReportsPage() {
                 </tr>
               ))}
               {kiosReports.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan.</td></tr>
+                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
               )}
             </tbody>
           </table>
@@ -155,7 +199,7 @@ export default async function ReportsPage() {
                 </tr>
               ))}
               {gatheringReports.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan.</td></tr>
+                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
               )}
             </tbody>
           </table>
@@ -189,12 +233,32 @@ export default async function ReportsPage() {
                 </tr>
               ))}
               {companyReports.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan.</td></tr>
+                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
+
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1rem', marginBottom: '3rem' }}>
+        {page > 1 ? (
+          <Link href={`/dashboard/reports?page=${page - 1}${queryStr}`} className="btn btn-outline">← Sebelumnya</Link>
+        ) : (
+          <button className="btn btn-outline" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>← Sebelumnya</button>
+        )}
+        
+        <span style={{ padding: '0.5rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+          Halaman {page}
+        </span>
+        
+        {hasMore ? (
+          <Link href={`/dashboard/reports?page=${page + 1}${queryStr}`} className="btn btn-outline">Selanjutnya →</Link>
+        ) : (
+          <button className="btn btn-outline" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>Selanjutnya →</button>
+        )}
+      </div>
+
     </div>
   )
 }
+
