@@ -82,6 +82,7 @@ const categories: ImportCategory[] = [
       { key: 'isFinalSession', label: 'sesi_terakhir' },
       { key: 'latitude', label: 'latitude' },
       { key: 'longitude', label: 'longitude' },
+      { key: 'username_fo', label: 'username_fo', required: true },
     ],
     importFn: (rows) => bulkImportDemoPlots(rows as DemoPlotRow[])
   },

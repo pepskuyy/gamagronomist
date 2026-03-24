@@ -214,11 +214,14 @@ export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
 export type DemoPlotRow = {
   date: string; area?: string; commodity?: string; landSize?: string;
   resultNotes?: string; farmerName?: string; isFinalSession?: string;
-  latitude?: string; longitude?: string
+  latitude?: string; longitude?: string; username_fo?: string
 }
 
 export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
   await requireAdmin()
+  const cookieStore = await cookies()
+  const token = cookieStore.get('session')?.value
+  const session = await decrypt(token as string)
   let inserted = 0, skipped = 0
   const errors: { row: number; name: string; reason: string }[] = []
 
@@ -249,17 +252,47 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
     const lat = r.latitude ? parseFloat(r.latitude) : null
     const lng = r.longitude ? parseFloat(r.longitude) : null
     const isFinal = r.isFinalSession?.trim().toLowerCase()
+    
+    // Default to admin/spv if username_fo is completely missing (fallback), but we require it.
+    let foId = session.userId
+    if (r.username_fo) {
+      const u = await prisma.user.findFirst({
+        where: { username: { equals: r.username_fo.trim(), mode: 'insensitive' } },
+        select: { id: true }
+      })
+      if (u) foId = u.id
+      else {
+        errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Username FO "${r.username_fo}" tidak ditemukan.` })
+        skipped++; continue
+      }
+    } else {
+      errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Kolom username_fo kosong.` })
+      skipped++; continue
+    }
 
     try {
+      // Create a mock Request for this Demo Plot so it's tied to an FO
+      const req = await prisma.request.create({
+        data: {
+          foId,
+          farmerId,
+          area: r.area?.trim() || null,
+          commodity: r.commodity?.trim() || null,
+          plan: 'Migrated Standalone Demo Plot',
+          status: (isFinal === 'ya' || isFinal === 'true' || isFinal === '1' || isFinal === 'yes') ? 'DEMO_PLOT_SELESAI' : 'APPROVED',
+        }
+      })
+
       await prisma.demoPlot.create({
         data: {
+          requestId: req.id,
           date: parsedDate,
           area: r.area?.trim() || null,
           commodity: r.commodity?.trim() || null,
           landSize: r.landSize ? parseFloat(r.landSize) || null : null,
           resultNotes: r.resultNotes?.trim() || null,
           farmerId,
-          isFinalSession: isFinal === 'ya' || isFinal === 'true' || isFinal === '1' || isFinal === 'yes',
+          isFinalSession: req.status === 'DEMO_PLOT_SELESAI',
           latitude: isNaN(lat as number) ? null : lat,
           longitude: isNaN(lng as number) ? null : lng,
         }
