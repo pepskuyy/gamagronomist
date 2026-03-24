@@ -9,7 +9,7 @@ import RegionSelect from '@/components/RegionSelect'
 import SearchableSelect from '@/components/SearchableSelect'
 
 type Product = { id: string; name: string; unit: string }
-type CbFarmer = { id: string; farmerName: string; phone?: string; district?: string; address?: string; commodity?: string; constraints?: string }
+type CbFarmer = { id: string; farmerName: string; phone?: string; district?: string; location?: string; address?: string; commodity?: string; constraints?: string }
 
 export default function FoDemoPlotDirectPage() {
   const router = useRouter()
@@ -139,7 +139,7 @@ export default function FoDemoPlotDirectPage() {
                   options={[
                     ...cbFarmers.map(f => ({
                       value: f.id,
-                      label: `${f.farmerName} ${f.district ? `— ${f.district}` : ''}`
+                      label: `${f.farmerName} ${f.location ? `— ${f.location}` : ''}`
                     }))
                   ]}
                   value={selectedCb?.id || ''}
@@ -153,7 +153,7 @@ export default function FoDemoPlotDirectPage() {
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem' }}>
                     <div><strong>Nama:</strong> {selectedCb.farmerName}</div>
                     <div><strong>No. HP:</strong> {selectedCb.phone || '-'}</div>
-                    <div><strong>Kabupaten:</strong> {selectedCb.district || '-'}</div>
+                    <div><strong>Desa/Kecamatan:</strong> {selectedCb.location || '-'}</div>
                     <div><strong>Komoditas:</strong> {selectedCb.commodity || '-'}</div>
                     {selectedCb.constraints && <div style={{ gridColumn: '1/-1' }}><strong>Kendala:</strong> {selectedCb.constraints}</div>}
                   </div>
