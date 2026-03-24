@@ -28,7 +28,7 @@ export default function CommodityChart() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/demoplot-stats')
+    fetch('/api/cb-stats/commodities')
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
@@ -44,7 +44,7 @@ export default function CommodityChart() {
   if (!data || data.total === 0) return (
     <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
       <div style={{ fontSize: '2.5rem' }}>🌿</div>
-      <p style={{ marginTop: '0.5rem', fontWeight: 500 }}>Belum ada data komoditas dari demo plot.</p>
+      <p style={{ marginTop: '0.5rem', fontWeight: 500 }}>Belum ada data komoditas dari Customer Behavior.</p>
     </div>
   )
 
@@ -53,9 +53,9 @@ export default function CommodityChart() {
   return (
     <div>
       <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.2rem' }}>🌿 Sebaran Komoditas Demo Plot</h2>
+        <h2 style={{ margin: 0, fontSize: '1.2rem' }}>🌿 Sebaran Komoditas (Customer Behavior)</h2>
         <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          Total <strong>{data.total}</strong> demo plot tercatat
+          Berdasarkan <strong>{data.total}</strong> input komoditas dari laporan CB
         </p>
       </div>
 
