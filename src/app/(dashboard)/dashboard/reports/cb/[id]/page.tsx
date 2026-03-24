@@ -12,9 +12,21 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
 
   if (!report) return notFound()
 
-  const optTypes  = report.optTypes  ? JSON.parse(report.optTypes  as string) as string[] : []
-  const optDetails= report.optDetails? JSON.parse(report.optDetails as string) as string[] : []
-  const photos    = report.photos    ? JSON.parse(report.photos    as string) as string[] : []
+  const safeParseArray = (val: string | null | undefined): string[] => {
+    if (!val) return []
+    try {
+      const parsed = JSON.parse(val)
+      if (Array.isArray(parsed)) return parsed
+    } catch {
+      // If it's a plain comma-separated string from import
+      return val.split(',').map(s => s.trim()).filter(Boolean)
+    }
+    return []
+  }
+
+  const optTypes  = safeParseArray(report.optTypes as string | null)
+  const optDetails= safeParseArray(report.optDetails as string | null)
+  const photos    = safeParseArray(report.photos as string | null)
 
   const row = (label: string, value?: string | null) =>
     value ? (
