@@ -1,10 +1,19 @@
 import { PrismaClient } from '@prisma/client'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
+import ReportAdminActions from '@/components/ReportAdminActions'
+import { deleteCustomerBehavior } from '@/app/actions/cb-admin'
 
 const prisma = new PrismaClient()
 
 export default async function CustomerBehaviorDetail({ params }: { params: { id: string } }) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+  const isAdmin = session?.role === 'ADMIN'
+
   const report = await prisma.customerBehavior.findUnique({
     where: { id: params.id },
     include: { user: true }
@@ -38,9 +47,15 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
 
   return (
     <div className="form-container-wide">
-      <div className="back-header">
-        <Link href="/dashboard/reports" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '1rem' }}>← Kembali</Link>
-        <h2 style={{ margin: 0 }}>Detail Customer Behavior</h2>
+      <div className="back-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div>
+          <Link href="/dashboard/reports" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '1rem' }}>← Kembali</Link>
+          <h2 style={{ margin: 0, marginTop: '0.2rem' }}>Detail Customer Behavior</h2>
+        </div>
+        
+        {isAdmin && (
+          <ReportAdminActions type="cb" id={report.id} deleteAction={deleteCustomerBehavior} />
+        )}
       </div>
 
       {/* Meta */}

@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import ReportAdminActions from '@/components/ReportAdminActions'
+import { deleteDemoPlot } from '@/app/actions/demoplot-admin'
 
 const prisma = new PrismaClient()
 
@@ -16,6 +18,8 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
   if (!session?.userId) {
     return redirect('/login')
   }
+
+  const isAdmin = session.role === 'ADMIN'
 
   const request = await prisma.request.findUnique({
     where: { id },
@@ -113,11 +117,18 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
           <h3 style={{ marginBottom: '1rem' }}>Sesi Realisasi (Eksekusi)</h3>
           {request.demoPlots.map((dp, index) => (
             <div key={dp.id} style={{ marginBottom: '1.5rem', padding: '1rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem', alignItems: 'flex-start' }}>
                 <strong style={{ color: 'var(--primary)' }}>Sesi ke-{index + 1}</strong>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  {new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(dp.date)}
-                </span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '0.25rem' }}>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+                    {new Intl.DateTimeFormat('id-ID', { dateStyle: 'long' }).format(dp.date)}
+                  </span>
+                  {isAdmin && (
+                    <div style={{ marginTop: '0.5rem' }}>
+                      <ReportAdminActions type="demoplot" id={dp.id} deleteAction={deleteDemoPlot} />
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
