@@ -7,7 +7,7 @@ import { PALETTE } from './CommodityChart'
 type CbItem = { name: string; count: number; pct: number }
 type StatsData = { total: number; items: CbItem[] }
 
-type ChartInnerProps = { items: CbItem[]; palette: string[]; total: number }
+type ChartInnerProps = { items: CbItem[]; palette: string[]; total: number; label?: string }
 
 // Recharts must render client-side only (reuse the same inner component)
 const ChartInner = dynamic<ChartInnerProps>(() => import('@/components/CommodityChartInner'), { ssr: false, loading: () => (
@@ -55,7 +55,7 @@ export default function CbProductChart() {
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 320px) 1fr', gap: '2rem', alignItems: 'center' }}>
         {/* Left: Donut Chart */}
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-          <ChartInner items={topItems} palette={PALETTE} total={data.total} />
+          <ChartInner items={topItems} palette={PALETTE} total={data.total} label="Produk CB" />
         </div>
 
         {/* Right: Ranked list */}

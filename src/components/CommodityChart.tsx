@@ -6,7 +6,7 @@ import dynamic from 'next/dynamic'
 type CommodityItem = { name: string; count: number; pct: number }
 type StatsData = { total: number; items: CommodityItem[] }
 
-type ChartInnerProps = { items: CommodityItem[]; palette: string[]; total: number }
+type ChartInnerProps = { items: CommodityItem[]; palette: string[]; total: number; label?: string }
 
 // Recharts must render client-side only
 const ChartInner = dynamic<ChartInnerProps>(() => import('@/components/CommodityChartInner'), { ssr: false, loading: () => (
@@ -62,7 +62,7 @@ export default function CommodityChart() {
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 320px) 1fr', gap: '2rem', alignItems: 'center' }}>
         {/* Left: Donut Chart */}
         <div style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-          <ChartInner items={topItems} palette={PALETTE} total={data.total} />
+          <ChartInner items={topItems} palette={PALETTE} total={data.total} label="Komoditas" />
         </div>
 
         {/* Right: Ranked list */}
