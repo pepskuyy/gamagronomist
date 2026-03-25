@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import { createUser, updateUser, deleteUser } from '@/app/actions/master'
+import { createUser, updateUser, deleteUser, bulkDeleteUsers } from '@/app/actions/master'
 
 type User = { id: string; name: string; username: string; role: string; isActive: boolean; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
 type Area = { id: string; name: string }
@@ -28,6 +28,9 @@ export default function UsersMasterPage() {
   const [selected, setSelected] = useState<User | null>(null)
   const [error, setError]   = useState<string | null>(null)
   const [isPending, start]  = useTransition()
+
+  // Bulk selection
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set())
 
   const fetchData = async () => {
     const [uRes, aRes] = await Promise.all([
@@ -66,6 +69,23 @@ export default function UsersMasterPage() {
       if (res?.error) alert(res.error)
       else fetchData()
     })
+  }
+
+  function handleBulkDelete() {
+    if (!selectedUsers.size) return
+    if (!confirm(`Hapus ${selectedUsers.size} user yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) return
+    start(async () => {
+      const res = await bulkDeleteUsers(Array.from(selectedUsers))
+      if (res?.error) alert(res.error)
+      else { setSelectedUsers(new Set()); fetchData() }
+    })
+  }
+
+  function toggleUser(id: string) {
+    setSelectedUsers(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  function toggleAllUsers(checked: boolean) {
+    setSelectedUsers(checked ? new Set(users.map(u => u.id)) : new Set())
   }
 
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Memuat data...</div>
@@ -146,11 +166,23 @@ export default function UsersMasterPage() {
         <button onClick={openAdd} className="btn btn-primary">➕ Tambah User</button>
       </div>
 
+      {/* Bulk delete bar */}
+      {selectedUsers.size > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
+          <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedUsers.size} user dipilih</span>
+          <button onClick={handleBulkDelete} disabled={isPending} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>🗑️ Hapus yang Dipilih</button>
+          <button onClick={() => setSelectedUsers(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+        </div>
+      )}
+
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ background: 'var(--surface-hover)', borderBottom: '2px solid var(--border)' }}>
               <tr>
+                <th style={{ padding: '0.85rem 1rem', width: '40px', textAlign: 'center' }}>
+                  <input type="checkbox" checked={users.length > 0 && selectedUsers.size === users.length} onChange={e => toggleAllUsers(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                </th>
                 {['Nama', 'Username', 'Role', 'Status', 'Area', 'Supervisor AFA', 'Aksi'].map(h => (
                   <th key={h} style={{ padding: '0.85rem 1rem', fontWeight: 600, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{h}</th>
                 ))}
@@ -158,7 +190,10 @@ export default function UsersMasterPage() {
             </thead>
             <tbody>
               {users.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--border)' }}>
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--border)', background: selectedUsers.has(u.id) ? 'var(--primary-light)' : undefined }}>
+                  <td style={{ padding: '0.85rem 1rem', width: '40px', textAlign: 'center' }}>
+                    <input type="checkbox" checked={selectedUsers.has(u.id)} onChange={() => toggleUser(u.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                  </td>
                   <td style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>{u.name}</td>
                   <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.username}</td>
                   <td style={{ padding: '0.85rem 1rem' }}>
@@ -180,7 +215,7 @@ export default function UsersMasterPage() {
                 </tr>
               ))}
               {users.length === 0 && (
-                <tr><td colSpan={7} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada data pengguna.</td></tr>
+                <tr><td colSpan={8} style={{ padding: '2.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada data pengguna.</td></tr>
               )}
             </tbody>
           </table>

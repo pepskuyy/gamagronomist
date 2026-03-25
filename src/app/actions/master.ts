@@ -132,3 +132,39 @@ export async function deleteProduct(id: string) {
   } catch { return { error: 'Gagal menghapus produk. Mungkin ada stok atau request yang terkait.' } }
 }
 
+// ─── BULK DELETE ─────────────────────────────────
+export async function bulkDeleteAreas(ids: string[]) {
+  if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  try {
+    await prisma.area.deleteMany({ where: { id: { in: ids } } })
+    revalidatePath('/dashboard/master/areas')
+    return { success: true }
+  } catch { return { error: 'Gagal menghapus area. Pastikan tidak ada user yang terkait.' } }
+}
+
+export async function bulkDeleteFarmers(ids: string[]) {
+  if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  try {
+    await prisma.farmer.deleteMany({ where: { id: { in: ids } } })
+    revalidatePath('/dashboard/master/areas')
+    return { success: true }
+  } catch { return { error: 'Gagal menghapus petani.' } }
+}
+
+export async function bulkDeleteUsers(ids: string[]) {
+  if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  try {
+    await prisma.user.deleteMany({ where: { id: { in: ids } } })
+    revalidatePath('/dashboard/master/users')
+    return { success: true }
+  } catch { return { error: 'Gagal menghapus users. Mungkin ada data yang terkait.' } }
+}
+
+export async function bulkDeleteProducts(ids: string[]) {
+  if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  try {
+    await prisma.product.deleteMany({ where: { id: { in: ids } } })
+    revalidatePath('/dashboard/master/products')
+    return { success: true }
+  } catch { return { error: 'Gagal menghapus produk. Mungkin ada stok atau request yang terkait.' } }
+}

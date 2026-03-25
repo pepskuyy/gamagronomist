@@ -66,3 +66,16 @@ export async function updateCustomerBehavior(id: string, formData: FormData) {
     return { error: 'Gagal mengupdate laporan Customer Behavior.' }
   }
 }
+
+export async function bulkDeleteCustomerBehaviors(ids: string[]) {
+  if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  try {
+    await getAdminSession()
+    await prisma.customerBehavior.deleteMany({ where: { id: { in: ids } } })
+    revalidatePath('/dashboard/reports')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Bulk Delete CB Error:', err)
+    return { error: 'Gagal menghapus data Customer Behavior.' }
+  }
+}

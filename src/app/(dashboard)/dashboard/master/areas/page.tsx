@@ -2,13 +2,15 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import { createArea, deleteArea, createFarmer, deleteFarmer } from '@/app/actions/master'
+import { createArea, deleteArea, createFarmer, deleteFarmer, bulkDeleteAreas, bulkDeleteFarmers } from '@/app/actions/master'
 
 type Area = { id: string; name: string; users: { id: string; name: string; role: string }[] }
 type Farmer = { id: string; name: string; phone: string | null; address: string | null; area: string | null; createdAt: string }
 
 const tdStyle: React.CSSProperties = { padding: '0.7rem 0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem' }
 const thStyle: React.CSSProperties = { padding: '0.7rem 0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-hover)' }
+const chkTd: React.CSSProperties = { ...tdStyle, width: '40px', textAlign: 'center' }
+const chkTh: React.CSSProperties = { ...thStyle, width: '40px', textAlign: 'center' }
 
 export default function AreasPage() {
   const [areas,   setAreas]   = useState<Area[]>([])
@@ -24,6 +26,10 @@ export default function AreasPage() {
   const [showFarmerForm, setShowFarmerForm] = useState(false)
   const [farmerError, setFarmerError] = useState<string | null>(null)
   const [isPendingFarmer, startFarmer] = useTransition()
+
+  // Bulk selection
+  const [selectedAreas, setSelectedAreas] = useState<Set<string>>(new Set())
+  const [selectedFarmers, setSelectedFarmers] = useState<Set<string>>(new Set())
 
   const fetchData = async () => {
     const [aRes, fRes] = await Promise.all([
@@ -57,6 +63,16 @@ export default function AreasPage() {
     })
   }
 
+  function handleBulkDeleteAreas() {
+    if (!selectedAreas.size) return
+    if (!confirm(`Hapus ${selectedAreas.size} area yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) return
+    startArea(async () => {
+      const res = await bulkDeleteAreas(Array.from(selectedAreas))
+      if (res?.error) alert(res.error)
+      else { setSelectedAreas(new Set()); fetchData() }
+    })
+  }
+
   function handleAddFarmer(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     const fd = new FormData(e.currentTarget)
@@ -77,7 +93,43 @@ export default function AreasPage() {
     })
   }
 
+  function handleBulkDeleteFarmers() {
+    if (!selectedFarmers.size) return
+    if (!confirm(`Hapus ${selectedFarmers.size} petani yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) return
+    startFarmer(async () => {
+      const res = await bulkDeleteFarmers(Array.from(selectedFarmers))
+      if (res?.error) alert(res.error)
+      else { setSelectedFarmers(new Set()); fetchData() }
+    })
+  }
+
+  function toggleArea(id: string) {
+    setSelectedAreas(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  function toggleAllAreas(checked: boolean) {
+    setSelectedAreas(checked ? new Set(areas.map(a => a.id)) : new Set())
+  }
+  function toggleFarmer(id: string) {
+    setSelectedFarmers(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  function toggleAllFarmers(checked: boolean) {
+    setSelectedFarmers(checked ? new Set(farmers.map(f => f.id)) : new Set())
+  }
+
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Memuat data...</div>
+
+  const BulkBar = ({ count, onDelete, pending }: { count: number; onDelete: () => void; pending: boolean }) =>
+    count > 0 ? (
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
+        <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{count} item dipilih</span>
+        <button onClick={onDelete} disabled={pending} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>
+          🗑️ Hapus yang Dipilih
+        </button>
+        <button onClick={() => count > 0} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>
+          ✕ Batal Pilih
+        </button>
+      </div>
+    ) : null
 
   return (
     <div>
@@ -91,28 +143,29 @@ export default function AreasPage() {
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '1.25rem' }}>Wilayah Area Operasional</h3>
 
-        {/* Add Area Form */}
         <form onSubmit={handleAddArea} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
-          <input
-            name="name"
-            type="text"
-            className="form-control"
-            placeholder="Nama area baru, misal: Jawa Timur"
-            value={areaName}
-            onChange={e => setAreaName(e.target.value)}
-            style={{ flex: 1, minWidth: '200px' }}
-            required
-          />
-          <button type="submit" className="btn btn-primary" disabled={isPendingArea}>
-            {isPendingArea ? 'Menyimpan...' : '➕ Tambah Area'}
-          </button>
+          <input name="name" type="text" className="form-control" placeholder="Nama area baru, misal: Jawa Timur" value={areaName} onChange={e => setAreaName(e.target.value)} style={{ flex: 1, minWidth: '200px' }} required />
+          <button type="submit" className="btn btn-primary" disabled={isPendingArea}>{isPendingArea ? 'Menyimpan...' : '➕ Tambah Area'}</button>
         </form>
         {areaError && <div style={{ color: 'var(--danger)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{areaError}</div>}
+
+        {selectedAreas.size > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedAreas.size} area dipilih</span>
+            <button onClick={handleBulkDeleteAreas} disabled={isPendingArea} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>
+              🗑️ Hapus yang Dipilih
+            </button>
+            <button onClick={() => setSelectedAreas(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+          </div>
+        )}
 
         <div className="table-responsive">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
+                <th style={chkTh}>
+                  <input type="checkbox" checked={areas.length > 0 && selectedAreas.size === areas.length} onChange={e => toggleAllAreas(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                </th>
                 <th style={thStyle}>Nama Area</th>
                 <th style={thStyle}>Jumlah User</th>
                 <th style={{ ...thStyle, width: '80px' }}>Aksi</th>
@@ -120,7 +173,10 @@ export default function AreasPage() {
             </thead>
             <tbody>
               {areas.map(a => (
-                <tr key={a.id}>
+                <tr key={a.id} style={{ background: selectedAreas.has(a.id) ? 'var(--primary-light)' : undefined }}>
+                  <td style={chkTd}>
+                    <input type="checkbox" checked={selectedAreas.has(a.id)} onChange={() => toggleArea(a.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                  </td>
                   <td style={tdStyle}><strong>{a.name}</strong></td>
                   <td style={tdStyle}>
                     <span className="badge badge-neutral">{a.users.length} user</span>
@@ -135,7 +191,7 @@ export default function AreasPage() {
                 </tr>
               ))}
               {areas.length === 0 && (
-                <tr><td colSpan={3} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Belum ada data area.</td></tr>
+                <tr><td colSpan={4} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Belum ada data area.</td></tr>
               )}
             </tbody>
           </table>
@@ -151,7 +207,6 @@ export default function AreasPage() {
           </button>
         </div>
 
-        {/* Add Farmer Form */}
         {showFarmerForm && (
           <form onSubmit={handleAddFarmer} style={{ background: 'var(--surface-hover)', borderRadius: '0.75rem', padding: '1.25rem', marginBottom: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
             <div className="form-group" style={{ margin: 0 }}>
@@ -178,11 +233,23 @@ export default function AreasPage() {
           </form>
         )}
 
-        {/* Farmers Table */}
+        {selectedFarmers.size > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
+            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedFarmers.size} petani dipilih</span>
+            <button onClick={handleBulkDeleteFarmers} disabled={isPendingFarmer} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>
+              🗑️ Hapus yang Dipilih
+            </button>
+            <button onClick={() => setSelectedFarmers(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+          </div>
+        )}
+
         <div className="table-responsive">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr>
+                <th style={chkTh}>
+                  <input type="checkbox" checked={farmers.length > 0 && selectedFarmers.size === farmers.length} onChange={e => toggleAllFarmers(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                </th>
                 <th style={thStyle}>Nama Petani</th>
                 <th style={thStyle}>No. Telepon</th>
                 <th style={thStyle}>Area</th>
@@ -192,7 +259,10 @@ export default function AreasPage() {
             </thead>
             <tbody>
               {farmers.map(f => (
-                <tr key={f.id}>
+                <tr key={f.id} style={{ background: selectedFarmers.has(f.id) ? 'var(--primary-light)' : undefined }}>
+                  <td style={chkTd}>
+                    <input type="checkbox" checked={selectedFarmers.has(f.id)} onChange={() => toggleFarmer(f.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                  </td>
                   <td style={{ ...tdStyle, fontWeight: 600 }}>{f.name}</td>
                   <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{f.phone || '-'}</td>
                   <td style={tdStyle}>{f.area || '-'}</td>
@@ -203,7 +273,7 @@ export default function AreasPage() {
                 </tr>
               ))}
               {farmers.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Belum ada data petani.</td></tr>
+                <tr><td colSpan={6} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '2rem' }}>Belum ada data petani.</td></tr>
               )}
             </tbody>
           </table>

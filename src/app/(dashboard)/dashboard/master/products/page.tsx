@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import { createProduct, updateProduct, deleteProduct } from '@/app/actions/master'
+import { createProduct, updateProduct, deleteProduct, bulkDeleteProducts } from '@/app/actions/master'
 import ImportModal from '@/components/ImportModal'
 
 type Product = { id: string; code: string | null; name: string; description: string | null; unit: string }
@@ -27,6 +27,7 @@ export default function ProductsMasterPage() {
   const [isPending, start]      = useTransition()
   const [showImport, setShowImport] = useState(false)
   const [search, setSearch]       = useState('')
+  const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
 
   const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
   const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
@@ -63,6 +64,23 @@ export default function ProductsMasterPage() {
       if (res?.error) alert(res.error)
       else fetchData()
     })
+  }
+
+  function handleBulkDelete() {
+    if (!selectedProducts.size) return
+    if (!confirm(`Hapus ${selectedProducts.size} produk yang dipilih? Tindakan ini tidak bisa dibatalkan.`)) return
+    start(async () => {
+      const res = await bulkDeleteProducts(Array.from(selectedProducts))
+      if (res?.error) alert(res.error)
+      else { setSelectedProducts(new Set()); fetchData() }
+    })
+  }
+
+  function toggleProduct(id: string) {
+    setSelectedProducts(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
+  }
+  function toggleAllProducts(checked: boolean) {
+    setSelectedProducts(checked ? new Set(filteredProducts.map(p => p.id)) : new Set())
   }
 
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Memuat data...</div>
@@ -143,11 +161,23 @@ export default function ProductsMasterPage() {
         </div>
       </div>
 
+      {/* Bulk delete bar */}
+      {selectedProducts.size > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
+          <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedProducts.size} produk dipilih</span>
+          <button onClick={handleBulkDelete} disabled={isPending} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>🗑️ Hapus yang Dipilih</button>
+          <button onClick={() => setSelectedProducts(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+        </div>
+      )}
+
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
             <thead>
               <tr>
+                <th style={{ ...thStyle, width: '40px', textAlign: 'center' }}>
+                  <input type="checkbox" checked={filteredProducts.length > 0 && selectedProducts.size === filteredProducts.length} onChange={e => toggleAllProducts(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                </th>
                 <th style={{...thStyle, width: '15%'}}>ID Produk</th>
                 <th style={{...thStyle, width: '30%'}}>Nama Produk</th>
                 <th style={{...thStyle, width: '15%'}}>Satuan</th>
@@ -157,7 +187,10 @@ export default function ProductsMasterPage() {
             </thead>
             <tbody>
               {filteredProducts.map(p => (
-                <tr key={p.id} className="fo-stock-row">
+                <tr key={p.id} className="fo-stock-row" style={{ background: selectedProducts.has(p.id) ? 'var(--primary-light)' : undefined }}>
+                  <td style={{...tdStyle, width: '40px', textAlign: 'center'}}>
+                    <input type="checkbox" checked={selectedProducts.has(p.id)} onChange={() => toggleProduct(p.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
+                  </td>
                   <td style={{...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)'}}>{p.code || '—'}</td>
                   <td style={{...tdStyle, fontWeight: 600, color: 'var(--primary)'}}>{p.name}</td>
                   <td style={{...tdStyle}}><span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>{p.unit}</span></td>
@@ -170,7 +203,7 @@ export default function ProductsMasterPage() {
               ))}
               {filteredProducts.length === 0 && (
                 <tr>
-                  <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <td colSpan={6} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     Belum ada data produk atau produk tidak ditemukan.
                   </td>
                 </tr>

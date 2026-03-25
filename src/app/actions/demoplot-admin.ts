@@ -98,3 +98,29 @@ export async function updateDemoPlot(id: string, formData: FormData) {
     return { error: 'Gagal mengupdate laporan Demo Plot.' }
   }
 }
+
+export async function bulkDeleteDemoPlots(ids: string[]) {
+  if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  try {
+    await getAdminSession()
+    // Collect all the requestIds before deleting
+    const plots = await prisma.demoPlot.findMany({
+      where: { id: { in: ids } },
+      select: { id: true, requestId: true, request: { select: { plan: true } } }
+    })
+    await prisma.demoPlot.deleteMany({ where: { id: { in: ids } } })
+    // Clean up any mock requests left behind
+    const mockRequestIds = plots
+      .filter(p => p.requestId && p.request?.plan === 'Migrated Standalone Demo Plot')
+      .map(p => p.requestId!)
+    if (mockRequestIds.length) {
+      await prisma.request.deleteMany({ where: { id: { in: mockRequestIds } } })
+    }
+    revalidatePath('/dashboard/reports')
+    revalidatePath('/dashboard/demoplot')
+    return { success: true }
+  } catch (err: any) {
+    console.error('Bulk Delete Demo Plot Error:', err)
+    return { error: 'Gagal menghapus data Demo Plot.' }
+  }
+}

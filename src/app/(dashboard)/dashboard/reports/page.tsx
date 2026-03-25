@@ -2,6 +2,7 @@ import { PrismaClient } from '@prisma/client'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
+import CbReportTable from '@/components/CbReportTable'
 
 const prisma = new PrismaClient()
 
@@ -105,38 +106,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       </form>
 
       {/* Customer Behavior Table */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>📝 Customer Behavior</h3>
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead style={{ background: 'var(--surface-hover)' }}>
-              <tr>
-                <th style={thStyle}>Tanggal</th>
-                <th style={thStyle}>Pembuat</th>
-                <th style={thStyle}>Nama Petani</th>
-                <th style={thStyle}>Komoditas</th>
-                <th style={thStyle}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {cbReports.map(rp => (
-                <tr key={rp.id}>
-                  <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
-                  <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{rp.farmerName}</td>
-                  <td style={tdStyle}>{rp.commodity || '-'}</td>
-                  <td style={tdStyle}>
-                    <Link href={`/dashboard/reports/cb/${rp.id}`} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</Link>
-                  </td>
-                </tr>
-              ))}
-              {cbReports.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <CbReportTable
+        reports={cbReports.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
+        isAdmin={session.role === 'ADMIN'}
+      />
 
       {/* Visit Kios Table */}
       <div className="card" style={{ marginBottom: '2rem' }}>
