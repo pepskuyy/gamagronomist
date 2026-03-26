@@ -163,8 +163,23 @@ export async function bulkDeleteUsers(ids: string[]) {
 export async function bulkDeleteProducts(ids: string[]) {
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
   try {
-    await prisma.product.deleteMany({ where: { id: { in: ids } } })
+    // Must delete all related records first (no CASCADE configured in schema)
+    await prisma.$transaction([
+      // 1. Delete ledger entries (stock transactions)
+      prisma.ledger.deleteMany({ where: { productId: { in: ids } } }),
+      // 2. Delete demo plot detail (actual usage)
+      prisma.demoPlotDetail.deleteMany({ where: { productId: { in: ids } } }),
+      // 3. Delete request detail (requested items)
+      prisma.requestDetail.deleteMany({ where: { productId: { in: ids } } }),
+      // 4. Delete opname detail (stock opname lines)
+      prisma.opnameDetail.deleteMany({ where: { productId: { in: ids } } }),
+      // 5. Finally delete the products themselves
+      prisma.product.deleteMany({ where: { id: { in: ids } } }),
+    ])
     revalidatePath('/dashboard/master/products')
     return { success: true }
-  } catch { return { error: 'Gagal menghapus produk. Mungkin ada stok atau request yang terkait.' } }
+  } catch (e: any) {
+    console.error('Bulk delete products error:', e)
+    return { error: 'Gagal menghapus produk: ' + (e?.message ?? 'Terjadi kesalahan.') }
+  }
 }
