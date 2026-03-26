@@ -72,18 +72,19 @@ const categories: ImportCategory[] = [
     importFn: (rows) => bulkImportCustomerBehaviors(rows as CBRow[])
   },
   {
-    id: 'demoplot', icon: '🌱', title: 'Demo Plot', description: 'Import data demo plot. Petani dari CB sudah otomatis tersedia. Sertakan lat/long agar muncul di peta.', order: 4,
+    id: 'demoplot', icon: '🌱', title: 'Demo Plot', description: 'Import data demo plot. Kolom produk diisi nama produk dipisah koma (misal: "Bion-M:100,Virtako:50"). Jika tanpa jumlah, defaultnya 1. Nama produk harus sesuai dengan nama di Master Produk.', order: 4,
     columns: [
       { key: 'date', label: 'tanggal', required: true },
+      { key: 'username_fo', label: 'username_fo', required: true },
       { key: 'area', label: 'area' },
       { key: 'commodity', label: 'komoditas' },
-      { key: 'landSize', label: 'luas_lahan' },
-      { key: 'resultNotes', label: 'catatan_hasil' },
       { key: 'farmerName', label: 'nama_petani' },
+      { key: 'landSize', label: 'luas_lahan' },
+      { key: 'produk', label: 'produk' },
+      { key: 'resultNotes', label: 'catatan_hasil' },
       { key: 'isFinalSession', label: 'sesi_terakhir' },
       { key: 'latitude', label: 'latitude' },
       { key: 'longitude', label: 'longitude' },
-      { key: 'username_fo', label: 'username_fo', required: true },
     ],
     importFn: (rows) => bulkImportDemoPlots(rows as DemoPlotRow[])
   },

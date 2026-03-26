@@ -232,7 +232,8 @@ export async function bulkImportCustomerBehaviors(rows: CBRow[]) {
 export type DemoPlotRow = {
   date: string; area?: string; commodity?: string; landSize?: string;
   resultNotes?: string; farmerName?: string; isFinalSession?: string;
-  latitude?: string; longitude?: string; username_fo?: string
+  latitude?: string; longitude?: string; username_fo?: string;
+  produk?: string  // e.g. "Bion-M:100,Virtako:50" or just "Bion-M"
 }
 
 export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
@@ -245,6 +246,11 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
 
   const farmers = await prisma.farmer.findMany({ select: { id: true, name: true } })
   const farmerMap = new Map(farmers.map(f => [f.name.toLowerCase().trim(), f.id]))
+
+  // Build a product name → id map for DemoPlotDetail creation
+  const products = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
+  const productByName = new Map(products.map(p => [p.name.toLowerCase().trim(), p.id]))
+  const productByCode = new Map(products.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
@@ -302,7 +308,7 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
         }
       })
 
-      await prisma.demoPlot.create({
+      const dp = await prisma.demoPlot.create({
         data: {
           requestId: req.id,
           date: parsedDate,
@@ -316,6 +322,32 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
           longitude: isNaN(lng as number) ? null : lng,
         }
       })
+
+      // Parse the produk column and create DemoPlotDetail records
+      if (r.produk?.trim()) {
+        const entries = r.produk.split(',').map(s => s.trim()).filter(Boolean)
+        for (const entry of entries) {
+          // Support both "ProductName:qty" and just "ProductName"
+          const colonIdx = entry.lastIndexOf(':')
+          let productKey: string
+          let qty = 1
+          if (colonIdx !== -1) {
+            productKey = entry.slice(0, colonIdx).trim()
+            qty = parseFloat(entry.slice(colonIdx + 1).trim()) || 1
+          } else {
+            productKey = entry.trim()
+          }
+          const productId =
+            productByName.get(productKey.toLowerCase()) ??
+            productByCode.get(productKey.toLowerCase())
+          if (productId) {
+            await prisma.demoPlotDetail.create({
+              data: { demoPlotId: dp.id, productId, actualUsage: qty }
+            })
+          }
+          // If product not found, silently skip — don't block the row insert
+        }
+      }
       inserted++
     } catch (e: any) {
       errors.push({ row: rowNum, name: r.farmerName || '-', reason: 'Gagal disimpan: ' + e.message }); skipped++
