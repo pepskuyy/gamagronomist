@@ -236,7 +236,7 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
 
   const handleSaveTargets = () => {
     startTransition(async () => {
-      await setKpiTarget({ userId: ownerUserId, month: selectedMonth, year: selectedYear, ...targetInputs })
+      await setKpiTarget({ userId: selectedUserId, month: selectedMonth, year: selectedYear, ...targetInputs })
       await fetchData()
       setShowTargetForm(false)
     })
@@ -337,7 +337,7 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
           marginBottom: '1.5rem',
         }}>
           <div style={{ fontWeight: 700, marginBottom: '1rem', color: '#065f46', fontSize: '0.9rem' }}>
-            🎯 Set Target untuk {MONTHS[selectedMonth - 1]} {selectedYear}
+            🎯 Set Target untuk <span style={{ textDecoration: 'underline' }}>{selectedUserName}</span> · {MONTHS[selectedMonth - 1]} {selectedYear}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
             {ACTIVITY_CARDS.map(c => (
