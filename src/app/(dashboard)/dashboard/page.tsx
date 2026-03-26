@@ -7,6 +7,7 @@ import KpiFieldDashboard from '@/components/KpiFieldDashboard'
 import DemoPlotMap from '@/components/DemoPlotMap'
 import CommodityChart from '@/components/CommodityChart'
 import CbProductChart from '@/components/CbProductChart'
+import CbBuyReasonChart from '@/components/CbBuyReasonChart'
 
 const prisma = new PrismaClient()
 
@@ -190,6 +191,11 @@ export default async function DashboardPage() {
       {/* CB Product Chart Section */}
       <div className="card" style={{ marginBottom: '2.5rem' }}>
         <CbProductChart />
+      </div>
+
+      {/* CB Buy Reason Chart Section */}
+      <div className="card" style={{ marginBottom: '2.5rem' }}>
+        <CbBuyReasonChart />
       </div>
 
       {/* Stock Summary Table (SPV/AFA only) */}
