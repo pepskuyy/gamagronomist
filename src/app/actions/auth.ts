@@ -25,6 +25,11 @@ export async function login(formData: FormData) {
       return { error: 'Username tidak ditemukan!' }
     }
 
+    // Block deactivated accounts
+    if (!user.isActive) {
+      return { error: 'Akun Anda telah dinonaktifkan. Hubungi administrator.' }
+    }
+
     // Verify password with bcrypt
     const isMatch = await bcrypt.compare(password, user.password)
     
@@ -32,14 +37,15 @@ export async function login(formData: FormData) {
       return { error: 'Password salah!' }
     }
 
-    // Create session
+    // Create session (include isActive so middleware can reject if later deactivated)
     const sessionToken = await encrypt({ 
       userId: user.id, 
       username: user.username,
       role: user.role,
       name: user.name,
       areaId: user.areaId,
-      afaId: user.afaId
+      afaId: user.afaId,
+      isActive: user.isActive
     })
     
     const cookieStore = await cookies()
@@ -60,4 +66,38 @@ export async function login(formData: FormData) {
 export async function logout() {
   const cookieStore = await cookies()
   cookieStore.delete('session')
+}
+
+export async function changePassword(formData: FormData) {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('session')?.value
+    const session = await import('@/lib/auth').then(m => m.decrypt(token as string))
+    if (!session?.userId) return { error: 'Tidak terotorisasi.' }
+
+    const currentPassword = formData.get('currentPassword') as string
+    const newPassword     = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (!currentPassword || !newPassword || !confirmPassword)
+      return { error: 'Semua kolom wajib diisi.' }
+    if (newPassword.length < 6)
+      return { error: 'Password baru minimal 6 karakter.' }
+    if (newPassword !== confirmPassword)
+      return { error: 'Konfirmasi password tidak cocok.' }
+
+    const user = await prisma.user.findUnique({ where: { id: session.userId } })
+    if (!user) return { error: 'User tidak ditemukan.' }
+
+    const isMatch = await bcrypt.compare(currentPassword, user.password)
+    if (!isMatch) return { error: 'Password lama salah.' }
+
+    const hashed = await bcrypt.hash(newPassword, 12)
+    await prisma.user.update({ where: { id: user.id }, data: { password: hashed } })
+
+    return { success: true }
+  } catch (err) {
+    console.error('Change password error', err)
+    return { error: 'Terjadi kesalahan. Coba lagi.' }
+  }
 }

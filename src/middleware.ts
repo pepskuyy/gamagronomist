@@ -22,6 +22,13 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
+  // Block deactivated accounts — isActive is stored in JWT at login time
+  if (session.isActive === false) {
+    const response = NextResponse.redirect(new URL('/login?deactivated=1', request.url))
+    response.cookies.delete('session')
+    return response
+  }
+
   // Redirect ROOT to Dashboard
   if (request.nextUrl.pathname === '/') {
     return NextResponse.redirect(new URL('/dashboard', request.url))
