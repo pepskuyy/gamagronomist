@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
+import DemoPlotReportTable from '@/components/DemoPlotReportTable'
 
 const prisma = new PrismaClient()
 
@@ -44,7 +45,26 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     userFilter = { userId: session.userId }
   }
 
-  const [cbReports, kiosReports, gatheringReports, companyReports] = await Promise.all([
+  // Demo Plot filter: use request.foId instead of userId
+  let dpUserFilter: any = {}
+  if (['ADMIN', 'SPV'].includes(session.role)) {
+    dpUserFilter = {}
+  } else if (session.role === 'AFA') {
+    const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
+    const foIds = [session.userId, ...fos.map(u => u.id)]
+    dpUserFilter = { request: { foId: { in: foIds } } }
+  } else {
+    dpUserFilter = { request: { foId: session.userId } }
+  }
+
+  const dpDateFilter = startDate || endDate ? {
+    date: {
+      ...(startDate ? { gte: startDate } : {}),
+      ...(endDate ? { lte: endDate } : {})
+    }
+  } : {}
+
+  const [cbReports, kiosReports, gatheringReports, companyReports, dpSessions] = await Promise.all([
     prisma.customerBehavior.findMany({
       where: { ...userFilter, ...dateFilter, ...(search ? { farmerName: { contains: search, mode: 'insensitive' } } : {}) },
       include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
@@ -61,6 +81,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       where: { ...userFilter, ...dateFilter, ...(search ? { companyName: { contains: search, mode: 'insensitive' } } : {}) },
       include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
     }),
+    prisma.demoPlot.findMany({
+      where: { ...dpDateFilter, ...dpUserFilter, ...(search ? { area: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { request: { include: { fo: true } } },
+      orderBy: { date: 'desc' }, skip, take
+    })
   ])
 
   const tdStyle = { padding: '0.75rem', borderBottom: '1px solid var(--border)' }
@@ -68,7 +93,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   const formatDate = (d: Date) => new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(d)
 
-  const hasMore = cbReports.length === take || kiosReports.length === take || gatheringReports.length === take || companyReports.length === take
+  const hasMore = cbReports.length === take || kiosReports.length === take || gatheringReports.length === take || companyReports.length === take || dpSessions.length === take
   const queryStr = `&search=${encodeURIComponent(search)}&start=${startParam}&end=${endParam}`
 
   return (
@@ -108,6 +133,20 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* Customer Behavior Table */}
       <CbReportTable
         reports={cbReports.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
+        isAdmin={session.role === 'ADMIN'}
+      />
+
+      {/* Demo Plot Realizations Table */}
+      <DemoPlotReportTable
+        sessions={dpSessions.map(s => ({
+          id: s.id,
+          date: s.date.toISOString(),
+          requestId: s.requestId,
+          area: s.area,
+          commodity: s.commodity,
+          isFinalSession: s.isFinalSession,
+          request: s.request ? { fo: { name: s.request.fo.name, role: s.request.fo.role } } : null
+        }))}
         isAdmin={session.role === 'ADMIN'}
       />
 
