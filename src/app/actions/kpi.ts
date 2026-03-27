@@ -59,7 +59,7 @@ export async function getKpiData(
     prisma.visitCompany.count({ where: { ...dateFilter, userId: { in: userIds } } }),
     prisma.customerBehavior.count({ where: { ...dateFilter, userId: { in: userIds } } }),
     prisma.kpiTarget.findUnique({
-      where: { userId_month_year: { userId: ownerUserId, month, year } }
+      where: { userId_month_year: { userId: targetUserId, month, year } }
     })
   ])
 
@@ -124,9 +124,16 @@ export async function getKpiDataForFieldUser(
     prisma.farmerGathering.count({ where: { ...dateFilter, userId: { in: userIds } } }),
     prisma.visitCompany.count({ where: { ...dateFilter, userId: { in: userIds } } }),
     prisma.customerBehavior.count({ where: { ...dateFilter, userId: { in: userIds } } }),
+    // Look up the field user's own target first (set by SPV via dropdown),
+    // then fall back to any SPV-wide target if none exists.
     prisma.kpiTarget.findFirst({
-      where: { userId: { in: spvIds }, month, year },
-      orderBy: { updatedAt: 'desc' }
+      where: { userId, month, year }
+    }).then(async ownTarget => {
+      if (ownTarget) return ownTarget
+      return prisma.kpiTarget.findFirst({
+        where: { userId: { in: spvIds }, month, year },
+        orderBy: { updatedAt: 'desc' }
+      })
     })
   ])
 
