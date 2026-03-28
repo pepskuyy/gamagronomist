@@ -36,8 +36,8 @@ export async function submitAfaSelfPlan(formData: FormData) {
     return { error: 'Gagal membaca daftar produk.' }
   }
 
-  if (products.length === 0 || products.length > 5) {
-    return { error: 'Produk minimal 1 dan maksimal 5 jenis.' }
+  if (products.length === 0) {
+    return { error: 'Produk minimal 1 jenis.' }
   }
 
   try {

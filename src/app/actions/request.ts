@@ -29,8 +29,8 @@ export async function submitRequestDemoPlot(formData: FormData) {
     return { error: 'Gagal membaca daftar produk.' }
   }
 
-  if (productsToRequest.length === 0 || productsToRequest.length > 5) {
-    return { error: 'Produk minimal 1 dan maksimal 5 jenis.' }
+  if (productsToRequest.length === 0) {
+    return { error: 'Produk minimal 1 jenis.' }
   }
 
   try {

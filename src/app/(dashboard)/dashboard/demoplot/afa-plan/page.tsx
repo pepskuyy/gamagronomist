@@ -30,7 +30,6 @@ export default function AfaSelfPlanPage() {
 
   function addProduct() {
     if (!currentProduct || !currentQty || Number(currentQty) <= 0) return
-    if (selectedProducts.length >= 5) return alert('Maksimal 5 produk.')
     if (selectedProducts.find(p => p.productId === currentProduct)) return alert('Produk sudah ada.')
     const detail = products.find(p => p.id === currentProduct)
     if (detail) {
@@ -114,7 +113,7 @@ export default function AfaSelfPlanPage() {
 
         {/* Product picker */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>📦 Kebutuhan Produk dari Stok Sendiri (Maks 5)</h3>
+          <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>📦 Kebutuhan Produk dari Stok Sendiri</h3>
           {error && (
             <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#FEE2E2', color: '#991B1B', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }}>{error}</div>
           )}

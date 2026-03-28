@@ -24,7 +24,6 @@ export default function FOStockRequestPage() {
 
   function addProduct() {
     if (!currentProduct || !currentQty || Number(currentQty) <= 0) return
-    if (selectedProducts.length >= 5) { alert('Maksimal 5 produk per pengajuan!'); return }
     if (selectedProducts.find(p => p.productId === currentProduct)) { alert('Produk ini sudah ada dalam daftar.'); return }
     const detail = products.find(p => p.id === currentProduct)
     if (detail) {
@@ -67,7 +66,7 @@ export default function FOStockRequestPage() {
 
       <form onSubmit={handleSubmit}>
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>📋 Kebutuhan Produk (Maks. 5 jenis)</h3>
+          <h3 style={{ marginBottom: '1rem' }}>📋 Kebutuhan Produk</h3>
 
           {error && <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fee2e2', color: '#991b1b', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
 
