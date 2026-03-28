@@ -54,17 +54,17 @@ const MapView = dynamic(() => import('@/components/MapView'), { ssr: false, load
   </div>
 ) })
 
-export default function DemoPlotMap() {
+export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string }) {
   const [points, setPoints] = useState<DemoPlotPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [activeFilter, setActiveFilter] = useState<'all' | 'spot' | 'mini' | 'full'>('all')
 
   useEffect(() => {
-    fetch('/api/demoplot-map')
+    fetch(`/api/demoplot-map${filterQuery}`)
       .then(r => r.json())
       .then(data => { setPoints(data); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  }, [filterQuery])
 
   const filtered = activeFilter === 'all' ? points : points.filter(p => p.type === activeFilter)
 

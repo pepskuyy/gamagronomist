@@ -5,27 +5,17 @@ import { decrypt } from '@/lib/auth'
 
 const prisma = new PrismaClient()
 
-export async function GET() {
+export async function GET(req: any) {
   try {
     const cookieStore = await cookies()
     const token = cookieStore.get('session')?.value
     const session = await decrypt(token as string)
     if (!session?.userId) return NextResponse.json([])
 
-    // Build role filter
-    let whereClause: any = {}
-    if (session.role === 'FO' || session.role === 'INTERN') {
-      whereClause = { userId: session.userId }
-    } else if (session.role === 'AFA') {
-      // Find all FOs under this AFA
-      const fos = await prisma.user.findMany({
-        where: { afaId: session.userId },
-        select: { id: true }
-      })
-      const foIds = fos.map(f => f.id)
-      foIds.push(session.userId) // include AFA's own entries
-      whereClause = { userId: { in: foIds } }
-    }
+    // Import helper
+    const { buildActivityWhereClause } = await import('@/lib/kpi-filters')
+    const searchParams = req.nextUrl.searchParams
+    const whereClause = await buildActivityWhereClause(session, searchParams)
 
     const cbs = await prisma.customerBehavior.findMany({
       where: whereClause,

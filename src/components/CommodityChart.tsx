@@ -23,16 +23,16 @@ const PALETTE = [
 
 export { PALETTE }
 
-export default function CommodityChart() {
+export default function CommodityChart({ filterQuery = '' }: { filterQuery?: string }) {
   const [data, setData] = useState<StatsData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/cb-stats/commodities')
+    fetch(`/api/cb-stats/commodities${filterQuery}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  }, [filterQuery])
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', color: 'var(--text-muted)' }}>

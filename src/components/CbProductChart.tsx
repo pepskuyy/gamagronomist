@@ -16,16 +16,16 @@ const ChartInner = dynamic<ChartInnerProps>(() => import('@/components/Commodity
   </div>
 ) })
 
-export default function CbProductChart() {
+export default function CbProductChart({ filterQuery = '' }: { filterQuery?: string }) {
   const [data, setData] = useState<StatsData | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    fetch('/api/cb-stats/products')
+    fetch(`/api/cb-stats/products${filterQuery}`)
       .then(r => r.json())
       .then(d => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
-  }, [])
+  }, [filterQuery])
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', color: 'var(--text-muted)' }}>

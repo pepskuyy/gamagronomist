@@ -11,19 +11,25 @@ function classify(productCount: number): 'spot' | 'mini' | 'full' {
   return 'full'
 }
 
-export async function GET() {
+export async function GET(req: any) {
   try {
     const cookieStore = await cookies()
     const token = cookieStore.get('session')?.value
     const session = await decrypt(token as string)
     if (!session?.userId) return NextResponse.json([])
 
+    // Import helper
+    const { buildDemoPlotWhereClause } = await import('@/lib/kpi-filters')
+    const searchParams = req.nextUrl.searchParams
+    const whereClause = await buildDemoPlotWhereClause(session, searchParams)
+
+    // Ensure GPS coordinates exist
+    whereClause.latitude = { not: null }
+    whereClause.longitude = { not: null }
+
     // Fetch demo plots that have GPS coordinates
     const demoPlots = await prisma.demoPlot.findMany({
-      where: {
-        latitude: { not: null },
-        longitude: { not: null },
-      },
+      where: whereClause,
       include: {
         farmer: true,
         request: {

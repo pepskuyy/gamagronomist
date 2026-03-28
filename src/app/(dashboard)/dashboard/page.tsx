@@ -8,10 +8,12 @@ import DemoPlotMap from '@/components/DemoPlotMap'
 import CommodityChart from '@/components/CommodityChart'
 import CbProductChart from '@/components/CbProductChart'
 import CbBuyReasonChart from '@/components/CbBuyReasonChart'
+import DashboardChartFilter from '@/components/DashboardChartFilter'
 
 const prisma = new PrismaClient()
 
-export default async function DashboardPage() {
+export default async function DashboardPage(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
+  const searchParams = await props.searchParams
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
@@ -67,6 +69,25 @@ export default async function DashboardPage() {
   let fieldKpi: Awaited<ReturnType<typeof getKpiDataForFieldUser>> | null = null
   if (session.role === 'AFA' || session.role === 'FO' || session.role === 'INTERN') {
     fieldKpi = await getKpiDataForFieldUser(session.userId, session.role, currentMonth, currentYear)
+  }
+
+  // ----- GLOBAL DASHBOARD FILTER DATA -----
+  const areas = await prisma.area.findMany({ orderBy: { name: 'asc' } })
+  // Build chart filter query parameter string to pass down to clients
+  const params = new URLSearchParams()
+  if (searchParams?.start) params.set('start', searchParams.start)
+  if (searchParams?.end) params.set('end', searchParams.end)
+  if (searchParams?.userId) params.set('userId', searchParams.userId)
+  if (searchParams?.areaId) params.set('areaId', searchParams.areaId)
+  const filterQuery = params.toString() ? `?${params.toString()}` : ''
+
+  // Subordinates for filter dropdown (AFA sees their FOs, SPV sees all)
+  let filterSubordinates: { id: string; name: string; role: string }[] = []
+  if (isSPV) {
+    filterSubordinates = subordinates
+  } else if (isAFA) {
+    const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true, name: true, role: true }, orderBy: { name: 'asc' } })
+    filterSubordinates = fos
   }
 
   // Stock summary for all users visible to this role
@@ -178,24 +199,27 @@ export default async function DashboardPage() {
         </div>
       </div>
 
+      {/* Global Dashboard Filters */}
+      <DashboardChartFilter subordinates={filterSubordinates} areas={areas} />
+
       {/* Demo Plot Map Section */}
       <div className="card" style={{ marginBottom: '2.5rem' }}>
-        <DemoPlotMap />
+        <DemoPlotMap filterQuery={filterQuery} />
       </div>
 
       {/* Commodity Chart Section */}
       <div className="card" style={{ marginBottom: '2.5rem' }}>
-        <CommodityChart />
+        <CommodityChart filterQuery={filterQuery} />
       </div>
 
       {/* CB Product Chart Section */}
       <div className="card" style={{ marginBottom: '2.5rem' }}>
-        <CbProductChart />
+        <CbProductChart filterQuery={filterQuery} />
       </div>
 
       {/* CB Buy Reason Chart Section */}
       <div className="card" style={{ marginBottom: '2.5rem' }}>
-        <CbBuyReasonChart />
+        <CbBuyReasonChart filterQuery={filterQuery} />
       </div>
 
       {/* Stock Summary Table (SPV/AFA only) */}
