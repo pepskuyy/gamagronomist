@@ -4,6 +4,7 @@ import { useState, useEffect, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { submitAfaStockRequest } from '@/app/actions/afa-stock'
+import SearchableSelect from '@/components/SearchableSelect'
 
 type Product = { id: string, name: string, unit: string }
 type SelectedProduct = { productId: string; qtyRequested: number; name: string; unit: string }
@@ -98,10 +99,12 @@ export default function StockInPage() {
             <div className="picker-row">
               <div style={{ flex: 2 }}>
                 <label className="form-label">Pilih Produk</label>
-                <select className="form-control" value={currentProduct} onChange={e => setCurrentProduct(e.target.value)}>
-                  <option value="">-- Pilih --</option>
-                  {products.map(p => <option key={p.id} value={p.id}>{p.name} ({p.unit})</option>)}
-                </select>
+                <SearchableSelect 
+                  options={products.map(p => ({ value: p.id, label: `${p.name} (${p.unit})` }))}
+                  value={currentProduct}
+                  onChange={setCurrentProduct}
+                  placeholder="-- Ketik nama produk --"
+                />
               </div>
               <div style={{ flex: 1 }}>
                 <label className="form-label">Kuantitas</label>
