@@ -30,7 +30,7 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo">🌱 Gamagronomist</div>
+          <div className="logo">🌱 Agrolens</div>
           <p>Sistem Tracking Stok & Demo Plot</p>
         </div>
         

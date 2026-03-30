@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Gamagronomist - Tracking Stok & Demo Plot",
-  description: "Sistem internal tracking stok produk pertanian dan aktivitas demo plot untuk tim agronomis",
+  title: "Agrolens - Tracking Stok & Demo Plot",
+  description: "Portal agronomi untuk pelacakan barang, permintaan, dan aktivitas",
 };
 
 export default function RootLayout({

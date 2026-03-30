@@ -86,7 +86,9 @@ export default function AfaStockRequestTable({
 
       // Footer
       const finalY = (doc as any).lastAutoTable?.finalY || 65
-      doc.text('Dokumen ini dibuat secara otomatis oleh sistem Gamagronomist dan sah tanpa tanda tangan fisik.', 14, finalY + 20)
+      doc.setDrawColor('#E2E8F0')
+      doc.line(14, finalY + 15, 196, finalY + 15)
+      doc.text('Dokumen ini dibuat secara otomatis oleh sistem Agrolens dan sah tanpa tanda tangan fisik.', 14, finalY + 20)
 
       doc.save(`Bukti_Stok_${req.id.slice(0, 8).toUpperCase()}.pdf`)
     } catch (err) {

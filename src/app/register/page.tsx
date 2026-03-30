@@ -30,7 +30,7 @@ export default function RegisterPage() {
             <div style={{ width: 40, height: 40, background: 'var(--primary)', borderRadius: '0.6rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="rgba(255,255,255,0.2)"/><path d="M12 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 10c-2.7 0-5.8 1.29-6 2h12c-.2-.71-3.3-2-6-2z" fill="white"/></svg>
             </div>
-            <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>Gamagronomist</span>
+            <span style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--primary)' }}>Agrolens</span>
           </div>
           <h2 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '0.25rem' }}>Buat Akun Baru</h2>
           <p style={{ fontSize: '0.85rem' }}>Permintaan akan dikonfirmasi oleh SPV sebelum aktif</p>

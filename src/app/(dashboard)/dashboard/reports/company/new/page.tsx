@@ -125,8 +125,8 @@ export default function NewVisitCompany() {
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Produk yang prospek/ditawarkan</label>
-              <textarea name="products" className="form-control" rows={2} placeholder="Sebutkan produk Gamagronomist yang berpotensi dipakai" />
+              <label className="form-label">Minat Produk Agrolens / Peluang Kerjasama <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <textarea name="products" className="form-control" rows={2} placeholder="Sebutkan produk Agrolens yang berpotensi dipakai" />
             </div>
 
             <div className="form-group">
