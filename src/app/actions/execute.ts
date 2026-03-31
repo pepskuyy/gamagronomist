@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
+import { revalidatePath } from 'next/cache'
 
 const prisma = new PrismaClient()
 
@@ -93,6 +94,7 @@ export async function submitDemoPlotSession(formData: FormData) {
       }
     })
 
+    revalidatePath('/dashboard/demoplot')
     return { success: true }
   } catch (err: any) {
     console.error('Demo Plot Execution Error:', err)

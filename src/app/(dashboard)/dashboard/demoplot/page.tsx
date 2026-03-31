@@ -12,7 +12,7 @@ export default async function DemoPlotIndexPage() {
 
   if (!session?.userId) return null
 
-  const include = { fo: true, afa: true, farmer: true, details: { include: { product: true } } }
+  const include = { fo: true, afa: true, farmer: true, details: { include: { product: true } }, demoPlots: { select: { id: true, isFinalSession: true } } }
   let requests: any[] = []
   if (session.role === 'FO' || session.role === 'INTERN') {
     requests = await prisma.request.findMany({ where: { foId: session.userId }, include, orderBy: { createdAt: 'desc' } })
@@ -142,7 +142,16 @@ export default async function DemoPlotIndexPage() {
                       <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
                       <td style={{ fontSize: '0.82rem' }}>{req.details?.map((d: any) => `${d.product?.name}: ${d.qtyRequested} ${d.product?.unit}`).join(', ')}</td>
                       <td>{getStatusBadge(req.status)}</td>
-                      <td><Link href={`/dashboard/demoplot/detail/${req.id}`}><button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button></Link></td>
+                      <td>
+                        <div className="action-row">
+                          {req.status === 'APPROVED' && req.demoPlots?.length > 0 && req.foId === session.userId && (
+                            <Link href={`/dashboard/demoplot/continue/${req.id}`}>
+                              <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
+                            </Link>
+                          )}
+                          <Link href={`/dashboard/demoplot/detail/${req.id}`}><button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button></Link>
+                        </div>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
@@ -182,7 +191,7 @@ export default async function DemoPlotIndexPage() {
                   <td>{getStatusBadge(req.status)}</td>
                   <td>
                     <div className="action-row">
-                      {req.status === 'APPROVED' && req.foId === session.userId && (
+                      {req.status === 'APPROVED' && (req.foId === session.userId || req.afaId === session.userId) && (
                         <Link href={`/dashboard/demoplot/continue/${req.id}`}>
                           <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
                         </Link>
