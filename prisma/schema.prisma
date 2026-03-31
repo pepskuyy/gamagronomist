@@ -19,6 +19,7 @@ model User {
   username  String   @unique
   password  String   // Akan di-hash untuk MVP
   name      String
+  email     String?  // Email untuk fitur lupa password
   role      String   // "ADMIN", "SPV", "AFA", "FO", "INTERN"
   isActive  Boolean  @default(true)
   

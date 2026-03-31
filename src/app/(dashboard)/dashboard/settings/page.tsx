@@ -1,6 +1,10 @@
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
+import { PrismaClient } from '@prisma/client'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
+import UpdateEmailForm from '@/components/UpdateEmailForm'
+
+const prisma = new PrismaClient()
 
 export default async function SettingsPage() {
   const cookieStore = await cookies()
@@ -9,6 +13,12 @@ export default async function SettingsPage() {
 
   if (!session?.userId) return <div>Unauthorized</div>
 
+  // Fetch current email from DB
+  const user = await prisma.user.findUnique({
+    where: { id: session.userId },
+    select: { email: true }
+  })
+
   return (
     <div>
       <h2 style={{ marginBottom: '0.5rem' }}>⚙️ Pengaturan Akun</h2>
@@ -16,6 +26,21 @@ export default async function SettingsPage() {
         Kelola pengaturan pribadi untuk akun <strong>{session.name}</strong> ({session.role})
       </p>
 
+      {/* Email Recovery Section */}
+      <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>
+        <h3 style={{ marginBottom: '0.4rem' }}>📧 Email Pemulihan</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+          Daftarkan email Anda agar dapat digunakan untuk mereset password jika lupa.
+          {!user?.email && (
+            <span style={{ display: 'block', marginTop: '0.5rem', color: 'var(--warning, #d97706)', fontWeight: 600, fontSize: '0.82rem' }}>
+              ⚠️ Anda belum mendaftarkan email. Anda tidak bisa mereset password jika lupa.
+            </span>
+          )}
+        </p>
+        <UpdateEmailForm currentEmail={user?.email ?? null} />
+      </div>
+
+      {/* Change Password Section */}
       <div className="card" style={{ maxWidth: 520 }}>
         <h3 style={{ marginBottom: '0.4rem' }}>🔐 Ubah Password</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>

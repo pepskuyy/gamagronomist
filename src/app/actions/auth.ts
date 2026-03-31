@@ -101,3 +101,67 @@ export async function changePassword(formData: FormData) {
     return { error: 'Terjadi kesalahan. Coba lagi.' }
   }
 }
+
+/**
+ * Update email for the currently logged-in user (for password recovery)
+ */
+export async function updateEmail(formData: FormData) {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('session')?.value
+    const session = await import('@/lib/auth').then(m => m.decrypt(token as string))
+    if (!session?.userId) return { error: 'Tidak terotorisasi.' }
+
+    const email = (formData.get('email') as string)?.trim()
+    if (!email) return { error: 'Email wajib diisi.' }
+
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) return { error: 'Format email tidak valid.' }
+
+    await prisma.user.update({
+      where: { id: session.userId },
+      data: { email }
+    })
+
+    return { success: true }
+  } catch (err) {
+    console.error('Update email error', err)
+    return { error: 'Terjadi kesalahan. Coba lagi.' }
+  }
+}
+
+/**
+ * Reset password using username + email verification (no email sending needed)
+ */
+export async function resetPasswordWithEmail(formData: FormData) {
+  try {
+    const username = (formData.get('username') as string)?.trim()
+    const email    = (formData.get('email') as string)?.trim()
+    const newPassword     = formData.get('newPassword') as string
+    const confirmPassword = formData.get('confirmPassword') as string
+
+    if (!username || !email) return { error: 'Username dan email wajib diisi.' }
+    if (!newPassword || !confirmPassword) return { error: 'Password baru wajib diisi.' }
+    if (newPassword.length < 6) return { error: 'Password baru minimal 6 karakter.' }
+    if (newPassword !== confirmPassword) return { error: 'Konfirmasi password tidak cocok.' }
+
+    const user = await prisma.user.findUnique({ where: { username } })
+
+    if (!user) return { error: 'Username tidak ditemukan.' }
+    if (!user.email) return { error: 'Akun ini belum mendaftarkan email. Hubungi admin untuk reset password.' }
+    if (user.email.toLowerCase() !== email.toLowerCase()) return { error: 'Email tidak sesuai dengan yang terdaftar pada akun ini.' }
+    if (!user.isActive) return { error: 'Akun ini telah dinonaktifkan.' }
+
+    const hashed = await bcrypt.hash(newPassword, 12)
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashed }
+    })
+
+    return { success: true }
+  } catch (err) {
+    console.error('Reset password error', err)
+    return { error: 'Terjadi kesalahan. Coba lagi.' }
+  }
+}

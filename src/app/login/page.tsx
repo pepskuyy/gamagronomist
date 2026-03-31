@@ -66,8 +66,15 @@ export default function LoginPage() {
           </button>
         </form>
 
+        {/* Forgot password */}
+        <div style={{ textAlign: 'center', marginTop: '1rem' }}>
+          <a href="/forgot-password" style={{ color: 'var(--primary)', fontSize: '0.85rem', textDecoration: 'none' }}>
+            🔑 Lupa Password?
+          </a>
+        </div>
+
         {/* Register link */}
-        <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+        <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
           <div style={{ height: '1px', background: 'var(--border)', marginBottom: '1.25rem' }} />
           <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem' }}>Belum punya akun?</p>
           <a href="/register" className="btn btn-outline" style={{ width: '100%', display: 'flex', justifyContent: 'center', fontSize: '0.9rem', padding: '0.7rem' }}>
