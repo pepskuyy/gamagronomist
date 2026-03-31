@@ -65,7 +65,6 @@ export default function DashboardShell({ session, children }: SidebarProps) {
     { href: '/dashboard',          label: 'Dashboard',          icon: Icons.dashboard, show: true },
     { href: '/dashboard/master',   label: 'Master Data',        icon: Icons.master,    show: session?.role === 'ADMIN' || session?.role === 'SPV' },
     { href: '/dashboard/stock',    label: 'Manajemen Stok',     icon: Icons.stock,     show: true },
-    { href: '/dashboard/demoplot', label: 'Demo Plot',          icon: Icons.demoplot,  show: true },
     { href: '/dashboard/reports',  label: 'Laporan Aktivitas',  icon: Icons.reports,   show: true },
     { href: '/dashboard/opname',   label: 'Stock Opname',       icon: Icons.opname,    show: true },
     { href: '/dashboard/settings', label: 'Pengaturan Akun',    icon: Icons.settings,  show: true },
