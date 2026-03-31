@@ -3,11 +3,36 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
-import DemoPlotReportTable from '@/components/DemoPlotReportTable'
 
 const prisma = new PrismaClient()
 
-export default async function ReportsPage({ searchParams }: { searchParams: Promise<{ page?: string, search?: string, start?: string, end?: string }> }) {
+// Pagination helper component
+function TablePager({ paramName, currentPage, hasMore, baseQuery }: { paramName: string; currentPage: number; hasMore: boolean; baseQuery: string }) {
+  function buildHref(p: number) {
+    const params = new URLSearchParams(baseQuery)
+    params.set(paramName, String(p))
+    return `/dashboard/reports?${params.toString()}`
+  }
+  return (
+    <div style={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: '0.5rem', marginTop: '0.75rem', padding: '0 0.25rem' }}>
+      {currentPage > 1 ? (
+        <Link href={buildHref(currentPage - 1)} className="btn btn-outline" style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}>← Prev</Link>
+      ) : (
+        <button className="btn btn-outline" disabled style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem', opacity: 0.4, cursor: 'not-allowed' }}>← Prev</button>
+      )}
+      <span style={{ fontSize: '0.8rem', padding: '0.3rem 0.65rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+        Hal {currentPage}
+      </span>
+      {hasMore ? (
+        <Link href={buildHref(currentPage + 1)} className="btn btn-outline" style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem' }}>Next →</Link>
+      ) : (
+        <button className="btn btn-outline" disabled style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem', opacity: 0.4, cursor: 'not-allowed' }}>Next →</button>
+      )}
+    </div>
+  )
+}
+
+export default async function ReportsPage({ searchParams }: { searchParams: Promise<Record<string, string | undefined>> }) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
@@ -15,17 +40,34 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   if (!session?.userId) return <div>Unauthorized</div>
 
   const resolvedParams = await searchParams
-  const page = parseInt(resolvedParams.page || '1')
   const take = 10
-  const skip = (page - 1) * take
 
-  const search = resolvedParams.search || ''
-  const startParam = resolvedParams.start || ''
-  const endParam = resolvedParams.end || ''
+  // Per-table page params
+  const pcb      = Math.max(1, parseInt(resolvedParams.pcb      || '1'))
+  const pdp      = Math.max(1, parseInt(resolvedParams.pdp      || '1'))
+  const pkios    = Math.max(1, parseInt(resolvedParams.pkios    || '1'))
+  const pgather  = Math.max(1, parseInt(resolvedParams.pgather  || '1'))
+  const pcomp    = Math.max(1, parseInt(resolvedParams.pcomp    || '1'))
+
+  const search     = resolvedParams.search || ''
+  const startParam = resolvedParams.start  || ''
+  const endParam   = resolvedParams.end    || ''
   
   const startDate = startParam ? new Date(startParam) : undefined
   const endDate = endParam ? new Date(endParam) : undefined
   if (endDate) endDate.setHours(23, 59, 59, 999)
+
+  // Build a base query string that preserves all page params + filters
+  const baseParams = new URLSearchParams()
+  if (search)     baseParams.set('search', search)
+  if (startParam) baseParams.set('start', startParam)
+  if (endParam)   baseParams.set('end', endParam)
+  if (pcb > 1)    baseParams.set('pcb', String(pcb))
+  if (pdp > 1)    baseParams.set('pdp', String(pdp))
+  if (pkios > 1)  baseParams.set('pkios', String(pkios))
+  if (pgather > 1) baseParams.set('pgather', String(pgather))
+  if (pcomp > 1)  baseParams.set('pcomp', String(pcomp))
+  const baseQuery = baseParams.toString()
 
   const dateFilter = startDate || endDate ? {
     createdAt: {
@@ -45,26 +87,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     userFilter = { userId: session.userId }
   }
 
-  // Demo Plot filter: use request.foId instead of userId
-  let dpUserFilter: any = {}
-  if (['ADMIN', 'SPV'].includes(session.role)) {
-    dpUserFilter = {}
-  } else if (session.role === 'AFA') {
-    const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
-    const foIds = [session.userId, ...fos.map(u => u.id)]
-    dpUserFilter = { request: { foId: { in: foIds } } }
-  } else {
-    dpUserFilter = { request: { foId: session.userId } }
-  }
-
-  const dpDateFilter = startDate || endDate ? {
-    date: {
-      ...(startDate ? { gte: startDate } : {}),
-      ...(endDate ? { lte: endDate } : {})
-    }
-  } : {}
-
-  // Fetch demo plot REQUEST records (for "Riwayat Realisasi" table with continue button)
+  // Demo Plot Request filter
   let dpRequestFilter: any = { commodity: { not: '-' }, farmer: { isNot: null } }
   if (['ADMIN', 'SPV'].includes(session.role)) {
     // see all
@@ -76,35 +99,55 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     dpRequestFilter = { ...dpRequestFilter, foId: session.userId }
   }
 
-  const [cbReports, kiosReports, gatheringReports, companyReports, dpSessions, dpRequests] = await Promise.all([
+  if (startDate || endDate) {
+    dpRequestFilter.createdAt = {
+      ...(startDate ? { gte: startDate } : {}),
+      ...(endDate ? { lte: endDate } : {}),
+    }
+  }
+
+  const [cbReports, dpRequests, kiosReports, gatheringReports, companyReports] = await Promise.all([
     prisma.customerBehavior.findMany({
       where: { ...userFilter, ...dateFilter, ...(search ? { farmerName: { contains: search, mode: 'insensitive' } } : {}) },
-      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
-    }),
-    prisma.visitKios.findMany({
-      where: { ...userFilter, ...dateFilter, ...(search ? { kiosName: { contains: search, mode: 'insensitive' } } : {}) },
-      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
-    }),
-    prisma.farmerGathering.findMany({
-      where: { ...userFilter, ...dateFilter, ...(search ? { leaderName: { contains: search, mode: 'insensitive' } } : {}) },
-      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
-    }),
-    prisma.visitCompany.findMany({
-      where: { ...userFilter, ...dateFilter, ...(search ? { companyName: { contains: search, mode: 'insensitive' } } : {}) },
-      include: { user: true }, orderBy: { createdAt: 'desc' }, skip, take
-    }),
-    prisma.demoPlot.findMany({
-      where: { ...dpDateFilter, ...dpUserFilter, ...(search ? { area: { contains: search, mode: 'insensitive' } } : {}) },
-      include: { request: { include: { fo: true } } },
-      orderBy: { date: 'desc' }, skip, take
+      include: { user: true }, orderBy: { createdAt: 'desc' },
+      skip: (pcb - 1) * take, take: take + 1,
     }),
     prisma.request.findMany({
       where: dpRequestFilter,
       include: { fo: true, afa: true, farmer: true, details: { include: { product: true } }, demoPlots: { select: { id: true, isFinalSession: true } } },
       orderBy: { createdAt: 'desc' },
-      take: 50,
-    })
+      skip: (pdp - 1) * take, take: take + 1,
+    }),
+    prisma.visitKios.findMany({
+      where: { ...userFilter, ...dateFilter, ...(search ? { kiosName: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' },
+      skip: (pkios - 1) * take, take: take + 1,
+    }),
+    prisma.farmerGathering.findMany({
+      where: { ...userFilter, ...dateFilter, ...(search ? { leaderName: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' },
+      skip: (pgather - 1) * take, take: take + 1,
+    }),
+    prisma.visitCompany.findMany({
+      where: { ...userFilter, ...dateFilter, ...(search ? { companyName: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' },
+      skip: (pcomp - 1) * take, take: take + 1,
+    }),
   ])
+
+  // Determine "has more" per table (we fetched take+1 rows)
+  const cbHasMore      = cbReports.length > take
+  const dpHasMore      = dpRequests.length > take
+  const kiosHasMore    = kiosReports.length > take
+  const gatherHasMore  = gatheringReports.length > take
+  const compHasMore    = companyReports.length > take
+
+  // Trim the extra row
+  const cbSlice      = cbReports.slice(0, take)
+  const dpSlice      = dpRequests.slice(0, take)
+  const kiosSlice    = kiosReports.slice(0, take)
+  const gatherSlice  = gatheringReports.slice(0, take)
+  const compSlice    = companyReports.slice(0, take)
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -120,9 +163,6 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const thStyle = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem', textTransform: 'uppercase' as const }
 
   const formatDate = (d: Date) => new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(d)
-
-  const hasMore = cbReports.length === take || kiosReports.length === take || gatheringReports.length === take || companyReports.length === take || dpSessions.length === take
-  const queryStr = `&search=${encodeURIComponent(search)}&start=${startParam}&end=${endParam}`
 
   return (
     <div>
@@ -169,15 +209,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         </div>
       </form>
 
-      {/* Customer Behavior Table */}
+      {/* ── Customer Behavior ── */}
       <CbReportTable
-        reports={cbReports.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
+        reports={cbSlice.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
         isAdmin={session.role === 'ADMIN'}
       />
+      {(cbHasMore || pcb > 1) && (
+        <div style={{ marginTop: '-1rem', marginBottom: '2rem' }}>
+          <TablePager paramName="pcb" currentPage={pcb} hasMore={cbHasMore} baseQuery={baseQuery} />
+        </div>
+      )}
 
-      {/* ══════════════════════════════════════════════════════════ */}
-      {/* Riwayat Realisasi Demo Plot — full table with continue   */}
-      {/* ══════════════════════════════════════════════════════════ */}
+      {/* ── Riwayat Realisasi Demo Plot ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ margin: 0, marginBottom: '1rem' }}>🌾 Riwayat Realisasi Demo Plot</h3>
         <div className="table-responsive">
@@ -194,7 +237,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               </tr>
             </thead>
             <tbody>
-              {dpRequests.map((req: any) => (
+              {dpSlice.map((req: any) => (
                 <tr key={req.id}>
                   <td style={{ ...tdStyle, fontSize: '0.8rem', fontFamily: 'monospace' }}>{req.id.slice(0, 8).toUpperCase()}</td>
                   <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{formatDate(req.createdAt)}</td>
@@ -219,7 +262,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   </td>
                 </tr>
               ))}
-              {dpRequests.length === 0 && (
+              {dpSlice.length === 0 && (
                 <tr><td colSpan={7} style={{ ...tdStyle, padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Belum ada realisasi demo plot.
                 </td></tr>
@@ -227,9 +270,12 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
             </tbody>
           </table>
         </div>
+        {(dpHasMore || pdp > 1) && (
+          <TablePager paramName="pdp" currentPage={pdp} hasMore={dpHasMore} baseQuery={baseQuery} />
+        )}
       </div>
 
-      {/* Visit Kios Table */}
+      {/* ── Visit Kios ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '1rem' }}>🏪 Visit Kios</h3>
         <div className="table-responsive">
@@ -244,7 +290,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               </tr>
             </thead>
             <tbody>
-              {kiosReports.map(rp => (
+              {kiosSlice.map(rp => (
                 <tr key={rp.id}>
                   <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
                   <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
@@ -255,15 +301,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   </td>
                 </tr>
               ))}
-              {kiosReports.length === 0 && (
+              {kiosSlice.length === 0 && (
                 <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
               )}
             </tbody>
           </table>
         </div>
+        {(kiosHasMore || pkios > 1) && (
+          <TablePager paramName="pkios" currentPage={pkios} hasMore={kiosHasMore} baseQuery={baseQuery} />
+        )}
       </div>
 
-      {/* Farmer Gathering Table */}
+      {/* ── Farmer Gathering ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '1rem' }}>🤝 Farmer Gathering</h3>
         <div className="table-responsive">
@@ -278,7 +327,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               </tr>
             </thead>
             <tbody>
-              {gatheringReports.map(rp => (
+              {gatherSlice.map(rp => (
                 <tr key={rp.id}>
                   <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
                   <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
@@ -289,15 +338,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   </td>
                 </tr>
               ))}
-              {gatheringReports.length === 0 && (
+              {gatherSlice.length === 0 && (
                 <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
               )}
             </tbody>
           </table>
         </div>
+        {(gatherHasMore || pgather > 1) && (
+          <TablePager paramName="pgather" currentPage={pgather} hasMore={gatherHasMore} baseQuery={baseQuery} />
+        )}
       </div>
 
-      {/* Visit Company Table */}
+      {/* ── Visit Company ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '1rem' }}>🏢 Visit Company</h3>
         <div className="table-responsive">
@@ -312,7 +364,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
               </tr>
             </thead>
             <tbody>
-              {companyReports.map(rp => (
+              {compSlice.map(rp => (
                 <tr key={rp.id}>
                   <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
                   <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
@@ -323,29 +375,14 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   </td>
                 </tr>
               ))}
-              {companyReports.length === 0 && (
+              {compSlice.length === 0 && (
                 <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
               )}
             </tbody>
           </table>
         </div>
-      </div>
-
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '1rem', marginBottom: '3rem' }}>
-        {page > 1 ? (
-          <Link href={`/dashboard/reports?page=${page - 1}${queryStr}`} className="btn btn-outline">← Sebelumnya</Link>
-        ) : (
-          <button className="btn btn-outline" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>← Sebelumnya</button>
-        )}
-        
-        <span style={{ padding: '0.5rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
-          Halaman {page}
-        </span>
-        
-        {hasMore ? (
-          <Link href={`/dashboard/reports?page=${page + 1}${queryStr}`} className="btn btn-outline">Selanjutnya →</Link>
-        ) : (
-          <button className="btn btn-outline" disabled style={{ opacity: 0.5, cursor: 'not-allowed' }}>Selanjutnya →</button>
+        {(compHasMore || pcomp > 1) && (
+          <TablePager paramName="pcomp" currentPage={pcomp} hasMore={compHasMore} baseQuery={baseQuery} />
         )}
       </div>
 
