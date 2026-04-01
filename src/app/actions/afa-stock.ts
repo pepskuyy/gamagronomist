@@ -36,7 +36,7 @@ export async function submitAfaStockRequest(formData: FormData) {
   }
 
   try {
-    await prisma.request.create({
+    const req = await prisma.request.create({
       data: {
         foId: session.userId, // We trace the requester via foId
         commodity: 'AFA_STOCK_IN',
@@ -51,6 +51,23 @@ export async function submitAfaStockRequest(formData: FormData) {
         }
       }
     })
+
+    // Cari SPV dari area yang sama dengan AFA
+    const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
+    if (afaUser && afaUser.areaId) {
+      const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId } })
+      // Notify sema SPV di area tersebut
+      for (const spv of spvs) {
+        await prisma.notification.create({
+          data: {
+            userId: spv.id,
+            title: '📩 Pengajuan Stok Baru (AFA)',
+            message: `${afaUser.name} telah mengajukan permintaan restock gudang AFA.`,
+            link: `/dashboard/stock`
+          }
+        })
+      }
+    }
 
     revalidatePath('/dashboard/stock')
     return { success: true }
@@ -105,6 +122,16 @@ export async function approveAfaStockRequest(requestId: string) {
         referenceId: req.id,
         notes: `Approval Pengadaan Stok oleh SPV. Ref: ${req.plan}`,
       }))
+    })
+
+    // 3. Notify AFA (the requester)
+    await prisma.notification.create({
+      data: {
+        userId: req.foId,
+        title: '✅ Pengajuan Stok Disetujui',
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah disetujui oleh SPV dan stok telah masuk ke ledger Anda.`,
+        link: `/dashboard/stock`
+      }
     })
 
     revalidatePath('/dashboard/stock')

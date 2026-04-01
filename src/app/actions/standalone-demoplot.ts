@@ -122,6 +122,33 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
       })
     }
 
+    // Notify SPV/AFA
+    if (session.role === 'FO' && session.afaId) {
+      await prisma.notification.create({
+        data: {
+          userId: session.afaId,
+          title: '📝 Realisasi Demo Plot',
+          message: `${session.name} telah menyimpan realisasi demo plot untuk petani ${farmerName}.`,
+          link: `/dashboard/demoplot/detail/${req.id}`
+        }
+      })
+    } else if (session.role === 'AFA') {
+      const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
+      if (afaUser && afaUser.areaId) {
+        const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId } })
+        for (const spv of spvs) {
+          await prisma.notification.create({
+            data: {
+              userId: spv.id,
+              title: '📝 Realisasi Demo Plot',
+              message: `${session.name} (AFA) telah menyimpan realisasi demo plot untuk petani ${farmerName}.`,
+              link: `/dashboard/demoplot/detail/${req.id}`
+            }
+          })
+        }
+      }
+    }
+
     revalidatePath('/dashboard/demoplot')
     return { success: true, requestId: req.id }
   } catch (err: any) {
@@ -218,6 +245,33 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
         where: { id: requestId },
         data: { status: 'DEMO_PLOT_SELESAI' }
       })
+    }
+
+    // Notify SPV/AFA
+    if (session.role === 'FO' && session.afaId) {
+      await prisma.notification.create({
+        data: {
+          userId: session.afaId,
+          title: '📝 Update Sesi Demo Plot',
+          message: `${session.name} telah menyimpan sesi lanjutan demo plot untuk petani ${req.farmer?.name ?? '-'}.`,
+          link: `/dashboard/demoplot/detail/${req.id}`
+        }
+      })
+    } else if (session.role === 'AFA') {
+      const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
+      if (afaUser && afaUser.areaId) {
+        const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId } })
+        for (const spv of spvs) {
+          await prisma.notification.create({
+            data: {
+              userId: spv.id,
+              title: '📝 Update Sesi Demo Plot',
+              message: `${session.name} (AFA) telah menyimpan sesi lanjutan demo plot untuk petani ${req.farmer?.name ?? '-'}.`,
+              link: `/dashboard/demoplot/detail/${req.id}`
+            }
+          })
+        }
+      }
     }
 
     revalidatePath('/dashboard/demoplot')

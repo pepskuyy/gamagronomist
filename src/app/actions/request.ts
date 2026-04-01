@@ -38,7 +38,6 @@ export async function submitRequestDemoPlot(formData: FormData) {
       data: {
         foId: session.userId,
         afaId: session.afaId,
-        // farmer and demo plot fields are no longer required at request stage
         farmerId: null,
         area: notes || 'Pengajuan Stok',
         commodity: '-',
@@ -53,6 +52,18 @@ export async function submitRequestDemoPlot(formData: FormData) {
         },
       },
     })
+
+    if (session.afaId) {
+      await prisma.notification.create({
+        data: {
+          userId: session.afaId,
+          title: '📩 Permintaan Stok Baru (FO)',
+          message: `${session.name} mengajukan permintaan pengambilan stok baru.`,
+          link: `/dashboard/demoplot/detail/${newReq.id}`
+        }
+      })
+    }
+
     return { success: true, requestId: newReq.id }
   } catch (err: any) {
     console.error('Submit request error', err)

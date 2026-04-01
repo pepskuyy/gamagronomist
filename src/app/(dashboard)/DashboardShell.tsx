@@ -9,6 +9,8 @@ type SidebarProps = {
   children: React.ReactNode
 }
 
+import NotificationBell from '@/components/NotificationBell'
+
 // Nav icon SVGs — clean, modern look matching the reference
 const Icons = {
   dashboard: (
@@ -142,13 +144,16 @@ export default function DashboardShell({ session, children }: SidebarProps) {
             </div>
           </div>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>{session?.name?.split(' ')[0]}</div>
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: roleColor[session?.role] || 'var(--text-muted)' }}>{session?.role}</div>
-            </div>
-            <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0 }}>
-              {session?.name?.charAt(0)?.toUpperCase()}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <NotificationBell />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid var(--border)', paddingLeft: '1rem' }}>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>{session?.name?.split(' ')[0]}</div>
+                <div style={{ fontSize: '0.72rem', fontWeight: 700, color: roleColor[session?.role] || 'var(--text-muted)' }}>{session?.role}</div>
+              </div>
+              <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0 }}>
+                {session?.name?.charAt(0)?.toUpperCase()}
+              </div>
             </div>
           </div>
         </header>

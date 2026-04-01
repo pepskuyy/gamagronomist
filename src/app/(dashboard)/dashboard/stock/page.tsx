@@ -4,6 +4,7 @@ import { getStockBalance } from '@/lib/ledger/stock'
 import { PrismaClient } from '@prisma/client'
 import Link from 'next/link'
 import AfaStockRequestTable from '@/components/AfaStockRequestTable'
+import TeamStockTable from '@/components/TeamStockTable'
 
 const prisma = new PrismaClient()
 
@@ -16,50 +17,70 @@ export default async function StockDashboardPage() {
 
   const myStocks = await getStockBalance(session.userId)
 
-  // For AFA: fetch all FOs under this AFA and their stock balances
-  let foStockData: { fo: { id: string; name: string }; stocks: { product: { id: string; name: string; unit: string }; quantity: number }[] }[] = []
+  // Determine who to fetch for monitoring table
+  let teamUsers: { id: string; name: string; role: string; parentName?: string }[] = []
 
-  if (session.role === 'AFA') {
+  if (session.role === 'ADMIN') {
+    // Admin sees ALL AFA and FO/INTERN
+    const users = await prisma.user.findMany({
+      where: { role: { in: ['AFA', 'FO', 'INTERN'] } },
+      include: { afa: { select: { name: true } }, area: { select: { name: true } } },
+      orderBy: [{ role: 'asc' }, { name: 'asc' }]
+    })
+    teamUsers = users.map(u => ({
+      id: u.id, name: u.name, role: u.role, 
+      parentName: u.role === 'AFA' ? (u.area?.name || 'Pusat') : (u.afa?.name || u.area?.name || '-')
+    }))
+  } else if (session.role === 'SPV') {
+    // SPV sees AFA and FO in their Area
+    const users = await prisma.user.findMany({
+      where: { 
+        role: { in: ['AFA', 'FO', 'INTERN'] },
+        // If SPV has area, filter by area. Note: some logic depends on areaId directly.
+        ...(session.areaId ? { areaId: session.areaId } : {})
+      },
+      include: { afa: { select: { name: true } }, area: { select: { name: true } } },
+      orderBy: [{ role: 'asc' }, { name: 'asc' }]
+    })
+    // For SPV, also include FOs that might be linked to AFAs in this area but don't have areaId explicitly (just in case)
+    // Actually the above is safe.
+    teamUsers = users.map(u => ({
+      id: u.id, name: u.name, role: u.role, 
+      parentName: u.role === 'AFA' ? (u.area?.name || '-') : (u.afa?.name || '-')
+    }))
+  } else if (session.role === 'AFA') {
+    // AFA sees FOs under them
     const fos = await prisma.user.findMany({
       where: { afaId: session.userId, role: { in: ['FO', 'INTERN'] } },
-      select: { id: true, name: true },
       orderBy: { name: 'asc' },
     })
-    foStockData = await Promise.all(
-      fos.map(async (fo) => ({
-        fo,
-        stocks: await getStockBalance(fo.id),
-      }))
-    )
+    teamUsers = fos.map(u => ({
+      id: u.id, name: u.name, role: u.role
+    }))
   }
 
-  // For SPV: fetch all AFAs in the area, and their FOs
-  let spvFoData: { fo: { id: string; name: string; afa?: { name: string } | null }; stocks: { product: { id: string; name: string; unit: string }; quantity: number }[] }[] = []
-
-  if (session.role === 'SPV') {
-    const fos = await prisma.user.findMany({
-      where: { role: { in: ['FO', 'INTERN'] }, area: { is: session.areaId ? { id: session.areaId } : undefined } },
-      include: { afa: { select: { name: true } } },
-      orderBy: { name: 'asc' },
+  // Fetch stocks for all teamUsers
+  const stocksMap: Record<string, { product: any, quantity: number }[]> = {}
+  await Promise.all(
+    teamUsers.map(async (u) => {
+      stocksMap[u.id] = await getStockBalance(u.id)
     })
-    spvFoData = await Promise.all(
-      fos.map(async (fo) => ({
-        fo: { id: fo.id, name: fo.name, afa: fo.afa },
-        stocks: await getStockBalance(fo.id),
-      }))
-    )
-  }
-
-  // Collect all products that appear in FO stocks (for table columns)
-  const allProducts = Array.from(
-    new Map(
-      [...foStockData, ...spvFoData]
-        .flatMap(d => d.stocks.map(s => s.product))
-        .map(p => [p.id, p])
-    ).values()
   )
 
-  const foRows = session.role === 'AFA' ? foStockData : spvFoData
+  // Collect all products globally available to be columns
+  const allProductsMap = new Map()
+  
+  // If there are no team users, we can just fetch all products in db
+  if (teamUsers.length === 0) {
+    const prods = await prisma.product.findMany()
+    prods.forEach(p => allProductsMap.set(p.id, p))
+  } else {
+    // Collect from actual stocks
+    for (const uid in stocksMap) {
+      stocksMap[uid].forEach(s => allProductsMap.set(s.product.id, s.product))
+    }
+  }
+  const allProducts = Array.from(allProductsMap.values())
 
   // Fetch AFA Stock Requests (Pengajuan Stok AFA)
   let afaStockRequests: any[] = []
@@ -238,76 +259,35 @@ export default async function StockDashboardPage() {
         <AfaStockRequestTable requests={afaStockRequests} role={session.role} />
       )}
 
-      {/* FO Monitoring Table (AFA & SPV only) */}
-      {['SPV', 'AFA'].includes(session.role) && (
+      {/* Global Stock Monitoring Table (ADMIN, SPV, AFA only) */}
+      {['ADMIN', 'SPV', 'AFA'].includes(session.role) && (
         <div style={{ marginTop: '2.5rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem' }}>
-            <h2 style={{ margin: 0 }}>👀 Pantauan Stok FO</h2>
+            <h2 style={{ margin: 0 }}>👀 Pantauan Stok User</h2>
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', background: 'var(--surface-2)', padding: '0.2rem 0.65rem', borderRadius: '9999px', border: '1px solid var(--border)' }}>
-              {foRows.length} FO
+              {teamUsers.length} User
             </span>
           </div>
 
-          {foRows.length === 0 ? (
+          {teamUsers.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '2.5rem' }}>
-              <p>Belum ada FO yang terdaftar di bawah Anda.</p>
+              <p>Belum ada user yang terdaftar untuk dipantau.</p>
             </div>
           ) : allProducts.length === 0 ? (
             <div className="card" style={{ textAlign: 'center', padding: '2.5rem' }}>
-              <p>FO di bawah Anda belum memiliki stok yang tercatat.</p>
+              <p>User yang dipantau belum memiliki stok yang tercatat.</p>
             </div>
           ) : (
-            <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 500 }}>
-                  <thead>
-                    <tr>
-                      <th style={{ ...thStyle, textAlign: 'left' }}>Nama FO</th>
-                      {session.role === 'SPV' && <th style={{ ...thStyle, textAlign: 'left' }}>AFA</th>}
-                      {allProducts.map(p => (
-                        <th key={p.id} style={{ ...thStyle, textAlign: 'right' }}>
-                          {p.name}
-                          <span style={{ display: 'block', fontWeight: 400, textTransform: 'lowercase', letterSpacing: 0 }}>({p.unit})</span>
-                        </th>
-                      ))}
-                      <th style={{ ...thStyle, textAlign: 'right' }}>Total Item</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {foRows.map(({ fo, stocks }) => {
-                      const totalQty = stocks.reduce((sum, s) => sum + s.quantity, 0)
-                      return (
-                        <tr key={fo.id} className="fo-stock-row">
-                          <td style={{ ...tdStyle, fontWeight: 600 }}>{fo.name}</td>
-                          {session.role === 'SPV' && (
-                            <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
-                              {(fo as any).afa?.name || '-'}
-                            </td>
-                          )}
-                          {allProducts.map(p => {
-                            const s = stocks.find(st => st.product.id === p.id)
-                            const qty = s?.quantity ?? 0
-                            return (
-                              <td key={p.id} style={{ ...tdStyle, textAlign: 'right', fontWeight: qty > 0 ? 600 : 400, color: qty > 0 ? 'var(--primary)' : 'var(--text-muted)' }}>
-                                {qty > 0 ? qty.toLocaleString() : '—'}
-                              </td>
-                            )
-                          })}
-                          <td style={{ ...tdStyle, textAlign: 'right', fontWeight: 700 }}>
-                            <span style={{ background: totalQty > 0 ? 'var(--primary-light)' : 'var(--surface-2)', color: totalQty > 0 ? 'var(--primary)' : 'var(--text-muted)', padding: '0.2rem 0.65rem', borderRadius: '9999px', fontSize: '0.82rem' }}>
-                              {totalQty > 0 ? totalQty.toLocaleString() : '0'}
-                            </span>
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            </div>
+            <TeamStockTable 
+              users={teamUsers}
+              stocks={stocksMap}
+              allProducts={allProducts}
+              role={session.role}
+            />
           )}
         </div>
       )}
     </div>
   )
 }
+

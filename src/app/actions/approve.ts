@@ -57,6 +57,16 @@ export async function approveRequest(formData: FormData) {
       data: { status: 'APPROVED' }
     })
 
+    // Notify FO
+    await prisma.notification.create({
+      data: {
+        userId: request.foId,
+        title: '✅ Permintaan Stok Disetujui',
+        message: `Permintaan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah disetujui oleh AFA.`,
+        link: `/dashboard/demoplot/detail/${requestId}`
+      }
+    })
+
     return { success: true }
   } catch (err: any) {
     console.error('Approve error', err)
@@ -78,10 +88,24 @@ export async function rejectRequest(formData: FormData) {
   if (!requestId) return { error: 'Data tidak valid' }
 
   try {
+    const request = await prisma.request.findUnique({ where: { id: requestId } })
+    if (!request) return { error: 'Request tidak valid' }
+
     await prisma.request.update({
       where: { id: requestId },
       data: { status: 'REJECTED' }
     })
+
+    // Notify FO
+    await prisma.notification.create({
+      data: {
+        userId: request.foId,
+        title: '❌ Permintaan Stok Ditolak',
+        message: `Permintaan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah ditolak oleh AFA.`,
+        link: `/dashboard/demoplot/detail/${requestId}`
+      }
+    })
+
     return { success: true }
   } catch (err) {
     return { error: 'Gagal menolak pengajuan' }
