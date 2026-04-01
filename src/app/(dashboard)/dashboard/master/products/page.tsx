@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
+import * as XLSX from 'xlsx'
 import { createProduct, updateProduct, deleteProduct, bulkDeleteProducts } from '@/app/actions/master'
 import ImportModal from '@/components/ImportModal'
 
@@ -74,6 +75,19 @@ export default function ProductsMasterPage() {
       if (res?.error) alert(res.error)
       else { setSelectedProducts(new Set()); fetchData() }
     })
+  }
+
+  function handleExportExcel() {
+    if (products.length === 0) { alert('Belum ada data produk untuk diekspor.'); return }
+    const data = [
+      ['id_db', 'id_produk', 'nama_produk', 'satuan', 'deskripsi'],
+      ...products.map(p => [p.id, p.code || '', p.name, p.unit, p.description || ''])
+    ]
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.aoa_to_sheet(data)
+    ws['!cols'] = [{ wch: 28 }, { wch: 15 }, { wch: 30 }, { wch: 12 }, { wch: 40 }]
+    XLSX.utils.book_append_sheet(wb, ws, 'Produk')
+    XLSX.writeFile(wb, `master_produk_${new Date().toISOString().slice(0,10)}.xlsx`)
   }
 
   function toggleProduct(id: string) {
@@ -156,6 +170,7 @@ export default function ProductsMasterPage() {
              value={search}
              onChange={e => setSearch(e.target.value)}
           />
+          <button onClick={handleExportExcel} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📤 Export Excel</button>
           <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📥 Import Excel</button>
           <button onClick={openAdd} className="btn btn-primary">➕ Tambah Produk</button>
         </div>

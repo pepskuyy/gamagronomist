@@ -9,14 +9,13 @@ const VALID_UNITS = ['ml', 'gr', 'kg', 'liter', 'pcs', 'sachet', 'botol']
 function downloadTemplate() {
   const wb = XLSX.utils.book_new()
   const data = [
-    ['id_produk', 'nama_produk', 'satuan', 'deskripsi'],
-    ['P001', 'Pupuk Cair Bintang', 'ml', 'Pupuk cair serbaguna'],
-    ['', 'Pestisida Andalan', 'liter', 'Untuk hama wereng'],
-    ['P003', 'Granul Spesifik', 'gr', ''],
+    ['id_db', 'id_produk', 'nama_produk', 'satuan', 'deskripsi'],
+    ['(kosongkan jika baru)', 'P001', 'Pupuk Cair Bintang', 'ml', 'Pupuk cair serbaguna'],
+    ['', 'P002', 'Pestisida Andalan', 'liter', 'Untuk hama wereng'],
+    ['', 'P003', 'Granul Spesifik', 'gr', ''],
   ]
   const ws = XLSX.utils.aoa_to_sheet(data)
-  // Column comment / validation hints — widen columns
-  ws['!cols'] = [{ wch: 15 }, { wch: 30 }, { wch: 12 }, { wch: 40 }]
+  ws['!cols'] = [{ wch: 28 }, { wch: 15 }, { wch: 30 }, { wch: 12 }, { wch: 40 }]
   XLSX.utils.book_append_sheet(wb, ws, 'Produk')
   XLSX.writeFile(wb, 'template_import_produk.xlsx')
 }
@@ -56,8 +55,10 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
             acc[k.toLowerCase().replace(/\s+/g, '_')] = r[k]
             return acc
           }, {} as any)
+          const rawId = String(keys['id_db'] ?? '').trim()
           return {
-            code:        String(keys['id_produk'] ?? keys['id'] ?? keys['code'] ?? '').trim() || undefined,
+            id:          rawId && !rawId.startsWith('(') ? rawId : undefined,
+            code:        String(keys['id_produk'] ?? keys['code'] ?? '').trim() || undefined,
             name:        String(keys['nama_produk'] ?? keys['name'] ?? '').trim(),
             unit:        String(keys['satuan'] ?? keys['unit'] ?? '').trim().toLowerCase(),
             description: String(keys['deskripsi'] ?? keys['description'] ?? '').trim() || undefined,
@@ -98,8 +99,11 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
         {/* ─── Step 1: Upload ─── */}
         {step === 'upload' && (
           <>
-            <h3 style={{ marginBottom: '0.25rem' }}>📥 Import Produk dari Excel</h3>
-            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>Upload file .xlsx atau .xls dengan kolom (opsional ditandai *): <br/><code>id_produk*</code>, <code>nama_produk</code>, <code>satuan</code>, <code>deskripsi*</code></p>
+            <h3 style={{ marginBottom: '0.25rem' }}>📥 Import / Update Produk dari Excel</h3>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Upload file .xlsx atau .xls. Gunakan kolom <code>id_db</code> (isi ID dari sistem) untuk <strong>memperbarui</strong> produk yang sudah ada, atau kosongkan untuk <strong>menambah</strong> produk baru.</p>
+            <div style={{ marginBottom: '1rem', padding: '0.6rem 0.9rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.5rem', fontSize: '0.82rem', color: '#166534' }}>
+              💡 <strong>Tip:</strong> Gunakan tombol &quot;Export Excel&quot; di halaman produk untuk mendapatkan file dengan kolom <code>id_db</code> yang sudah terisi, lalu edit dan re-import kembali.
+            </div>
 
             <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', fontSize: '0.85rem', color: '#1e40af' }}>
               <strong>Satuan yang valid:</strong> {VALID_UNITS.join(', ')}
@@ -180,14 +184,18 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
         {step === 'done' && result && (
           <>
             <h3 style={{ marginBottom: '0.75rem' }}>🎉 Hasil Import</h3>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
               <div style={{ padding: '1rem', background: '#dcfce7', borderRadius: '0.75rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 800, color: '#16a34a' }}>{result.inserted}</div>
-                <div style={{ fontSize: '0.85rem', color: '#166534' }}>Berhasil Ditambahkan</div>
+                <div style={{ fontSize: '0.85rem', color: '#166534' }}>Ditambahkan</div>
+              </div>
+              <div style={{ padding: '1rem', background: '#eff6ff', borderRadius: '0.75rem', textAlign: 'center' }}>
+                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#2563eb' }}>{(result as any).updated ?? 0}</div>
+                <div style={{ fontSize: '0.85rem', color: '#1e40af' }}>Diperbarui</div>
               </div>
               <div style={{ padding: '1rem', background: result.skipped > 0 ? '#fff7ed' : '#f0fdf4', borderRadius: '0.75rem', textAlign: 'center' }}>
                 <div style={{ fontSize: '2rem', fontWeight: 800, color: result.skipped > 0 ? '#ea580c' : '#16a34a' }}>{result.skipped}</div>
-                <div style={{ fontSize: '0.85rem', color: result.skipped > 0 ? '#9a3412' : '#166534' }}>Dilewati / Error</div>
+                <div style={{ fontSize: '0.85rem', color: result.skipped > 0 ? '#9a3412' : '#166534' }}>Dilewati</div>
               </div>
             </div>
 
