@@ -6,8 +6,8 @@ import Link from 'next/link'
 import { submitAfaStockRequest } from '@/app/actions/afa-stock'
 import SearchableSelect from '@/components/SearchableSelect'
 
-type Product = { id: string, name: string, unit: string }
-type SelectedProduct = { productId: string; qtyRequested: number; name: string; unit: string }
+type Product = { id: string, name: string, unit: string, unitGramasi?: string | null, gramasiPerUnit?: number | null }
+type SelectedProduct = { productId: string; qtyRequested: number; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
 
 export default function StockInPage() {
   const router = useRouter()
@@ -37,7 +37,14 @@ export default function StockInPage() {
     if (detail) {
       setSelectedProducts(prev => [
         ...prev, 
-        { productId: detail.id, qtyRequested: Number(currentQty), name: detail.name, unit: detail.unit }
+        { 
+          productId: detail.id, 
+          qtyRequested: Number(currentQty), 
+          name: detail.name, 
+          unit: detail.unit,
+          unitGramasi: detail.unitGramasi,
+          gramasiPerUnit: detail.gramasiPerUnit,
+        }
       ])
       setCurrentProduct('')
       setCurrentQty('')
@@ -100,15 +107,20 @@ export default function StockInPage() {
               <div style={{ flex: 2 }}>
                 <label className="form-label">Pilih Produk</label>
                 <SearchableSelect 
-                  options={products.map(p => ({ value: p.id, label: `${p.name} (${p.unit})` }))}
+                  options={products.map(p => ({ 
+                    value: p.id, 
+                    label: p.unitGramasi 
+                      ? `${p.name} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit}`
+                      : `${p.name} (${p.unit})`
+                  }))}
                   value={currentProduct}
                   onChange={setCurrentProduct}
                   placeholder="-- Ketik nama produk --"
                 />
               </div>
               <div style={{ flex: 1 }}>
-                <label className="form-label">Kuantitas</label>
-                <input type="number" step="0.01" min="0.01" className="form-control" value={currentQty} onChange={e => setCurrentQty(e.target.value)} />
+                <label className="form-label">Kuantitas (dalam {products.find(p => p.id === currentProduct)?.unit || 'kemasan'})</label>
+                <input type="number" step="1" min="1" className="form-control" value={currentQty} onChange={e => setCurrentQty(e.target.value)} />
               </div>
               <button type="button" onClick={addProduct} className="btn btn-outline" style={{ height: '42px', padding: '0 1.5rem' }}>Tambah</button>
             </div>
@@ -128,10 +140,16 @@ export default function StockInPage() {
                       <tr key={p.productId}>
                         <td style={tdStyle}>
                           <div style={{ fontWeight: 500 }}>{p.name}</div>
+                          {p.unitGramasi && p.gramasiPerUnit && (
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.gramasiPerUnit}{p.unitGramasi} per {p.unit}</div>
+                          )}
                         </td>
                         <td style={tdStyle}>
                           <span style={{ fontWeight: 700, fontSize: '1rem' }}>{p.qtyRequested}</span> 
                           <span style={{ color: 'var(--text-muted)', marginLeft: '0.4rem' }}>{p.unit}</span>
+                          {p.unitGramasi && p.gramasiPerUnit && (
+                            <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem', marginLeft: '0.5rem' }}>= {(p.qtyRequested * p.gramasiPerUnit).toLocaleString()}{p.unitGramasi}</span>
+                          )}
                         </td>
                         <td style={{ ...tdStyle, textAlign: 'center' }}>
                           <button type="button" onClick={() => removeProduct(p.productId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.2rem', padding: '0.2rem' }}>✕</button>

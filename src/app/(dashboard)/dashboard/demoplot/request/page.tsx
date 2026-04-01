@@ -6,8 +6,14 @@ import Link from 'next/link'
 import { submitRequestDemoPlot } from '@/app/actions/request'
 import SearchableSelect from '@/components/SearchableSelect'
 
-type AfaProduct = { id: string; name: string; unit: string; balance: number }
-type SelectedProduct = { productId: string; qtyRequested: number; name: string; unit: string; afaBalance: number }
+type AfaProduct = { 
+  id: string; name: string; unit: string; balance: number;
+  unitGramasi?: string | null; gramasiPerUnit?: number | null; balanceKemasan?: number | null
+}
+type SelectedProduct = { 
+  productId: string; qtyRequested: number; name: string; 
+  unitGramasi?: string | null; unit: string; afaBalance: number
+}
 
 export default function FOStockRequestPage() {
   const router = useRouter()
@@ -34,8 +40,12 @@ export default function FOStockRequestPage() {
     if (!detail) return
 
     const qty = Number(currentQty)
-    if (qty > detail.balance) {
-      alert(`Jumlah melebihi stok AFA! Stok tersedia: ${detail.balance} ${detail.unit}`)
+    if (qty <= 0) return
+    // balance is in gramasi (ml/gr); if no gramasi, fall back to kemasan check
+    const effectiveMax = detail.balance
+    if (qty > effectiveMax) {
+      const unitLabel = detail.unitGramasi || detail.unit
+      alert(`Jumlah melebihi stok AFA! Stok tersedia: ${detail.balance} ${unitLabel}`)
       return
     }
 
@@ -43,7 +53,7 @@ export default function FOStockRequestPage() {
       productId: detail.id,
       qtyRequested: qty,
       name: detail.name,
-      unit: detail.unit,
+      unit: detail.unitGramasi || detail.unit,  // FO requests in gramasi
       afaBalance: detail.balance,
     }])
     setCurrentProduct('')
@@ -71,7 +81,9 @@ export default function FOStockRequestPage() {
     .filter(p => !selectedProducts.find(s => s.productId === p.id))
     .map(p => ({
       value: p.id,
-      label: `${p.name} — stok: ${p.balance} ${p.unit}`,
+      label: p.unitGramasi
+        ? `${p.name} — stok: ${p.balance} ${p.unitGramasi}${p.balanceKemasan != null ? ` (≈${p.balanceKemasan} ${p.unit})` : ''}`
+        : `${p.name} — stok: ${p.balance} ${p.unit}`,
     }))
 
   const selectedAfaProduct = afaProducts.find(p => p.id === currentProduct)
@@ -120,8 +132,11 @@ export default function FOStockRequestPage() {
                 }}>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{p.name}</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 800, color: p.balance > 0 ? '#16a34a' : '#dc2626' }}>
-                    {p.balance} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.unit}</span>
+                    {p.balance.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.unitGramasi || p.unit}</span>
                   </div>
+                  {p.unitGramasi && p.balanceKemasan != null && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>≈ {p.balanceKemasan} {p.unit}</div>
+                  )}
                 </div>
               ))}
             </div>
@@ -145,10 +160,10 @@ export default function FOStockRequestPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className="form-label">
-                    Jumlah
+                    Jumlah (dalam {afaProducts.find(p => p.id === currentProduct)?.unitGramasi || afaProducts.find(p => p.id === currentProduct)?.unit || 'gramasi'})
                     {selectedAfaProduct && (
                       <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
-                        (maks: {selectedAfaProduct.balance} {selectedAfaProduct.unit})
+                        (maks: {selectedAfaProduct.balance.toLocaleString()} {selectedAfaProduct.unitGramasi || selectedAfaProduct.unit})
                       </span>
                     )}
                   </label>

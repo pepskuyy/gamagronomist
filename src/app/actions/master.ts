@@ -99,26 +99,40 @@ export async function deleteUser(id: string) {
 
 // ─── PRODUCT ────────────────────────────────────
 export async function createProduct(formData: FormData) {
-  const code        = (formData.get('code')        as string)?.trim()
-  const name        = (formData.get('name')        as string)?.trim()
-  const description = (formData.get('description') as string)?.trim()
-  const unit        = (formData.get('unit')        as string)?.trim()
-  if (!name || !unit) return { error: 'Nama dan satuan unit wajib diisi.' }
+  const code          = (formData.get('code')          as string)?.trim()
+  const name          = (formData.get('name')          as string)?.trim()
+  const description   = (formData.get('description')   as string)?.trim()
+  const unit          = (formData.get('unit')          as string)?.trim()
+  const unitGramasi   = (formData.get('unitGramasi')   as string)?.trim() || null
+  const gramasiRaw    = (formData.get('gramasiPerUnit') as string)?.trim()
+  const gramasiPerUnit = gramasiRaw ? parseFloat(gramasiRaw) : null
+  if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
   try {
-    await prisma.product.create({ data: { code: code || null, name, description: description || null, unit } })
+    await prisma.product.create({ data: { 
+      code: code || null, name, description: description || null, unit,
+      unitGramasi: unitGramasi || null,
+      gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
+    }})
     revalidatePath('/dashboard/master/products')
     return { success: true }
   } catch { return { error: 'Gagal menyimpan produk.' } }
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-  const code        = (formData.get('code')        as string)?.trim()
-  const name        = (formData.get('name')        as string)?.trim()
-  const description = (formData.get('description') as string)?.trim()
-  const unit        = (formData.get('unit')        as string)?.trim()
-  if (!name || !unit) return { error: 'Nama dan satuan unit wajib diisi.' }
+  const code          = (formData.get('code')          as string)?.trim()
+  const name          = (formData.get('name')          as string)?.trim()
+  const description   = (formData.get('description')   as string)?.trim()
+  const unit          = (formData.get('unit')          as string)?.trim()
+  const unitGramasi   = (formData.get('unitGramasi')   as string)?.trim() || null
+  const gramasiRaw    = (formData.get('gramasiPerUnit') as string)?.trim()
+  const gramasiPerUnit = gramasiRaw ? parseFloat(gramasiRaw) : null
+  if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
   try {
-    await prisma.product.update({ where: { id }, data: { code: code || null, name, description: description || null, unit } })
+    await prisma.product.update({ where: { id }, data: { 
+      code: code || null, name, description: description || null, unit,
+      unitGramasi: unitGramasi || null,
+      gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
+    }})
     revalidatePath('/dashboard/master/products')
     return { success: true }
   } catch { return { error: 'Gagal mengupdate produk.' } }

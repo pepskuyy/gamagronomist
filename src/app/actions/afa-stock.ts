@@ -112,16 +112,32 @@ export async function approveAfaStockRequest(requestId: string) {
       }
     })
 
-    // 2. Add stock to AFA's ledger
+    // 2. Add stock to AFA's ledger — convert kemasan qty → gramasi qty (Opsi B)
+    // Fetch product info to get gramasiPerUnit for conversion
+    const productIds = req.details.map(d => d.productId)
+    const productInfos = await prisma.product.findMany({
+      where: { id: { in: productIds } },
+      select: { id: true, gramasiPerUnit: true, unitGramasi: true, unit: true },
+    })
+    const productMap = new Map(productInfos.map(p => [p.id, p]))
+
     await prisma.ledger.createMany({
-      data: req.details.map(d => ({
-        userId: req.foId, // The AFA
-        productId: d.productId,
-        transactionType: 'STOCK_IN_GUDANG', // Or "APPROVED_STOCK_IN"
-        quantity: d.qtyApproved ?? d.qtyRequested,
-        referenceId: req.id,
-        notes: `Approval Pengadaan Stok oleh SPV. Ref: ${req.plan}`,
-      }))
+      data: req.details.map(d => {
+        const prod = productMap.get(d.productId)
+        const qtyKemasan = d.qtyApproved ?? d.qtyRequested
+        // If product has gramasi info, multiply; otherwise store as-is (backward compat)
+        const qtyToStore = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
+          ? qtyKemasan * prod.gramasiPerUnit
+          : qtyKemasan
+        return {
+          userId: req.foId,
+          productId: d.productId,
+          transactionType: 'STOCK_IN_GUDANG',
+          quantity: qtyToStore,
+          referenceId: req.id,
+          notes: `Approval Pengadaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
+        }
+      })
     })
 
     // 3. Notify AFA (the requester)

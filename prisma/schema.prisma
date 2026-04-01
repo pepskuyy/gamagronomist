@@ -96,13 +96,15 @@ model AccountRequest {
 }
 
 model Product {
-  id          String   @id @default(cuid())
-  code        String?
-  name        String
-  description String?
-  unit        String   // "ml", "gr"
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id              String   @id @default(cuid())
+  code            String?
+  name            String
+  description     String?
+  unit            String   // Satuan kemasan: PCS, Btl, Bks, Box, Sak, gl, Pack, Rol
+  unitGramasi     String?  // Satuan isi per kemasan: "ml" atau "gr"
+  gramasiPerUnit  Float?   // Volume/berat per kemasan, misal 500 (artinya 500ml/Btl)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 
   ledgers           Ledger[]
   requestDetails    RequestDetail[]

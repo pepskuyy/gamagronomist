@@ -8,10 +8,12 @@ import { revalidatePath } from 'next/cache'
 const prisma = new PrismaClient()
 
 export type BulkProductRow = {
-  id?: string      // DB id (cuid) — if provided, will update existing product
-  code?: string    // human-readable code field (e.g. P001)
+  id?: string
+  code?: string
   name: string
-  unit: string
+  unit: string           // kemasan: PCS, Btl, Bks, Box, Sak, gl, Pack, Rol
+  unitGramasi?: string   // ml or gr
+  gramasiPerUnit?: number
   description?: string
 }
 
@@ -23,7 +25,10 @@ export type BulkImportResult = {
   errors: { row: number; name: string; reason: string }[]
 }
 
-const VALID_UNITS = ['ml', 'gr', 'kg', 'liter', 'pcs', 'sachet', 'botol']
+const VALID_UNITS_KEMASAN = ['PCS', 'Btl', 'Bks', 'Box', 'Sak', 'gl', 'Pack', 'Rol']
+// Legacy units still accepted for backward compatibility with existing data
+const VALID_UNITS_LEGACY = ['ml', 'gr', 'kg', 'liter', 'pcs', 'sachet', 'botol']
+const ALL_VALID_UNITS = [...VALID_UNITS_KEMASAN, ...VALID_UNITS_LEGACY]
 
 export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkImportResult> {
   const cookieStore = await cookies()
@@ -54,14 +59,17 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
       skipped++
       continue
     }
-    if (!row.unit?.trim() || !VALID_UNITS.includes(row.unit.trim().toLowerCase())) {
-      errors.push({ row: rowNum, name: row.name, reason: `Satuan tidak valid: "${row.unit}". Gunakan: ${VALID_UNITS.join(', ')}` })
+    if (!row.unit?.trim() || !ALL_VALID_UNITS.includes(row.unit.trim())) {
+      errors.push({ row: rowNum, name: row.name, reason: `Satuan tidak valid: "${row.unit}". Kemasan: ${VALID_UNITS_KEMASAN.join(', ')}` })
       skipped++
       continue
     }
 
     const normalizedName = row.name.trim()
-    const normalizedUnit = row.unit.trim().toLowerCase()
+    // Keep original case for kemasan (Btl, PCS, etc.), only lowercase legacy units
+    const normalizedUnit = row.unit.trim()
+    const normalizedGramasi = row.unitGramasi?.trim().toLowerCase() || null
+    const gramasiPerUnit = row.gramasiPerUnit && row.gramasiPerUnit > 0 ? row.gramasiPerUnit : null
     const productId = row.id?.trim()
 
     // ── CASE 1: id provided and matches existing product → UPDATE ──
@@ -74,7 +82,8 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
             name: normalizedName,
             unit: normalizedUnit,
             description: row.description?.trim() || null,
-          }
+            ...(normalizedGramasi ? { unitGramasi: normalizedGramasi, gramasiPerUnit } : {}),
+          } as any
         })
         existingById.set(productId, { id: productId, name: normalizedName })
         existingByName.set(normalizedName.toLowerCase(), { id: productId, name: normalizedName })
@@ -101,7 +110,8 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
             name: normalizedName,
             unit: normalizedUnit,
             description: row.description?.trim() || null,
-          }
+            ...(normalizedGramasi ? { unitGramasi: normalizedGramasi, gramasiPerUnit } : {}),
+          } as any
         })
         existingById.set(productId, { id: productId, name: normalizedName })
         existingByName.set(normalizedName.toLowerCase(), { id: productId, name: normalizedName })
@@ -127,7 +137,8 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
           name: normalizedName,
           unit: normalizedUnit,
           description: row.description?.trim() || null,
-        }
+          ...(normalizedGramasi ? { unitGramasi: normalizedGramasi, gramasiPerUnit } : {}),
+        } as any
       })
       existingById.set(created.id, { id: created.id, name: normalizedName })
       existingByName.set(normalizedName.toLowerCase(), { id: created.id, name: normalizedName })

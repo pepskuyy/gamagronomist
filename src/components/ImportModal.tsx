@@ -4,18 +4,20 @@ import { useState, useRef } from 'react'
 import * as XLSX from 'xlsx'
 import { bulkImportProducts, BulkProductRow, BulkImportResult } from '@/app/actions/bulk-import'
 
-const VALID_UNITS = ['ml', 'gr', 'kg', 'liter', 'pcs', 'sachet', 'botol']
+const VALID_UNITS_KEMASAN = ['PCS', 'Btl', 'Bks', 'Box', 'Sak', 'gl', 'Pack', 'Rol']
+const VALID_UNITS_LEGACY = ['ml', 'gr', 'kg', 'liter', 'pcs', 'sachet', 'botol']
+const ALL_VALID_UNITS = [...VALID_UNITS_KEMASAN, ...VALID_UNITS_LEGACY]
 
 function downloadTemplate() {
   const wb = XLSX.utils.book_new()
   const data = [
-    ['id_db', 'id_produk', 'nama_produk', 'satuan', 'deskripsi'],
-    ['(kosongkan jika baru)', 'P001', 'Pupuk Cair Bintang', 'ml', 'Pupuk cair serbaguna'],
-    ['', 'P002', 'Pestisida Andalan', 'liter', 'Untuk hama wereng'],
-    ['', 'P003', 'Granul Spesifik', 'gr', ''],
+    ['id_db', 'id_produk', 'nama_produk', 'satuan_kemasan', 'satuan_gramasi', 'gramasi_per_kemasan', 'deskripsi'],
+    ['(kosongkan jika baru)', 'P001', 'Fungisida Bintang', 'Btl', 'ml', '500', 'Untuk hama wereng'],
+    ['', 'P002', 'Insektisida Xtra', 'Bks', 'gr', '250', ''],
+    ['', 'P003', 'Alat Semprot', 'PCS', '', '', 'Tanpa gramasi'],
   ]
   const ws = XLSX.utils.aoa_to_sheet(data)
-  ws['!cols'] = [{ wch: 28 }, { wch: 15 }, { wch: 30 }, { wch: 12 }, { wch: 40 }]
+  ws['!cols'] = [{ wch: 28 }, { wch: 15 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 40 }]
   XLSX.utils.book_append_sheet(wb, ws, 'Produk')
   XLSX.writeFile(wb, 'template_import_produk.xlsx')
 }
@@ -56,12 +58,15 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
             return acc
           }, {} as any)
           const rawId = String(keys['id_db'] ?? '').trim()
+          const gramasiRaw = String(keys['gramasi_per_kemasan'] ?? keys['gramasi_per_unit'] ?? '').trim()
           return {
-            id:          rawId && !rawId.startsWith('(') ? rawId : undefined,
-            code:        String(keys['id_produk'] ?? keys['code'] ?? '').trim() || undefined,
-            name:        String(keys['nama_produk'] ?? keys['name'] ?? '').trim(),
-            unit:        String(keys['satuan'] ?? keys['unit'] ?? '').trim().toLowerCase(),
-            description: String(keys['deskripsi'] ?? keys['description'] ?? '').trim() || undefined,
+            id:             rawId && !rawId.startsWith('(') ? rawId : undefined,
+            code:           String(keys['id_produk'] ?? keys['code'] ?? '').trim() || undefined,
+            name:           String(keys['nama_produk'] ?? keys['name'] ?? '').trim(),
+            unit:           String(keys['satuan_kemasan'] ?? keys['satuan'] ?? keys['unit'] ?? '').trim(),
+            unitGramasi:    String(keys['satuan_gramasi'] ?? '').trim().toLowerCase() || undefined,
+            gramasiPerUnit: gramasiRaw ? parseFloat(gramasiRaw) : undefined,
+            description:    String(keys['deskripsi'] ?? keys['description'] ?? '').trim() || undefined,
           }
         })
 
@@ -106,7 +111,7 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
             </div>
 
             <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', fontSize: '0.85rem', color: '#1e40af' }}>
-              <strong>Satuan yang valid:</strong> {VALID_UNITS.join(', ')}
+              <strong>Satuan kemasan yang valid:</strong> {VALID_UNITS_KEMASAN.join(', ')}
             </div>
 
             <label style={{ border: '2px dashed var(--border)', borderRadius: '0.75rem', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '0.5rem', background: 'var(--surface-hover)' }}>
@@ -146,7 +151,7 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
                 <tbody>
                   {preview.map((row, i) => {
                     const nameOk = !!row.name
-                    const unitOk = VALID_UNITS.includes(row.unit)
+                    const unitOk = ALL_VALID_UNITS.includes(row.unit)
                     const ok = nameOk && unitOk
                     return (
                       <tr key={i} style={{ background: ok ? 'transparent' : '#fff7ed' }}>

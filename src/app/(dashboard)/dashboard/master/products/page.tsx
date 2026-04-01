@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx'
 import { createProduct, updateProduct, deleteProduct, bulkDeleteProducts } from '@/app/actions/master'
 import ImportModal from '@/components/ImportModal'
 
-type Product = { id: string; code: string | null; name: string; description: string | null; unit: string }
+type Product = { id: string; code: string | null; name: string; description: string | null; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
@@ -80,12 +80,12 @@ export default function ProductsMasterPage() {
   function handleExportExcel() {
     if (products.length === 0) { alert('Belum ada data produk untuk diekspor.'); return }
     const data = [
-      ['id_db', 'id_produk', 'nama_produk', 'satuan', 'deskripsi'],
-      ...products.map(p => [p.id, p.code || '', p.name, p.unit, p.description || ''])
+      ['id_db', 'id_produk', 'nama_produk', 'satuan_kemasan', 'satuan_gramasi', 'gramasi_per_kemasan', 'deskripsi'],
+      ...products.map(p => [p.id, p.code || '', p.name, p.unit, p.unitGramasi || '', p.gramasiPerUnit ?? '', p.description || ''])
     ]
     const wb = XLSX.utils.book_new()
     const ws = XLSX.utils.aoa_to_sheet(data)
-    ws['!cols'] = [{ wch: 28 }, { wch: 15 }, { wch: 30 }, { wch: 12 }, { wch: 40 }]
+    ws['!cols'] = [{ wch: 28 }, { wch: 15 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 40 }]
     XLSX.utils.book_append_sheet(wb, ws, 'Produk')
     XLSX.writeFile(wb, `master_produk_${new Date().toISOString().slice(0,10)}.xlsx`)
   }
@@ -124,21 +124,38 @@ export default function ProductsMasterPage() {
               </div>
               <div>
                 <label style={labelStyle}>Nama Produk <span style={{ color: 'red' }}>*</span></label>
-                <input name="name" style={inputStyle} required defaultValue={selected?.name} placeholder="contoh: Pupuk Cair Bintang" />
+                <input name="name" style={inputStyle} required defaultValue={selected?.name} placeholder="contoh: Fungisida Bintang" />
               </div>
               <div>
-                <label style={labelStyle}>Satuan Unit <span style={{ color: 'red' }}>*</span></label>
+                <label style={labelStyle}>Satuan Kemasan <span style={{ color: 'red' }}>*</span></label>
                 <select name="unit" style={inputStyle} required defaultValue={selected?.unit || ''}>
-                  <option value="">-- Pilih Satuan --</option>
-                  <option value="ml">ml (mililiter)</option>
-                  <option value="gr">gr (gram)</option>
-                  <option value="kg">kg (kilogram)</option>
-                  <option value="liter">liter</option>
-                  <option value="pcs">pcs (pieces)</option>
-                  <option value="sachet">sachet</option>
-                  <option value="botol">botol</option>
+                  <option value="">-- Pilih Satuan Kemasan --</option>
+                  <option value="PCS">PCS (pieces satuan)</option>
+                  <option value="Btl">Btl (botol)</option>
+                  <option value="Bks">Bks (bungkus)</option>
+                  <option value="Box">Box</option>
+                  <option value="Sak">Sak</option>
+                  <option value="gl">gl (galon)</option>
+                  <option value="Pack">Pack</option>
+                  <option value="Rol">Rol</option>
                 </select>
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem', marginBottom: 0 }}>Satuan saat AFA mengajukan stok dari SPV/gudang</p>
               </div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                <div>
+                  <label style={labelStyle}>Satuan Gramasi</label>
+                  <select name="unitGramasi" style={inputStyle} defaultValue={selected?.unitGramasi || ''}>
+                    <option value="">-- Tidak Ada --</option>
+                    <option value="ml">ml (liquid)</option>
+                    <option value="gr">gr (non-liquid)</option>
+                  </select>
+                </div>
+                <div>
+                  <label style={labelStyle}>Isi per Kemasan</label>
+                  <input name="gramasiPerUnit" type="number" step="0.01" min="0" style={inputStyle} defaultValue={selected?.gramasiPerUnit ?? ''} placeholder="misal: 500" />
+                </div>
+              </div>
+              <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '-0.5rem' }}>Contoh: Fungisida 500ml/Btl → pilih ml, isi 500. Digunakan FO saat request eceran.</p>
               <div>
                 <label style={labelStyle}>Deskripsi</label>
                 <textarea name="description" style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} defaultValue={selected?.description || ''} placeholder="Keterangan singkat tentang produk..." />
@@ -190,14 +207,15 @@ export default function ProductsMasterPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 600 }}>
             <thead>
               <tr>
-                <th style={{ ...thStyle, width: '40px', textAlign: 'center' }}>
+                <th style={{...thStyle, width: '40px', textAlign: 'center'}}>
                   <input type="checkbox" checked={filteredProducts.length > 0 && selectedProducts.size === filteredProducts.length} onChange={e => toggleAllProducts(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
                 </th>
-                <th style={{...thStyle, width: '15%'}}>ID Produk</th>
-                <th style={{...thStyle, width: '30%'}}>Nama Produk</th>
-                <th style={{...thStyle, width: '15%'}}>Satuan</th>
-                <th style={{...thStyle, width: '25%'}}>Deskripsi</th>
-                <th style={{...thStyle, width: '15%', textAlign: 'center'}}>Aksi</th>
+                <th style={{...thStyle, width: '12%'}}>ID Produk</th>
+                <th style={{...thStyle, width: '28%'}}>Nama Produk</th>
+                <th style={{...thStyle, width: '12%'}}>Kemasan</th>
+                <th style={{...thStyle, width: '16%'}}>Gramasi</th>
+                <th style={{...thStyle, width: '22%'}}>Deskripsi</th>
+                <th style={{...thStyle, width: '10%', textAlign: 'center'}}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -209,6 +227,13 @@ export default function ProductsMasterPage() {
                   <td style={{...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)'}}>{p.code || '—'}</td>
                   <td style={{...tdStyle, fontWeight: 600, color: 'var(--primary)'}}>{p.name}</td>
                   <td style={{...tdStyle}}><span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>{p.unit}</span></td>
+                  <td style={{...tdStyle}}>
+                    {p.unitGramasi && p.gramasiPerUnit ? (
+                      <span className="badge" style={{ fontSize: '0.75rem', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
+                        {p.gramasiPerUnit}{p.unitGramasi}/{p.unit}
+                      </span>
+                    ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>}
+                  </td>
                   <td style={{...tdStyle, color: 'var(--text-muted)'}}>{p.description || '—'}</td>
                   <td style={{...tdStyle, textAlign: 'center', whiteSpace: 'nowrap'}}>
                     <button onClick={() => openEdit(p)} className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', marginRight: '0.4rem' }}>✏️ Edit</button>

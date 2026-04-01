@@ -48,18 +48,27 @@ export async function GET() {
     const productIds = positiveProducts.map(l => l.productId)
     const products = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, name: true, unit: true },
+      select: { id: true, name: true, unit: true, unitGramasi: true, gramasiPerUnit: true },
       orderBy: { name: 'asc' },
     })
 
     // Merge balance info into the product data
+    // balance is stored in gramasi units (ml/gr) per Opsi B
     const result = products.map(p => {
       const ledger = positiveProducts.find(l => l.productId === p.id)
+      const balanceGramasi = ledger?._sum.quantity || 0
+      // Calculate equivalent kemasan count for display
+      const balanceKemasan = (p as any).gramasiPerUnit && (p as any).gramasiPerUnit > 0
+        ? Math.floor(balanceGramasi / (p as any).gramasiPerUnit)
+        : null
       return {
         id: p.id,
         name: p.name,
         unit: p.unit,
-        balance: ledger?._sum.quantity || 0,
+        unitGramasi: (p as any).unitGramasi || null,
+        gramasiPerUnit: (p as any).gramasiPerUnit || null,
+        balance: balanceGramasi,           // in gramasi (ml/gr)
+        balanceKemasan,                    // in kemasan units (Btl, PCS, etc.) — for display
       }
     })
 

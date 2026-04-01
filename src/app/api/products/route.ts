@@ -18,7 +18,9 @@ export async function GET(request: Request) {
       select: {
         id: true,
         name: true,
-        unit: true
+        unit: true,
+        unitGramasi: true,
+        gramasiPerUnit: true,
       },
       orderBy: { name: 'asc' }
     })
