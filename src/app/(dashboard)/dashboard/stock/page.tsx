@@ -43,6 +43,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   if (['ADMIN', 'SPV', 'AFA'].includes(session.role)) {
     const userWhere: any = { 
       role: { in: ['AFA', 'FO', 'INTERN'] },
+      isActive: true,
       ...(qu ? { name: { contains: qu, mode: 'insensitive' } } : {})
     }
     
