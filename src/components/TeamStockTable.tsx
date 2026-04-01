@@ -16,6 +16,13 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
   const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
   const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
 
+  const displayProducts = allProducts.filter(p => {
+    return users.some(u => {
+      const s = stocks[u.id]?.find(st => st.product.id === p.id)
+      return s && s.quantity > 0
+    })
+  })
+
   return (
     <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
       <div style={{ overflowX: 'auto' }}>
@@ -24,7 +31,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
             <tr>
               <th style={{ ...thStyle, textAlign: 'left' }}>Nama User</th>
               {role !== 'AFA' && <th style={{ ...thStyle, textAlign: 'left' }}>AFA / Area</th>}
-              {allProducts.map(p => (
+              {displayProducts.map(p => (
                 <th key={p.id} style={{ ...thStyle, textAlign: 'right' }}>
                   {p.name}
                   <span style={{ display: 'block', fontWeight: 400, textTransform: 'lowercase', letterSpacing: 0 }}>({p.unit})</span>
@@ -52,7 +59,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                       {user.parentName || '-'}
                     </td>
                   )}
-                  {allProducts.map(p => {
+                  {displayProducts.map(p => {
                     const s = userStocks.find(st => st.product.id === p.id)
                     const qty = s?.quantity ?? 0
                     return (
