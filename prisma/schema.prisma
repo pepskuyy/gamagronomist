@@ -98,6 +98,7 @@ model AccountRequest {
 model Product {
   id              String   @id @default(cuid())
   code            String?
+  accurateId      String?  @unique  // no_barang / SKU dari Accurate Online
   name            String
   description     String?
   unit            String   // Satuan kemasan: PCS, Btl, Bks, Box, Sak, gl, Pack, Rol

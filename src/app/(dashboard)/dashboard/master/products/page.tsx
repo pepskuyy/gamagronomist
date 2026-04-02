@@ -29,6 +29,8 @@ export default function ProductsMasterPage() {
   const [showImport, setShowImport] = useState(false)
   const [search, setSearch]       = useState('')
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
+  const [syncing, setSyncing]   = useState(false)
+  const [syncResult, setSyncResult] = useState<{ ok: boolean; msg: string; detail?: string } | null>(null)
 
   const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
   const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
@@ -88,6 +90,30 @@ export default function ProductsMasterPage() {
     ws['!cols'] = [{ wch: 28 }, { wch: 15 }, { wch: 30 }, { wch: 14 }, { wch: 14 }, { wch: 18 }, { wch: 40 }]
     XLSX.utils.book_append_sheet(wb, ws, 'Produk')
     XLSX.writeFile(wb, `master_produk_${new Date().toISOString().slice(0,10)}.xlsx`)
+  }
+
+  async function handleAccurateSync() {
+    if (!confirm('Sinkronisasi produk dari Accurate Online?\n\n• Nama produk yang sudah ada akan diperbarui\n• Produk baru dari Accurate akan ditambahkan dengan satuan default (PCS)\n• Satuan kemasan & gramasi tidak akan berubah')) return
+    setSyncing(true)
+    setSyncResult(null)
+    try {
+      const res = await fetch('/api/accurate-sync', { method: 'POST' })
+      const data = await res.json()
+      if (data.error) {
+        setSyncResult({ ok: false, msg: data.error })
+      } else {
+        setSyncResult({
+          ok: true,
+          msg: data.message,
+          detail: `Total dari Accurate: ${data.total} produk`
+        })
+        fetchData()
+      }
+    } catch {
+      setSyncResult({ ok: false, msg: 'Gagal menghubungi server. Cek koneksi.' })
+    } finally {
+      setSyncing(false)
+    }
   }
 
   function toggleProduct(id: string) {
@@ -187,11 +213,42 @@ export default function ProductsMasterPage() {
              value={search}
              onChange={e => setSearch(e.target.value)}
           />
+          <button
+            onClick={handleAccurateSync}
+            disabled={syncing}
+            className="btn btn-outline"
+            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderColor: '#d97706', color: '#92400e', background: syncing ? '#fef3c7' : undefined }}
+            title="Sinkronisasi nama & SKU produk dari Accurate Online"
+          >
+            {syncing ? <><span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #d97706', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Menyinkronkan...</> : '🔄 Sync Accurate'}
+          </button>
           <button onClick={handleExportExcel} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📤 Export Excel</button>
           <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📥 Import Excel</button>
           <button onClick={openAdd} className="btn btn-primary">➕ Tambah Produk</button>
         </div>
       </div>
+
+      {/* Sync result banner */}
+      {syncResult && (
+        <div style={{
+          display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem',
+          padding: '0.75rem 1rem',
+          background: syncResult.ok ? '#f0fdf4' : '#fef2f2',
+          border: `1px solid ${syncResult.ok ? '#86efac' : '#fca5a5'}`,
+          borderRadius: '0.5rem',
+          marginBottom: '1rem',
+          fontSize: '0.875rem',
+        }}>
+          <div>
+            <div style={{ fontWeight: 600, color: syncResult.ok ? '#166534' : '#991b1b' }}>
+              {syncResult.ok ? '✅' : '❌'} {syncResult.msg}
+            </div>
+            {syncResult.detail && <div style={{ color: 'var(--text-muted)', marginTop: '0.2rem', fontSize: '0.8rem' }}>{syncResult.detail}</div>}
+            {syncResult.ok && <div style={{ color: '#92400e', marginTop: '0.25rem', fontSize: '0.78rem' }}>⚠️ Produk baru dari Accurate ditambahkan dengan satuan <strong>PCS</strong> — harap perbarui satuan kemasan & gramasi secara manual.</div>}
+          </div>
+          <button onClick={() => setSyncResult(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1rem', padding: '0 0.25rem' }}>✕</button>
+        </div>
+      )}
 
       {/* Bulk delete bar */}
       {selectedProducts.size > 0 && (
