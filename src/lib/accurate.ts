@@ -4,8 +4,10 @@ import { createHmac } from 'crypto'
 
 // src/lib/accurate.ts
 // Helper library untuk integrasi Accurate Online API
-
-const ACCURATE_AUTH_URL = 'https://account.accurate.id'
+//
+// CATATAN: API Token yang digunakan sudah berjenis "Database-Specific Token",
+// yang berarti session sudah embedded di dalamnya. Tidak perlu memanggil
+// open-db.do. Panggil endpoint data langsung dengan token + signature.
 
 /**
  * Ambil credentials dari environment variables dengan validasi
@@ -13,16 +15,14 @@ const ACCURATE_AUTH_URL = 'https://account.accurate.id'
 function getCredentials() {
   const token   = process.env.ACCURATE_API_TOKEN
   const secret  = process.env.ACCURATE_SIGNATURE_SECRET
-  const dbIdRaw = process.env.ACCURATE_DB_ID
+  // Host untuk API Accurate — bisa dioverride jika menggunakan Private Cloud
+  // Default: https://public.accurate.id (server shared Accurate Online)
+  const host    = (process.env.ACCURATE_HOST ?? 'https://public.accurate.id').replace(/\/$/, '')
 
-  if (!token)   throw new Error('ACCURATE_API_TOKEN belum di-set di environment variables.')
-  if (!secret)  throw new Error('ACCURATE_SIGNATURE_SECRET belum di-set di environment variables.')
-  if (!dbIdRaw) throw new Error('ACCURATE_DB_ID belum di-set di environment variables.')
+  if (!token)  throw new Error('ACCURATE_API_TOKEN belum di-set di environment variables.')
+  if (!secret) throw new Error('ACCURATE_SIGNATURE_SECRET belum di-set di environment variables.')
 
-  const dbId = parseInt(dbIdRaw, 10)
-  if (isNaN(dbId)) throw new Error(`ACCURATE_DB_ID harus berupa angka integer, bukan "${dbIdRaw}".`)
-
-  return { token, secret, dbId }
+  return { token, secret, host }
 }
 
 /**
@@ -38,43 +38,9 @@ function buildAuthHeaders(token: string, secret: string): Record<string, string>
     .digest('hex')
 
   return {
-    'Authorization':     `Bearer ${token}`,
-    'X-Api-Timestamp':   timestamp,
-    'X-Api-Signature':   signature,
-  }
-}
-
-/**
- * Buka database Accurate dan dapatkan Host + Session ID.
- * Harus dipanggil sebelum setiap sesi API Accurate.
- */
-export async function openAccurateSession(): Promise<{ host: string; session: string }> {
-  const { token, secret, dbId } = getCredentials()
-  const headers = buildAuthHeaders(token, secret)
-
-  // PENTING: id harus integer (bukan string)
-  const url = `${ACCURATE_AUTH_URL}/api/open-db.do?id=${dbId}`
-
-  const res = await fetch(url, {
-    method: 'GET',
-    headers,
-    cache: 'no-store',
-  })
-
-  if (!res.ok) {
-    const text = await res.text()
-    throw new Error(`Gagal membuka session Accurate (HTTP ${res.status}): ${text}`)
-  }
-
-  const data = await res.json()
-
-  if (!data.s) {
-    throw new Error(`Accurate API error saat open-db: ${JSON.stringify(data)}`)
-  }
-
-  return {
-    host:    data.host,
-    session: data.session,
+    'Authorization':   `Bearer ${token}`,
+    'X-Api-Timestamp': timestamp,
+    'X-Api-Signature': signature,
   }
 }
 
@@ -86,11 +52,12 @@ export type AccurateItem = {
 
 /**
  * Ambil semua item/barang dari Accurate Online dengan auto-paginasi.
- * Hanya mengambil field: id, no, name.
+ *
+ * Karena token sudah berjenis database-specific (session embedded),
+ * tidak perlu open-db.do atau X-Session-ID header.
  */
 export async function fetchAccurateItems(): Promise<AccurateItem[]> {
-  const { token, secret } = getCredentials()
-  const { host, session } = await openAccurateSession()
+  const { token, secret, host } = getCredentials()
 
   const allItems: AccurateItem[] = []
   let page = 1
@@ -102,11 +69,7 @@ export async function fetchAccurateItems(): Promise<AccurateItem[]> {
     url.searchParams.set('sp.page',     String(page))
     url.searchParams.set('sp.pageSize', String(pageSize))
 
-    // Buat headers baru tiap request agar timestamp selalu fresh
-    const headers = {
-      ...buildAuthHeaders(token, secret),
-      'X-Session-ID': session,
-    }
+    const headers = buildAuthHeaders(token, secret)
 
     const res = await fetch(url.toString(), { headers, cache: 'no-store' })
 
