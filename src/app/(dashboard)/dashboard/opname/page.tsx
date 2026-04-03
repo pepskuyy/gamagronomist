@@ -21,8 +21,9 @@ export default function StockOpnamePage() {
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   
-  // State for physical counts
+  // State for physical counts and notes
   const [counts, setCounts] = useState<Record<string, number>>({})
+  const [notes, setNotes] = useState<Record<string, string>>({})
 
   useEffect(() => {
     // In MVP, we fetch products and system balances. 
@@ -48,6 +49,10 @@ export default function StockOpnamePage() {
     setCounts({ ...counts, [id]: Number(val) || 0 })
   }
 
+  const handleNoteChange = (id: string, val: string) => {
+    setNotes({ ...notes, [id]: val })
+  }
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setSubmitting(true)
@@ -59,7 +64,8 @@ export default function StockOpnamePage() {
     // Format counts
     const countsArray = Object.keys(counts).map(key => ({
       productId: key,
-      physicalQty: counts[key]
+      physicalQty: counts[key],
+      notes: notes[key] || ""
     }))
     
     formData.append('counts', JSON.stringify(countsArray))
@@ -88,11 +94,11 @@ export default function StockOpnamePage() {
 
       <div className="card">
         <p style={{ marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
-          Hitung stok fisik Anda dan masukkan pada kolom <strong>Fisik Aktual</strong>. Sistem akan otomatis melakukan penyesuaian (Adjustment) pada Ledger Anda jika ada selisih.
+          Hitung stok fisik Anda dan masukkan pada kolom <strong>Fisik Aktual</strong>. Pengajuan penyesuaian (Adjustment) jika ada selisih memerlukan persetujuan SPV terlebih dahulu sebelum masuk ke Ledger. Keterangan wajib diisi pada baris yang memiliki selisih stok.
         </p>
 
         {error && <div className="alert-error" style={{ marginBottom: '1rem', color: 'red' }}>{error}</div>}
-        {success && <div className="badge badge-success" style={{ marginBottom: '1rem', display: 'block', textAlign: 'center', padding: '1rem' }}>✅ Validasi Opname selesai! Ledger di-update. Mengalihkan...</div>}
+        {success && <div className="badge badge-success" style={{ marginBottom: '1rem', display: 'block', textAlign: 'center', padding: '1rem' }}>✅ Pengajuan opname berhasil dikirim ke SPV! Mengalihkan...</div>}
 
         <form onSubmit={handleSubmit}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', marginBottom: '2rem' }}>
@@ -102,6 +108,7 @@ export default function StockOpnamePage() {
                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Stok Sistem (Ledger)</th>
                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '200px' }}>Fisik Aktual</th>
                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '120px' }}>Selisih</th>
+                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '250px' }}>Keterangan</th>
                </tr>
              </thead>
              <tbody>
@@ -135,13 +142,25 @@ export default function StockOpnamePage() {
                         {diff > 0 ? '+' : ''}{diff} {p.unit}
                       </span>
                    </td>
+                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                      <input 
+                          type="text" 
+                          className="form-control" 
+                          placeholder={diff !== 0 ? "Wajib diisi..." : "-"}
+                          style={{ padding: '0.4rem', margin: 0, borderColor: diff !== 0 && !notes[p.id] ? 'var(--danger)' : undefined }}
+                          value={notes[p.id] || ''}
+                          onChange={(e) => handleNoteChange(p.id, e.target.value)}
+                          required={diff !== 0}
+                          disabled={diff === 0}
+                        />
+                   </td>
                  </tr>
                )})}
              </tbody>
           </table>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }} disabled={submitting}>
-             {submitting ? 'Menyimpan Opname...' : 'Konfirmasi & Sesuaikan Ledger'}
+             {submitting ? 'Mengirim Pengajuan...' : 'Ajukan Penyesuaian ke SPV'}
           </button>
         </form>
       </div>

@@ -221,7 +221,7 @@ model StockOpname {
   id             String   @id @default(cuid())
   userId         String
   user           User     @relation(fields: [userId], references: [id])
-  status         String   @default("RECORDED") // "RECORDED", "ADJUSTED"
+  status         String   @default("SUBMITTED") // "SUBMITTED", "APPROVED", "REJECTED"
   
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

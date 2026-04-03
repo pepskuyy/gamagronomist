@@ -14,9 +14,9 @@ export async function submitStockOpname(formData: FormData) {
 
   if (!session?.userId) return { error: 'Unauthorized' }
 
-  // Array of physical counts 
+  // Array of physical counts included with notes
   const countsJSON = formData.get('counts') as string
-  let counts: { productId: string, physicalQty: number }[] = []
+  let counts: { productId: string, physicalQty: number, notes?: string }[] = []
   
   try {
     if (countsJSON) counts = JSON.parse(countsJSON)
@@ -30,20 +30,25 @@ export async function submitStockOpname(formData: FormData) {
     const currentStocks = await getStockBalance(session.userId)
     
     await prisma.$transaction(async (tx) => {
-      // 1. Create Stock Opname Header
+      // 1. Create Stock Opname Header (Status SUBMITTED by default as per schema)
       const opname = await tx.stockOpname.create({
         data: {
           userId: session.userId,
-          status: 'ADJUSTED'
+          status: 'SUBMITTED'
         }
       })
 
-      // 2. Calculate Variance & Adjust Ledger
+      // 2. Calculate Variance & Save Detail (TIDAK adjust Ledger dulu)
       for (const count of counts) {
         const systemStockObj = currentStocks.find(s => s.product.id === count.productId)
         const systemStock = systemStockObj ? systemStockObj.quantity : 0
         const physicalStock = Number(count.physicalQty)
         const variance = physicalStock - systemStock
+
+        // Jika selisih dan tidak ada notes, lemparkan error
+        if (variance !== 0 && (!count.notes || count.notes.trim() === '')) {
+            throw new Error(`Keterangan wajib diisi untuk selisih pada ID Produk ${count.productId}`)
+        }
 
         // Simpan Record Detail
         await tx.opnameDetail.create({
@@ -53,30 +58,15 @@ export async function submitStockOpname(formData: FormData) {
             systemStock,
             physicalStock,
             variance,
-            notes: variance !== 0 ? 'Koreksi Stok Otomatis' : 'Sesuai'
+            notes: count.notes || (variance !== 0 ? 'Terdapat selisih' : 'Sesuai')
           }
         })
-
-        // Adjust Ledger jika ada selisih
-        if (variance !== 0) {
-          const txType = variance > 0 ? 'ADJUSTMENT_PLUS' : 'ADJUSTMENT_MINUS'
-          await tx.ledger.create({
-            data: {
-              userId: session.userId,
-              productId: count.productId,
-              transactionType: txType,
-              quantity: variance, // otomatis positif/negatif
-              referenceId: opname.id,
-              notes: `Adjustment via Opname id ${opname.id.slice(0, 8)}`
-            }
-          })
-        }
       }
     })
 
     return { success: true }
   } catch (err: any) {
     console.error('Opname Error:', err)
-    return { error: 'Terjadi kesalahan sistem saat memproses Opname.' }
+    return { error: err.message || 'Terjadi kesalahan sistem saat memproses Opname.' }
   }
 }
