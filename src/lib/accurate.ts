@@ -45,11 +45,10 @@ function buildAuthHeaders(token: string, secret: string): Record<string, string>
 }
 
 export type AccurateItem = {
-  id:           number  // Internal Accurate item ID
-  no:           string  // no_barang / SKU
-  name:         string  // nama barang
-  unitQuantity?: number // stok dalam satuan unit kemasan (field dari Accurate)
-  qty?:         number  // alias yang mungkin digunakan versi lain Accurate
+  id:        number  // Internal Accurate item ID
+  no:        string  // no_barang / SKU
+  name:      string  // nama barang
+  quantity?: number  // stok dalam satuan kemasan (field 'quantity' di Accurate)
 }
 
 /**
@@ -67,7 +66,7 @@ export async function fetchAccurateItems(): Promise<AccurateItem[]> {
 
   while (true) {
     const url = new URL(`${host}/accurate/api/item/list.do`)
-    url.searchParams.set('fields',      'id,no,name,unitQuantity')
+    url.searchParams.set('fields',      'id,no,name,quantity')
     url.searchParams.set('sp.page',     String(page))
     url.searchParams.set('sp.pageSize', String(pageSize))
 

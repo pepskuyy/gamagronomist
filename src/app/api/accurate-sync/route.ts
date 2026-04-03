@@ -65,7 +65,7 @@ export async function POST() {
 
       if (existing) {
         // Update: nama, accurateId, dan spvStock (jangan override unit/gramasi manual)
-        const spvStock = item.unitQuantity ?? item.qty ?? null
+        const spvStock = item.quantity ?? null
         await (prisma.product as any).update({
           where: { id: existing.id },
           data: {
@@ -80,7 +80,7 @@ export async function POST() {
         updated++
       } else {
         // Insert produk baru — unit default PCS, spvStock dari Accurate
-        const spvStock = item.unitQuantity ?? item.qty ?? null
+        const spvStock = item.quantity ?? null
         const newProduct = await (prisma.product as any).create({
           data: {
             name,
