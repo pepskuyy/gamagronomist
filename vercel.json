@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/accurate-sync-cron",
+      "schedule": "*/30 * * * *"
+    }
+  ]
+}

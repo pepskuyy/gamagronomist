@@ -21,13 +21,18 @@ export async function GET() {
         spvStock:       true,
         code:           true,
         accurateId:     true,
+        updatedAt:      true,
       },
       orderBy: { name: 'asc' },
     })
 
-    // Hanya kembalikan produk yang memiliki data unit (sudah dikonfigurasi)
-    // dan sertakan semua produk (stok 0 juga ditampilkan supaya AFA tahu apa saja yang ada)
-    return NextResponse.json(products)
+    // Ambil waktu sync terakhir dari produk yang punya spvStock (diupdate saat sync)
+    const synced = products.filter((p: any) => p.spvStock !== null)
+    const lastSyncedAt = synced.length > 0
+      ? new Date(Math.max(...synced.map((p: any) => new Date(p.updatedAt).getTime()))).toISOString()
+      : null
+
+    return NextResponse.json({ products, lastSyncedAt })
   } catch (err: any) {
     console.error('[spv-stock] error:', err)
     return NextResponse.json({ error: err.message }, { status: 500 })

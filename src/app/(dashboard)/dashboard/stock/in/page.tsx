@@ -47,6 +47,7 @@ export default function StockInPage() {
 
   const [products, setProducts]         = useState<SpvProduct[]>([])
   const [loadingProducts, setLoadingProducts] = useState(true)
+  const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
 
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
   const [currentProduct, setCurrentProduct]     = useState('')
@@ -58,7 +59,11 @@ export default function StockInPage() {
   useEffect(() => {
     fetch('/api/spv-stock')
       .then(r => r.json())
-      .then(data => { setProducts(data); setLoadingProducts(false) })
+      .then(data => {
+        setProducts(data.products ?? [])
+        setLastSyncedAt(data.lastSyncedAt ?? null)
+        setLoadingProducts(false)
+      })
       .catch(() => setLoadingProducts(false))
   }, [])
 
@@ -134,6 +139,20 @@ export default function StockInPage() {
             Minta persetujuan tambahan stok dari SPV area Anda. Pengajuan dalam satuan kemasan utuh.
           </p>
         </div>
+      </div>
+
+      {/* Info sync freshness */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.5rem 0.9rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+        <span>🔄 Data stok SPV dari Accurate</span>
+        {lastSyncedAt ? (
+          <span style={{ color: new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? '#d97706' : '#166534', fontWeight: 500 }}>
+            Terakhir disinkron: {new Date(lastSyncedAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+            {new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? ' ⚠️ (lebih dari 1 jam lalu)' : ' ✓'}
+          </span>
+        ) : (
+          <span style={{ color: '#d97706' }}>⚠️ Belum pernah disinkron — hubungi admin</span>
+        )}
+        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>• Auto-sync setiap 30 menit</span>
       </div>
 
       <div className="card">

@@ -1,24 +1,15 @@
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { fetchAccurateItems } from '@/lib/accurate'
-
-const prisma = new PrismaClient()
+import { runAccurateSync } from '@/lib/accurate-sync'
 
 /**
  * POST /api/accurate-sync
- * Sinkronisasi master produk dari Accurate Online.
+ * Trigger manual sync dari UI (tombol "Sync Accurate").
  * Hanya ADMIN/SPV yang boleh memicu sync ini.
- *
- * Logika:
- * - Produk dengan accurateId (no_barang) sudah ada → UPDATE nama saja
- * - Produk dengan code = no_barang (data lama) → link + update
- * - Belum ada sama sekali → INSERT baru (unit='PCS', perlu diisi manual)
  */
 export async function POST() {
   try {
-    // Auth check
     const cookieStore = await cookies()
     const sessionToken = cookieStore.get('session')?.value
     const session = await decrypt(sessionToken as string)
@@ -26,83 +17,15 @@ export async function POST() {
       return NextResponse.json({ error: 'Akses ditolak. Hanya ADMIN/SPV.' }, { status: 403 })
     }
 
-    // Fetch semua produk dari Accurate
-    const accurateItems = await fetchAccurateItems()
+    const result = await runAccurateSync()
 
-    if (accurateItems.length === 0) {
-      return NextResponse.json({
-        success: true,
-        message: 'Tidak ada produk ditemukan di Accurate Online.',
-        inserted: 0, updated: 0, skipped: 0, total: 0,
-      })
-    }
-
-    // Load semua produk yang sudah ada di DB (untuk efisiensi — hindari N+1 query)
-    const existingProducts = await (prisma.product as any).findMany({
-      select: { id: true, accurateId: true, code: true, name: true }
-    })
-
-    // Build lookup maps
-    const byAccurateId = new Map<string, any>()
-    const byCode       = new Map<string, any>()
-    for (const p of existingProducts) {
-      if (p.accurateId) byAccurateId.set(p.accurateId, p)
-      if (p.code)       byCode.set(p.code, p)
-    }
-
-    let inserted = 0
-    let updated  = 0
-    let skipped  = 0
-
-    for (const item of accurateItems) {
-      const sku  = String(item.no ?? '').trim()
-      const name = String(item.name ?? '').trim()
-
-      if (!sku || !name) { skipped++; continue }
-
-      // Prioritas lookup: 1) accurateId, 2) code (backward compat)
-      const existing = byAccurateId.get(sku) ?? byCode.get(sku)
-
-      if (existing) {
-        // Update: nama, accurateId, dan spvStock (jangan override unit/gramasi manual)
-        const spvStock = item.quantity ?? null
-        await (prisma.product as any).update({
-          where: { id: existing.id },
-          data: {
-            name,
-            accurateId: sku,
-            code: sku,
-            ...(spvStock !== null ? { spvStock } : {}),
-          }
-        })
-        // Perbarui map untuk hindari konflik di iterasi selanjutnya
-        byAccurateId.set(sku, { ...existing, name, accurateId: sku })
-        updated++
-      } else {
-        // Insert produk baru — unit default PCS, spvStock dari Accurate
-        const spvStock = item.quantity ?? null
-        const newProduct = await (prisma.product as any).create({
-          data: {
-            name,
-            accurateId: sku,
-            code: sku,
-            unit: 'PCS',
-            ...(spvStock !== null ? { spvStock } : {}),
-          }
-        })
-        byAccurateId.set(sku, newProduct)
-        byCode.set(sku, newProduct)
-        inserted++
-      }
-    }
-
+    const isEmpty = result.total === 0
     return NextResponse.json({
       success: true,
-      message: `Sinkronisasi selesai: ${inserted} produk baru ditambahkan, ${updated} diperbarui, ${skipped} dilewati.`,
-      inserted,
-      updated,
-      skipped,
-      total: accurateItems.length,
+      message: isEmpty
+        ? 'Tidak ada produk ditemukan di Accurate Online.'
+        : `Sinkronisasi selesai: ${result.inserted} produk baru, ${result.updated} diperbarui, ${result.skipped} dilewati.`,
+      ...result,
     })
   } catch (err: any) {
     console.error('[accurate-sync] error:', err)
