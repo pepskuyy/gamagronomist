@@ -64,26 +64,30 @@ export async function POST() {
       const existing = byAccurateId.get(sku) ?? byCode.get(sku)
 
       if (existing) {
-        // Update: hanya nama dan linkkan accurateId (jangan sentuh unit/gramasi)
+        // Update: nama, accurateId, dan spvStock (jangan override unit/gramasi manual)
+        const spvStock = item.unitQuantity ?? item.qty ?? null
         await (prisma.product as any).update({
           where: { id: existing.id },
           data: {
             name,
             accurateId: sku,
-            code: sku,        // jadikan code konsisten dengan SKU
+            code: sku,
+            ...(spvStock !== null ? { spvStock } : {}),
           }
         })
         // Perbarui map untuk hindari konflik di iterasi selanjutnya
         byAccurateId.set(sku, { ...existing, name, accurateId: sku })
         updated++
       } else {
-        // Insert produk baru — unit default PCS, admin harus set satuan manual setelahnya
+        // Insert produk baru — unit default PCS, spvStock dari Accurate
+        const spvStock = item.unitQuantity ?? item.qty ?? null
         const newProduct = await (prisma.product as any).create({
           data: {
             name,
             accurateId: sku,
             code: sku,
-            unit: 'PCS',  // default, harus diisi manual oleh admin
+            unit: 'PCS',
+            ...(spvStock !== null ? { spvStock } : {}),
           }
         })
         byAccurateId.set(sku, newProduct)

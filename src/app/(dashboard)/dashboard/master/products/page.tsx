@@ -6,7 +6,7 @@ import * as XLSX from 'xlsx'
 import { createProduct, updateProduct, deleteProduct, bulkDeleteProducts } from '@/app/actions/master'
 import ImportModal from '@/components/ImportModal'
 
-type Product = { id: string; code: string | null; name: string; description: string | null; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
+type Product = { id: string; code: string | null; name: string; description: string | null; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null; spvStock?: number | null }
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
@@ -267,11 +267,12 @@ export default function ProductsMasterPage() {
                 <th style={{...thStyle, width: '40px', textAlign: 'center'}}>
                   <input type="checkbox" checked={filteredProducts.length > 0 && selectedProducts.size === filteredProducts.length} onChange={e => toggleAllProducts(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
                 </th>
-                <th style={{...thStyle, width: '12%'}}>ID Produk</th>
-                <th style={{...thStyle, width: '28%'}}>Nama Produk</th>
-                <th style={{...thStyle, width: '12%'}}>Kemasan</th>
-                <th style={{...thStyle, width: '16%'}}>Gramasi</th>
-                <th style={{...thStyle, width: '22%'}}>Deskripsi</th>
+                <th style={{...thStyle, width: '11%'}}>ID Produk</th>
+                <th style={{...thStyle, width: '25%'}}>Nama Produk</th>
+                <th style={{...thStyle, width: '10%'}}>Kemasan</th>
+                <th style={{...thStyle, width: '14%'}}>Gramasi</th>
+                <th style={{...thStyle, width: '12%', textAlign: 'right'}}>Stok SPV</th>
+                <th style={{...thStyle, width: '18%'}}>Deskripsi</th>
                 <th style={{...thStyle, width: '10%', textAlign: 'center'}}>Aksi</th>
               </tr>
             </thead>
@@ -288,6 +289,13 @@ export default function ProductsMasterPage() {
                     {p.unitGramasi && p.gramasiPerUnit ? (
                       <span className="badge" style={{ fontSize: '0.75rem', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
                         {p.gramasiPerUnit}{p.unitGramasi}/{p.unit}
+                      </span>
+                    ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>}
+                  </td>
+                  <td style={{...tdStyle, textAlign: 'right'}}>
+                    {p.spvStock != null ? (
+                      <span style={{ fontWeight: 600, color: p.spvStock > 0 ? '#166534' : '#b91c1c' }}>
+                        {p.spvStock.toLocaleString('id-ID')} {p.unit}
                       </span>
                     ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>}
                   </td>

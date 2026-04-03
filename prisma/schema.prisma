@@ -104,6 +104,7 @@ model Product {
   unit            String   // Satuan kemasan: PCS, Btl, Bks, Box, Sak, gl, Pack, Rol
   unitGramasi     String?  // Satuan isi per kemasan: "ml" atau "gr"
   gramasiPerUnit  Float?   // Volume/berat per kemasan, misal 500 (artinya 500ml/Btl)
+  spvStock        Float?   // Stok SPV dari Accurate (dalam satuan kemasan)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
