@@ -65,11 +65,19 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
       continue
     }
 
+    const normalizedGramasi = row.unitGramasi?.trim().toLowerCase() || null
+    const gramasiPerUnit = row.gramasiPerUnit && row.gramasiPerUnit > 0 ? row.gramasiPerUnit : null
+
+    // Validation: if they provide gramasi amount, they MUST provide the unit (and vice versa)
+    if ((normalizedGramasi && !gramasiPerUnit) || (!normalizedGramasi && gramasiPerUnit)) {
+      errors.push({ row: rowNum, name: row.name, reason: `Satuan gramasi dan isinya harus diisi bersaman (tidak boleh salah satu kosong).` })
+      skipped++
+      continue
+    }
+
     const normalizedName = row.name.trim()
     // Keep original case for kemasan (Btl, PCS, etc.), only lowercase legacy units
     const normalizedUnit = row.unit.trim()
-    const normalizedGramasi = row.unitGramasi?.trim().toLowerCase() || null
-    const gramasiPerUnit = row.gramasiPerUnit && row.gramasiPerUnit > 0 ? row.gramasiPerUnit : null
     const productId = row.id?.trim()
 
     // ── CASE 1: id provided and matches existing product → UPDATE ──
@@ -82,7 +90,8 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
             name: normalizedName,
             unit: normalizedUnit,
             description: row.description?.trim() || null,
-            ...(normalizedGramasi ? { unitGramasi: normalizedGramasi, gramasiPerUnit } : {}),
+            unitGramasi: normalizedGramasi,
+            gramasiPerUnit: gramasiPerUnit,
           } as any
         })
         existingById.set(productId, { id: productId, name: normalizedName })
@@ -110,7 +119,8 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
             name: normalizedName,
             unit: normalizedUnit,
             description: row.description?.trim() || null,
-            ...(normalizedGramasi ? { unitGramasi: normalizedGramasi, gramasiPerUnit } : {}),
+            unitGramasi: normalizedGramasi,
+            gramasiPerUnit: gramasiPerUnit,
           } as any
         })
         existingById.set(productId, { id: productId, name: normalizedName })
@@ -137,7 +147,8 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
           name: normalizedName,
           unit: normalizedUnit,
           description: row.description?.trim() || null,
-          ...(normalizedGramasi ? { unitGramasi: normalizedGramasi, gramasiPerUnit } : {}),
+          unitGramasi: normalizedGramasi,
+          gramasiPerUnit: gramasiPerUnit,
         } as any
       })
       existingById.set(created.id, { id: created.id, name: normalizedName })
