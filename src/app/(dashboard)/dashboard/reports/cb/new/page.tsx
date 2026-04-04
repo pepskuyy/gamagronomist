@@ -158,7 +158,7 @@ export default function NewCustomerBehaviorRef() {
             </div>
             <div className="form-group">
               <label className="form-label">Umur</label>
-              <input type="text" name="age" className="form-control" />
+              <input type="text" name="age" className="form-control" inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Apakah Petani Memiliki No. HP?</label>

@@ -71,7 +71,7 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
             </div>
             <div className="form-group">
               <label className="form-label">Umur</label>
-              <input type="text" name="age" className="form-control" defaultValue={data.age || ''} />
+              <input type="text" name="age" className="form-control" defaultValue={data.age || ''} inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Apakah Petani Memiliki No. HP?</label>
