@@ -206,10 +206,6 @@ export default function FoDemoPlotDirectPage() {
               <label className="form-label">Masalah / Kendala</label>
               <textarea className="form-control" rows={2} value={problem} onChange={e => setProblem(e.target.value)} placeholder="Hama wereng mengganas..." style={{ resize: 'none' }} />
             </div>
-            <div style={{ gridColumn: '1/-1' }}>
-              <label className="form-label">Rencana / Teknik Demo Plot</label>
-              <textarea className="form-control" rows={2} value={plan} onChange={e => setPlan(e.target.value)} placeholder="Semprot 2x interval 1 minggu..." style={{ resize: 'none' }} />
-            </div>
           </div>
         </div>
 
@@ -263,21 +259,17 @@ export default function FoDemoPlotDirectPage() {
               return (
                 <div key={usage.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 120px auto', gap: '0.75rem', alignItems: 'center', padding: '1rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
                   <div>
-                    <select 
-                      className="form-control"
+                    <SearchableSelect
+                      options={products.filter(p => (stockBalance[p.id] || 0) > 0).map(p => ({ value: p.id, label: p.name }))}
                       value={usage.productId}
-                      onChange={e => {
+                      onChange={val => {
                         const newList = [...usageList]
-                        newList[idx].productId = e.target.value
+                        newList[idx].productId = val
                         setUsageList(newList)
                       }}
+                      placeholder="-- Cari Produk --"
                       required
-                    >
-                      <option value="">-- Pilih Produk --</option>
-                      {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
-                    </select>
+                    />
                     {selectedProduct && (
                       <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
                         Tersedia: <strong>{onHand} {selectedProduct.unit}</strong>

@@ -1,0 +1,192 @@
+import { NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
+
+const prisma = new PrismaClient()
+
+export async function GET(req: Request) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  if (!session?.userId) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  const { searchParams } = new URL(req.url)
+  const type = searchParams.get('type')
+  const search = searchParams.get('search') || ''
+  const startParam = searchParams.get('start') || ''
+  const endParam = searchParams.get('end') || ''
+
+  const startDate = startParam ? new Date(startParam) : undefined
+  const endDate = endParam ? new Date(endParam) : undefined
+  if (endDate) endDate.setHours(23, 59, 59, 999)
+
+  const dateFilter = startDate || endDate ? {
+    createdAt: {
+      ...(startDate ? { gte: startDate } : {}),
+      ...(endDate ? { lte: endDate } : {})
+    }
+  } : {}
+
+  let userFilter: any = {}
+  if (['ADMIN', 'SPV'].includes(session.role)) {
+    userFilter = {}
+  } else if (session.role === 'AFA') {
+    const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
+    const userIds = [session.userId, ...fos.map(u => u.id)]
+    userFilter = { userId: { in: userIds } }
+  } else {
+    userFilter = { userId: session.userId }
+  }
+
+  try {
+    let data: any[] = []
+
+    if (type === 'cb') {
+      const q = await prisma.customerBehavior.findMany({
+        where: {
+          ...dateFilter,
+          ...userFilter,
+          ...(search ? {
+            OR: [
+              { farmerName: { contains: search } },
+              { district: { contains: search } }
+            ]
+          } : {})
+        },
+        include: { user: { select: { name: true, role: true } } },
+        orderBy: { createdAt: 'desc' }
+      })
+      data = q.map(i => ({
+        'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
+        'Pelapor': i.user.name,
+        'Role': i.user.role,
+        'Nama Petani': i.farmerName,
+        'Umur': i.age || '-',
+        'No. HP': i.phone || '-',
+        'Area/Kabupaten': i.district || '-',
+        'Alamat Lengkap': i.address || '-',
+        'Komoditas': i.commodity || '-',
+        'Kendala': i.constraints || '-',
+        'Jenis OPT': i.optTypes || '-',
+        'Detail OPT': i.optDetails || '-',
+        'Produk Biasa Dipakai': i.usedProducts || '-',
+        'Lokasi Beli': i.buyLocation || '-',
+        'Referensi': i.references || '-'
+      }))
+
+    } else if (type === 'demoplot') {
+      let dpRequestFilter: any = { commodity: { not: '-' }, farmer: { isNot: null } }
+      if (['ADMIN', 'SPV'].includes(session.role)) {
+        // empty
+      } else if (session.role === 'AFA') {
+        const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
+        const foIds = [session.userId, ...fos.map(u => u.id)]
+        dpRequestFilter = { ...dpRequestFilter, OR: [{ foId: { in: foIds } }, { afaId: session.userId }] }
+      } else {
+        dpRequestFilter = { ...dpRequestFilter, foId: session.userId }
+      }
+
+      const q = await prisma.request.findMany({
+        where: {
+          ...dateFilter,
+          ...dpRequestFilter,
+          ...(search ? {
+            OR: [
+              { farmer: { name: { contains: search } } },
+              { area: { contains: search } }
+            ]
+          } : {})
+        },
+        include: { fo: { select: { name: true } }, farmer: true, demoPlots: true },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      data = q.map(i => ({
+        'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
+        'ID Tiket': i.id,
+        'Pelaksana (FO/AFA)': i.fo?.name || '-',
+        'Nama Petani': i.farmer?.name || '-',
+        'No. HP': i.farmer?.phone || '-',
+        'Area/Desa': i.area || '-',
+        'Komoditas': i.commodity || '-',
+        'Status': i.status,
+        'Jumlah Sesi Dilakukan': i.demoPlots.length
+      }))
+
+    } else if (type === 'kios') {
+      const q = await prisma.visitKios.findMany({
+        where: {
+          ...dateFilter,
+          ...userFilter,
+          ...(search ? { kiosName: { contains: search } } : {})
+        },
+        include: { user: { select: { name: true } } },
+        orderBy: { createdAt: 'desc' }
+      })
+      data = q.map(i => ({
+        'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
+        'Pelapor': i.user.name,
+        'Nama Kios': i.kiosName,
+        'Detail Aktivitas': i.activityDetail || '-',
+        'Hasil Kunjungan': i.visitResult || '-',
+        'Catatan': i.notes || '-'
+      }))
+
+    } else if (type === 'gathering') {
+      const q = await prisma.farmerGathering.findMany({
+        where: {
+          ...dateFilter,
+          ...userFilter,
+          ...(search ? { leaderName: { contains: search } } : {})
+        },
+        include: { user: { select: { name: true } } },
+        orderBy: { createdAt: 'desc' }
+      })
+      data = q.map(i => ({
+        'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
+        'Pelapor': i.user.name,
+        'Alamat': i.address || '-',
+        'Kecamatan/Kabupaten': i.district || '-',
+        'Ketua Kelompok Tani': i.leaderName || '-',
+        'No HP': i.phone || '-',
+        'Detail Aktivitas': i.activityDetail || '-',
+        'Biaya': i.cost || '-',
+        'Detail Biaya': i.costDetail || '-'
+      }))
+
+    } else if (type === 'company') {
+      const q = await prisma.visitCompany.findMany({
+        where: {
+          ...dateFilter,
+          ...userFilter,
+          ...(search ? { companyName: { contains: search } } : {})
+        },
+        include: { user: { select: { name: true } } },
+        orderBy: { createdAt: 'desc' }
+      })
+      data = q.map(i => ({
+        'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
+        'Pelapor': i.user.name,
+        'Nama Perusahaan': i.companyName,
+        'Area': i.district || '-',
+        'Alamat': i.address || '-',
+        'PIC': i.picName || '-',
+        'Jabatan PIC': i.picPosition || '-',
+        'No HP PIC': i.picPhone || '-',
+        'Luas Lahan': i.landArea || '-',
+        'Komoditas': i.commodities || '-',
+        'Produk': i.products || '-',
+        'Tgl Pengadaan': i.procurementDate ? new Date(i.procurementDate).toLocaleDateString('id-ID') : '-',
+        'Term of Payment': i.paymentTerm || '-'
+      }))
+    }
+
+    return NextResponse.json({ data })
+  } catch (error: any) {
+    return NextResponse.json({ error: error.message }, { status: 500 })
+  }
+}

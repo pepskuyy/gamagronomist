@@ -16,13 +16,14 @@ interface Props {
   reports: CB[]
   isAdmin: boolean
   onDeleted?: () => void
+  exportNode?: React.ReactNode
 }
 
 const tdStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)' }
 const thStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem', textTransform: 'uppercase' }
 const formatDate = (d: string) => new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(d))
 
-export default function CbReportTable({ reports, isAdmin, onDeleted }: Props) {
+export default function CbReportTable({ reports, isAdmin, onDeleted, exportNode }: Props) {
   const [selected, setSelected] = useState<Set<string>>(new Set())
   const [isPending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -54,6 +55,7 @@ export default function CbReportTable({ reports, isAdmin, onDeleted }: Props) {
     <div className="card" style={{ marginBottom: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
         <h3 style={{ margin: 0 }}>📝 Customer Behavior</h3>
+        {exportNode}
       </div>
 
       {error && <div style={{ color: 'var(--danger)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{error}</div>}

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
+import ExportExcelButton from '@/components/ExportExcelButton'
 
 const prisma = new PrismaClient()
 
@@ -213,6 +214,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <CbReportTable
         reports={cbSlice.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
         isAdmin={session.role === 'ADMIN'}
+        exportNode={<ExportExcelButton type="cb" search={search} start={startParam} end={endParam} />}
       />
       {(cbHasMore || pcb > 1) && (
         <div style={{ marginTop: '-1rem', marginBottom: '2rem' }}>
@@ -222,7 +224,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       {/* ── Riwayat Realisasi Demo Plot ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ margin: 0, marginBottom: '1rem' }}>🌾 Riwayat Realisasi Demo Plot</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0 }}>🌾 Riwayat Realisasi Demo Plot</h3>
+          <ExportExcelButton type="demoplot" search={search} start={startParam} end={endParam} />
+        </div>
         <div className="table-responsive">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ background: 'var(--surface-hover)' }}>
@@ -277,7 +282,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       {/* ── Visit Kios ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>🏪 Visit Kios</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0 }}>🏪 Visit Kios</h3>
+          <ExportExcelButton type="kios" search={search} start={startParam} end={endParam} />
+        </div>
         <div className="table-responsive">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ background: 'var(--surface-hover)' }}>
@@ -314,7 +322,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       {/* ── Farmer Gathering ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>🤝 Farmer Gathering</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0 }}>🤝 Farmer Gathering</h3>
+          <ExportExcelButton type="gathering" search={search} start={startParam} end={endParam} />
+        </div>
         <div className="table-responsive">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ background: 'var(--surface-hover)' }}>
@@ -351,7 +362,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       {/* ── Visit Company ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>🏢 Visit Company</h3>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0 }}>🏢 Visit Company</h3>
+          <ExportExcelButton type="company" search={search} start={startParam} end={endParam} />
+        </div>
         <div className="table-responsive">
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ background: 'var(--surface-hover)' }}>

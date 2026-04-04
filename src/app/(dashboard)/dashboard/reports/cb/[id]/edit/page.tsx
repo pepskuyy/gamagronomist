@@ -116,7 +116,7 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
               <input type="text" name="reasonChoice" className="form-control" defaultValue={data.reasonChoice || ''} />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Kendala</label>
+              <label className="form-label">Kendala yang dialami (selain opt)</label>
               <textarea name="constraints" className="form-control" rows={2} defaultValue={data.constraints || ''} />
             </div>
             <div className="form-group">

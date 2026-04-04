@@ -209,7 +209,7 @@ export default function NewCustomerBehaviorRef() {
             <input type="text" name="reasonChoice" className="form-control" />
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Kendala yang dialami</label>
+            <label className="form-label">Kendala yang dialami (selain opt)</label>
             <textarea name="constraints" className="form-control" rows={2} />
           </div>
 
