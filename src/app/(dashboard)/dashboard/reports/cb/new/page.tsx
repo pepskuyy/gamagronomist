@@ -88,6 +88,7 @@ export default function NewCustomerBehaviorRef() {
   const [photos, setPhotos] = useState<string[]>([])
   const [lat, setLat] = useState<number | null>(null)
   const [lng, setLng] = useState<number | null>(null)
+  const [hasPhone, setHasPhone] = useState(true)
 
   // Commodity multi-chip
   const [selectedCommodities, setSelectedCommodities] = useState<string[]>([])
@@ -159,10 +160,26 @@ export default function NewCustomerBehaviorRef() {
               <label className="form-label">Umur</label>
               <input type="text" name="age" className="form-control" />
             </div>
-            <div className="form-group">
-              <label className="form-label">No. HP</label>
-              <input type="tel" name="phone" className="form-control" />
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Apakah Petani Memiliki No. HP?</label>
+              <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.25rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="hasPhoneToggle" value="yes" checked={hasPhone} onChange={() => setHasPhone(true)} style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--primary)' }} />
+                  <span>Ya, Punya</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="hasPhoneToggle" value="no" checked={!hasPhone} onChange={() => setHasPhone(false)} style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--primary)' }} />
+                  <span>Tidak Punya</span>
+                </label>
+              </div>
             </div>
+            
+            {hasPhone && (
+              <div className="form-group">
+                <label className="form-label">No. HP <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <input type="tel" name="phone" className="form-control" required pattern="[0-9]+" title="Hanya angka" />
+              </div>
+            )}
             <div style={{ gridColumn: '1 / -1', marginBottom: '0.5rem' }}>
               <RegionSelect nameKabupaten="district" nameKecamatan="districtKecamatan" nameDesa="districtDesa" required={false} />
             </div>

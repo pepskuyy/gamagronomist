@@ -13,6 +13,7 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
   
   // State for form fields
   const [data, setData] = useState<any>(null)
+  const [hasPhone, setHasPhone] = useState(true)
 
   useEffect(() => {
     // Fetch existing report
@@ -20,7 +21,10 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
       .then(res => res.json())
       .then(d => {
         if (d.error) setError(d.error)
-        else setData(d)
+        else {
+          setData(d)
+          setHasPhone(!!d.phone)
+        }
         setLoading(false)
       })
       .catch(err => {
@@ -69,10 +73,26 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
               <label className="form-label">Umur</label>
               <input type="text" name="age" className="form-control" defaultValue={data.age || ''} />
             </div>
-            <div className="form-group">
-              <label className="form-label">No. HP</label>
-              <input type="text" name="phone" className="form-control" defaultValue={data.phone || ''} />
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Apakah Petani Memiliki No. HP?</label>
+              <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.25rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="hasPhoneToggle" value="yes" checked={hasPhone} onChange={() => setHasPhone(true)} style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--primary)' }} />
+                  <span>Ya, Punya</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" name="hasPhoneToggle" value="no" checked={!hasPhone} onChange={() => setHasPhone(false)} style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--primary)' }} />
+                  <span>Tidak Punya</span>
+                </label>
+              </div>
             </div>
+            
+            {hasPhone && (
+              <div className="form-group">
+                <label className="form-label">No. HP <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <input type="tel" name="phone" className="form-control" defaultValue={data.phone || ''} required pattern="[0-9]+" title="Hanya angka" />
+              </div>
+            )}
             <div className="form-group">
               <label className="form-label">Kabupaten/Kota Area</label>
               <input type="text" name="district" className="form-control" defaultValue={data.district || ''} />

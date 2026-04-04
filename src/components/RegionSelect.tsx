@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { getRegencies, getDistricts, getVillages } from '@/app/actions/region'
+import SearchableSelect from './SearchableSelect'
 
 type Region = { id: string; name: string }
 
@@ -104,22 +105,22 @@ export default function RegionSelect({
     }
   }, [kabName, kecName, desaName, onChangeFullString])
 
-  const handleKabChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value
+  const handleKabChange = (id: string) => {
     setSelectedKabId(id)
-    setKabName(e.target.options[e.target.selectedIndex].text)
+    const found = kabupatens.find(x => x.id === id)
+    setKabName(found ? found.name : '')
   }
 
-  const handleKecChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value
+  const handleKecChange = (id: string) => {
     setSelectedKecId(id)
-    setKecName(e.target.options[e.target.selectedIndex].text)
+    const found = kecamatans.find(x => x.id === id)
+    setKecName(found ? found.name : '')
   }
 
-  const handleDesaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const id = e.target.value
+  const handleDesaChange = (id: string) => {
     setSelectedDesaId(id)
-    setDesaName(e.target.options[e.target.selectedIndex].text)
+    const found = desas.find(x => x.id === id)
+    setDesaName(found ? found.name : '')
   }
 
   return (
@@ -131,32 +132,47 @@ export default function RegionSelect({
 
       <div className="form-group" style={{ margin: 0 }}>
         <label className="form-label">Kabupaten / Kota {required && <span style={{ color: 'var(--danger)' }}>*</span>}</label>
-        <select className="form-control" value={selectedKabId} onChange={handleKabChange} required={required}>
-          <option value="">-- Pilih Kabupaten --</option>
-          {kabupatens.map(k => (
-            <option key={k.id} value={k.id}>{k.name}</option>
-          ))}
-        </select>
+        <SearchableSelect
+          options={kabupatens.map(k => ({ value: k.id, label: k.name }))}
+          value={selectedKabId}
+          onChange={handleKabChange}
+          required={required}
+          placeholder="-- Pilih Kabupaten --"
+        />
       </div>
 
       <div className="form-group" style={{ margin: 0 }}>
         <label className="form-label">Kecamatan {required && <span style={{ color: 'var(--danger)' }}>*</span>}</label>
-        <select className="form-control" value={selectedKecId} onChange={handleKecChange} required={required} disabled={!selectedKabId}>
-          <option value="">-- Pilih Kecamatan --</option>
-          {kecamatans.map(k => (
-            <option key={k.id} value={k.id}>{k.name}</option>
-          ))}
-        </select>
+        {selectedKabId ? (
+          <SearchableSelect
+            options={kecamatans.map(k => ({ value: k.id, label: k.name }))}
+            value={selectedKecId}
+            onChange={handleKecChange}
+            required={required}
+            placeholder="-- Pilih Kecamatan --"
+          />
+        ) : (
+          <select className="form-control" disabled required={required}>
+            <option value="">-- Pilih Kabupaten Dulu --</option>
+          </select>
+        )}
       </div>
 
       <div className="form-group" style={{ margin: 0 }}>
         <label className="form-label">Desa / Kelurahan {required && <span style={{ color: 'var(--danger)' }}>*</span>}</label>
-        <select className="form-control" value={selectedDesaId} onChange={handleDesaChange} required={required} disabled={!selectedKecId}>
-          <option value="">-- Pilih Desa --</option>
-          {desas.map(d => (
-            <option key={d.id} value={d.id}>{d.name}</option>
-          ))}
-        </select>
+        {selectedKecId ? (
+          <SearchableSelect
+            options={desas.map(k => ({ value: k.id, label: k.name }))}
+            value={selectedDesaId}
+            onChange={handleDesaChange}
+            required={required}
+            placeholder="-- Pilih Desa --"
+          />
+        ) : (
+          <select className="form-control" disabled required={required}>
+            <option value="">-- Pilih Kecamatan Dulu --</option>
+          </select>
+        )}
       </div>
     </div>
   )

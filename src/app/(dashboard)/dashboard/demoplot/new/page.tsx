@@ -26,6 +26,7 @@ export default function FoDemoPlotDirectPage() {
   const [commodity, setCommodity]   = useState('')
   const [problem, setProblem]       = useState('')
   const [plan, setPlan]             = useState('')
+  const [hasPhone, setHasPhone]     = useState(true)
 
   // Product usage state
   const [usageList, setUsageList] = useState<{ id: string, productId: string, qty: string }[]>([])
@@ -54,6 +55,7 @@ export default function FoDemoPlotDirectPage() {
     if (f) {
       setFarmerName(f.farmerName || '')
       setFarmerPhone(f.phone || '')
+      setHasPhone(!!f.phone)
       setArea(f.district || '')
       setCommodity(f.commodity || '')
       setProblem(f.constraints || '')
@@ -169,10 +171,25 @@ export default function FoDemoPlotDirectPage() {
               <label className="form-label">Nama Petani <span style={{ color: 'var(--danger)' }}>*</span></label>
               <input className="form-control" value={farmerName} onChange={e => setFarmerName(e.target.value)} required placeholder="Bpk. Budi Santoso" />
             </div>
-            <div>
-              <label className="form-label">No. HP</label>
-              <input className="form-control" value={farmerPhone} onChange={e => setFarmerPhone(e.target.value)} placeholder="0812xxx" />
+            <div style={{ gridColumn: '1/-1' }}>
+              <label className="form-label">Apakah Petani Memiliki No. HP?</label>
+              <div style={{ display: 'flex', gap: '1.5rem', marginTop: '0.25rem' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" value="yes" checked={hasPhone} onChange={() => setHasPhone(true)} style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--primary)' }} />
+                  <span>Ya, Punya</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                  <input type="radio" value="no" checked={!hasPhone} onChange={() => { setHasPhone(false); setFarmerPhone(''); }} style={{ width: '1.1rem', height: '1.1rem', accentColor: 'var(--primary)' }} />
+                  <span>Tidak Punya</span>
+                </label>
+              </div>
             </div>
+            {hasPhone && (
+              <div>
+                <label className="form-label">No. HP <span style={{ color: 'var(--danger)' }}>*</span></label>
+                <input type="tel" className="form-control" value={farmerPhone} onChange={e => setFarmerPhone(e.target.value)} required pattern="[0-9]+" title="Hanya angka" placeholder="0812xxx" />
+              </div>
+            )}
             {farmerMode === 'manual' && (
               <div style={{ gridColumn: '1/-1' }}>
                 <RegionSelect onChangeFullString={setArea} />
