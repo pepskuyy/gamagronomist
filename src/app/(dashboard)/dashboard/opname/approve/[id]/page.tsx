@@ -7,7 +7,10 @@ import { redirect } from 'next/navigation'
 
 const prisma = new PrismaClient()
 
-export default async function OpnameApproveDetail({ params }: { params: { id: string } }) {
+export default async function OpnameApproveDetail({ params }: { params: Promise<{ id: string }> }) {
+  const resolvedParams = await params
+  const id = resolvedParams.id
+
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
@@ -17,7 +20,7 @@ export default async function OpnameApproveDetail({ params }: { params: { id: st
   }
 
   const opname = await prisma.stockOpname.findUnique({
-    where: { id: params.id },
+    where: { id },
     include: {
       user: {
         select: { name: true, role: true, area: { select: { name: true } } }
