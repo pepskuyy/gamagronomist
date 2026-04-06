@@ -46,6 +46,7 @@ model User {
   farmerGatherings  FarmerGathering[]
   visitCompanies    VisitCompany[]
   kpiTargets        KpiTarget[]
+  spotDemplot       SpotDemplot[]
 
   // Notifikasi
   notifications     Notification[]
@@ -112,6 +113,7 @@ model Product {
   requestDetails    RequestDetail[]
   demoPlotDetails   DemoPlotDetail[]
   opnameDetails     OpnameDetail[]
+  spotDemplotDetails SpotDemplotDetail[]
 }
 
 model Farmer {
@@ -333,4 +335,34 @@ model Notification {
   isRead    Boolean  @default(false)
   
   createdAt DateTime @default(now())
+}
+
+model SpotDemplot {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id])
+  
+  districtDesa      String?
+  districtKec       String?
+  districtKab       String?
+  weeds             String?  // JSON Array or string
+  date              DateTime
+  observationResult String?
+  latitude          Float?
+  longitude         Float?
+  photos            String?  // JSON Array of URLs
+  
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+  
+  details           SpotDemplotDetail[]
+}
+
+model SpotDemplotDetail {
+  id             String      @id @default(cuid())
+  spotDemplotId  String
+  spotDemplot    SpotDemplot @relation(fields: [spotDemplotId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product     @relation(fields: [productId], references: [id])
+  usage          Float
 }

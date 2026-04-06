@@ -49,6 +49,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const pkios    = Math.max(1, parseInt(resolvedParams.pkios    || '1'))
   const pgather  = Math.max(1, parseInt(resolvedParams.pgather  || '1'))
   const pcomp    = Math.max(1, parseInt(resolvedParams.pcomp    || '1'))
+  const pspot    = Math.max(1, parseInt(resolvedParams.pspot    || '1'))
 
   const search     = resolvedParams.search || ''
   const startParam = resolvedParams.start  || ''
@@ -68,6 +69,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   if (pkios > 1)  baseParams.set('pkios', String(pkios))
   if (pgather > 1) baseParams.set('pgather', String(pgather))
   if (pcomp > 1)  baseParams.set('pcomp', String(pcomp))
+  if (pspot > 1)  baseParams.set('pspot', String(pspot))
   const baseQuery = baseParams.toString()
 
   const dateFilter = startDate || endDate ? {
@@ -107,7 +109,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
     }
   }
 
-  const [cbReports, dpRequests, kiosReports, gatheringReports, companyReports] = await Promise.all([
+  const [cbReports, dpRequests, kiosReports, gatheringReports, companyReports, spotReports] = await Promise.all([
     prisma.customerBehavior.findMany({
       where: { ...userFilter, ...dateFilter, ...(search ? { farmerName: { contains: search, mode: 'insensitive' } } : {}) },
       include: { user: true }, orderBy: { createdAt: 'desc' },
@@ -134,6 +136,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       include: { user: true }, orderBy: { createdAt: 'desc' },
       skip: (pcomp - 1) * take, take: take + 1,
     }),
+    prisma.spotDemplot.findMany({
+      where: { ...userFilter, ...dateFilter, ...(search ? { districtDesa: { contains: search, mode: 'insensitive' } } : {}) },
+      include: { user: true }, orderBy: { createdAt: 'desc' },
+      skip: (pspot - 1) * take, take: take + 1,
+    })
   ])
 
   // Determine "has more" per table (we fetched take+1 rows)
@@ -142,6 +149,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const kiosHasMore    = kiosReports.length > take
   const gatherHasMore  = gatheringReports.length > take
   const compHasMore    = companyReports.length > take
+  const spotHasMore    = spotReports.length > take
 
   // Trim the extra row
   const cbSlice      = cbReports.slice(0, take)
@@ -149,6 +157,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const kiosSlice    = kiosReports.slice(0, take)
   const gatherSlice  = gatheringReports.slice(0, take)
   const compSlice    = companyReports.slice(0, take)
+  const spotSlice    = spotReports.slice(0, take)
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -172,6 +181,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
         <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Laporan Aktivitas Harian</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           <Link href="/dashboard/reports/cb/new"        className="btn btn-primary"  style={{ fontSize: '0.85rem' }}>+ 📝 Customer Behavior</Link>
+          <Link href="/dashboard/reports/spot-demplot/new" className="btn btn-primary" style={{ fontSize: '0.85rem' }}>+ 🌿 Spot Demplot</Link>
           <Link href="/dashboard/reports/kios/new"      className="btn btn-outline"  style={{ fontSize: '0.85rem' }}>+ 🏪 Visit Kios</Link>
           <Link href="/dashboard/reports/gathering/new" className="btn btn-outline"  style={{ fontSize: '0.85rem' }}>+ 👥 Gathering</Link>
           <Link href="/dashboard/reports/company/new"   className="btn btn-outline"  style={{ fontSize: '0.85rem' }}>+ 🏢 Visit Company</Link>
@@ -221,6 +231,48 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <TablePager paramName="pcb" currentPage={pcb} hasMore={cbHasMore} baseQuery={baseQuery} />
         </div>
       )}
+
+      {/* ── Spot Demplot ── */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
+          <h3 style={{ margin: 0 }}>🌿 Riwayat Spot Demplot</h3>
+          <ExportExcelButton type="spot-demplot" search={search} start={startParam} end={endParam} />
+        </div>
+        <div className="table-responsive">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ background: 'var(--surface-hover)' }}>
+              <tr>
+                <th style={thStyle}>Tanggal</th>
+                <th style={thStyle}>Pembuat</th>
+                <th style={thStyle}>Lokasi</th>
+                <th style={thStyle}>Hasil Pengamatan</th>
+                {/* Aksi bisa kita matikan dulu / dummy untuk format konsistensi */}
+                <th style={thStyle}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {spotSlice.map(rp => (
+                <tr key={rp.id}>
+                  <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
+                  <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
+                  <td style={tdStyle}>{rp.districtDesa || rp.districtKab || '-'}</td>
+                  <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.observationResult || '-'}</td>
+                  <td style={tdStyle}>
+                    {/* Placeholder button since there's no detail page yet based on minimum requirements */}
+                    <button className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => alert('Detail belum tersedia')}>Detail</button>
+                  </td>
+                </tr>
+              ))}
+              {spotSlice.length === 0 && (
+                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada laporan di halaman ini.</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+        {(spotHasMore || pspot > 1) && (
+          <TablePager paramName="pspot" currentPage={pspot} hasMore={spotHasMore} baseQuery={baseQuery} />
+        )}
+      </div>
 
       {/* ── Riwayat Realisasi Demo Plot ── */}
       <div className="card" style={{ marginBottom: '2rem' }}>

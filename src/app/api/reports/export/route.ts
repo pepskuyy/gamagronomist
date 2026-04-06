@@ -158,8 +158,7 @@ export async function GET(req: Request) {
         'Detail Biaya': i.costDetail || '-'
       }))
 
-    } else if (type === 'company') {
-      const q = await prisma.visitCompany.findMany({
+      const companyQ = await prisma.visitCompany.findMany({
         where: {
           ...dateFilter,
           ...userFilter,
@@ -168,7 +167,7 @@ export async function GET(req: Request) {
         include: { user: { select: { name: true } } },
         orderBy: { createdAt: 'desc' }
       })
-      data = q.map(i => ({
+      data = companyQ.map(i => ({
         'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
         'Pelapor': i.user.name,
         'Nama Perusahaan': i.companyName,
@@ -183,6 +182,30 @@ export async function GET(req: Request) {
         'Tgl Pengadaan': i.procurementDate ? new Date(i.procurementDate).toLocaleDateString('id-ID') : '-',
         'Term of Payment': i.paymentTerm || '-'
       }))
+    } else if (type === 'spot-demplot') {
+      const spotQ = await prisma.spotDemplot.findMany({
+        where: {
+          ...dateFilter,
+          ...userFilter,
+          ...(search ? { districtDesa: { contains: search } } : {})
+        },
+        include: { user: { select: { name: true } }, details: { include: { product: { select: { name: true, unit: true } } } } },
+        orderBy: { createdAt: 'desc' }
+      })
+      data = spotQ.map(i => {
+        const usageText = i.details.map((d: any) => `${d.product?.name || 'Produk'} (${d.usage} ${d.product?.unit || ''})`).join(', ')
+        return {
+          'Tanggal Pelaksanaan': new Date(i.date).toLocaleDateString('id-ID'),
+          'Tanggal Submit': new Date(i.createdAt).toLocaleString('id-ID'),
+          'Pelapor': i.user.name,
+          'Desa': i.districtDesa || '-',
+          'Kecamatan': i.districtKec || '-',
+          'Kabupaten': i.districtKab || '-',
+          'Jenis Gulma': i.weeds ? JSON.parse(i.weeds).join(', ') : '-',
+          'Penggunaan Produk': usageText || '-',
+          'Hasil Pengamatan': i.observationResult || '-'
+        }
+      })
     }
 
     return NextResponse.json({ data })

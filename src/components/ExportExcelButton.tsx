@@ -4,7 +4,7 @@ import { useState } from 'react'
 import * as XLSX from 'xlsx'
 
 interface Props {
-  type: 'cb' | 'demoplot' | 'kios' | 'gathering' | 'company'
+  type: 'cb' | 'demoplot' | 'kios' | 'gathering' | 'company' | 'spot-demplot'
   search: string
   start: string
   end: string
