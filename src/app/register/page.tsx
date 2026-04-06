@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useTransition } from 'react'
+import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { submitAccountRequest } from '../actions/register'
 
@@ -9,6 +9,18 @@ export default function RegisterPage() {
   const [error,   setError]   = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const [role,    setRole]    = useState('')
+  const [areas,   setAreas]   = useState<{ id: string; name: string }[]>([])
+
+
+
+  useEffect(() => {
+    fetch('/api/master/areas')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) setAreas(data)
+      })
+      .catch(console.error)
+  }, [])
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -58,8 +70,8 @@ export default function RegisterPage() {
 
             {/* Email */}
             <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">Email <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 'normal' }}>(opsional)</span></label>
-              <input name="email" type="email" className="form-control" placeholder="contoh: budi@gmail.com" />
+              <label className="form-label">Email <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input name="email" type="email" className="form-control" required placeholder="contoh: budi@gmail.com" />
             </div>
 
             {/* Username */}
@@ -93,8 +105,13 @@ export default function RegisterPage() {
 
             {/* Area */}
             <div className="form-group" style={{ margin: 0 }}>
-              <label className="form-label">Area / Wilayah</label>
-              <input name="areaName" type="text" className="form-control" placeholder="contoh: Jawa Timur" />
+              <label className="form-label">Area / Wilayah <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <select name="areaName" className="form-control" required>
+                <option value="">-- Pilih Area --</option>
+                {areas.map(a => (
+                  <option key={a.id} value={a.name}>{a.name}</option>
+                ))}
+              </select>
             </div>
 
             {/* AFA name (only for FO) */}
