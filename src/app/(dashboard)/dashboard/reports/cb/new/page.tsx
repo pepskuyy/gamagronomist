@@ -8,14 +8,25 @@ import GpsCapture from '@/components/GpsCapture'
 import { submitCustomerBehavior } from '@/app/actions/report'
 
 // ── Dropdown options ──────────────────────────────────────────────
-const OPT_TYPES = ['Hama', 'Penyakit', 'Gulma']
-const OPT_DETAILS = [
-  'Ulat grayak', 'Ulat buah', 'Ulat pelipat daun', 'Uret (ulat tanah)',
-  'Sundep', 'Kutu', 'Tungau', 'Thrips', 'Wereng', 'Walang sangit',
-  'Belalang', 'Lalat Buah', 'Keong', 'Burung', 'Tikus',
-  'Jamur/ cendawan', 'Bakteri', 'Virus',
-  'Berdaun lebar', 'Rumput - rumputan', 'Pakis - pakisan', 'Lulangan', 'Teki'
-]
+const OPT_DATA = {
+  Hama: [
+    'Ulat Grayak', 'Ulat Buah', 'Ulat Tanah', 'Ulat Pelipat Daun', 'Ulat Krop', 'Uret',
+    'Penggerek Batang (Sundep/Beluk)', 'Penggerek Umbi', 'Kutu Daun', 'Tungau (Acarina)',
+    'Thrips', 'Wereng Batang Coklat', 'Wereng Hijau', 'Walang Sangit (Lembing)', 'Kepik',
+    'Belalang', 'Lalat Buah', 'Lalat Pengorok Daun', 'Keong/Bekicot', 'Burung Pipit',
+    'Tikus', 'Kelelawar', 'Babi Hutan', 'Nematoda'
+  ],
+  Penyakit: [
+    'Hawar Daun Bakteri (kresek)', 'Blas/Patah Leher', 'Tungro', 'Hawar Pelepah',
+    'Gosong Palsu (oncom)', 'Bulai', 'Bercak Daun', 'Hawar Daun', 'Layu Fusarium',
+    'Layu Bakteri', 'Busuk Batang', 'Antraknosa/Patek', 'Karat Daun', 'Cacar Daun',
+    'Bercak Ungu', 'Mati Pucuk', 'Busuk Buah', 'Akar Gada', 'Geminivirus/Bule'
+  ],
+  Gulma: [
+    'Daun Sempit (Rerumputan)', 'Daun Lebar', 'Teki-tekian', 'Paku-pakuan (Pakis)',
+    'Lulangan', 'Berkayu/Semak'
+  ]
+}
 
 const COMMODITIES = [
   'Cabai', 'Bawang Merah', 'Padi', 'Jagung', 'Tomat', 'Semangka',
@@ -123,7 +134,15 @@ export default function NewCustomerBehaviorRef() {
     formData.set('commodity', buildMultiValue(selectedCommodities, commodityOther))
     formData.set('usedProducts', buildMultiValue(selectedBrands, brandsOther))
     formData.set('references', buildMultiValue(selectedRefs, refsOther))
-    formData.set('optTypes', JSON.stringify(selectedOptTypes))
+
+    const computedTypes = new Set<string>()
+    selectedOptDetails.forEach(detail => {
+      if (OPT_DATA.Hama.includes(detail)) computedTypes.add('Hama')
+      if (OPT_DATA.Penyakit.includes(detail)) computedTypes.add('Penyakit')
+      if (OPT_DATA.Gulma.includes(detail)) computedTypes.add('Gulma')
+    })
+
+    formData.set('optTypes', JSON.stringify(Array.from(computedTypes)))
     formData.set('optDetails', JSON.stringify(selectedOptDetails))
     formData.set('photos', JSON.stringify(photos))
     formData.set('latitude', String(lat))
@@ -214,25 +233,25 @@ export default function NewCustomerBehaviorRef() {
           </div>
 
           <div className="form-group" style={{ marginTop: '1.5rem' }}>
-            <label className="form-label">OPT (Pilih satu atau lebih)</label>
-            <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-              {OPT_TYPES.map(type => (
-                <label key={type} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', background: selectedOptTypes.includes(type) ? 'var(--primary-light)' : 'var(--surface-hover)', padding: '0.5rem 1rem', borderRadius: 'var(--radius-md)', border: `1px solid ${selectedOptTypes.includes(type) ? 'var(--primary)' : 'var(--border)'}` }}>
-                  <input type="checkbox" checked={selectedOptTypes.includes(type)} onChange={() => toggleItem(selectedOptTypes, setSelectedOptTypes, type)} style={{ width: '1.25rem', height: '1.25rem' }} />
-                  <span>{type}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="form-group" style={{ marginTop: '1.5rem' }}>
-            <label className="form-label">Detail OPT (Pilih satu atau lebih)</label>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
-              {OPT_DETAILS.map(detail => (
-                <label key={detail} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
-                  <input type="checkbox" checked={selectedOptDetails.includes(detail)} onChange={() => toggleItem(selectedOptDetails, setSelectedOptDetails, detail)} />
-                  {detail}
-                </label>
+            <label className="form-label" style={{ marginBottom: '1rem', display: 'block', fontSize: '1.1rem', fontWeight: 600 }}>Organisme Pengganggu Tanaman (OPT)</label>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
+              {Object.entries(OPT_DATA).map(([category, details]) => (
+                <div key={category} style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+                  <h4 style={{ margin: '0 0 1rem 0', color: 'var(--primary)', borderBottom: '2px solid var(--primary-light)', paddingBottom: '0.5rem' }}>{category.toUpperCase()}</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {details.map(detail => (
+                      <label key={detail} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer', fontSize: '0.85rem' }}>
+                        <input 
+                          type="checkbox" 
+                          checked={selectedOptDetails.includes(detail)} 
+                          onChange={() => toggleItem(selectedOptDetails, setSelectedOptDetails, detail)} 
+                          style={{ width: '1rem', height: '1rem', flexShrink: 0 }}
+                        />
+                        <span style={{ lineHeight: 1.3 }}>{detail}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
           </div>
