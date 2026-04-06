@@ -87,6 +87,7 @@ model AccountRequest {
   password  String
   name      String
   role      String   // "AFA", "FO"
+  email     String?  // Email dari calon user
   areaName  String?  // Area yang diminta (nama teks)
   afaName   String?  // Nama AFA supervisor (untuk FO)
   notes     String?  // Catatan dari calon user

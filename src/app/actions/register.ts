@@ -16,6 +16,7 @@ export async function submitAccountRequest(formData: FormData) {
   const areaName = (formData.get('areaName') as string)?.trim() || null
   const afaName  = (formData.get('afaName')  as string)?.trim() || null
   const notes    = (formData.get('notes')    as string)?.trim() || null
+  const email    = (formData.get('email')    as string)?.trim() || null
 
   if (!username || !password || !name || !role) {
     return { error: 'Username, password, nama, dan role wajib diisi.' }
@@ -44,8 +45,8 @@ export async function submitAccountRequest(formData: FormData) {
     const hashed = await bcrypt.hash(password, 10)
     await prisma.accountRequest.upsert({
       where: { username },
-      create: { username, password: hashed, name, role, areaName, afaName, notes, status: 'PENDING' },
-      update: { password: hashed, name, role, areaName, afaName, notes, status: 'PENDING' },
+      create: { username, password: hashed, name, role, email, areaName, afaName, notes, status: 'PENDING' },
+      update: { password: hashed, name, role, email, areaName, afaName, notes, status: 'PENDING' },
     })
     return { success: true }
   } catch (e: any) {
@@ -79,6 +80,7 @@ export async function approveAccountRequest(requestId: string) {
           username: req.username,
           password: req.password,
           name: req.name,
+          email: req.email,
           role: req.role,
           areaId,
           afaId,

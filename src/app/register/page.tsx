@@ -56,6 +56,12 @@ export default function RegisterPage() {
               <input name="name" type="text" className="form-control" required placeholder="contoh: Budi Santoso" />
             </div>
 
+            {/* Email */}
+            <div className="form-group" style={{ margin: 0 }}>
+              <label className="form-label">Email <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem', fontWeight: 'normal' }}>(opsional)</span></label>
+              <input name="email" type="email" className="form-control" placeholder="contoh: budi@gmail.com" />
+            </div>
+
             {/* Username */}
             <div className="form-group" style={{ margin: 0 }}>
               <label className="form-label">Username <span style={{ color: 'var(--danger)' }}>*</span></label>
