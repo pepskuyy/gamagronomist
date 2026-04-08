@@ -81,14 +81,12 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
   if (searchParams?.areaId) params.set('areaId', searchParams.areaId)
   const filterQuery = params.toString() ? `?${params.toString()}` : ''
 
-  // Subordinates for filter dropdown (AFA sees their FOs, SPV sees all)
-  let filterSubordinates: { id: string; name: string; role: string }[] = []
-  if (isSPV) {
-    filterSubordinates = subordinates
-  } else if (isAFA) {
-    const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true, name: true, role: true }, orderBy: { name: 'asc' } })
-    filterSubordinates = fos
-  }
+  // Subordinates for filter dropdown - EVERYONE can see all users so they can filter the global charts freely
+  const filterSubordinates = await prisma.user.findMany({ 
+    where: { role: { in: ['AFA', 'FO', 'INTERN'] } }, 
+    select: { id: true, name: true, role: true }, 
+    orderBy: { name: 'asc' } 
+  })
 
   // Stock summary for all users visible to this role
   let stockSummary: { userName: string, role: string, productName: string, unit: string, balance: number }[] = []

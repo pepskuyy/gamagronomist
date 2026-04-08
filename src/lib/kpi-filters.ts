@@ -11,16 +11,8 @@ export async function buildActivityWhereClause(session: any, searchParams: URLSe
   const whereClause: any = {}
 
   // 1. Enforce RBAC base
+  // 1. Enforce RBAC base - DISABLED: All users can view global visualizations by default
   let allowedUserIds: string[] | null = null
-  if (session.role === 'FO' || session.role === 'INTERN') {
-    allowedUserIds = [session.userId]
-  } else if (session.role === 'AFA') {
-    const fos = await prisma.user.findMany({
-      where: { afaId: session.userId },
-      select: { id: true }
-    })
-    allowedUserIds = [session.userId, ...fos.map(f => f.id)]
-  }
 
   // 2. Apply Custom Query Filters
   const qStart = searchParams.get('start')
@@ -35,16 +27,9 @@ export async function buildActivityWhereClause(session: any, searchParams: URLSe
   }
 
   // User filter
+  // User filter directly uses searchParam if present (no default override limitation)
   if (qUserId) {
-    // Make sure SPV or AFA is explicitly filtering for an allowed subordinate
-    if (allowedUserIds && !allowedUserIds.includes(qUserId)) {
-      whereClause.userId = 'UNAUTHORIZED' // Forces 0 results securely
-    } else {
-      whereClause.userId = qUserId
-    }
-  } else if (allowedUserIds) {
-    // General restricted view
-    whereClause.userId = { in: allowedUserIds }
+    whereClause.userId = qUserId
   }
 
   // Area filter
@@ -63,16 +48,8 @@ export async function buildDemoPlotWhereClause(session: any, searchParams: URLSe
   const whereClause: any = {}
   
   // Base RBAC
+  // Base RBAC - DISABLED: All users can view global visualizations by default
   let allowedUserIds: string[] | null = null
-  if (session.role === 'FO' || session.role === 'INTERN') {
-    allowedUserIds = [session.userId]
-  } else if (session.role === 'AFA') {
-    const fos = await prisma.user.findMany({
-      where: { afaId: session.userId },
-      select: { id: true }
-    })
-    allowedUserIds = [session.userId, ...fos.map(f => f.id)]
-  }
 
   // Combine conditions
   const qStart = searchParams.get('start')
@@ -89,13 +66,7 @@ export async function buildDemoPlotWhereClause(session: any, searchParams: URLSe
   const requestFilter: any = {}
 
   if (qUserId) {
-    if (allowedUserIds && !allowedUserIds.includes(qUserId)) {
-      requestFilter.foId = 'UNAUTHORIZED'
-    } else {
-      requestFilter.foId = qUserId
-    }
-  } else if (allowedUserIds) {
-    requestFilter.foId = { in: allowedUserIds }
+    requestFilter.foId = qUserId
   }
 
   if (qAreaId) {
