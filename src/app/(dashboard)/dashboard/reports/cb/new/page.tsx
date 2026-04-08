@@ -42,6 +42,16 @@ const PRODUCT_BRANDS = [
 
 const REFERENCES = ['Pengalaman', 'Media Sosial', 'Kelompok Tani', 'Keluarga']
 
+const CONSTRAINTS = [
+  'Tidak ada kendala', 'Kelebihan dosis urea', 'pH tanah rendah', 'Tanah ambles / lunak',
+  'Stres herbisida', 'Kebanjiran', 'Kekurangan air', 'Belum paham penggunaan obat/pestisida',
+  'Tanah kapur', 'Tenaga kerja mahal', 'Pilihan komoditas terbatas', 'Tanah lempung / lengket',
+  'Tanah keras', 'Banyak garapan', 'Drainase buruk', 'Lahan susah kering',
+  'Pertumbuhan/keluarnya bulir tidak serempak', 'Harga jual murah', 'Modal tinggi',
+  'Jumlah anakan sedikit', 'Tanah tidak subur', 'Obat/pestisida mahal', 'Hujan',
+  'Angin kencang', 'Tanaman ambruk', 'Pupuk sulit didapat'
+]
+
 // ── Reusable multi-chip selector ──────────────────────────────────
 function MultiChip({
   options, selected, onToggle, otherValue, onOtherChange, otherLabel = 'Lainnya...'
@@ -113,6 +123,10 @@ export default function NewCustomerBehaviorRef() {
   const [selectedRefs, setSelectedRefs] = useState<string[]>([])
   const [refsOther, setRefsOther] = useState('')
 
+  // Constraints multi-chip
+  const [selectedConstraints, setSelectedConstraints] = useState<string[]>([])
+  const [constraintsOther, setConstraintsOther] = useState('')
+
   function toggleItem(list: string[], setList: (v: string[]) => void, val: string) {
     setList(list.includes(val) ? list.filter(x => x !== val) : [...list, val])
   }
@@ -132,6 +146,7 @@ export default function NewCustomerBehaviorRef() {
 
     const formData = new FormData(e.currentTarget)
     formData.set('commodity', buildMultiValue(selectedCommodities, commodityOther))
+    formData.set('constraints', buildMultiValue(selectedConstraints, constraintsOther))
     formData.set('usedProducts', buildMultiValue(selectedBrands, brandsOther))
     formData.set('references', buildMultiValue(selectedRefs, refsOther))
 
@@ -228,8 +243,13 @@ export default function NewCustomerBehaviorRef() {
             <input type="text" name="reasonChoice" className="form-control" />
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Kendala yang dialami (selain opt)</label>
-            <textarea name="constraints" className="form-control" rows={2} />
+            <label className="form-label">Kendala yang dialami (selain OPT)</label>
+            <MultiChip
+              options={CONSTRAINTS} selected={selectedConstraints}
+              onToggle={toggle(selectedConstraints, setSelectedConstraints)}
+              otherValue={constraintsOther} onOtherChange={setConstraintsOther}
+              otherLabel="Kendala lainnya..."
+            />
           </div>
 
           <div className="form-group" style={{ marginTop: '1.5rem' }}>
