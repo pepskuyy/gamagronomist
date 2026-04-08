@@ -67,8 +67,8 @@ export default function DashboardShell({ session, children }: SidebarProps) {
     { href: '/dashboard',          label: 'Dashboard',          icon: Icons.dashboard, show: true },
     { href: '/dashboard/master',   label: 'Master Data',        icon: Icons.master,    show: session?.role === 'ADMIN' || session?.role === 'SPV' },
     { href: '/dashboard/stock',    label: 'Manajemen Stok',     icon: Icons.stock,     show: true },
-    { href: '/dashboard/reports',  label: 'Laporan Aktivitas',  icon: Icons.reports,   show: true },
-    { href: '/dashboard/opname',   label: 'Stock Opname',       icon: Icons.opname,    show: true },
+    { href: '/dashboard/reports',  label: 'Laporan Aktivitas',  icon: Icons.reports,   show: !['FAM', 'WHM'].includes(session?.role) },
+    { href: '/dashboard/opname',   label: 'Stock Opname',       icon: Icons.opname,    show: !['FAM', 'WHM'].includes(session?.role) },
     { href: '/dashboard/settings', label: 'Pengaturan Akun',    icon: Icons.settings,  show: true },
   ]
 
@@ -76,7 +76,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
     href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
 
   const roleColor: Record<string, string> = {
-    ADMIN: '#b91c1c', SPV: '#a16207', AFA: '#15803d', FO: '#1d4ed8'
+    ADMIN: '#b91c1c', SPV: '#a16207', AFA: '#15803d', FO: '#1d4ed8', FAM: '#7c3aed', WHM: '#0891b2'
   }
 
   return (

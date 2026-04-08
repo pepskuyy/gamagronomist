@@ -7,8 +7,8 @@ import { createUser, updateUser, deleteUser, bulkDeleteUsers } from '@/app/actio
 type User = { id: string; name: string; username: string; role: string; isActive: boolean; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
 type Area = { id: string; name: string }
 
-const ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN']
-const roleBadge: Record<string, string> = { ADMIN: 'badge-danger', SPV: 'badge-warning', AFA: 'badge-success', FO: 'badge-neutral', INTERN: 'badge-neutral' }
+const ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN', 'FAM', 'WHM']
+const roleBadge: Record<string, string> = { ADMIN: 'badge-danger', SPV: 'badge-warning', AFA: 'badge-success', FO: 'badge-neutral', INTERN: 'badge-neutral', FAM: 'badge-neutral', WHM: 'badge-neutral' }
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,

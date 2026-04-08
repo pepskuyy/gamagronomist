@@ -7,10 +7,7 @@ import { revalidatePath } from 'next/cache'
 
 const prisma = new PrismaClient()
 
-/**
- * AFA requests stock to be approved by SPV.
- * Creates a Request with commodity="AFA_STOCK_IN".
- */
+// ─── AFA submits a stock request ──────────────────────────────────
 export async function submitAfaStockRequest(formData: FormData) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -38,7 +35,7 @@ export async function submitAfaStockRequest(formData: FormData) {
   try {
     const req = await prisma.request.create({
       data: {
-        foId: session.userId, // We trace the requester via foId
+        foId: session.userId,
         commodity: 'AFA_STOCK_IN',
         plan: notes,
         status: 'SUBMITTED',
@@ -46,17 +43,16 @@ export async function submitAfaStockRequest(formData: FormData) {
           create: validProducts.map(p => ({
             productId: p.productId,
             qtyRequested: p.qtyRequested,
-            qtyApproved: p.qtyRequested, // Auto-copy requested to approved initially
+            qtyApproved: p.qtyRequested,
           }))
         }
       }
     })
 
-    // Cari SPV dari area yang sama dengan AFA
+    // Notify SPV(s) in the same area
     const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
     if (afaUser && afaUser.areaId) {
       const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId } })
-      // Notify sema SPV di area tersebut
       for (const spv of spvs) {
         await prisma.notification.create({
           data: {
@@ -77,23 +73,20 @@ export async function submitAfaStockRequest(formData: FormData) {
   }
 }
 
-/**
- * SPV approves an AFA's stock request.
- * Updates the Request status and instantly adds the stock to the AFA's ledger.
- */
+// ─── STEP 1: SPV approves → APPROVED_SPV ──────────────────────────
 export async function approveAfaStockRequest(requestId: string) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (session?.role !== 'SPV') {
-    return { error: 'Hanya SPV yang dapat menyetujui permintaan stok AFA.' }
+  if (session?.role !== 'SPV' && session?.role !== 'ADMIN') {
+    return { error: 'Hanya SPV yang dapat menyetujui pada tahap ini.' }
   }
 
   try {
     const req = await prisma.request.findUnique({
       where: { id: requestId },
-      include: { details: true, fo: true } // fo is the AFA
+      include: { details: true, fo: true }
     })
 
     if (!req || req.commodity !== 'AFA_STOCK_IN') {
@@ -103,17 +96,135 @@ export async function approveAfaStockRequest(requestId: string) {
       return { error: 'Pengajuan ini sudah pernah diproses.' }
     }
 
-    // 1. Update Request to APPROVED and store the approver in afaId (mental map: SPV acts as approver)
+    // Update to APPROVED_SPV — no ledger entry yet
     await prisma.request.update({
       where: { id: requestId },
       data: {
-        status: 'APPROVED',
-        afaId: session.userId, // Storing SPV ID as the approver
+        status: 'APPROVED_SPV',
+        afaId: session.userId,
       }
     })
 
-    // 2. Add stock to AFA's ledger — convert kemasan qty → gramasi qty (Opsi B)
-    // Fetch product info to get gramasiPerUnit for conversion
+    // Notify all FA Managers
+    const fams = await prisma.user.findMany({ where: { role: 'FAM', isActive: true } })
+    for (const fam of fams) {
+      await prisma.notification.create({
+        data: {
+          userId: fam.id,
+          title: '📩 Pengajuan Stok Menunggu Approval FA Manager',
+          message: `Pengajuan stok AFA (${req.fo?.name || 'AFA'}) telah disetujui SPV dan menunggu approval Anda.`,
+          link: `/dashboard/stock`
+        }
+      })
+    }
+
+    // Notify AFA about progress
+    await prisma.notification.create({
+      data: {
+        userId: req.foId,
+        title: '✅ Disetujui SPV — Menunggu FA Manager',
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui SPV. Menunggu approval FA Manager.`,
+        link: `/dashboard/stock`
+      }
+    })
+
+    revalidatePath('/dashboard/stock')
+    return { success: true }
+  } catch (err: any) {
+    console.error('approveAfaStockRequest error:', err)
+    return { error: 'Gagal memproses approval SPV.' }
+  }
+}
+
+// ─── STEP 2: FA Manager approves → APPROVED_FAM ───────────────────
+export async function approveFamStockRequest(requestId: string) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  if (session?.role !== 'FAM') {
+    return { error: 'Hanya FA Manager yang dapat menyetujui pada tahap ini.' }
+  }
+
+  try {
+    const req = await prisma.request.findUnique({
+      where: { id: requestId },
+      include: { details: true, fo: true }
+    })
+
+    if (!req || req.commodity !== 'AFA_STOCK_IN') {
+      return { error: 'Pengajuan stok tidak ditemukan.' }
+    }
+    if (req.status !== 'APPROVED_SPV') {
+      return { error: 'Pengajuan ini tidak dalam status menunggu FA Manager.' }
+    }
+
+    await prisma.request.update({
+      where: { id: requestId },
+      data: { status: 'APPROVED_FAM' }
+    })
+
+    // Notify all WH Managers
+    const whms = await prisma.user.findMany({ where: { role: 'WHM', isActive: true } })
+    for (const whm of whms) {
+      await prisma.notification.create({
+        data: {
+          userId: whm.id,
+          title: '📩 Pengajuan Stok Menunggu Approval WH Manager',
+          message: `Pengajuan stok AFA (${req.fo?.name || 'AFA'}) telah disetujui FA Manager dan menunggu approval Anda.`,
+          link: `/dashboard/stock`
+        }
+      })
+    }
+
+    // Notify AFA about progress
+    await prisma.notification.create({
+      data: {
+        userId: req.foId,
+        title: '✅ Disetujui FA Manager — Menunggu WH Manager',
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui FA Manager. Menunggu approval WH Manager.`,
+        link: `/dashboard/stock`
+      }
+    })
+
+    revalidatePath('/dashboard/stock')
+    return { success: true }
+  } catch (err: any) {
+    console.error('approveFamStockRequest error:', err)
+    return { error: 'Gagal memproses approval FA Manager.' }
+  }
+}
+
+// ─── STEP 3 (FINAL): WH Manager approves → APPROVED + LEDGER ─────
+export async function approveWhmStockRequest(requestId: string) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  if (session?.role !== 'WHM') {
+    return { error: 'Hanya WH Manager yang dapat menyetujui pada tahap ini.' }
+  }
+
+  try {
+    const req = await prisma.request.findUnique({
+      where: { id: requestId },
+      include: { details: true, fo: true }
+    })
+
+    if (!req || req.commodity !== 'AFA_STOCK_IN') {
+      return { error: 'Pengajuan stok tidak ditemukan.' }
+    }
+    if (req.status !== 'APPROVED_FAM') {
+      return { error: 'Pengajuan ini tidak dalam status menunggu WH Manager.' }
+    }
+
+    // 1. Update to APPROVED (final)
+    await prisma.request.update({
+      where: { id: requestId },
+      data: { status: 'APPROVED' }
+    })
+
+    // 2. Add stock to AFA's ledger (with gramasi conversion)
     const productIds = req.details.map(d => d.productId)
     const productInfos = await prisma.product.findMany({
       where: { id: { in: productIds } },
@@ -125,7 +236,6 @@ export async function approveAfaStockRequest(requestId: string) {
       data: req.details.map(d => {
         const prod = productMap.get(d.productId)
         const qtyKemasan = d.qtyApproved ?? d.qtyRequested
-        // If product has gramasi info, multiply; otherwise store as-is (backward compat)
         const qtyToStore = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
           ? qtyKemasan * prod.gramasiPerUnit
           : qtyKemasan
@@ -135,17 +245,17 @@ export async function approveAfaStockRequest(requestId: string) {
           transactionType: 'STOCK_IN_GUDANG',
           quantity: qtyToStore,
           referenceId: req.id,
-          notes: `Approval Pengadaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
+          notes: `Approval Pengadaan Stok oleh WH Manager (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
         }
       })
     })
 
-    // 3. Notify AFA (the requester)
+    // 3. Notify AFA (requester) — final
     await prisma.notification.create({
       data: {
         userId: req.foId,
-        title: '✅ Pengajuan Stok Disetujui',
-        message: `Pengajuan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah disetujui oleh SPV dan stok telah masuk ke ledger Anda.`,
+        title: '✅ Pengajuan Stok Selesai — Stok Telah Masuk',
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui WH Manager. Stok telah masuk ke ledger Anda.`,
         link: `/dashboard/stock`
       }
     })
@@ -153,7 +263,64 @@ export async function approveAfaStockRequest(requestId: string) {
     revalidatePath('/dashboard/stock')
     return { success: true }
   } catch (err: any) {
-    console.error('approveAfaStockRequest error:', err)
-    return { error: 'Gagal menyetujui pengajuan stok AFA.' }
+    console.error('approveWhmStockRequest error:', err)
+    return { error: 'Gagal memproses approval WH Manager.' }
+  }
+}
+
+// ─── REJECT (any approver can reject at their step) ───────────────
+export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV' | 'FAM' | 'WHM') {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  const roleStatusMap: Record<string, string> = {
+    'SPV': 'SUBMITTED',
+    'FAM': 'APPROVED_SPV',
+    'WHM': 'APPROVED_FAM',
+  }
+
+  if (session?.role !== rejectRole && session?.role !== 'ADMIN') {
+    return { error: 'Anda tidak memiliki akses untuk menolak pada tahap ini.' }
+  }
+
+  const expectedStatus = roleStatusMap[rejectRole]
+  if (!expectedStatus) return { error: 'Role tidak valid.' }
+
+  try {
+    const req = await prisma.request.findUnique({
+      where: { id: requestId },
+      include: { fo: true }
+    })
+
+    if (!req || req.commodity !== 'AFA_STOCK_IN') {
+      return { error: 'Pengajuan stok tidak ditemukan.' }
+    }
+    if (req.status !== expectedStatus) {
+      return { error: 'Pengajuan ini tidak dalam status yang sesuai untuk ditolak.' }
+    }
+
+    await prisma.request.update({
+      where: { id: requestId },
+      data: { status: 'REJECTED' }
+    })
+
+    const roleLabels: Record<string, string> = { SPV: 'SPV', FAM: 'FA Manager', WHM: 'WH Manager' }
+
+    // Notify AFA
+    await prisma.notification.create({
+      data: {
+        userId: req.foId,
+        title: '❌ Pengajuan Stok Ditolak',
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah ditolak oleh ${roleLabels[rejectRole]}.`,
+        link: `/dashboard/stock`
+      }
+    })
+
+    revalidatePath('/dashboard/stock')
+    return { success: true }
+  } catch (err: any) {
+    console.error('rejectAfaStockRequest error:', err)
+    return { error: 'Gagal menolak pengajuan stok.' }
   }
 }

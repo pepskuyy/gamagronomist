@@ -83,7 +83,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   let afaStockRequests: any[] = []
   let hasMoreAfaReqs = false
 
-  if (['SPV', 'AFA'].includes(session.role)) {
+  if (['SPV', 'AFA', 'FAM', 'WHM'].includes(session.role)) {
     let afaStockWhere: any = { commodity: 'AFA_STOCK_IN' }
     
     if (session.role === 'AFA') {
@@ -91,6 +91,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
     } else if (session.role === 'SPV' && session.areaId) {
       afaStockWhere.fo = { areaId: session.areaId }
     }
+    // FAM and WHM see all AFA_STOCK_IN requests (global scope)
 
     if (qa) {
       // `fo` points to the requester (AFA) in AFA_STOCK_IN
@@ -158,7 +159,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   return (
     <div>
       {/* 1. KARTU STOK PRIBADI (Tidak terlihat untuk Admin/SPV) */}
-      {session.role !== 'SPV' && session.role !== 'ADMIN' && (
+      {!['FAM', 'WHM'].includes(session.role) && session.role !== 'SPV' && session.role !== 'ADMIN' && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <h2 style={{ margin: 0 }}>📦 Saldo Stok Saat Ini</h2>
@@ -233,10 +234,10 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       )}
 
       {/* 3. PENGAJUAN STOK AFA */}
-      {['SPV', 'AFA'].includes(session.role) && (
+      {['SPV', 'AFA', 'FAM', 'WHM'].includes(session.role) && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>📨 Pengajuan Stok {session.role === 'SPV' ? 'dari AFA' : 'Saya'}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>📨 Pengajuan Stok {session.role === 'AFA' ? 'Saya' : session.role === 'SPV' ? 'dari AFA' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
           </div>
           <TableFilter prefix="a" showDateRange={true} />
 
@@ -253,7 +254,8 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
         </div>
       )}
 
-      {/* 4. PERMINTAAN STOK FO */}
+      {/* 4. PERMINTAAN STOK FO (hidden for FAM/WHM) */}
+      {!['FAM', 'WHM'].includes(session.role) && (
       <div style={{ marginBottom: '3rem' }}>
         <h2 style={{ margin: 0, marginBottom: '1rem', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           📦 {['FO', 'INTERN'].includes(session.role) ? 'Permintaan Stok Saya' : 'Permintaan Stok FO'}
@@ -325,6 +327,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
           </div>
         )}
       </div>
+      )}
 
     </div>
   )
