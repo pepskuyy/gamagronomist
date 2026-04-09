@@ -10,6 +10,7 @@ type RequestProps = {
   status: string
   plan: string | null
   foId: string
+  accurateInvoiceNo?: string | null
   fo?: { id: string; name: string } | null
   afaId?: string | null
   afa?: { id: string; name: string } | null
@@ -179,6 +180,7 @@ export default function AfaStockRequestTable({
                 {role !== 'AFA' && <th style={{ ...thStyle, textAlign: 'left' }}>Nama AFA</th>}
                 <th style={{ ...thStyle, textAlign: 'left' }}>Produk Diminta</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Status</th>
+                <th style={{ ...thStyle, textAlign: 'center' }}>Invoice</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
@@ -192,6 +194,19 @@ export default function AfaStockRequestTable({
                     {req.details.map(d => `${d.product.name}: ${d.qtyRequested} ${d.product.unit}`).join(', ')}
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>{getStatusBadge(req.status)}</td>
+                  <td style={{ ...tdStyle, textAlign: 'center' }}>
+                    {req.status === 'APPROVED' && req.accurateInvoiceNo ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#dcfce7', color: '#166534' }}>
+                        ✅ {req.accurateInvoiceNo}
+                      </span>
+                    ) : req.status === 'APPROVED' && !req.accurateInvoiceNo ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#fef3c7', color: '#92400e' }}>
+                        ⚠️ Tidak Terbit
+                      </span>
+                    ) : (
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>—</span>
+                    )}
+                  </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
                     <div className="action-row" style={{ justifyContent: 'center', gap: '0.4rem' }}>
                       {canApprove(req.status) && (

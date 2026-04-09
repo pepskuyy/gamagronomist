@@ -282,7 +282,7 @@ export async function receiveSpvStockRequest(requestId: string) {
       return { error: 'Pengajuan ini tidak dalam status menunggu penerimaan SPV.' }
     }
 
-    // 1. Update to APPROVED (final)
+    // 1. Update to APPROVED (final) — will update invoiceNo below if available
     await prisma.request.update({
       where: { id: requestId },
       data: { status: 'APPROVED' }
@@ -316,6 +316,8 @@ export async function receiveSpvStockRequest(requestId: string) {
 
     // 3. Create Sales Invoice in Accurate (outbound from warehouse)
     //    Non-blocking: approval succeeds even if Accurate API is unreachable
+    //    Don't send unitPrice — let Accurate auto-fill from its item master prices
+    let savedInvoiceNo: string | null = null
     try {
       const invoiceItems = req.details
         .map(d => {
@@ -324,7 +326,7 @@ export async function receiveSpvStockRequest(requestId: string) {
           return {
             itemNo: prod.accurateId,
             quantity: d.qtyApproved ?? d.qtyRequested,
-            unitPrice: 0,
+            // unitPrice omitted — Accurate will use default price from item master
           }
         })
         .filter((x): x is NonNullable<typeof x> => x !== null)
@@ -338,25 +340,35 @@ export async function receiveSpvStockRequest(requestId: string) {
           'PT Gama Agro Sejati',
           transDate,
           invoiceItems,
-          `Penerimaan Stok AFA (${afaName}) — Ref: ${requestId.slice(0, 8).toUpperCase()}`
+          `Diajukan untuk kebutuhan ${afaName} — Ref: ${requestId.slice(0, 8).toUpperCase()}`
         )
 
         if (!invoiceResult.success) {
           console.warn(`[SPV Receive] Accurate invoice creation failed (non-blocking): ${invoiceResult.error}`)
         } else {
-          console.log(`[SPV Receive] Accurate invoice created: ${invoiceResult.invoiceNo}`)
+          savedInvoiceNo = invoiceResult.invoiceNo ?? null
+          console.log(`[SPV Receive] Accurate invoice created: ${savedInvoiceNo}`)
         }
       }
     } catch (accErr: any) {
       console.warn(`[SPV Receive] Accurate API error (non-blocking):`, accErr.message)
     }
 
+    // 3b. Save invoice number to Request record
+    if (savedInvoiceNo) {
+      await prisma.request.update({
+        where: { id: requestId },
+        data: { accurateInvoiceNo: savedInvoiceNo }
+      })
+    }
+
     // 4. Notify AFA (requester) — final
+    const invoiceInfo = savedInvoiceNo ? ` Invoice Accurate: ${savedInvoiceNo}.` : ''
     await prisma.notification.create({
       data: {
         userId: req.foId,
         title: '✅ Pengajuan Stok Selesai — Stok Telah Masuk',
-        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah diterima SPV. Stok telah masuk ke ledger Anda.`,
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah diterima SPV. Stok telah masuk ke ledger Anda.${invoiceInfo}`,
         link: `/dashboard/stock`
       }
     })
