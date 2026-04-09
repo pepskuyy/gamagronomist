@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import { createSalesInvoice } from '@/lib/accurate'
 
 const prisma = new PrismaClient()
 
@@ -228,7 +229,7 @@ export async function approveWhmStockRequest(requestId: string) {
     const productIds = req.details.map(d => d.productId)
     const productInfos = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, gramasiPerUnit: true, unitGramasi: true, unit: true },
+      select: { id: true, accurateId: true, gramasiPerUnit: true, unitGramasi: true, unit: true },
     })
     const productMap = new Map(productInfos.map(p => [p.id, p]))
 
@@ -250,7 +251,44 @@ export async function approveWhmStockRequest(requestId: string) {
       })
     })
 
-    // 3. Notify AFA (requester) — final
+    // 3. Create Sales Invoice in Accurate (outbound from warehouse)
+    //    Non-blocking: approval succeeds even if Accurate API is unreachable
+    try {
+      const invoiceItems = req.details
+        .map(d => {
+          const prod = productMap.get(d.productId)
+          if (!prod?.accurateId) return null
+          return {
+            itemNo: prod.accurateId,
+            quantity: d.qtyApproved ?? d.qtyRequested,
+            unitPrice: 0, // Internal transfer, no sales value
+          }
+        })
+        .filter((x): x is NonNullable<typeof x> => x !== null)
+
+      if (invoiceItems.length > 0) {
+        const now = new Date()
+        const transDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
+        const afaName = req.fo?.name ?? 'AFA'
+
+        const invoiceResult = await createSalesInvoice(
+          'PT Gama Agro Sejati',
+          transDate,
+          invoiceItems,
+          `Pengadaan Stok AFA (${afaName}) — Ref: ${requestId.slice(0, 8).toUpperCase()}`
+        )
+
+        if (!invoiceResult.success) {
+          console.warn(`[WHM Approve] Accurate invoice creation failed (non-blocking): ${invoiceResult.error}`)
+        } else {
+          console.log(`[WHM Approve] Accurate invoice created: ${invoiceResult.invoiceNo}`)
+        }
+      }
+    } catch (accErr: any) {
+      console.warn(`[WHM Approve] Accurate API error (non-blocking):`, accErr.message)
+    }
+
+    // 4. Notify AFA (requester) — final
     await prisma.notification.create({
       data: {
         userId: req.foId,

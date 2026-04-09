@@ -96,3 +96,87 @@ export async function fetchAccurateItems(): Promise<AccurateItem[]> {
 
   return allItems
 }
+
+// ─── SALES INVOICE (OUTBOUND) ─────────────────────────────────────
+
+export type InvoiceLineItem = {
+  itemNo:   string   // SKU / no_barang di Accurate (= product.accurateId)
+  quantity: number   // Jumlah dalam satuan kemasan
+  unitPrice?: number // Harga satuan (opsional, default 0 untuk transfer internal)
+}
+
+/**
+ * Buat Sales Invoice di Accurate Online.
+ * Digunakan saat WHM meng-approve pengajuan stok AFA agar stok gudang di Accurate berkurang.
+ *
+ * Endpoint: POST {host}/accurate/api/sales-invoice/save.do
+ * Content-Type: application/x-www-form-urlencoded
+ *
+ * @param customerNo - Nomor pelanggan di Accurate (contoh: "PT Gama Agro Sejati")
+ * @param transDate  - Tanggal transaksi dalam format dd/MM/yyyy
+ * @param items      - Array line items
+ * @param description - Keterangan transaksi (opsional)
+ * @returns Data invoice yang dibuat dari response Accurate
+ */
+export async function createSalesInvoice(
+  customerNo: string,
+  transDate: string,
+  items: InvoiceLineItem[],
+  description?: string
+): Promise<{ success: boolean; invoiceNo?: string; error?: string; rawResponse?: any }> {
+  const { token, secret, host } = getCredentials()
+
+  const url = `${host}/accurate/api/sales-invoice/save.do`
+  const headers = buildAuthHeaders(token, secret)
+
+  // Build form-urlencoded body following Accurate's convention
+  const params = new URLSearchParams()
+  params.set('customerNo', customerNo)
+  params.set('transDate', transDate)
+  if (description) params.set('description', description)
+
+  // Line items use indexed array parameters: detailItem[0].itemNo, detailItem[0].quantity, etc.
+  items.forEach((item, idx) => {
+    params.set(`detailItem[${idx}].itemNo`, item.itemNo)
+    params.set(`detailItem[${idx}].quantity`, String(item.quantity))
+    if (item.unitPrice !== undefined) {
+      params.set(`detailItem[${idx}].unitPrice`, String(item.unitPrice))
+    }
+  })
+
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: {
+        ...headers,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: params.toString(),
+      cache: 'no-store',
+    })
+
+    const data = await res.json()
+
+    if (!res.ok || !data.s) {
+      console.error('[Accurate] Sales invoice creation failed:', JSON.stringify(data))
+      return {
+        success: false,
+        error: data.d ?? data.message ?? `HTTP ${res.status}`,
+        rawResponse: data,
+      }
+    }
+
+    return {
+      success: true,
+      invoiceNo: data.r?.number ?? data.d?.number ?? null,
+      rawResponse: data,
+    }
+  } catch (err: any) {
+    console.error('[Accurate] Sales invoice network error:', err)
+    return {
+      success: false,
+      error: err.message || 'Network error',
+    }
+  }
+}
+
