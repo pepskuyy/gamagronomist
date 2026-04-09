@@ -196,7 +196,7 @@ export async function approveFamStockRequest(requestId: string) {
   }
 }
 
-// ─── STEP 3 (FINAL): WH Manager approves → APPROVED + LEDGER ─────
+// ─── STEP 3: WH Manager approves → APPROVED_WHM ──────────────────
 export async function approveWhmStockRequest(requestId: string) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -217,6 +217,69 @@ export async function approveWhmStockRequest(requestId: string) {
     }
     if (req.status !== 'APPROVED_FAM') {
       return { error: 'Pengajuan ini tidak dalam status menunggu WH Manager.' }
+    }
+
+    // Update to APPROVED_WHM — no ledger/invoice yet, wait for SPV receive
+    await prisma.request.update({
+      where: { id: requestId },
+      data: { status: 'APPROVED_WHM' }
+    })
+
+    // Notify SPV(s) in the same area as AFA to receive
+    const afaUser = await prisma.user.findUnique({ where: { id: req.foId } })
+    if (afaUser && afaUser.areaId) {
+      const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId, isActive: true } })
+      for (const spv of spvs) {
+        await prisma.notification.create({
+          data: {
+            userId: spv.id,
+            title: '📦 Stok Siap Diterima',
+            message: `Pengajuan stok AFA (${req.fo?.name || 'AFA'}) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.`,
+            link: `/dashboard/stock`
+          }
+        })
+      }
+    }
+
+    // Notify AFA about progress
+    await prisma.notification.create({
+      data: {
+        userId: req.foId,
+        title: '✅ Disetujui WH Manager — Menunggu Penerimaan SPV',
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.`,
+        link: `/dashboard/stock`
+      }
+    })
+
+    revalidatePath('/dashboard/stock')
+    return { success: true }
+  } catch (err: any) {
+    console.error('approveWhmStockRequest error:', err)
+    return { error: 'Gagal memproses approval WH Manager.' }
+  }
+}
+
+// ─── STEP 4 (FINAL): SPV receives stock → APPROVED + LEDGER + INVOICE ─
+export async function receiveSpvStockRequest(requestId: string) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  if (session?.role !== 'SPV' && session?.role !== 'ADMIN') {
+    return { error: 'Hanya SPV yang dapat mengkonfirmasi penerimaan stok.' }
+  }
+
+  try {
+    const req = await prisma.request.findUnique({
+      where: { id: requestId },
+      include: { details: true, fo: true }
+    })
+
+    if (!req || req.commodity !== 'AFA_STOCK_IN') {
+      return { error: 'Pengajuan stok tidak ditemukan.' }
+    }
+    if (req.status !== 'APPROVED_WHM') {
+      return { error: 'Pengajuan ini tidak dalam status menunggu penerimaan SPV.' }
     }
 
     // 1. Update to APPROVED (final)
@@ -246,7 +309,7 @@ export async function approveWhmStockRequest(requestId: string) {
           transactionType: 'STOCK_IN_GUDANG',
           quantity: qtyToStore,
           referenceId: req.id,
-          notes: `Approval Pengadaan Stok oleh WH Manager (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
+          notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
         }
       })
     })
@@ -261,7 +324,7 @@ export async function approveWhmStockRequest(requestId: string) {
           return {
             itemNo: prod.accurateId,
             quantity: d.qtyApproved ?? d.qtyRequested,
-            unitPrice: 0, // Internal transfer, no sales value
+            unitPrice: 0,
           }
         })
         .filter((x): x is NonNullable<typeof x> => x !== null)
@@ -275,17 +338,17 @@ export async function approveWhmStockRequest(requestId: string) {
           'PT Gama Agro Sejati',
           transDate,
           invoiceItems,
-          `Pengadaan Stok AFA (${afaName}) — Ref: ${requestId.slice(0, 8).toUpperCase()}`
+          `Penerimaan Stok AFA (${afaName}) — Ref: ${requestId.slice(0, 8).toUpperCase()}`
         )
 
         if (!invoiceResult.success) {
-          console.warn(`[WHM Approve] Accurate invoice creation failed (non-blocking): ${invoiceResult.error}`)
+          console.warn(`[SPV Receive] Accurate invoice creation failed (non-blocking): ${invoiceResult.error}`)
         } else {
-          console.log(`[WHM Approve] Accurate invoice created: ${invoiceResult.invoiceNo}`)
+          console.log(`[SPV Receive] Accurate invoice created: ${invoiceResult.invoiceNo}`)
         }
       }
     } catch (accErr: any) {
-      console.warn(`[WHM Approve] Accurate API error (non-blocking):`, accErr.message)
+      console.warn(`[SPV Receive] Accurate API error (non-blocking):`, accErr.message)
     }
 
     // 4. Notify AFA (requester) — final
@@ -293,7 +356,7 @@ export async function approveWhmStockRequest(requestId: string) {
       data: {
         userId: req.foId,
         title: '✅ Pengajuan Stok Selesai — Stok Telah Masuk',
-        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui WH Manager. Stok telah masuk ke ledger Anda.`,
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah diterima SPV. Stok telah masuk ke ledger Anda.`,
         link: `/dashboard/stock`
       }
     })
@@ -301,8 +364,8 @@ export async function approveWhmStockRequest(requestId: string) {
     revalidatePath('/dashboard/stock')
     return { success: true }
   } catch (err: any) {
-    console.error('approveWhmStockRequest error:', err)
-    return { error: 'Gagal memproses approval WH Manager.' }
+    console.error('receiveSpvStockRequest error:', err)
+    return { error: 'Gagal memproses penerimaan stok.' }
   }
 }
 

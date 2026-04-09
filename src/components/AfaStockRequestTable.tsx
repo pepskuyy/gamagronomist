@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
-import { approveAfaStockRequest, approveFamStockRequest, approveWhmStockRequest, rejectAfaStockRequest } from '@/app/actions/afa-stock'
+import { approveAfaStockRequest, approveFamStockRequest, approveWhmStockRequest, receiveSpvStockRequest, rejectAfaStockRequest } from '@/app/actions/afa-stock'
 
 type RequestProps = {
   id: string
@@ -33,8 +33,8 @@ export default function AfaStockRequestTable({
   const [actionId, setActionId] = useState<string | null>(null)
 
   const handleApprove = (id: string) => {
-    const confirmMsg = role === 'WHM'
-      ? 'Apakah Anda yakin? Stok akan langsung ditambahkan ke ledger AFA setelah approve.'
+    const confirmMsg = (role === 'SPV' || role === 'ADMIN')
+      ? 'Apakah Anda yakin ingin menyetujui pengajuan stok ini?'
       : 'Apakah Anda yakin ingin menyetujui pengajuan stok ini?'
     if (!confirm(confirmMsg)) return
     setActionId(id)
@@ -47,6 +47,20 @@ export default function AfaStockRequestTable({
       } else if (role === 'WHM') {
         res = await approveWhmStockRequest(id)
       }
+      if (res?.error) {
+        alert(res.error)
+      } else {
+        router.refresh()
+      }
+      setActionId(null)
+    })
+  }
+
+  const handleReceive = (id: string) => {
+    if (!confirm('Apakah Anda yakin telah menerima stok ini? Stok akan langsung ditambahkan ke ledger AFA dan invoice Accurate akan diterbitkan.')) return
+    setActionId(id)
+    startTransition(async () => {
+      const res = await receiveSpvStockRequest(id)
       if (res?.error) {
         alert(res.error)
       } else {
@@ -123,18 +137,24 @@ export default function AfaStockRequestTable({
       case 'SUBMITTED':     return <span className="badge badge-warning">Menunggu SPV</span>
       case 'APPROVED_SPV':  return <span className="badge" style={{ background: '#dbeafe', color: '#1d4ed8' }}>Menunggu FA Manager</span>
       case 'APPROVED_FAM':  return <span className="badge" style={{ background: '#ede9fe', color: '#7c3aed' }}>Menunggu WH Manager</span>
+      case 'APPROVED_WHM':  return <span className="badge" style={{ background: '#fef3c7', color: '#92400e' }}>Menunggu Penerimaan SPV</span>
       case 'APPROVED':      return <span className="badge badge-success">Selesai</span>
       case 'REJECTED':      return <span className="badge badge-danger">Ditolak</span>
       default:              return <span className="badge badge-neutral">{status}</span>
     }
   }
 
-  // Determine which status this role can act on
+  // Determine which status this role can act on (approve)
   const canApprove = (status: string) => {
     if ((role === 'SPV' || role === 'ADMIN') && status === 'SUBMITTED') return true
     if (role === 'FAM' && status === 'APPROVED_SPV') return true
     if (role === 'WHM' && status === 'APPROVED_FAM') return true
     return false
+  }
+
+  // SPV can receive stock at APPROVED_WHM
+  const canReceive = (status: string) => {
+    return (role === 'SPV' || role === 'ADMIN') && status === 'APPROVED_WHM'
   }
 
   if (requests.length === 0) return null
@@ -195,6 +215,17 @@ export default function AfaStockRequestTable({
                         </>
                       )}
                       
+                      {canReceive(req.status) && (
+                        <button 
+                          onClick={() => handleReceive(req.id)}
+                          className="btn" 
+                          style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}
+                          disabled={isPending && actionId === req.id}
+                        >
+                          {isPending && actionId === req.id ? 'Memproses...' : '📦 Terima Stok'}
+                        </button>
+                      )}
+
                       {req.status === 'APPROVED' && (
                         <button 
                           onClick={() => handleDownloadPdf(req)}

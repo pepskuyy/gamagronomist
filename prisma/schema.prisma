@@ -167,7 +167,7 @@ model Request {
   cbReference    String?
   problem        String?
   plan           String?
-  status         String   @default("SUBMITTED") // "SUBMITTED", "APPROVED_SPV", "APPROVED_FAM", "APPROVED", "REJECTED", "DEMO_PLOT_SELESAI"
+  status         String   @default("SUBMITTED") // "SUBMITTED", "APPROVED_SPV", "APPROVED_FAM", "APPROVED_WHM", "APPROVED", "REJECTED", "DEMO_PLOT_SELESAI"
   
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
