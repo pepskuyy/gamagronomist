@@ -340,7 +340,8 @@ export async function receiveSpvStockRequest(requestId: string) {
           'T/027', // ID Pelanggan PT Gama Agro Sejati di Accurate
           transDate,
           invoiceItems,
-          `Diajukan untuk kebutuhan ${afaName} — Ref: ${requestId.slice(0, 8).toUpperCase()}`
+          `Diajukan untuk kebutuhan ${afaName} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
+          'Kantor Pusat SMG' // Cabang di Accurate
         )
 
         if (!invoiceResult.success) {

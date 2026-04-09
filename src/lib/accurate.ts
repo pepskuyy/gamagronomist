@@ -122,7 +122,8 @@ export async function createSalesInvoice(
   customerNo: string,
   transDate: string,
   items: InvoiceLineItem[],
-  description?: string
+  description?: string,
+  branchName?: string
 ): Promise<{ success: boolean; invoiceNo?: string; error?: string; rawResponse?: any }> {
   const { token, secret, host } = getCredentials()
 
@@ -134,6 +135,7 @@ export async function createSalesInvoice(
   params.set('customerNo', customerNo)
   params.set('transDate', transDate)
   if (description) params.set('description', description)
+  if (branchName) params.set('branchName', branchName)
 
   // Line items use indexed array parameters: detailItem[0].itemNo, detailItem[0].quantity, etc.
   items.forEach((item, idx) => {
