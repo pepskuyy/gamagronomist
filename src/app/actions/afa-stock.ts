@@ -337,7 +337,7 @@ export async function receiveSpvStockRequest(requestId: string) {
         const afaName = req.fo?.name ?? 'AFA'
 
         const invoiceResult = await createSalesInvoice(
-          'PT Gama Agro Sejati',
+          'T/027', // ID Pelanggan PT Gama Agro Sejati di Accurate
           transDate,
           invoiceItems,
           `Diajukan untuk kebutuhan ${afaName} — Ref: ${requestId.slice(0, 8).toUpperCase()}`
