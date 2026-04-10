@@ -6,12 +6,10 @@ type SalesOrder = {
   number: string
   transDate: string      // DD/MM/YYYY from Accurate
   status: string
-  customerName: string
-  customerNo: string
+  customer?: { name?: string, no?: string }
   description: string
   grandTotal: number
-  masterSalesman: string
-  detailSalesOrder?: any[]
+  salesman?: { name?: string }
 }
 
 type UrgencyLevel = 'normal' | 'warning' | 'danger'
@@ -115,7 +113,7 @@ export default function SoTrackingPage() {
     if (search) {
       const q = search.toLowerCase()
       if (!so.number?.toLowerCase().includes(q) &&
-          !so.customerName?.toLowerCase().includes(q) &&
+          !so.customer?.name?.toLowerCase().includes(q) &&
           !so.description?.toLowerCase().includes(q)) return false
     }
     return true
@@ -232,7 +230,7 @@ export default function SoTrackingPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: 700 }}>
               <thead>
                 <tr>
-                  {['No SO','Tanggal','Umur','Pelanggan','Keterangan','Status','Total','Detail'].map(h => (
+                  {['No SO','Tanggal','Umur','Pelanggan','Keterangan','Status','Total'].map(h => (
                     <th key={h} style={{
                       padding: '0.7rem 1rem', fontSize: '0.72rem', fontWeight: 700,
                       color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em',
@@ -252,15 +250,9 @@ export default function SoTrackingPage() {
                 ) : (
                   filtered.map((so) => {
                     const urgency = getUrgency(so.transDate, so.status)
-                    const isExpanded = expandedNo === so.number
-                    const details: any[] = so.detailSalesOrder ?? []
-
                     return (
-                      <>
                         <tr key={so.number}
-                          onClick={() => setExpandedNo(isExpanded ? null : so.number)}
                           style={{
-                            cursor: 'pointer',
                             transition: 'background 0.15s',
                             ...urgencyStyle[urgency]
                           }}
@@ -278,7 +270,7 @@ export default function SoTrackingPage() {
                             <AgeDays transDate={so.transDate} />
                           </td>
                           <td style={{ padding: '0.8rem 1rem', fontSize: '0.83rem', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>
-                            {so.customerName || '-'}
+                            {so.customer?.name || '-'}
                           </td>
                           <td style={{ padding: '0.8rem 1rem', fontSize: '0.8rem', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {so.description || '-'}
@@ -295,46 +287,7 @@ export default function SoTrackingPage() {
                           <td style={{ padding: '0.8rem 1rem', fontSize: '0.83rem', borderBottom: '1px solid var(--border)', textAlign: 'right', fontWeight: 700, whiteSpace: 'nowrap' }}>
                             {so.grandTotal ? formatCurrency(so.grandTotal) : '-'}
                           </td>
-                          <td style={{ padding: '0.8rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>
-                            <span style={{ fontSize: '0.78rem', color: 'var(--primary)', cursor: 'pointer' }}>
-                              {isExpanded ? '▲ Tutup' : '▼ Lihat'}
-                            </span>
-                          </td>
                         </tr>
-                        {isExpanded && (
-                          <tr key={`${so.number}-detail`}>
-                            <td colSpan={8} style={{ padding: '0.5rem 1.5rem 1rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
-                              <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                                Detail Produk ({details.length} item)
-                              </div>
-                              {details.length === 0 ? (
-                                <div style={{ color: 'var(--text-muted)', fontSize: '0.82rem' }}>Tidak ada detail item.</div>
-                              ) : (
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
-                                  <thead>
-                                    <tr style={{ background: 'var(--surface)' }}>
-                                      {['Barang','Qty','Satuan','Harga','Total'].map(h => (
-                                        <th key={h} style={{ padding: '0.4rem 0.75rem', textAlign: h === 'Qty' || h === 'Harga' || h === 'Total' ? 'right' : 'left', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>{h}</th>
-                                      ))}
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {details.map((d: any, idx: number) => (
-                                      <tr key={idx}>
-                                        <td style={{ padding: '0.35rem 0.75rem', borderBottom: '1px solid var(--border)' }}>{d.itemName ?? d.itemNo ?? '-'}</td>
-                                        <td style={{ padding: '0.35rem 0.75rem', textAlign: 'right', borderBottom: '1px solid var(--border)' }}>{d.quantity ?? '-'}</td>
-                                        <td style={{ padding: '0.35rem 0.75rem', borderBottom: '1px solid var(--border)' }}>{d.unitName ?? '-'}</td>
-                                        <td style={{ padding: '0.35rem 0.75rem', textAlign: 'right', borderBottom: '1px solid var(--border)' }}>{d.unitPrice != null ? formatCurrency(d.unitPrice) : '-'}</td>
-                                        <td style={{ padding: '0.35rem 0.75rem', textAlign: 'right', fontWeight: 600, borderBottom: '1px solid var(--border)' }}>{d.amount != null ? formatCurrency(d.amount) : '-'}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              )}
-                            </td>
-                          </tr>
-                        )}
-                      </>
                     )
                   })
                 )}
