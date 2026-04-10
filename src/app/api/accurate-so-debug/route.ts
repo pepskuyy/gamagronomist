@@ -11,14 +11,14 @@ function buildHeaders(token: string, secret: string) {
   }
 }
 
-async function tryEndpoint(host: string, token: string, secret: string, fields: string) {
-  const url = `${host}/accurate/api/sales-order/list.do?sp.pageSize=1&fields=${fields}`
+async function tryEndpoint(host: string, token: string, secret: string, queryExt: string) {
+  const url = `${host}/accurate/api/sales-order/list.do?sp.pageSize=1&fields=id,number,transDate,status,customer,description,totalAmount,masterSalesman${queryExt}`
   try {
     const res = await fetch(url, { headers: buildHeaders(token, secret), cache: 'no-store' })
     const data = await res.json()
-    return { fields, ok: data.s === true, status: res.status, response: data }
+    return { queryExt, ok: data.s === true, status: res.status, response: data }
   } catch (err: any) {
-    return { fields, ok: false, error: err.message }
+    return { queryExt, ok: false, error: err.message }
   }
 }
 
@@ -32,19 +32,17 @@ export async function GET() {
       return NextResponse.json({ error: 'Credentials not configured' }, { status: 500 })
     }
 
-    const testFields = [
-      'number,transDate,status',
-      'number,transDate,status,customer',
-      'number,transDate,status,customer,description',
-      'number,transDate,status,customer,description,grandTotal',
-      'number,transDate,status,customer,description,grandTotal,salesman',
-      'number,transDate,status,customer,description,totalAmount', // maybe grandTotal -> totalAmount?
-      'number,transDate,status,customer,description,masterSalesman' // maybe salesman -> masterSalesman?
+    const testQueries = [
+      '',
+      '&filter.transDate.op=EQUAL&filter.transDate.val=10/04/2026',
+      '&filter.transDate.op=GREATER_THAN_OR_EQUAL&filter.transDate.val=01/03/2026',
+      '&filter.transDate.op=BETWEEN&filter.transDate.val=01/03/2026&filter.transDate.val2=10/04/2026',
+      '&filter.transDate.val=01/03/2026&filter.transDate.val2=10/04/2026',
     ]
 
     const results = []
-    for (const fields of testFields) {
-        results.push(await tryEndpoint(host, token, secret, fields))
+    for (const q of testQueries) {
+        results.push(await tryEndpoint(host, token, secret, q))
     }
 
     return NextResponse.json({ results })
