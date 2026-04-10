@@ -97,6 +97,58 @@ export async function fetchAccurateItems(): Promise<AccurateItem[]> {
   return allItems
 }
 
+// ─── ITEM PRICE LOOKUP ────────────────────────────────────────────
+
+/**
+ * Fetch harga jual (unitPrice) dari Accurate untuk satu atau beberapa item.
+ * Menggunakan item/list.do dengan field unitPrice.
+ * @returns Map<itemNo, unitPrice>
+ */
+export async function fetchItemPrices(itemNos: string[]): Promise<Map<string, number>> {
+  if (itemNos.length === 0) return new Map()
+
+  const { token, secret, host } = getCredentials()
+  const priceMap = new Map<string, number>()
+
+  // Fetch in batches of 20 to avoid URL length issues
+  const batchSize = 20
+  for (let i = 0; i < itemNos.length; i += batchSize) {
+    const batch = itemNos.slice(i, i + batchSize)
+    const headers = buildAuthHeaders(token, secret)
+
+    // Use item/list.do with filter to get unitPrice field
+    const url = new URL(`${host}/accurate/api/item/list.do`)
+    url.searchParams.set('fields', 'no,unitPrice')
+    url.searchParams.set('sp.pageSize', String(batch.length))
+
+    // Filter by item numbers in this batch
+    batch.forEach((no, idx) => {
+      url.searchParams.set(`filter.no.val[${idx}]`, no)
+    })
+    url.searchParams.set('filter.no.op', 'EQUAL')
+
+    try {
+      const res = await fetch(url.toString(), {
+        headers,
+        cache: 'no-store',
+      })
+      const data = await res.json()
+
+      if (data.s && Array.isArray(data.d)) {
+        for (const item of data.d) {
+          const no = String(item.no ?? '').trim()
+          const price = item.unitPrice ?? 0
+          if (no) priceMap.set(no, price)
+        }
+      }
+    } catch (err) {
+      console.warn('[Accurate] Failed to fetch item prices for batch:', err)
+    }
+  }
+
+  return priceMap
+}
+
 // ─── SALES INVOICE (OUTBOUND) ─────────────────────────────────────
 
 export type InvoiceLineItem = {

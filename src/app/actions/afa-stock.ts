@@ -4,7 +4,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
-import { createSalesInvoice } from '@/lib/accurate'
+import { createSalesInvoice, fetchItemPrices } from '@/lib/accurate'
 
 const prisma = new PrismaClient()
 
@@ -316,9 +316,16 @@ export async function receiveSpvStockRequest(requestId: string) {
 
     // 3. Create Sales Invoice in Accurate (outbound from warehouse)
     //    Non-blocking: approval succeeds even if Accurate API is unreachable
-    //    Don't send unitPrice — let Accurate auto-fill from its item master prices
     let savedInvoiceNo: string | null = null
     try {
+      // Collect item codes that have accurateId
+      const itemCodes = req.details
+        .map(d => productMap.get(d.productId)?.accurateId)
+        .filter((x): x is string => !!x)
+
+      // Fetch prices from Accurate item master
+      const priceMap = await fetchItemPrices(itemCodes)
+
       const invoiceItems = req.details
         .map(d => {
           const prod = productMap.get(d.productId)
@@ -326,7 +333,7 @@ export async function receiveSpvStockRequest(requestId: string) {
           return {
             itemNo: prod.accurateId,
             quantity: d.qtyApproved ?? d.qtyRequested,
-            // unitPrice omitted — Accurate will use default price from item master
+            unitPrice: priceMap.get(prod.accurateId) ?? undefined,
           }
         })
         .filter((x): x is NonNullable<typeof x> => x !== null)
