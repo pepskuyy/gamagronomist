@@ -45,7 +45,6 @@ export async function GET(req: Request) {
       params.set('fields', 'id,number,transDate,status,customer,description,totalAmount,masterSalesman')
       params.set('sp.pageSize', String(pageSize))
       params.set('sp.page', String(page))
-      params.set('sp.sort', 'transDate.desc')
 
       // Date range filters - Accurate only reliably supports BETWEEN or EQUAL for transDate
       if (dateFrom || dateTo) {
@@ -92,6 +91,16 @@ export async function GET(req: Request) {
       return salesmanStr.toLowerCase().includes('business development') || 
              salesmanStr.toLowerCase().includes('busdev') ||
              salesmanStr.toLowerCase() === 'busdev'
+    })
+
+    // Sort locally by transDate descending
+    filtered.sort((a, b) => {
+      if (!a.transDate || !b.transDate) return 0
+      const [aD, aM, aY] = a.transDate.split('/')
+      const [bD, bM, bY] = b.transDate.split('/')
+      const dateA = new Date(`${aY}-${aM}-${aD}T00:00:00`).getTime()
+      const dateB = new Date(`${bY}-${bM}-${bD}T00:00:00`).getTime()
+      return dateB - dateA
     })
 
     return NextResponse.json({ success: true, data: filtered, total: filtered.length })
