@@ -27,8 +27,8 @@ export async function submitAccountRequest(formData: FormData) {
   if (password !== confirm) {
     return { error: 'Password dan konfirmasi password tidak cocok.' }
   }
-  if (!['AFA', 'FO', 'INTERN'].includes(role)) {
-    return { error: 'Role tidak valid. Pilih AFA atau FO.' }
+  if (!['AFA', 'FO', 'INTERN', 'BD'].includes(role)) {
+    return { error: 'Role tidak valid.' }
   }
 
   try {

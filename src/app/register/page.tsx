@@ -100,6 +100,7 @@ export default function RegisterPage() {
                 <option value="AFA">AFA (Asisten Field Agronomi)</option>
                 <option value="FO">FO (Field Officer)</option>
                 <option value="INTERN">INTERN (Magang)</option>
+                <option value="BD">BD (Business Development Staff)</option>
               </select>
             </div>
 
