@@ -47,16 +47,23 @@ export async function GET(req: Request) {
       params.set('sp.page', String(page))
       params.set('sp.sort', 'transDate.desc')
 
-      // Date range filters
-      if (dateFrom) {
-        const [y, m, d] = dateFrom.split('-')
-        params.set('filter.transDate.val', `${d}/${m}/${y}`)
-        params.set('filter.transDate.op', 'GREATER_THAN_OR_EQUAL')
-      }
-      if (dateTo) {
-        const [y, m, d] = dateTo.split('-')
-        params.set('filter.transDate.val2', `${d}/${m}/${y}`)
-        params.set('filter.transDate.op', dateFrom ? 'BETWEEN' : 'LESS_THAN_OR_EQUAL')
+      // Date range filters - Accurate only reliably supports BETWEEN or EQUAL for transDate
+      if (dateFrom || dateTo) {
+        // Default to a wide range if one side is missing
+        const from = dateFrom || '2000-01-01'
+        const to = dateTo || '2100-12-31'
+        
+        const [fY, fM, fD] = from.split('-')
+        const [tY, tM, tD] = to.split('-')
+        
+        if (from === to) {
+          params.set('filter.transDate.op', 'EQUAL')
+          params.set('filter.transDate.val', `${fD}/${fM}/${fY}`)
+        } else {
+          params.set('filter.transDate.op', 'BETWEEN')
+          params.set('filter.transDate.val', `${fD}/${fM}/${fY}`)
+          params.set('filter.transDate.val2', `${tD}/${tM}/${tY}`)
+        }
       }
 
       const headers = buildAccurateHeaders(token, secret)
