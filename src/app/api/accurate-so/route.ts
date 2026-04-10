@@ -42,7 +42,7 @@ export async function GET(req: Request) {
 
     while (true) {
       const params = new URLSearchParams()
-      params.set('fields', 'id,number,transDate,status,customer,description,grandTotal,salesman')
+      params.set('fields', 'id,number,transDate,status,customer,description,totalAmount,masterSalesman')
       params.set('sp.pageSize', String(pageSize))
       params.set('sp.page', String(page))
       params.set('sp.sort', 'transDate.desc')
@@ -81,7 +81,7 @@ export async function GET(req: Request) {
 
     // Filter by salesman containing "Business Development" (case-insensitive)
     const filtered = allSOs.filter(so => {
-      const salesmanStr = String(so.salesman?.name ?? '')
+      const salesmanStr = String(so.masterSalesman?.name ?? '')
       return salesmanStr.toLowerCase().includes('business development') || 
              salesmanStr.toLowerCase().includes('busdev') ||
              salesmanStr.toLowerCase() === 'busdev'

@@ -8,8 +8,8 @@ type SalesOrder = {
   status: string
   customer?: { name?: string, no?: string }
   description: string
-  grandTotal: number
-  salesman?: { name?: string }
+  totalAmount: number
+  masterSalesman?: { name?: string }
 }
 
 type UrgencyLevel = 'normal' | 'warning' | 'danger'
@@ -285,7 +285,7 @@ export default function SoTrackingPage() {
                             </span>
                           </td>
                           <td style={{ padding: '0.8rem 1rem', fontSize: '0.83rem', borderBottom: '1px solid var(--border)', textAlign: 'right', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                            {so.grandTotal ? formatCurrency(so.grandTotal) : '-'}
+                            {so.totalAmount ? formatCurrency(so.totalAmount) : '-'}
                           </td>
                         </tr>
                     )
