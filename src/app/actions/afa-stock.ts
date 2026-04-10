@@ -50,20 +50,28 @@ export async function submitAfaStockRequest(formData: FormData) {
       }
     })
 
-    // Notify SPV(s) in the same area
-    const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
-    if (afaUser && afaUser.areaId) {
-      const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId } })
+    // Notify SPV(s) — if AFA has areaId, notify SPVs in same area; otherwise notify all SPVs
+    try {
+      const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
+      const spvWhere: any = { role: 'SPV', isActive: true }
+      if (afaUser?.areaId) {
+        spvWhere.areaId = afaUser.areaId
+      }
+      const spvs = await prisma.user.findMany({ where: spvWhere, select: { id: true } })
+      
       for (const spv of spvs) {
         await prisma.notification.create({
           data: {
             userId: spv.id,
             title: '📩 Pengajuan Stok Baru (AFA)',
-            message: `${afaUser.name} telah mengajukan permintaan restock gudang AFA.`,
+            message: `${afaUser?.name || 'AFA'} telah mengajukan permintaan restock gudang AFA.`,
             link: `/dashboard/stock`
           }
         })
       }
+      console.log(`[AFA Stock] Notified ${spvs.length} SPV(s) for request ${req.id}`)
+    } catch (notifErr) {
+      console.warn('[AFA Stock] Failed to send SPV notification:', notifErr)
     }
 
     revalidatePath('/dashboard/stock')
