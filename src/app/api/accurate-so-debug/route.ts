@@ -11,14 +11,14 @@ function buildHeaders(token: string, secret: string) {
   }
 }
 
-async function tryEndpoint(host: string, token: string, secret: string, path: string, extraParams = '') {
-  const url = `${host}/accurate/api/${path}?sp.pageSize=1${extraParams}`
+async function tryEndpoint(host: string, token: string, secret: string, fields: string) {
+  const url = `${host}/accurate/api/sales-order/list.do?sp.pageSize=1&fields=${fields}`
   try {
     const res = await fetch(url, { headers: buildHeaders(token, secret), cache: 'no-store' })
     const data = await res.json()
-    return { path, url, ok: data.s === true, status: res.status, response: data }
+    return { fields, ok: data.s === true, status: res.status, response: data }
   } catch (err: any) {
-    return { path, url, ok: false, error: err.message }
+    return { fields, ok: false, error: err.message }
   }
 }
 
@@ -32,20 +32,22 @@ export async function GET() {
       return NextResponse.json({ error: 'Credentials not configured' }, { status: 500 })
     }
 
-    // Test candidate endpoint paths
-    const results = await Promise.all([
-      tryEndpoint(host, token, secret, 'sales-order/list.do'),
-      tryEndpoint(host, token, secret, 'sales-order/list.do', '&fields=number,transDate,status'),
-      tryEndpoint(host, token, secret, 'salesOrder/list.do'),
-      tryEndpoint(host, token, secret, 'sale-order/list.do'),
-    ])
+    const testFields = [
+      'number,transDate,status',
+      'number,transDate,status,customer',
+      'number,transDate,status,customer,description',
+      'number,transDate,status,customer,description,grandTotal',
+      'number,transDate,status,customer,description,grandTotal,salesman',
+      'number,transDate,status,customer,description,totalAmount', // maybe grandTotal -> totalAmount?
+      'number,transDate,status,customer,description,masterSalesman' // maybe salesman -> masterSalesman?
+    ]
 
-    // Also try to get detailed error from main endpoint without paging
-    const debugUrl = `${host}/accurate/api/sales-order/list.do`
-    const debugRes = await fetch(debugUrl, { headers: buildHeaders(token, secret), cache: 'no-store' })
-    const debugData = await debugRes.json()
+    const results = []
+    for (const fields of testFields) {
+        results.push(await tryEndpoint(host, token, secret, fields))
+    }
 
-    return NextResponse.json({ results, minimalTest: { url: debugUrl, response: debugData } })
+    return NextResponse.json({ results })
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 })
   }
