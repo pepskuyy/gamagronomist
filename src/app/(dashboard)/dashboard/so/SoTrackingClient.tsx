@@ -12,12 +12,12 @@ type SalesOrder = {
   masterSalesman?: { name?: string }
 }
 
-type UrgencyLevel = 'normal' | 'warning' | 'danger'
+type UrgencyLevel = 'terkirim' | 'neutral' | 'warning' | 'danger'
 
 function getUrgency(transDate: string, status: string): UrgencyLevel {
-  // Only flag unprocessed SOs (not CLOSED / FULLY_PROCESSED etc)
-  const doneStatuses = ['closed', 'fully processed', 'selesai', 'lunas']
-  if (doneStatuses.some(s => status?.toLowerCase().includes(s))) return 'normal'
+  // Flag processed SOs
+  const doneStatuses = ['closed', 'fully processed', 'selesai', 'lunas', 'proceed', 'terkirim']
+  if (doneStatuses.some(s => status?.toLowerCase().includes(s))) return 'terkirim'
 
   // Parse DD/MM/YYYY
   if (!transDate) return 'normal'
@@ -30,7 +30,7 @@ function getUrgency(transDate: string, status: string): UrgencyLevel {
 
   if (diffDays > 2) return 'danger'
   if (diffDays >= 1) return 'warning'
-  return 'normal'
+  return 'neutral'
 }
 
 function getDefaultDateRange() {
@@ -119,13 +119,16 @@ export default function SoTrackingPage() {
     return true
   })
 
+  const terkirimCount = orders.filter(o => getUrgency(o.transDate, o.status) === 'terkirim').length
   const warningCount = orders.filter(o => getUrgency(o.transDate, o.status) === 'warning').length
   const dangerCount = orders.filter(o => getUrgency(o.transDate, o.status) === 'danger').length
+  const neutralCount = orders.filter(o => getUrgency(o.transDate, o.status) === 'neutral').length
 
   const urgencyStyle: Record<UrgencyLevel, React.CSSProperties> = {
-    normal:  {},
-    warning: { borderLeft: '4px solid #f59e0b', background: 'rgba(245,158,11,0.04)' },
-    danger:  { borderLeft: '4px solid #ef4444', background: 'rgba(239,68,68,0.04)' },
+    neutral:  {},
+    terkirim: { borderLeft: '4px solid #10b981', background: 'rgba(16,185,129,0.03)' },
+    warning:  { borderLeft: '4px solid #f59e0b', background: 'rgba(245,158,11,0.04)' },
+    danger:   { borderLeft: '4px solid #ef4444', background: 'rgba(239,68,68,0.04)' },
   }
 
   return (
@@ -157,9 +160,15 @@ export default function SoTrackingPage() {
             <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#dc2626' }}>{dangerCount}</div>
             <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>🔴 Terlambat ({'>'}2 hari)</div>
           </div>
-          <div className="card" style={{ padding: '0.9rem 1rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#059669' }}>{orders.length - warningCount - dangerCount}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>✅ Normal</div>
+          <div className="card" style={{ padding: '0.9rem 1rem', textAlign: 'center', cursor: 'pointer', border: urgencyFilter === 'terkirim' ? '2px solid #10b981' : undefined }}
+            onClick={() => setUrgencyFilter(urgencyFilter === 'terkirim' ? 'all' : 'terkirim')}>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#059669' }}>{terkirimCount}</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>✅ Terkirim / Proceed</div>
+          </div>
+          <div className="card" style={{ padding: '0.9rem 1rem', textAlign: 'center', cursor: 'pointer', border: urgencyFilter === 'neutral' ? '2px solid #94a3b8' : undefined }}
+            onClick={() => setUrgencyFilter(urgencyFilter === 'neutral' ? 'all' : 'neutral')}>
+            <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#64748b' }}>{neutralCount}</div>
+            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>🆕 Baru</div>
           </div>
         </div>
       )}
@@ -202,10 +211,10 @@ export default function SoTrackingPage() {
 
       {/* Legend */}
       <div style={{ display: 'flex', gap: '1rem', marginBottom: '0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)', flexWrap: 'wrap' }}>
-        <span>🟩 Normal ({`<`}1 hari)</span>
+        <span style={{ color: '#059669' }}>🟩 Terkirim (Proceed / Closed)</span>
+        <span>⬜ Baru ({`<`}1 hari)</span>
         <span style={{ color: '#d97706' }}>🟨 Perlu Perhatian (1–2 hari belum diproses)</span>
         <span style={{ color: '#dc2626' }}>🟥 Terlambat ({`>`}2 hari belum diproses)</span>
-        <span style={{ marginLeft: 'auto' }}>Klik baris untuk lihat detail</span>
       </div>
 
       {/* Error */}
@@ -260,7 +269,8 @@ export default function SoTrackingPage() {
                           <td style={{ padding: '0.8rem 1rem', fontFamily: 'monospace', fontSize: '0.82rem', fontWeight: 700, borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
                             {urgency === 'danger' && <span style={{ marginRight: '0.35rem' }}>🔴</span>}
                             {urgency === 'warning' && <span style={{ marginRight: '0.35rem' }}>🟡</span>}
-                            {urgency === 'normal' && <span style={{ marginRight: '0.35rem' }}>🟢</span>}
+                            {urgency === 'terkirim' && <span style={{ marginRight: '0.35rem' }}>🟢</span>}
+                            {urgency === 'neutral' && <span style={{ marginRight: '0.35rem' }}>⚪</span>}
                             {so.number}
                           </td>
                           <td style={{ padding: '0.8rem 1rem', fontSize: '0.83rem', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }}>
