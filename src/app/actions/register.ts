@@ -48,6 +48,27 @@ export async function submitAccountRequest(formData: FormData) {
       create: { username, password: hashed, name, role, email, areaName, afaName, notes, status: 'PENDING' },
       update: { password: hashed, name, role, email, areaName, afaName, notes, status: 'PENDING' },
     })
+
+    // Notify ADMIN & SPV about new account request
+    try {
+      const admins = await prisma.user.findMany({
+        where: { role: { in: ['ADMIN', 'SPV'] }, isActive: true },
+        select: { id: true }
+      })
+      for (const admin of admins) {
+        await prisma.notification.create({
+          data: {
+            userId: admin.id,
+            title: '👤 Permintaan Akun Baru',
+            message: `${name} (${role}) mengajukan pembuatan akun dengan username "${username}".`,
+            link: '/dashboard/master/requests'
+          }
+        })
+      }
+    } catch (notifErr) {
+      console.warn('Failed to send account request notification:', notifErr)
+    }
+
     return { success: true }
   } catch (e: any) {
     return { error: 'Gagal mengirim permintaan. Coba lagi.' }
