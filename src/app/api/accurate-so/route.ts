@@ -103,7 +103,15 @@ export async function GET(req: Request) {
       return dateB - dateA
     })
 
-    return NextResponse.json({ success: true, data: filtered, total: filtered.length })
+    // Combine QUEUE and WAITING into WAITING for simplicity in UI
+    const finalData = filtered.map(so => {
+      if (so.status?.toUpperCase() === 'QUEUE') {
+        return { ...so, status: 'WAITING' }
+      }
+      return so
+    })
+
+    return NextResponse.json({ success: true, data: finalData, total: finalData.length })
   } catch (err: any) {
     console.error('[SO API] Error:', err.message)
     return NextResponse.json({ error: err.message }, { status: 500 })
