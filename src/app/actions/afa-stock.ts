@@ -5,6 +5,7 @@ import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { createSalesInvoice, fetchItemPrices } from '@/lib/accurate'
+import { sendWhatsAppBulk, getRolePhones } from '@/lib/waha'
 
 const prisma = new PrismaClient()
 
@@ -69,6 +70,14 @@ export async function submitAfaStockRequest(formData: FormData) {
           }
         })
       }
+
+      // Send WA to SPV numbers in SystemConfig
+      const spvPhones = await getRolePhones('wa_spv')
+      if (spvPhones.length > 0) {
+        const msg = `🔔 *Pengajuan Stok Baru*\n\nAFA *${afaUser?.name || 'AFA'}* telah mengajukan permintaan restock gudang.\n\nSilakan buka aplikasi untuk menyetujui: /dashboard/stock`
+        await sendWhatsAppBulk(spvPhones, msg)
+      }
+
       console.log(`[AFA Stock] Notified ${spvs.length} SPV(s) for request ${req.id}`)
     } catch (notifErr) {
       console.warn('[AFA Stock] Failed to send SPV notification:', notifErr)
@@ -137,6 +146,13 @@ export async function approveAfaStockRequest(requestId: string) {
       }
     })
 
+    // WA: notify FAM role numbers
+    const famPhones = await getRolePhones('wa_fam')
+    if (famPhones.length > 0) {
+      const msg = `✅ *Pengajuan Stok — Disetujui SPV*\n\nPengajuan restock AFA (*${req.fo?.name || 'AFA'}*) telah disetujui SPV.\nSaat ini menunggu persetujuan Anda sebagai FA Manager.\n\nBuka: /dashboard/stock`
+      await sendWhatsAppBulk(famPhones, msg)
+    }
+
     revalidatePath('/dashboard/stock')
     return { success: true }
   } catch (err: any) {
@@ -195,6 +211,13 @@ export async function approveFamStockRequest(requestId: string) {
         link: `/dashboard/stock`
       }
     })
+
+    // WA: notify WHM role numbers
+    const whmPhones = await getRolePhones('wa_whm')
+    if (whmPhones.length > 0) {
+      const msg = `✅ *Pengajuan Stok — Disetujui FA Manager*\n\nPengajuan restock AFA (*${req.fo?.name || 'AFA'}*) telah disetujui FA Manager.\nSaat ini menunggu persetujuan Anda sebagai WH Manager.\n\nBuka: /dashboard/stock`
+      await sendWhatsAppBulk(whmPhones, msg)
+    }
 
     revalidatePath('/dashboard/stock')
     return { success: true }
@@ -258,6 +281,13 @@ export async function approveWhmStockRequest(requestId: string) {
         link: `/dashboard/stock`
       }
     })
+
+    // WA: notify SPV numbers (to confirm receive)
+    const spvPhones = await getRolePhones('wa_spv')
+    if (spvPhones.length > 0) {
+      const msg = `📦 *Stok Siap Diterima*\n\nPengajuan restock AFA (*${req.fo?.name || 'AFA'}*) telah disetujui WH Manager.\nSilakan konfirmasi penerimaan stok di aplikasi: /dashboard/stock`
+      await sendWhatsAppBulk(spvPhones, msg)
+    }
 
     revalidatePath('/dashboard/stock')
     return { success: true }
@@ -389,6 +419,13 @@ export async function receiveSpvStockRequest(requestId: string) {
       }
     })
 
+    // WA: notify AFA directly to their registered phone number
+    const afaUserFinal = await prisma.user.findUnique({ where: { id: req.foId }, select: { phone: true, name: true } })
+    if (afaUserFinal?.phone) {
+      const msg = `✅ *Pengajuan Stok Selesai*\n\nHai *${afaUserFinal.name || 'AFA'}*, pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah diterima dan stok telah masuk.${savedInvoiceNo ? `\nNo. Invoice Accurate: ${savedInvoiceNo}` : ''}\n\nCek di: /dashboard/stock`
+      await sendWhatsAppBulk(afaUserFinal.phone, msg).catch(e => console.warn('[WAHA] AFA notify failed:', e))
+    }
+
     revalidatePath('/dashboard/stock')
     return { success: true }
   } catch (err: any) {
@@ -445,6 +482,13 @@ export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV'
         link: `/dashboard/stock`
       }
     })
+
+    // WA: notify AFA of rejection
+    const afaUserReject = await prisma.user.findUnique({ where: { id: req.foId }, select: { phone: true, name: true } })
+    if (afaUserReject?.phone) {
+      const msg = `❌ *Pengajuan Stok Ditolak*\n\nHai *${afaUserReject.name || 'AFA'}*, pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah *ditolak* oleh ${roleLabels[rejectRole]}.\n\nSilakan hubungi ${roleLabels[rejectRole]} untuk informasi lebih lanjut.`
+      await sendWhatsAppBulk(afaUserReject.phone, msg).catch(e => console.warn('[WAHA] AFA reject notify failed:', e))
+    }
 
     revalidatePath('/dashboard/stock')
     return { success: true }

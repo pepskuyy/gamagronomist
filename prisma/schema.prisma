@@ -21,6 +21,7 @@ model User {
   name      String
   email     String?  // Email untuk fitur lupa password
   role      String   // "ADMIN", "SPV", "AFA", "FO", "INTERN"
+  phone     String?  // Nomor WhatsApp (digunakan untuk notifikasi WAHA)
   isActive  Boolean  @default(true)
   
   // Self-Relation untuk AFA -> FO
@@ -94,6 +95,15 @@ model AccountRequest {
   status    String   @default("PENDING") // "PENDING", "APPROVED", "REJECTED"
   rejectReason String?
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// Konfigurasi sistem (WAHA, nomor WA per role, dll)
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique  // "waha_base_url", "waha_api_key", "waha_session", "wa_spv", "wa_fam", "wa_whm"
+  value     String
+  label     String?  // Label user-friendly untuk UI admin
   updatedAt DateTime @updatedAt
 }
 

@@ -3,6 +3,7 @@ import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
 import UpdateEmailForm from '@/components/UpdateEmailForm'
+import WahaSettingsClient from './WahaSettingsClient'
 
 const prisma = new PrismaClient()
 
@@ -41,13 +42,22 @@ export default async function SettingsPage() {
       </div>
 
       {/* Change Password Section */}
-      <div className="card" style={{ maxWidth: 520 }}>
+      <div className="card" style={{ maxWidth: 520, marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '0.4rem' }}>🔐 Ubah Password</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
           Masukkan password lama Anda terlebih dahulu untuk memverifikasi identitas, lalu ketik password baru yang diinginkan.
         </p>
         <ChangePasswordForm />
       </div>
+
+      {/* WAHA WhatsApp Integration — Admin only */}
+      {session.role === 'ADMIN' && (
+        <>
+          <hr style={{ border: 'none', borderTop: '1px solid var(--border)', marginBottom: '2rem' }} />
+          <WahaSettingsClient />
+        </>
+      )}
     </div>
   )
 }
+
