@@ -178,6 +178,7 @@ model Request {
   problem        String?
   plan           String?
   status         String   @default("SUBMITTED") // "SUBMITTED", "APPROVED_SPV", "APPROVED_FAM", "APPROVED_WHM", "APPROVED", "REJECTED", "DEMO_PLOT_SELESAI"
+  rejectReason   String?  // Keterangan/alasan penolakan (diisi oleh approver saat reject)
   accurateInvoiceNo String? // Nomor faktur dari Accurate Online (terisi saat SPV terima stok)
   
   createdAt      DateTime @default(now())

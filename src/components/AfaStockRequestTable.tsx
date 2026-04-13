@@ -10,6 +10,7 @@ type RequestProps = {
   status: string
   plan: string | null
   foId: string
+  rejectReason?: string | null
   accurateInvoiceNo?: string | null
   fo?: { id: string; name: string } | null
   afaId?: string | null
@@ -32,6 +33,10 @@ export default function AfaStockRequestTable({
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [actionId, setActionId] = useState<string | null>(null)
+
+  // Reject modal state
+  const [rejectModalId, setRejectModalId] = useState<string | null>(null)
+  const [rejectReason, setRejectReason] = useState('')
 
   const handleApprove = (id: string) => {
     const confirmMsg = (role === 'SPV' || role === 'ADMIN')
@@ -71,12 +76,28 @@ export default function AfaStockRequestTable({
     })
   }
 
-  const handleReject = (id: string) => {
-    if (!confirm('Apakah Anda yakin ingin menolak pengajuan stok ini?')) return
+  const openRejectModal = (id: string) => {
+    setRejectModalId(id)
+    setRejectReason('')
+  }
+
+  const closeRejectModal = () => {
+    setRejectModalId(null)
+    setRejectReason('')
+  }
+
+  const submitReject = () => {
+    if (!rejectReason.trim()) {
+      alert('Keterangan penolakan wajib diisi.')
+      return
+    }
+    if (!rejectModalId) return
+    const id = rejectModalId
+    closeRejectModal()
     setActionId(id)
     startTransition(async () => {
-      const rejectRole = role as 'SPV' | 'FAM' | 'WHM'
-      const res = await rejectAfaStockRequest(id, rejectRole)
+      const rejectRoleVal = role as 'SPV' | 'FAM' | 'WHM'
+      const res = await rejectAfaStockRequest(id, rejectRoleVal, rejectReason.trim())
       if (res?.error) {
         alert(res.error)
       } else {
@@ -193,7 +214,15 @@ export default function AfaStockRequestTable({
                   <td style={{ ...tdStyle, fontSize: '0.82rem' }}>
                     {req.details.map(d => `${d.product.name}: ${d.qtyRequested} ${d.product.unit}`).join(', ')}
                   </td>
-                  <td style={{ ...tdStyle, textAlign: 'center' }}>{getStatusBadge(req.status)}</td>
+                  <td style={{ ...tdStyle, textAlign: 'center' }}>
+                    {getStatusBadge(req.status)}
+                    {/* Show rejection reason */}
+                    {req.status === 'REJECTED' && req.rejectReason && (
+                      <div style={{ marginTop: '0.35rem', fontSize: '0.75rem', color: '#b91c1c', fontStyle: 'italic', maxWidth: 220 }}>
+                        💬 {req.rejectReason}
+                      </div>
+                    )}
+                  </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
                     {req.status === 'APPROVED' && req.accurateInvoiceNo ? (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#dcfce7', color: '#166534' }}>
@@ -220,7 +249,7 @@ export default function AfaStockRequestTable({
                             {isPending && actionId === req.id ? 'Memproses...' : '✓ Approve'}
                           </button>
                           <button 
-                            onClick={() => handleReject(req.id)}
+                            onClick={() => openRejectModal(req.id)}
                             className="btn" 
                             style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }}
                             disabled={isPending && actionId === req.id}
@@ -258,6 +287,61 @@ export default function AfaStockRequestTable({
           </table>
         </div>
       </div>
+
+      {/* ── Reject Modal ── */}
+      {rejectModalId && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          zIndex: 9999, padding: '1rem',
+        }}
+          onClick={closeRejectModal}
+        >
+          <div
+            className="card"
+            style={{ width: '100%', maxWidth: 480, padding: '1.75rem', position: 'relative' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              ❌ Tolak Pengajuan
+            </h3>
+            <p style={{ margin: '0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+              Silakan isi keterangan alasan penolakan agar AFA mengetahui penyebab pengajuan ditolak.
+            </p>
+
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Keterangan Penolakan <span style={{ color: '#dc2626' }}>*</span>
+            </label>
+            <textarea
+              className="input"
+              rows={4}
+              value={rejectReason}
+              onChange={e => setRejectReason(e.target.value)}
+              placeholder="Contoh: Stok produk X sedang kosong di gudang..."
+              style={{ width: '100%', resize: 'vertical', fontSize: '0.875rem', padding: '0.65rem 0.85rem', marginBottom: '1.25rem' }}
+              autoFocus
+            />
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+              <button
+                onClick={closeRejectModal}
+                className="btn"
+                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}
+              >
+                Batal
+              </button>
+              <button
+                onClick={submitReject}
+                className="btn"
+                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', background: '#dc2626', color: '#fff', border: 'none', fontWeight: 600 }}
+              >
+                Konfirmasi Tolak
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
+

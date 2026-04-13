@@ -440,7 +440,7 @@ export async function receiveSpvStockRequest(requestId: string) {
 }
 
 // ─── REJECT (any approver can reject at their step) ───────────────
-export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV' | 'FAM' | 'WHM') {
+export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV' | 'FAM' | 'WHM', reason?: string) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
@@ -473,17 +473,21 @@ export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV'
 
     await prisma.request.update({
       where: { id: requestId },
-      data: { status: 'REJECTED' }
+      data: {
+        status: 'REJECTED',
+        rejectReason: reason?.trim() || null,
+      }
     })
 
     const roleLabels: Record<string, string> = { SPV: 'SPV', FAM: 'FA Manager', WHM: 'WH Manager' }
+    const reasonText = reason?.trim() ? `\nAlasan: ${reason.trim()}` : ''
 
     // Notify AFA
     await prisma.notification.create({
       data: {
         userId: req.foId,
         title: '❌ Pengajuan Stok Ditolak',
-        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah ditolak oleh ${roleLabels[rejectRole]}.`,
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah ditolak oleh ${roleLabels[rejectRole]}.${reasonText}`,
         link: `/dashboard/stock`
       }
     })
