@@ -181,21 +181,33 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
-            {myStocks.map((stock) => (
-              <div key={stock.product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
-                <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
-                  {stock.product.name}
+            {myStocks.map((stock) => {
+              const product = stock.product as any
+              const hasGramasi = product.unitGramasi && product.gramasiPerUnit
+              const displayUnit = product.unitGramasi || product.unit
+              const kemasanEquiv = hasGramasi ? (stock.quantity / product.gramasiPerUnit) : null
+
+              return (
+                <div key={product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
+                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                    {product.name}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
+                    <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
+                      {stock.quantity.toLocaleString()}
+                    </span>
+                    <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
+                      {displayUnit}
+                    </span>
+                  </div>
+                  {kemasanEquiv != null && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                      ≈ {Number.isInteger(kemasanEquiv) ? kemasanEquiv : kemasanEquiv.toFixed(1)} {product.unit}
+                    </div>
+                  )}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
-                  <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
-                    {stock.quantity.toLocaleString()}
-                  </span>
-                  <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                    {stock.product.unit}
-                  </span>
-                </div>
-              </div>
-            ))}
+              )
+            })}
             {myStocks.length === 0 && (
               <div className="card" style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '2.5rem' }}>
                 <p>Saldo stok Anda saat ini kosong.</p>

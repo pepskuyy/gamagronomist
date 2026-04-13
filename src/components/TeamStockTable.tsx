@@ -5,8 +5,8 @@ import StockAdjustmentModal from './StockAdjustmentModal'
 
 type TeamStockTableProps = {
   users: { id: string, name: string, role: string, parentName?: string }[]
-  stocks: { [userId: string]: { product: { id: string, name: string, unit: string }, quantity: number }[] }
-  allProducts: { id: string, name: string, unit: string }[]
+  stocks: { [userId: string]: { product: { id: string, name: string, unit: string, unitGramasi?: string | null }, quantity: number }[] }
+  allProducts: { id: string, name: string, unit: string, unitGramasi?: string | null }[]
   role: string // ADMIN, SPV, AFA
 }
 
@@ -121,7 +121,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                             display: 'flex', alignItems: 'baseline', gap: '0.25rem'
                           }}>
                             {s.quantity.toLocaleString()}
-                            <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-muted)' }}>{s.product.unit}</span>
+                            <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-muted)' }}>{s.product.unitGramasi || s.product.unit}</span>
                           </span>
                         </div>
                       ))}

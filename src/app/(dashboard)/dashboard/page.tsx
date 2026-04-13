@@ -119,7 +119,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
               userName: user.name,
               role: user.role,
               productName: product.name,
-              unit: product.unit,
+              unit: product.unitGramasi || product.unit,
               balance: l._sum.quantity || 0
             })
           }
