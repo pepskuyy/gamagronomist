@@ -133,9 +133,14 @@ export default function ContinueDemoPlotPage() {
                       required
                     >
                       <option value="">-- Pilih Produk --</option>
-                      {products.map(p => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
-                      ))}
+                      {products
+                        .filter(p => (stockBalance[p.id] || 0) > 0)
+                        .map(p => (
+                          <option key={p.id} value={p.id}>
+                            {p.name} — {stockBalance[p.id] || 0} {p.unitGramasi || p.unit}
+                          </option>
+                        ))
+                      }
                     </select>
                     {selectedProduct && (
                       <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
