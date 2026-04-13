@@ -48,6 +48,15 @@ export async function insertStockInGudang(afaId: string, productId: string, qty:
  * Transfer Stok AFA ke FO (Ini akan memotong saldo AFA, dan menambah saldo FO)
  */
 export async function transferAfaToFo(afaId: string, foId: string, productId: string, qty: number, requestId?: string) {
+  // Fetch both user names to produce readable notes
+  const [afa, fo] = await Promise.all([
+    prisma.user.findUnique({ where: { id: afaId }, select: { name: true } }),
+    prisma.user.findUnique({ where: { id: foId },  select: { name: true } }),
+  ])
+
+  const afaName = afa?.name || afaId
+  const foName  = fo?.name  || foId
+
   return await prisma.$transaction([
     // Potong stok AFA
     prisma.ledger.create({
@@ -57,7 +66,7 @@ export async function transferAfaToFo(afaId: string, foId: string, productId: st
         transactionType: 'TRANSFER_TO_FO',
         quantity: -qty, // Negatif
         referenceId: requestId,
-        notes: `Transfer ke FO ${foId}`
+        notes: `Transfer ke FO: ${foName}`
       }
     }),
     // Tambah stok FO
@@ -68,7 +77,7 @@ export async function transferAfaToFo(afaId: string, foId: string, productId: st
         transactionType: 'RECEIVE_FROM_AFA',
         quantity: qty, // Positif
         referenceId: requestId,
-        notes: `Terima dari AFA ${afaId}`
+        notes: `Terima dari AFA: ${afaName}`
       }
     })
   ])
