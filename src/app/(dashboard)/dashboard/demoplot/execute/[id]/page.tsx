@@ -45,6 +45,7 @@ export default async function ExecuteDemoPlotPage({ params }: { params: Promise<
       productId: d.productId,
       name: d.product.name,
       unit: d.product.unit,
+      unitGramasi: (d.product as any).unitGramasi ?? null,
       qtyApproved: d.qtyApproved || 0,
       stockOnHand: onHand
     }

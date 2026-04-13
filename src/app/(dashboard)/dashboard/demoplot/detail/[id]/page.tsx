@@ -157,7 +157,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                   {dp.details.map(det => (
                     <tr key={det.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '0.5rem' }}>{det.product.name}</td>
-                      <td style={{ padding: '0.5rem', fontWeight: 600 }}>{det.actualUsage} {det.product.unit}</td>
+                      <td style={{ padding: '0.5rem', fontWeight: 600 }}>{det.actualUsage} {(det.product as any).unitGramasi || det.product.unit}</td>
                     </tr>
                   ))}
                 </tbody>

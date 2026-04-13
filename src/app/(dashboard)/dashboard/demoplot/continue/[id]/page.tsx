@@ -7,7 +7,7 @@ import { submitContinueDemoPlot } from '@/app/actions/standalone-demoplot'
 import ImageUploader from '@/components/ImageUploader'
 import GpsCapture from '@/components/GpsCapture'
 
-type Product = { id: string; name: string; unit: string }
+type Product = { id: string; name: string; unit: string; unitGramasi?: string | null }
 type RequestData = {
   id: string
   farmer: { name: string } | null
@@ -139,7 +139,7 @@ export default function ContinueDemoPlotPage() {
                     </select>
                     {selectedProduct && (
                       <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
-                        Tersedia: <strong>{onHand} {selectedProduct.unit}</strong>
+                        Tersedia: <strong>{onHand} {selectedProduct.unitGramasi || selectedProduct.unit}</strong>
                       </div>
                     )}
                   </div>
@@ -156,7 +156,7 @@ export default function ContinueDemoPlotPage() {
                       placeholder="0"
                       required
                     />
-                    {selectedProduct && <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{selectedProduct.unit}</span>}
+                    {selectedProduct && <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{selectedProduct.unitGramasi || selectedProduct.unit}</span>}
                   </div>
                   <button 
                     type="button" 

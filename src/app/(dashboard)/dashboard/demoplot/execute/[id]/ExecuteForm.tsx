@@ -10,6 +10,7 @@ type ApprovedProduct = {
   productId: string
   name: string
   unit: string
+  unitGramasi?: string | null
   qtyApproved: number
   stockOnHand: number
 }
@@ -96,7 +97,7 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
     // Validate if usage exceeds Stock On Hand
     const overStockProduct = products.find(p => usages[p.productId] > p.stockOnHand)
     if (overStockProduct) {
-      setError(`Penggunaan aktual untuk ${overStockProduct.name} melebihi Saldo Stok yang Anda miliki (${overStockProduct.stockOnHand} ${overStockProduct.unit}).`)
+      setError(`Penggunaan aktual untuk ${overStockProduct.name} melebihi Saldo Stok yang Anda miliki (${overStockProduct.stockOnHand} ${overStockProduct.unitGramasi || overStockProduct.unit}).`)
       setLoading(false)
       return
     }
@@ -204,10 +205,10 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
                {products.map(p => (
                  <tr key={p.productId}>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>{p.name}</td>
-                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>{p.qtyApproved} {p.unit}</td>
+                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>{p.qtyApproved} {p.unitGramasi || p.unit}</td>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
                      <span style={{ fontWeight: 600, color: p.stockOnHand > 0 ? 'var(--primary)' : 'var(--danger)' }}>
-                       {p.stockOnHand} {p.unit}
+                       {p.stockOnHand} {p.unitGramasi || p.unit}
                      </span>
                    </td>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
@@ -221,7 +222,7 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
                           value={usages[p.productId]}
                           onChange={(e) => handleUsageChange(p.productId, e.target.value)}
                         />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.unit}</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.unitGramasi || p.unit}</span>
                       </div>
                    </td>
                  </tr>

@@ -8,7 +8,7 @@ import ImageUploader from '@/components/ImageUploader'
 import RegionSelect from '@/components/RegionSelect'
 import SearchableSelect from '@/components/SearchableSelect'
 
-type Product = { id: string; name: string; unit: string }
+type Product = { id: string; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
 type CbFarmer = { id: string; farmerName: string; phone?: string; district?: string; location?: string; address?: string; commodity?: string; constraints?: string }
 
 export default function FoDemoPlotDirectPage() {
@@ -278,7 +278,7 @@ export default function FoDemoPlotDirectPage() {
                     />
                     {selectedProduct && (
                       <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
-                        Tersedia: <strong>{onHand} {selectedProduct.unit}</strong>
+                        Tersedia: <strong>{onHand} {selectedProduct.unitGramasi || selectedProduct.unit}</strong>
                       </div>
                     )}
                   </div>
@@ -295,7 +295,7 @@ export default function FoDemoPlotDirectPage() {
                       placeholder="0"
                       required
                     />
-                    {selectedProduct && <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{selectedProduct.unit}</span>}
+                    {selectedProduct && <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{selectedProduct.unitGramasi || selectedProduct.unit}</span>}
                   </div>
                   <button 
                     type="button" 
