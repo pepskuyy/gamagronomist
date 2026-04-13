@@ -92,8 +92,14 @@ export default function ContinueDemoPlotPage() {
               <input type="date" name="date" className="form-control" required defaultValue={new Date().toISOString().split('T')[0]} />
             </div>
             <div>
-              <label className="form-label">Luas Lahan (Ha/M²)</label>
-              <input type="number" step="0.01" name="landSize" className="form-control" placeholder="0.5" />
+              <label className="form-label">Luas Lahan</label>
+              <div style={{ display: 'flex', gap: '0.5rem' }}>
+                <input type="number" step="0.01" name="landSize" className="form-control" placeholder="0.5" style={{ flex: 2 }} />
+                <select name="landSizeUnit" className="form-control" style={{ flex: 1, maxWidth: 130 }}>
+                  <option value="ha">Hektare (ha)</option>
+                  <option value="m2">Meter Persegi (m²)</option>
+                </select>
+              </div>
             </div>
             <div style={{ gridColumn: '1/-1' }}>
               <label className="form-label">Hasil Pengamatan &amp; Catatan</label>

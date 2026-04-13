@@ -71,6 +71,7 @@ export async function updateDemoPlot(id: string, formData: FormData) {
       area: formData.get('area') as string,
       commodity: formData.get('commodity') as string,
       landSize: parseFloat(formData.get('landSize') as string) || null,
+      landSizeUnit: (formData.get('landSizeUnit') as string) || 'ha',
       resultNotes: formData.get('resultNotes') as string,
       isFinalSession,
     }

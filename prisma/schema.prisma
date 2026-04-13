@@ -211,6 +211,7 @@ model DemoPlot {
   area           String?
   commodity      String?
   landSize       Float?
+  landSizeUnit   String?  // "ha" atau "m2"
   resultNotes    String?
   photos         String?  // JSON stringified array of URLs
   latitude       Float?
@@ -283,6 +284,10 @@ model CustomerBehavior {
   references     String?
   notes          String?
   photos         String?  // URL foto dokumentasi (JSON Array)
+  totalLandArea     Float?   // Luas lahan total petani
+  totalLandAreaUnit String?  // "ha" atau "m2"
+  latitude       Float?
+  longitude      Float?
   
   createdAt      DateTime @default(now())
 }

@@ -40,14 +40,18 @@ export async function submitCustomerBehavior(formData: FormData) {
       commodity: formData.get('commodity') as string,
       reasonChoice: formData.get('reasonChoice') as string,
       constraints: formData.get('constraints') as string,
-      optTypes: formData.get('optTypes') as string, // JSON string from client
-      optDetails: formData.get('optDetails') as string, // JSON string from client
+      optTypes: formData.get('optTypes') as string,
+      optDetails: formData.get('optDetails') as string,
       usedProducts: formData.get('usedProducts') as string,
       buyLocation: formData.get('buyLocation') as string,
       buyReason: formData.get('buyReason') as string,
       references: formData.get('references') as string,
       notes: formData.get('notes') as string,
-      photos: formData.get('photos') as string, // JSON string array of URLs
+      photos: formData.get('photos') as string,
+      totalLandArea: formData.get('totalLandArea') ? parseFloat(formData.get('totalLandArea') as string) : null,
+      totalLandAreaUnit: (formData.get('totalLandAreaUnit') as string) || 'ha',
+      latitude: formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null,
+      longitude: formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null,
     }
 
     const report = await prisma.customerBehavior.create({ data })

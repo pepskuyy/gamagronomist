@@ -221,6 +221,26 @@ export default function NewCustomerBehaviorRef() {
               <label className="form-label">Detail Alamat (Jalan / RT / RW)</label>
               <textarea name="address" className="form-control" rows={2} placeholder="Samping masjid Al-Ikhlas..." />
             </div>
+
+            {/* Luas Lahan Total */}
+            <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+              <label className="form-label">Luas Lahan Total</label>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <input
+                  type="number"
+                  name="totalLandArea"
+                  className="form-control"
+                  step="0.01"
+                  min="0"
+                  placeholder="Contoh: 2.5"
+                  style={{ flex: 2 }}
+                />
+                <select name="totalLandAreaUnit" className="form-control" style={{ flex: 1, maxWidth: 140 }}>
+                  <option value="ha">Hektare (ha)</option>
+                  <option value="m2">Meter Persegi (m²)</option>
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 

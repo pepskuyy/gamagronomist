@@ -132,7 +132,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
-                {dp.landSize && <div><strong>Luas Lahan:</strong> {dp.landSize} Ha/M2</div>}
+                {dp.landSize && <div><strong>Luas Lahan:</strong> {dp.landSize} {(dp as any).landSizeUnit === 'm2' ? 'm²' : 'ha'}</div>}
                 {dp.latitude && dp.longitude && (
                   <div>
                     <strong>Lokasi (GPS):</strong> <a href={`https://www.google.com/maps?q=${dp.latitude},${dp.longitude}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--secondary)' }}>{dp.latitude.toFixed(6)}, {dp.longitude.toFixed(6)} ↗</a>

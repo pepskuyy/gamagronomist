@@ -28,6 +28,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
   const plan            = (formData.get('plan')         as string)?.trim() || '-'
   const date            = (formData.get('date')         as string)
   const landSize        = formData.get('landSize') ? parseFloat(formData.get('landSize') as string) : null
+  const landSizeUnit    = (formData.get('landSizeUnit') as string) || 'ha'
   const resultNotes     = (formData.get('resultNotes')  as string)?.trim() || null
   const latitude        = parseFloat(formData.get('latitude') as string)
   const longitude       = parseFloat(formData.get('longitude') as string)
@@ -102,6 +103,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
         area,
         commodity,
         landSize,
+        landSizeUnit,
         resultNotes,
         latitude,
         longitude,
@@ -171,6 +173,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
 
   const date           = (formData.get('date')        as string)
   const landSize       = formData.get('landSize') ? parseFloat(formData.get('landSize') as string) : null
+  const landSizeUnit   = (formData.get('landSizeUnit') as string) || 'ha'
   const resultNotes    = (formData.get('resultNotes') as string)?.trim() || null
   const latitude       = parseFloat(formData.get('latitude') as string)
   const longitude      = parseFloat(formData.get('longitude') as string)
@@ -205,6 +208,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
         area: req.area ?? undefined,
         commodity: req.commodity ?? undefined,
         landSize,
+        landSizeUnit,
         resultNotes,
         latitude,
         longitude,

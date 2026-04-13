@@ -79,8 +79,14 @@ export default function EditDemoPlot({ params }: { params: { id: string } }) {
         </div>
 
         <div className="form-group">
-          <label className="form-label">Luas Lahan (m²)</label>
-          <input type="number" step="0.01" name="landSize" className="form-control" defaultValue={data.landSize || ''} />
+          <label className="form-label">Luas Lahan</label>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <input type="number" step="0.01" name="landSize" className="form-control" defaultValue={data.landSize || ''} style={{ flex: 2 }} />
+            <select name="landSizeUnit" className="form-control" defaultValue={data.landSizeUnit || 'ha'} style={{ flex: 1, maxWidth: 130 }}>
+              <option value="ha">Hektare (ha)</option>
+              <option value="m2">Meter Persegi (m²)</option>
+            </select>
+          </div>
         </div>
 
         <div className="form-group">

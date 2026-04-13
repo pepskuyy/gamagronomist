@@ -17,6 +17,7 @@ export async function submitDemoPlotSession(formData: FormData) {
   const requestId = formData.get('requestId') as string
   const date = formData.get('date') as string
   const landSize = Number(formData.get('landSize'))
+  const landSizeUnit = (formData.get('landSizeUnit') as string) || 'ha'
   const resultNotes = formData.get('resultNotes') as string
   const isFinalSession = formData.get('isFinalSession') === 'true'
   const latitude = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
@@ -57,6 +58,7 @@ export async function submitDemoPlotSession(formData: FormData) {
           area: request.area,
           commodity: request.commodity,
           landSize: landSize || null,
+          landSizeUnit,
           resultNotes,
           latitude,
           longitude,
