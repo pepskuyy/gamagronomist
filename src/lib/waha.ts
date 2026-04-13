@@ -7,6 +7,22 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// Default message templates — used when admin hasn't customized them yet
+const DEFAULT_TEMPLATES: Record<string, string> = {
+  msg_afa_submit:
+    '🔔 *Pengajuan Stok Baru*\n\nAFA *{nama_afa}* telah mengajukan permintaan restock gudang.\n\nSilakan buka aplikasi untuk menyetujui: /dashboard/stock',
+  msg_spv_approve:
+    '✅ *Pengajuan Stok — Disetujui SPV*\n\nPengajuan restock AFA (*{nama_afa}*) telah disetujui SPV.\nSaat ini menunggu persetujuan Anda sebagai FA Manager.\n\nBuka: /dashboard/stock',
+  msg_fam_approve:
+    '✅ *Pengajuan Stok — Disetujui FA Manager*\n\nPengajuan restock AFA (*{nama_afa}*) telah disetujui FA Manager.\nSaat ini menunggu persetujuan Anda sebagai WH Manager.\n\nBuka: /dashboard/stock',
+  msg_whm_approve:
+    '📦 *Stok Siap Diterima*\n\nPengajuan restock AFA (*{nama_afa}*) telah disetujui WH Manager.\nSilakan konfirmasi penerimaan stok di aplikasi: /dashboard/stock',
+  msg_spv_receive:
+    '✅ *Pengajuan Stok Selesai*\n\nHai *{nama_afa}*, pengajuan stok Anda (ID: {id_pengajuan}) telah diterima dan stok telah masuk.{invoice}\n\nCek di: /dashboard/stock',
+  msg_rejection:
+    '❌ *Pengajuan Stok Ditolak*\n\nHai *{nama_afa}*, pengajuan stok Anda (ID: {id_pengajuan}) telah *ditolak* oleh {peran_penolak}.\n\nSilakan hubungi {peran_penolak} untuk informasi lebih lanjut.',
+}
+
 interface WahaConfig {
   baseUrl: string
   apiKey: string
@@ -119,4 +135,42 @@ export async function getRolePhones(key: 'wa_spv' | 'wa_fam' | 'wa_whm'): Promis
   } catch {
     return []
   }
+}
+
+/**
+ * Get a message template from SystemConfig (with fallback to defaults)
+ * and replace placeholders with provided variables.
+ *
+ * Supported placeholders:
+ *   {nama_afa}      — name of the AFA user
+ *   {id_pengajuan}  — first 8 chars of requestId uppercased
+ *   {peran_penolak} — role label that rejected (e.g. "SPV", "FA Manager")
+ *   {invoice}       — invoice info string (pre-formatted, e.g. "\nNo. Invoice: INV-001")
+ */
+export async function getMsgTemplate(
+  key: keyof typeof DEFAULT_TEMPLATES,
+  vars: Partial<{
+    nama_afa: string
+    id_pengajuan: string
+    peran_penolak: string
+    invoice: string
+  }> = {}
+): Promise<string> {
+  let template = DEFAULT_TEMPLATES[key] ?? ''
+
+  try {
+    const config = await prisma.systemConfig.findUnique({ where: { key } })
+    if (config?.value?.trim()) {
+      template = config.value
+    }
+  } catch (err) {
+    console.warn(`[WAHA] Could not load msg template "${key}", using default:`, err)
+  }
+
+  // Replace all placeholders
+  return template
+    .replace(/\{nama_afa\}/g, vars.nama_afa ?? '')
+    .replace(/\{id_pengajuan\}/g, vars.id_pengajuan ?? '')
+    .replace(/\{peran_penolak\}/g, vars.peran_penolak ?? '')
+    .replace(/\{invoice\}/g, vars.invoice ?? '')
 }

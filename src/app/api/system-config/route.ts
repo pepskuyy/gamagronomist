@@ -5,13 +5,40 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
-const ALLOWED_KEYS = [
-  { key: 'waha_base_url', label: 'WAHA Base URL' },
-  { key: 'waha_api_key', label: 'WAHA API Key' },
-  { key: 'waha_session', label: 'WAHA Session Name' },
-  { key: 'wa_spv', label: 'No. WA SPV (pisahkan koma jika lebih dari 1)' },
-  { key: 'wa_fam', label: 'No. WA FA Manager (pisahkan koma jika lebih dari 1)' },
-  { key: 'wa_whm', label: 'No. WA WH Manager (pisahkan koma jika lebih dari 1)' },
+// Default message templates (used as placeholder text in UI and fallback in afa-stock.ts)
+export const DEFAULT_TEMPLATES: Record<string, string> = {
+  msg_afa_submit:
+    '🔔 *Pengajuan Stok Baru*\n\nAFA *{nama_afa}* telah mengajukan permintaan restock gudang.\n\nSilakan buka aplikasi untuk menyetujui: /dashboard/stock',
+  msg_spv_approve:
+    '✅ *Pengajuan Stok — Disetujui SPV*\n\nPengajuan restock AFA (*{nama_afa}*) telah disetujui SPV.\nSaat ini menunggu persetujuan Anda sebagai FA Manager.\n\nBuka: /dashboard/stock',
+  msg_fam_approve:
+    '✅ *Pengajuan Stok — Disetujui FA Manager*\n\nPengajuan restock AFA (*{nama_afa}*) telah disetujui FA Manager.\nSaat ini menunggu persetujuan Anda sebagai WH Manager.\n\nBuka: /dashboard/stock',
+  msg_whm_approve:
+    '📦 *Stok Siap Diterima*\n\nPengajuan restock AFA (*{nama_afa}*) telah disetujui WH Manager.\nSilakan konfirmasi penerimaan stok di aplikasi: /dashboard/stock',
+  msg_spv_receive:
+    '✅ *Pengajuan Stok Selesai*\n\nHai *{nama_afa}*, pengajuan stok Anda (ID: {id_pengajuan}) telah diterima dan stok telah masuk.{invoice}\n\nCek di: /dashboard/stock',
+  msg_rejection:
+    '❌ *Pengajuan Stok Ditolak*\n\nHai *{nama_afa}*, pengajuan stok Anda (ID: {id_pengajuan}) telah *ditolak* oleh {peran_penolak}.\n\nSilakan hubungi {peran_penolak} untuk informasi lebih lanjut.',
+}
+
+export const ALLOWED_KEYS = [
+  // ── WAHA Server ──────────────────────────────────────────────────
+  { key: 'waha_base_url', label: 'WAHA Base URL', group: 'server' },
+  { key: 'waha_api_key',  label: 'WAHA API Key',  group: 'server' },
+  { key: 'waha_session',  label: 'WAHA Session Name', group: 'server' },
+
+  // ── Nomor WA per Role ─────────────────────────────────────────────
+  { key: 'wa_spv', label: 'No. WA SPV (pisahkan koma jika lebih dari 1)', group: 'phones' },
+  { key: 'wa_fam', label: 'No. WA FA Manager (pisahkan koma jika lebih dari 1)', group: 'phones' },
+  { key: 'wa_whm', label: 'No. WA WH Manager (pisahkan koma jika lebih dari 1)', group: 'phones' },
+
+  // ── Template Pesan ────────────────────────────────────────────────
+  { key: 'msg_afa_submit',  label: 'Pesan ke SPV saat AFA mengajukan stok',               group: 'templates' },
+  { key: 'msg_spv_approve', label: 'Pesan ke FA Manager saat SPV menyetujui',              group: 'templates' },
+  { key: 'msg_fam_approve', label: 'Pesan ke WH Manager saat FA Manager menyetujui',       group: 'templates' },
+  { key: 'msg_whm_approve', label: 'Pesan ke SPV saat WH Manager menyetujui (siap terima)', group: 'templates' },
+  { key: 'msg_spv_receive', label: 'Pesan ke AFA saat SPV konfirmasi penerimaan (selesai)', group: 'templates' },
+  { key: 'msg_rejection',   label: 'Pesan ke AFA saat pengajuan ditolak',                  group: 'templates' },
 ]
 
 async function getSession(req: NextRequest) {
@@ -31,13 +58,15 @@ export async function GET(req: NextRequest) {
       where: { key: { in: ALLOWED_KEYS.map(k => k.key) } }
     })
 
-    // Merge with defaults (ensure all keys appear even if not yet saved)
-    const result = ALLOWED_KEYS.map(({ key, label }) => {
+    // Merge with defaults
+    const result = ALLOWED_KEYS.map(({ key, label, group }) => {
       const found = configs.find(c => c.key === key)
       return {
         key,
         label,
-        value: found?.value ?? '',
+        group,
+        value: found?.value ?? '',                        // empty = use default
+        defaultValue: DEFAULT_TEMPLATES[key] ?? '',       // shown as placeholder
         updatedAt: found?.updatedAt ?? null,
       }
     })
@@ -66,11 +95,11 @@ export async function POST(req: NextRequest) {
 
     for (const { key, value } of body) {
       if (!allowedKeySet.has(key)) continue
-      const label = ALLOWED_KEYS.find(k => k.key === key)?.label
+      const meta = ALLOWED_KEYS.find(k => k.key === key)
       const record = await prisma.systemConfig.upsert({
         where: { key },
-        update: { value, label },
-        create: { key, value, label },
+        update: { value, label: meta?.label },
+        create: { key, value, label: meta?.label },
       })
       results.push(record)
     }
