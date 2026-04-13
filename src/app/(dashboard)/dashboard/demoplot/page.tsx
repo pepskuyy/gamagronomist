@@ -99,7 +99,11 @@ export default async function DemoPlotIndexPage() {
                       <td style={{ color: 'var(--primary)', fontWeight: 600 }}>{req.fo?.name}</td>
                       <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
                       <td style={{ fontSize: '0.82rem' }}>
-                        {req.details?.map((d: any) => `${d.product?.name}: ${d.qtyRequested} ${d.product?.unit}`).join(', ')}
+                        {req.details?.map((d: any) => {
+                          const unit = d.requestUnit || d.product?.unitGramasi || d.product?.unit
+                          const qty = d.qtyApproved != null ? `${d.qtyApproved} ${unit} (diminta: ${d.qtyRequested})` : `${d.qtyRequested} ${unit}`
+                          return `${d.product?.name}: ${qty}`
+                        }).join(', ')}
                       </td>
                       <td>{getStatusBadge(req.status)}</td>
                       <td>
@@ -140,7 +144,13 @@ export default async function DemoPlotIndexPage() {
                     <tr key={req.id}>
                       <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
                       <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
-                      <td style={{ fontSize: '0.82rem' }}>{req.details?.map((d: any) => `${d.product?.name}: ${d.qtyRequested} ${d.product?.unit}`).join(', ')}</td>
+                      <td style={{ fontSize: '0.82rem' }}>
+                        {req.details?.map((d: any) => {
+                          const unit = d.requestUnit || d.product?.unitGramasi || d.product?.unit
+                          const qty = d.qtyApproved != null ? `${d.qtyApproved} ${unit} (diminta: ${d.qtyRequested})` : `${d.qtyRequested} ${unit}`
+                          return `${d.product?.name}: ${qty}`
+                        }).join(', ')}
+                      </td>
                       <td>{getStatusBadge(req.status)}</td>
                       <td>
                         <div className="action-row">

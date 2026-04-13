@@ -8,7 +8,8 @@ import { approveRequest, rejectRequest } from '@/app/actions/approve'
 type Detail = {
   id: string
   qtyRequested: number
-  product: { name: string; unit: string; id: string }
+  requestUnit?: string | null
+  product: { name: string; unit: string; unitGramasi?: string | null; id: string }
 }
 
 type RequestData = {
@@ -149,12 +150,13 @@ export default function ApprovePageClient({
                 const approved = approvedQties[d.id] ?? d.qtyRequested
                 const diff = approved - d.qtyRequested
                 const enough = stock >= approved
+                const displayUnit = d.requestUnit || d.product.unitGramasi || d.product.unit
                 return (
                   <tr key={d.id}>
                     <td style={td}><strong>{d.product.name}</strong></td>
-                    <td style={td}>{d.qtyRequested} {d.product.unit}</td>
+                    <td style={td}>{d.qtyRequested} {displayUnit}</td>
                     <td style={td}>
-                      <span style={{ color: enough ? '#059669' : '#dc2626', fontWeight: 600 }}>{stock}</span> {d.product.unit}
+                      <span style={{ color: enough ? '#059669' : '#dc2626', fontWeight: 600 }}>{stock}</span> {displayUnit}
                     </td>
                     <td style={td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -172,16 +174,16 @@ export default function ApprovePageClient({
                           }}
                           disabled={approveStatus !== 'idle'}
                         />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{d.product.unit}</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{displayUnit}</span>
                       </div>
                     </td>
                     <td style={td}>
                       {diff === 0 ? (
                         <span className="badge badge-success" style={{ fontSize: '0.72rem' }}>Sesuai</span>
                       ) : diff > 0 ? (
-                        <span className="badge" style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '0.72rem' }}>+{diff} {d.product.unit}</span>
+                        <span className="badge" style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '0.72rem' }}>+{diff} {displayUnit}</span>
                       ) : (
-                        <span className="badge" style={{ background: '#fef3c7', color: '#92400e', fontSize: '0.72rem' }}>{diff} {d.product.unit}</span>
+                        <span className="badge" style={{ background: '#fef3c7', color: '#92400e', fontSize: '0.72rem' }}>{diff} {displayUnit}</span>
                       )}
                     </td>
                   </tr>

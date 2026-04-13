@@ -21,7 +21,7 @@ export async function submitRequestDemoPlot(formData: FormData) {
 
   const notes = (formData.get('notes') as string) || ''
   const productsJSON = formData.get('products') as string
-  let productsToRequest: { productId: string; qtyRequested: number }[] = []
+  let productsToRequest: { productId: string; qtyRequested: number; requestUnit?: string }[] = []
 
   try {
     if (productsJSON) productsToRequest = JSON.parse(productsJSON)
@@ -31,6 +31,21 @@ export async function submitRequestDemoPlot(formData: FormData) {
 
   if (productsToRequest.length === 0) {
     return { error: 'Produk minimal 1 jenis.' }
+  }
+
+  // If requestUnit not provided, look up from Product table
+  if (productsToRequest.some(p => !p.requestUnit)) {
+    const products = await prisma.product.findMany({
+      where: { id: { in: productsToRequest.map(p => p.productId) } },
+      select: { id: true, unit: true, unitGramasi: true }
+    })
+    const productMap = new Map(products.map(p => [p.id, p]))
+    for (const p of productsToRequest) {
+      if (!p.requestUnit) {
+        const prod = productMap.get(p.productId)
+        p.requestUnit = prod?.unitGramasi || prod?.unit || 'PCS'
+      }
+    }
   }
 
   try {
@@ -48,6 +63,7 @@ export async function submitRequestDemoPlot(formData: FormData) {
           create: productsToRequest.map(p => ({
             productId: p.productId,
             qtyRequested: p.qtyRequested,
+            requestUnit: p.requestUnit || null,
           })),
         },
       },

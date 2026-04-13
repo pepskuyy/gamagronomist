@@ -66,7 +66,7 @@ export default function FOStockRequestPage() {
     setError(null)
     const fd = new FormData()
     fd.append('notes', notes)
-    fd.append('products', JSON.stringify(selectedProducts.map(p => ({ productId: p.productId, qtyRequested: p.qtyRequested }))))
+    fd.append('products', JSON.stringify(selectedProducts.map(p => ({ productId: p.productId, qtyRequested: p.qtyRequested, requestUnit: p.unit }))))
     start(async () => {
       const res = await submitRequestDemoPlot(fd)
       if (res?.error) setError(res.error)

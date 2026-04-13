@@ -197,6 +197,7 @@ model RequestDetail {
   
   qtyRequested   Float
   qtyApproved    Float?
+  requestUnit    String?  // Satuan saat diajukan (ml, gr, Btl, dll) — agar tampilan konsisten
 }
 
 model DemoPlot {

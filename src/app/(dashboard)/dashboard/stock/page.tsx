@@ -298,7 +298,11 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                       )}
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.82rem' }}>
-                        {req.details?.map((d: any) => `${d.product?.name}: ${d.qtyRequested} ${d.product?.unit}`).join(', ')}
+                        {req.details?.map((d: any) => {
+                          const unit = d.requestUnit || d.product?.unitGramasi || d.product?.unit
+                          const qty = d.qtyApproved != null ? `${d.qtyApproved} ${unit} (diminta: ${d.qtyRequested})` : `${d.qtyRequested} ${unit}`
+                          return `${d.product?.name}: ${qty}`
+                        }).join(', ')}
                       </td>
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>{getStatusBadge(req.status)}</td>
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
