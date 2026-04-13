@@ -48,7 +48,7 @@ export type AccurateItem = {
   id:        number  // Internal Accurate item ID
   no:        string  // no_barang / SKU
   name:      string  // nama barang
-  quantity?: number  // stok dalam satuan kemasan (field 'quantity' di Accurate)
+  availableToSell?: number  // stok dapat dijual (field 'availableToSell' di Accurate)
 }
 
 /**
@@ -66,7 +66,7 @@ export async function fetchAccurateItems(): Promise<AccurateItem[]> {
 
   while (true) {
     const url = new URL(`${host}/accurate/api/item/list.do`)
-    url.searchParams.set('fields',      'id,no,name,quantity')
+    url.searchParams.set('fields',      'id,no,name,availableToSell')
     url.searchParams.set('sp.page',     String(page))
     url.searchParams.set('sp.pageSize', String(pageSize))
 

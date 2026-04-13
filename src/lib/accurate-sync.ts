@@ -41,7 +41,7 @@ export async function runAccurateSync(): Promise<SyncResult> {
   for (const item of accurateItems) {
     const sku      = String(item.no   ?? '').trim()
     const name     = String(item.name ?? '').trim()
-    const spvStock = item.quantity ?? null
+    const spvStock = item.availableToSell ?? null
 
     if (!sku || !name) { skipped++; continue }
 
