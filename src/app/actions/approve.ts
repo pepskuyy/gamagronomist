@@ -7,7 +7,14 @@ import { transferAfaToFo } from '@/lib/ledger/stock'
 
 const prisma = new PrismaClient()
 
-// AFA Approve Request
+/**
+ * AFA Approve Request — with adjustable quantities per product
+ *
+ * formData expects:
+ *   requestId          — ID pengajuan
+ *   approvedQties      — JSON string: { [detailId]: number }
+ *   approveNotes       — keterangan opsional dari AFA
+ */
 export async function approveRequest(formData: FormData) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -20,6 +27,15 @@ export async function approveRequest(formData: FormData) {
   const requestId = formData.get('requestId') as string
   if (!requestId) return { error: 'Request ID tidak ditemukan' }
 
+  // Parse qty overrides from form
+  let approvedQties: Record<string, number> = {}
+  try {
+    const raw = formData.get('approvedQties') as string
+    if (raw) approvedQties = JSON.parse(raw)
+  } catch { /* ignore parse error — use requested qty as fallback */ }
+
+  const approveNotes = (formData.get('approveNotes') as string)?.trim() || null
+
   try {
     const request = await prisma.request.findUnique({
       where: { id: requestId },
@@ -29,40 +45,52 @@ export async function approveRequest(formData: FormData) {
     if (!request || request.status !== 'SUBMITTED') {
        return { error: 'Pengajuan tidak valid atau sudah diproses' }
     }
-    
-    // Simulasikan persetujuan untuk semua item di detail (qtyApproval = qtyRequested by default untuk MVP simple)
-    // Dalam app yang lebih kompleks form ini bisa memanipulasi qtyApproved per item
 
-    // Eksekusi ledger transaction
+    // Eksekusi ledger transaction per detail
     for (const detail of request.details) {
+      // Use AFA-adjusted qty if provided, otherwise fallback to requested qty
+      const qtyToApprove = approvedQties[detail.id] ?? detail.qtyRequested
+      
+      if (qtyToApprove <= 0) continue // skip items with 0 qty
+
       // Potong stok AFA & Kirim ke FO
       await transferAfaToFo(
         session.userId, 
         request.foId, 
         detail.productId, 
-        detail.qtyRequested, // untuk saat ini approve full quantity
+        qtyToApprove,
         request.id
       )
       
       // Update approved qty di table RequestDetail
       await prisma.requestDetail.update({
         where: { id: detail.id },
-        data: { qtyApproved: detail.qtyRequested }
+        data: { qtyApproved: qtyToApprove }
       })
     }
 
-    // Update status request
+    // Update status request + catatan approval
     await prisma.request.update({
       where: { id: requestId },
-      data: { status: 'APPROVED' }
+      data: {
+        status: 'APPROVED',
+        ...(approveNotes ? { problem: approveNotes } : {}), // reuse 'problem' field as approve notes
+      }
     })
+
+    // Build detail message for FO
+    const detailLines = request.details.map(d => {
+      const approved = approvedQties[d.id] ?? d.qtyRequested
+      const diff = approved !== d.qtyRequested ? ` (diminta: ${d.qtyRequested})` : ''
+      return `• ${d.productId.slice(0, 6)}… → ${approved}${diff}`
+    }).join('\n')
 
     // Notify FO
     await prisma.notification.create({
       data: {
         userId: request.foId,
         title: '✅ Permintaan Stok Disetujui',
-        message: `Permintaan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah disetujui oleh AFA.`,
+        message: `Permintaan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah disetujui oleh AFA.${approveNotes ? `\nCatatan: ${approveNotes}` : ''}`,
         link: `/dashboard/demoplot/detail/${requestId}`
       }
     })
@@ -74,7 +102,7 @@ export async function approveRequest(formData: FormData) {
   }
 }
 
-// AFA Reject Request
+// AFA Reject Request — with required reason
 export async function rejectRequest(formData: FormData) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -85,6 +113,7 @@ export async function rejectRequest(formData: FormData) {
   }
 
   const requestId = formData.get('requestId') as string
+  const reason = (formData.get('rejectReason') as string)?.trim() || null
   if (!requestId) return { error: 'Data tidak valid' }
 
   try {
@@ -93,7 +122,10 @@ export async function rejectRequest(formData: FormData) {
 
     await prisma.request.update({
       where: { id: requestId },
-      data: { status: 'REJECTED' }
+      data: {
+        status: 'REJECTED',
+        rejectReason: reason,
+      }
     })
 
     // Notify FO
@@ -101,7 +133,7 @@ export async function rejectRequest(formData: FormData) {
       data: {
         userId: request.foId,
         title: '❌ Permintaan Stok Ditolak',
-        message: `Permintaan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah ditolak oleh AFA.`,
+        message: `Permintaan stok Anda (ID: ${requestId.slice(0,8).toUpperCase()}) telah ditolak oleh AFA.${reason ? `\nAlasan: ${reason}` : ''}`,
         link: `/dashboard/demoplot/detail/${requestId}`
       }
     })
