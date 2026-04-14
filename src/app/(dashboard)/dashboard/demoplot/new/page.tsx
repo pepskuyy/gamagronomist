@@ -29,7 +29,7 @@ export default function FoDemoPlotDirectPage() {
   const [hasPhone, setHasPhone]     = useState(true)
 
   // Product usage state
-  const [usageList, setUsageList] = useState<{ id: string, productId: string, qty: string }[]>([])
+  const [usageList, setUsageList] = useState<{ id: string, productId: string, qty: string, usedFarmerProduct: boolean }[]>([])
 
   // Session state
   const [latitude, setLatitude]   = useState<number | null>(null)
@@ -91,7 +91,7 @@ export default function FoDemoPlotDirectPage() {
     // Convert dynamic list back to expected payload: { productId, actualUsage }
     const actualUsages = usageList
       .filter(u => u.productId && parseFloat(u.qty) > 0)
-      .map(u => ({ productId: u.productId, actualUsage: parseFloat(u.qty) }))
+      .map(u => ({ productId: u.productId, actualUsage: parseFloat(u.qty), usedFarmerProduct: u.usedFarmerProduct }))
       
     fd.append('usages', JSON.stringify(actualUsages))
     fd.append('photos', JSON.stringify(photos))
@@ -259,60 +259,88 @@ export default function FoDemoPlotDirectPage() {
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {usageList.map((usage, idx) => {
+              const isFarmer = usage.usedFarmerProduct
               const selectedProduct = products.find(p => p.id === usage.productId)
               const onHand = selectedProduct ? stockBalance[selectedProduct.id] || 0 : 0
+              const availableProducts = isFarmer
+                ? products
+                : products.filter(p => (stockBalance[p.id] || 0) > 0)
               
               return (
-                <div key={usage.id} style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 120px auto', gap: '0.75rem', alignItems: 'center', padding: '1rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', border: '1px solid var(--border)' }}>
-                  <div>
-                    <SearchableSelect
-                      options={products.filter(p => (stockBalance[p.id] || 0) > 0).map(p => ({ value: p.id, label: p.name }))}
-                      value={usage.productId}
-                      onChange={val => {
-                        const newList = [...usageList]
-                        newList[idx].productId = val
-                        setUsageList(newList)
-                      }}
-                      placeholder="-- Cari Produk --"
-                      required
-                    />
-                    {selectedProduct && (
-                      <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
-                        Tersedia: <strong>{onHand} {selectedProduct.unitGramasi || selectedProduct.unit}</strong>
-                      </div>
-                    )}
+                <div key={usage.id} style={{ padding: '1rem', borderRadius: 'var(--radius-sm)', background: isFarmer ? '#fefce8' : 'var(--surface-2)', border: `1px solid ${isFarmer ? '#fde68a' : 'var(--border)'}` }}>
+                  {/* Toggle sumber produk */}
+                  <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
+                    <button
+                      type="button"
+                      onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = false; nl[idx].productId = ''; setUsageList(nl) }}
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: !isFarmer ? '2px solid var(--primary)' : '1px solid var(--border)', background: !isFarmer ? 'var(--primary-light)' : 'transparent', color: !isFarmer ? 'var(--primary)' : 'var(--text-muted)', transition: 'all 0.15s' }}
+                    >
+                      🏢 Stok Sendiri
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = true; nl[idx].productId = ''; setUsageList(nl) }}
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: isFarmer ? '2px solid #d97706' : '1px solid var(--border)', background: isFarmer ? '#fef3c7' : 'transparent', color: isFarmer ? '#92400e' : 'var(--text-muted)', transition: 'all 0.15s' }}
+                    >
+                      🌾 Produk Petani
+                    </button>
                   </div>
-                  <div style={{ position: 'relative' }}>
-                    <input
-                      type="number" min="0" step="0.01"
-                      className="form-control"
-                      value={usage.qty}
-                      onChange={e => {
-                        const newList = [...usageList]
-                        newList[idx].qty = e.target.value
-                        setUsageList(newList)
-                      }}
-                      placeholder="0"
-                      required
-                    />
-                    {selectedProduct && <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{selectedProduct.unitGramasi || selectedProduct.unit}</span>}
+                  {isFarmer && (
+                    <p style={{ fontSize: '0.75rem', color: '#92400e', marginBottom: '0.5rem', background: '#fef3c7', padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>
+                      ⚠️ Produk milik petani — <strong>tidak memotong stok Anda</strong>
+                    </p>
+                  )}
+                  <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 120px auto', gap: '0.75rem', alignItems: 'center' }}>
+                    <div>
+                      <SearchableSelect
+                        options={availableProducts.map(p => ({ value: p.id, label: p.name }))}
+                        value={usage.productId}
+                        onChange={val => {
+                          const newList = [...usageList]
+                          newList[idx].productId = val
+                          setUsageList(newList)
+                        }}
+                        placeholder={isFarmer ? '-- Pilih Produk Petani --' : '-- Cari Produk --'}
+                        required
+                      />
+                      {selectedProduct && !isFarmer && (
+                        <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
+                          Tersedia: <strong>{onHand} {selectedProduct.unitGramasi || selectedProduct.unit}</strong>
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ position: 'relative' }}>
+                      <input
+                        type="number" min="0" step="0.01"
+                        className="form-control"
+                        value={usage.qty}
+                        onChange={e => {
+                          const newList = [...usageList]
+                          newList[idx].qty = e.target.value
+                          setUsageList(newList)
+                        }}
+                        placeholder="0"
+                        required
+                      />
+                      {selectedProduct && <span style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>{selectedProduct.unitGramasi || selectedProduct.unit}</span>}
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => setUsageList(usageList.filter(u => u.id !== usage.id))}
+                      className="btn btn-outline"
+                      style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: '#fecaca', background: '#fef2f2' }}
+                      title="Hapus Produk"
+                    >
+                      🗑️
+                    </button>
                   </div>
-                  <button 
-                    type="button" 
-                    onClick={() => setUsageList(usageList.filter(u => u.id !== usage.id))}
-                    className="btn btn-outline"
-                    style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: '#fecaca', background: '#fef2f2' }}
-                    title="Hapus Produk"
-                  >
-                    🗑️
-                  </button>
                 </div>
               )
             })}
             
             <button 
               type="button" 
-              onClick={() => setUsageList([...usageList, { id: Math.random().toString(36).substr(2, 9), productId: '', qty: '' }])}
+              onClick={() => setUsageList([...usageList, { id: Math.random().toString(36).substr(2, 9), productId: '', qty: '', usedFarmerProduct: false }])}
               className="btn btn-outline" 
               style={{ padding: '0.75rem', borderStyle: 'dashed', borderWidth: '2px', background: 'transparent' }}
             >

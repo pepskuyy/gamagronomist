@@ -231,7 +231,8 @@ model DemoPlotDetail {
   productId      String
   product        Product  @relation(fields: [productId], references: [id])
   
-  actualUsage    Float
+  actualUsage          Float
+  usedFarmerProduct    Boolean  @default(false) // true = produk milik petani, tidak memotong stok user
 }
 
 model StockOpname {
@@ -383,5 +384,6 @@ model SpotDemplotDetail {
   spotDemplot    SpotDemplot @relation(fields: [spotDemplotId], references: [id], onDelete: Cascade)
   productId      String
   product        Product     @relation(fields: [productId], references: [id])
-  usage          Float
+  usage                Float
+  usedFarmerProduct    Boolean  @default(false) // true = produk milik petani, tidak memotong stok user
 }

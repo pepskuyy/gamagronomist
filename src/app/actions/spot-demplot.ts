@@ -31,7 +31,7 @@ export async function submitSpotDemplot(formData: FormData) {
   const usagesJSON = formData.get('usages') as string
   const photosJSON = formData.get('photos') as string
 
-  let usages: { productId: string; actualUsage: number }[] = []
+  let usages: { productId: string; actualUsage: number; usedFarmerProduct?: boolean }[] = []
   let photos: string[] = []
 
   try {
@@ -64,19 +64,20 @@ export async function submitSpotDemplot(formData: FormData) {
 
     const validUsages = usages.filter(u => u.actualUsage > 0)
     
-    // 2. Save usages & deduct stock
+    // 2. Save detail records (semua, termasuk produk petani)
     if (validUsages.length > 0) {
-      // Save details records
       await prisma.spotDemplotDetail.createMany({
         data: validUsages.map(u => ({
           spotDemplotId: spotDemplot.id,
           productId: u.productId,
           usage: u.actualUsage,
+          usedFarmerProduct: u.usedFarmerProduct ?? false,
         })),
       })
 
-      // Deduct stock via Ledger
-      for (const u of validUsages) {
+      // Deduct stock via Ledger — HANYA untuk produk milik user (bukan produk petani)
+      const ownStockUsages = validUsages.filter(u => !u.usedFarmerProduct)
+      for (const u of ownStockUsages) {
         await prisma.ledger.create({
           data: {
             userId: session.userId,

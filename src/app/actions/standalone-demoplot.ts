@@ -37,7 +37,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
   const usagesJSON = formData.get('usages') as string
   const photosJSON = formData.get('photos') as string
 
-  let usages: { productId: string; actualUsage: number }[] = []
+  let usages: { productId: string; actualUsage: number; usedFarmerProduct?: boolean }[] = []
   let photos: string[] = []
 
   try {
@@ -80,8 +80,8 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
       },
     })
 
-    // Deduct stock for each used product
-    for (const u of usages.filter(u => u.actualUsage > 0)) {
+    // Deduct stock — HANYA untuk produk milik user (bukan produk petani)
+    for (const u of usages.filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)) {
       await prisma.ledger.create({
         data: {
           userId: session.userId,
@@ -120,6 +120,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
           demoPlotId: demoPlot.id,
           productId: u.productId,
           actualUsage: u.actualUsage,
+          usedFarmerProduct: u.usedFarmerProduct ?? false,
         })),
       })
     }
@@ -181,7 +182,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
 
   const usagesJSON = formData.get('usages') as string
   const photosJSON = formData.get('photos') as string
-  let usages: { productId: string; actualUsage: number }[] = []
+  let usages: { productId: string; actualUsage: number; usedFarmerProduct?: boolean }[] = []
   let photos: string[] = []
   try {
     if (usagesJSON) usages = JSON.parse(usagesJSON)
@@ -225,11 +226,12 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
           demoPlotId: demoPlot.id,
           productId: u.productId,
           actualUsage: u.actualUsage,
+          usedFarmerProduct: u.usedFarmerProduct ?? false,
         })),
       })
 
-      // Deduct stock
-      for (const u of validUsages) {
+      // Deduct stock — HANYA untuk produk milik user (bukan produk petani)
+      for (const u of validUsages.filter(u => !u.usedFarmerProduct)) {
         await prisma.ledger.create({
           data: {
             userId: session.userId,
