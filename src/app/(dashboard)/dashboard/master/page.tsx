@@ -45,6 +45,14 @@ export default function MasterDataIndex() {
             <p style={{ fontSize: '0.9rem' }}>Import data dari spreadsheet: Area, User, Petani, Customer Behavior, dan Demo Plot.</p>
           </div>
         </Link>
+
+        <Link href="/dashboard/master/stores" style={{ textDecoration: 'none' }}>
+          <div className="card" style={{ cursor: 'pointer', height: '100%', borderColor: '#c4b5fd', background: 'linear-gradient(135deg, #f5f3ff 0%, #fff 100%)' }}>
+            <div style={{ fontSize: '2.5rem', marginBottom: '1rem' }}>🏪</div>
+            <h3 style={{ marginBottom: '0.5rem', color: '#5b21b6' }}>Toko / Kios</h3>
+            <p style={{ fontSize: '0.9rem' }}>Kelola master data toko pelanggan. Sinkronisasi dari Accurate Online. Koordinat GPS ditampilkan di peta sebaran.</p>
+          </div>
+        </Link>
       </div>
     </div>
   )

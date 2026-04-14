@@ -197,3 +197,68 @@ export async function bulkDeleteProducts(ids: string[]) {
     return { error: 'Gagal menghapus produk: ' + (e?.message ?? 'Terjadi kesalahan.') }
   }
 }
+
+// ─── STORE (TOKO / PELANGGAN) ────────────────────────────────────
+export async function createStore(formData: FormData) {
+  const name      = (formData.get('name')      as string)?.trim()
+  const code      = (formData.get('code')      as string)?.trim() || null
+  const address   = (formData.get('address')   as string)?.trim() || null
+  const phone     = (formData.get('phone')     as string)?.trim() || null
+  const notes     = (formData.get('notes')     as string)?.trim() || null
+  const latRaw    = (formData.get('latitude')  as string)?.trim()
+  const lngRaw    = (formData.get('longitude') as string)?.trim()
+  const latitude  = latRaw  ? parseFloat(latRaw)  : null
+  const longitude = lngRaw  ? parseFloat(lngRaw)  : null
+
+  if (!name) return { error: 'Nama toko tidak boleh kosong.' }
+  try {
+    await prisma.store.create({ data: {
+      name, code, address, phone, notes,
+      latitude:  latitude  && !isNaN(latitude)  ? latitude  : null,
+      longitude: longitude && !isNaN(longitude) ? longitude : null,
+    }})
+    revalidatePath('/dashboard/master/stores')
+    return { success: true }
+  } catch { return { error: 'Gagal menyimpan data toko.' } }
+}
+
+export async function updateStore(id: string, formData: FormData) {
+  const name      = (formData.get('name')      as string)?.trim()
+  const code      = (formData.get('code')      as string)?.trim() || null
+  const address   = (formData.get('address')   as string)?.trim() || null
+  const phone     = (formData.get('phone')     as string)?.trim() || null
+  const notes     = (formData.get('notes')     as string)?.trim() || null
+  const latRaw    = (formData.get('latitude')  as string)?.trim()
+  const lngRaw    = (formData.get('longitude') as string)?.trim()
+  const latitude  = latRaw  ? parseFloat(latRaw)  : null
+  const longitude = lngRaw  ? parseFloat(lngRaw)  : null
+
+  if (!name) return { error: 'Nama toko tidak boleh kosong.' }
+  try {
+    await prisma.store.update({ where: { id }, data: {
+      name, code, address, phone, notes,
+      latitude:  latitude  && !isNaN(latitude)  ? latitude  : null,
+      longitude: longitude && !isNaN(longitude) ? longitude : null,
+    }})
+    revalidatePath('/dashboard/master/stores')
+    return { success: true }
+  } catch { return { error: 'Gagal mengupdate data toko.' } }
+}
+
+export async function deleteStore(id: string) {
+  try {
+    await prisma.store.delete({ where: { id } })
+    revalidatePath('/dashboard/master/stores')
+    return { success: true }
+  } catch { return { error: 'Gagal menghapus toko.' } }
+}
+
+export async function bulkDeleteStores(ids: string[]) {
+  if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  try {
+    await prisma.store.deleteMany({ where: { id: { in: ids } } })
+    revalidatePath('/dashboard/master/stores')
+    return { success: true }
+  } catch { return { error: 'Gagal menghapus toko.' } }
+}
+

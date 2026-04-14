@@ -234,3 +234,47 @@ export async function createSalesInvoice(
   }
 }
 
+// ─── CUSTOMER (TOKO) ──────────────────────────────────────────────
+
+export type AccurateCustomer = {
+  id:          number
+  no:          string
+  name:        string
+  mobilePhone?: string
+  charfield3?: string  // longitude
+  charfield4?: string  // latitude
+}
+
+export async function fetchAccurateCustomers(): Promise<AccurateCustomer[]> {
+  const { token, secret, host } = getCredentials()
+  const allCustomers: AccurateCustomer[] = []
+  let page = 1
+  const pageSize = 100
+
+  while (true) {
+    const url = new URL(`${host}/accurate/api/customer/list.do`)
+    url.searchParams.set('fields',      'id,no,name,mobilePhone,charfield3,charfield4')
+    url.searchParams.set('sp.page',     String(page))
+    url.searchParams.set('sp.pageSize', String(pageSize))
+
+    const headers = buildAuthHeaders(token, secret)
+    const res = await fetch(url.toString(), { headers, cache: 'no-store' })
+
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`Gagal fetch customer Accurate hal ${page} (HTTP ${res.status}): ${text}`)
+    }
+
+    const data = await res.json()
+    if (!data.s) throw new Error(`Accurate customer/list.do error: ${JSON.stringify(data)}`)
+
+    const items: AccurateCustomer[] = data.d ?? []
+    allCustomers.push(...items)
+
+    const totalRows: number = data.sp?.rowCount ?? items.length
+    if (allCustomers.length >= totalRows || items.length < pageSize) break
+    page++
+  }
+
+  return allCustomers
+}

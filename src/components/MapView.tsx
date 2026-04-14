@@ -10,17 +10,25 @@ type DemoPlotPoint = {
   date: string; productCount: number; products: string[]
   type: 'spot' | 'mini' | 'full'
 }
+
+type StorePoint = {
+  id: string; lat: number; lng: number
+  name: string; code: string | null; address: string | null; phone: string | null
+}
+
 type TypeConfig = Record<string, { label: string; desc: string; color: string; emoji: string; bg: string; border: string; textColor: string }>
 
 interface Props {
   points: DemoPlotPoint[]
   typeConfig: TypeConfig
+  storePoints?: StorePoint[]
+  showStores?: boolean
 }
 
 // Jawa Tengah center
 const CENTER: [number, number] = [-7.15, 110.14]
 
-export default function MapView({ points, typeConfig }: Props) {
+export default function MapView({ points, typeConfig, storePoints = [], showStores = true }: Props) {
   return (
     <MapContainer
       center={CENTER}
@@ -28,12 +36,12 @@ export default function MapView({ points, typeConfig }: Props) {
       style={{ width: '100%', height: '100%' }}
       scrollWheelZoom={true}
     >
-      {/* Satellite tile layer (OpenTopoMap as free alternative — clean) */}
       <TileLayer
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
       />
 
+      {/* Demo Plot markers */}
       {points.map(p => {
         const cfg = typeConfig[p.type]
         return (
@@ -70,6 +78,31 @@ export default function MapView({ points, typeConfig }: Props) {
           </CircleMarker>
         )
       })}
+
+      {/* Store markers — ungu */}
+      {showStores && storePoints.map(s => (
+        <CircleMarker
+          key={`store-${s.id}`}
+          center={[s.lat, s.lng]}
+          radius={9}
+          pathOptions={{
+            fillColor: '#7c3aed',
+            color: '#fff',
+            weight: 2,
+            fillOpacity: 0.9,
+          }}
+        >
+          <Tooltip>
+            <div style={{ minWidth: '160px', fontSize: '0.8rem', lineHeight: 1.5 }}>
+              <div style={{ fontWeight: 700, marginBottom: '0.25rem', color: '#7c3aed' }}>🏪 Toko / Kios</div>
+              <div><strong>Nama:</strong> {s.name}</div>
+              {s.code    && <div><strong>Kode:</strong> {s.code}</div>}
+              {s.address && <div><strong>Alamat:</strong> {s.address}</div>}
+              {s.phone   && <div><strong>Telp:</strong> {s.phone}</div>}
+            </div>
+          </Tooltip>
+        </CircleMarker>
+      ))}
     </MapContainer>
   )
 }
