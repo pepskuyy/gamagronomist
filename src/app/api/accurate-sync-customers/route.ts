@@ -58,7 +58,8 @@ export async function POST() {
       const storeData = {
         name,
         code:      customerNo || null,
-        address:   c.billAddress || null,
+        // billAddress is an object — extract the street string
+        address:   c.billAddress?.street || c.billAddress?.address || null,
         phone:     c.mobilePhone || null,
         latitude:  latitude  && !isNaN(latitude)  ? latitude  : null,
         longitude: longitude && !isNaN(longitude) ? longitude : null,

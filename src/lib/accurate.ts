@@ -238,10 +238,16 @@ export async function createSalesInvoice(
 
 export type AccurateCustomer = {
   id:          number
-  customerNo?: string  // kode customer
+  customerNo?: string
   name:        string
   mobilePhone?: string
-  billAddress?: string // alamat tagihan
+  billAddress?: {
+    street?:            string
+    address?:           string
+    city?:              string
+    province?:          string
+    concatFullAddress?: string
+  } | null
   charField3?: string  // longitude
   charField4?: string  // latitude
 }
