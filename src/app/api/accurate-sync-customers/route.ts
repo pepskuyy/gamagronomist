@@ -34,30 +34,31 @@ export async function POST() {
     let inserted = 0, updated = 0, skipped = 0
 
     // Deduplicate customers from Accurate by accurateId
-    // (some databases may have duplicate no/customer codes)
+    // (some databases may have duplicate customerNo)
     const seen = new Set<string>()
 
     for (const c of customers) {
-      const no   = String(c.no   ?? '').trim()
-      const name = String(c.name ?? '').trim()
+      const customerNo = String(c.customerNo ?? '').trim()
+      const name       = String(c.name       ?? '').trim()
       if (!name) { skipped++; continue }
 
-      // Use no if available, otherwise fall back to Accurate's internal id
-      const accurateId = no || String(c.id)
+      // Use customerNo if available, otherwise fall back to Accurate's internal id
+      const accurateId = customerNo || String(c.id)
 
-      // Skip if already processed in this batch (duplicate no in Accurate)
+      // Skip if already processed in this batch (duplicate customerNo in Accurate)
       if (seen.has(accurateId)) { skipped++; continue }
       seen.add(accurateId)
 
-      // Parse lat/lng from charfield3/charfield4 — stored as string in Accurate
-      const latRaw = String(c.charfield4 ?? '').trim()
-      const lngRaw = String(c.charfield3 ?? '').trim()
+      // Parse lat/lng from charField3/charField4 — stored as string in Accurate
+      const latRaw = String(c.charField4 ?? '').trim()
+      const lngRaw = String(c.charField3 ?? '').trim()
       const latitude  = latRaw && latRaw !== '0' ? parseFloat(latRaw)  : null
       const longitude = lngRaw && lngRaw !== '0' ? parseFloat(lngRaw)  : null
 
       const storeData = {
         name,
-        code:      no || null,
+        code:      customerNo || null,
+        address:   c.billAddress || null,
         phone:     c.mobilePhone || null,
         latitude:  latitude  && !isNaN(latitude)  ? latitude  : null,
         longitude: longitude && !isNaN(longitude) ? longitude : null,
