@@ -180,21 +180,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="page-header" style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Laporan Aktivitas Harian</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <Link href="/dashboard/reports/cb/new"        className="btn btn-primary"  style={{ fontSize: '0.85rem' }}>+ 📝 Customer Behavior</Link>
-          <Link href="/dashboard/reports/spot-demplot/new" className="btn btn-primary" style={{ fontSize: '0.85rem' }}>+ 🌿 Spot Demplot</Link>
-          <Link href="/dashboard/reports/kios/new"      className="btn btn-outline"  style={{ fontSize: '0.85rem' }}>+ 🏪 Visit Kios</Link>
-          <Link href="/dashboard/reports/gathering/new" className="btn btn-outline"  style={{ fontSize: '0.85rem' }}>+ 👥 Gathering</Link>
-          <Link href="/dashboard/reports/company/new"   className="btn btn-outline"  style={{ fontSize: '0.85rem' }}>+ 🏢 Visit Company</Link>
+          <Link href="/dashboard/reports/cb/new"           className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 📝 Customer Behavior</Link>
+          <Link href="/dashboard/reports/spot-demplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🌿 Spot Demplot</Link>
+          <Link href="/dashboard/reports/kios/new"         className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🏪 Visit Kios</Link>
+          <Link href="/dashboard/reports/gathering/new"    className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 👥 Gathering</Link>
+          <Link href="/dashboard/reports/company/new"      className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🏢 Visit Company</Link>
 
           {/* Demo Plot buttons */}
           {(session.role === 'FO' || session.role === 'INTERN') && (
             <Link href="/dashboard/demoplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🌾 Rekam Demo Plot</Link>
           )}
           {session.role === 'AFA' && (
-            <>
-              <Link href="/dashboard/demoplot/afa-plan" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 📋 Perencanaan Demo</Link>
-              <Link href="/dashboard/demoplot/new"      className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🌾 Rekam Demo Plot</Link>
-            </>
+            <Link href="/dashboard/demoplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🌾 Rekam Demo Plot</Link>
           )}
         </div>
       </div>
