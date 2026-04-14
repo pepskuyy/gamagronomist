@@ -76,6 +76,7 @@ export default function FoDemoPlotDirectPage() {
     e.preventDefault()
     if (gpsStatus !== 'success') { setError('Aktifkan GPS terlebih dahulu.'); return }
     if (!farmerName || !area || !commodity) { setError('Nama petani, area, dan komoditas wajib diisi.'); return }
+    if (photos.length === 0) { setError('Dokumentasi foto wajib dilampirkan minimal 1 foto.'); return }
     setError(null)
 
     const fd = new FormData(e.currentTarget)
@@ -350,14 +351,15 @@ export default function FoDemoPlotDirectPage() {
 
 
           <div style={{ marginTop: '1.25rem' }}>
-            <label className="form-label">Hasil Pengamatan &amp; Catatan</label>
-            <textarea name="resultNotes" className="form-control" rows={3} placeholder="Hama mulai berkurang pada hari ke-3..." style={{ resize: 'none' }} />
+            <label className="form-label">Hasil Pengamatan &amp; Catatan <span style={{ color: 'var(--danger)' }}>*</span></label>
+            <textarea name="resultNotes" className="form-control" rows={3} placeholder="Hama mulai berkurang pada hari ke-3..." style={{ resize: 'none' }} required />
           </div>
         </div>
 
         {/* ── DOCUMENTATION ── */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📷 Dokumentasi</h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>📷 Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Minimal 1 foto wajib dilampirkan.</p>
           <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} label="Upload Foto Realisasi Demo Plot" />
         </div>
 

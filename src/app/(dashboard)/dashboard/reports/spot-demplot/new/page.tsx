@@ -64,6 +64,12 @@ export default function NewSpotDemplotPage() {
     setLoading(true)
     setError(null)
 
+    if (photos.length === 0) {
+      setError('Dokumentasi foto wajib dilampirkan minimal 1 foto.')
+      setLoading(false)
+      return
+    }
+
     const formData = new FormData(e.currentTarget)
     formData.set('latitude', String(latitude))
     formData.set('longitude', String(longitude))
@@ -130,8 +136,8 @@ export default function NewSpotDemplotPage() {
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Hasil Pengamatan</label>
-              <textarea name="observationResult" className="form-control" rows={3} placeholder="Ceritakan hasil pengamatan spot demplot..." />
+              <label className="form-label">Hasil Pengamatan <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <textarea name="observationResult" className="form-control" rows={3} placeholder="Ceritakan hasil pengamatan spot demplot..." required />
             </div>
           </div>
         </div>
@@ -228,7 +234,8 @@ export default function NewSpotDemplotPage() {
 
         {/* DOKUMENTASI */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📸 Dokumentasi</h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>📸 Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Minimal 1 foto wajib dilampirkan.</p>
           <ImageUploader onUploadSuccess={(urls) => setPhotos(urls)} />
           {photos.length > 0 && (
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>

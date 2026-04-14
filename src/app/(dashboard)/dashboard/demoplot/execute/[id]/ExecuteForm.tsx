@@ -102,6 +102,13 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
       return
     }
 
+    // Validate photo
+    if (photos.length === 0) {
+      setError('Dokumentasi foto wajib dilampirkan minimal 1 foto.')
+      setLoading(false)
+      return
+    }
+
     const formData = new FormData(e.currentTarget)
     formData.append('requestId', requestId)
     formData.append('latitude', latitude!.toString())
@@ -232,12 +239,13 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
         </div>
 
         <div className="form-group" style={{ marginBottom: '2rem' }}>
-           <label className="form-label">Hasil Pengamatan & Catatan (Opsional)</label>
-           <textarea name="resultNotes" className="form-control" rows={3} placeholder="Hama mulai terlihat berkurang pada hari ke-3" />
+           <label className="form-label">Hasil Pengamatan & Catatan <span style={{ color: 'var(--danger)' }}>*</span></label>
+           <textarea name="resultNotes" className="form-control" rows={3} placeholder="Hama mulai terlihat berkurang pada hari ke-3" required />
         </div>
 
         <div style={{ marginBottom: '2rem' }}>
-           <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Dokumentasi Realisasi</h3>
+           <h3 style={{ marginBottom: '0.5rem', fontSize: '1rem' }}>Dokumentasi Realisasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
+           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>Minimal 1 foto wajib dilampirkan.</p>
            <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} label="Upload Bukti Dokumentasi Realisasi" />
         </div>
 

@@ -44,6 +44,7 @@ export default function ContinueDemoPlotPage() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (lat === null || lng === null) { setError('GPS wajib diambil sebelum menyimpan sesi.'); return }
+    if (photos.length === 0) { setError('Dokumentasi foto wajib dilampirkan minimal 1 foto.'); return }
     setError(null)
 
     const fd = new FormData(e.currentTarget)
@@ -102,8 +103,8 @@ export default function ContinueDemoPlotPage() {
               </div>
             </div>
             <div style={{ gridColumn: '1/-1' }}>
-              <label className="form-label">Hasil Pengamatan &amp; Catatan</label>
-              <textarea name="resultNotes" className="form-control" rows={3} placeholder="Hama mulai berkurang pada hari ke-3..." style={{ resize: 'none' }} />
+              <label className="form-label">Hasil Pengamatan &amp; Catatan <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <textarea name="resultNotes" className="form-control" rows={3} placeholder="Hama mulai berkurang pada hari ke-3..." style={{ resize: 'none' }} required />
             </div>
           </div>
         </div>
@@ -207,7 +208,8 @@ export default function ContinueDemoPlotPage() {
 
         {/* Documentation + GPS */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📷 Dokumentasi &amp; Lokasi</h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>📷 Dokumentasi &amp; Lokasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
+          <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Minimal 1 foto wajib dilampirkan.</p>
           <GpsCapture onCapture={(la, lo) => { setLat(la); setLng(lo) }} onClear={() => { setLat(null); setLng(null) }} />
           <div style={{ marginTop: '1rem' }}>
             <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} label="Upload Foto Sesi Ini" />
