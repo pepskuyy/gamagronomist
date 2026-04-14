@@ -131,6 +131,27 @@ export async function updateEmail(formData: FormData) {
   }
 }
 
+export async function updatePhone(formData: FormData) {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('session')?.value
+    const session = await import('@/lib/auth').then(m => m.decrypt(token as string))
+    if (!session?.userId) return { error: 'Tidak terotorisasi.' }
+
+    const phone = (formData.get('phone') as string)?.trim() || null
+
+    await prisma.user.update({
+      where: { id: session.userId },
+      data: { phone }
+    })
+
+    return { success: true }
+  } catch (err) {
+    console.error('Update phone error', err)
+    return { error: 'Terjadi kesalahan. Coba lagi.' }
+  }
+}
+
 /**
  * Reset password using username + email verification (no email sending needed)
  */

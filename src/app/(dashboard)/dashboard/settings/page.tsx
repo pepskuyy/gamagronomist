@@ -3,6 +3,7 @@ import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
 import UpdateEmailForm from '@/components/UpdateEmailForm'
+import UpdatePhoneForm from '@/components/UpdatePhoneForm'
 import WahaSettingsClient from './WahaSettingsClient'
 
 const prisma = new PrismaClient()
@@ -14,10 +15,10 @@ export default async function SettingsPage() {
 
   if (!session?.userId) return <div>Unauthorized</div>
 
-  // Fetch current email from DB
+  // Fetch current email & phone from DB
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { email: true }
+    select: { email: true, phone: true }
   })
 
   return (
@@ -26,6 +27,20 @@ export default async function SettingsPage() {
       <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
         Kelola pengaturan pribadi untuk akun <strong>{session.name}</strong> ({session.role})
       </p>
+
+      {/* WhatsApp Phone Section */}
+      <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>
+        <h3 style={{ marginBottom: '0.4rem' }}>📱 Nomor WhatsApp</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+          Daftarkan nomor WhatsApp Anda agar dapat menerima notifikasi sistem (pengajuan stok, approval, dll) via WhatsApp.
+          {!user?.phone && (
+            <span style={{ display: 'block', marginTop: '0.5rem', color: 'var(--warning, #d97706)', fontWeight: 600, fontSize: '0.82rem' }}>
+              ⚠️ Anda belum mendaftarkan nomor WhatsApp. Notifikasi tidak akan terkirim.
+            </span>
+          )}
+        </p>
+        <UpdatePhoneForm currentPhone={user?.phone ?? null} />
+      </div>
 
       {/* Email Recovery Section */}
       <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>
@@ -60,4 +75,5 @@ export default async function SettingsPage() {
     </div>
   )
 }
+
 
