@@ -31,24 +31,29 @@ export async function POST() {
       return NextResponse.json({ success: true, message: 'Tidak ada customer ditemukan di Accurate.', total: 0, inserted: 0, updated: 0, skipped: 0 })
     }
 
-    // Load existing stores indexed by accurateId
-    const existing = await prisma.store.findMany({ select: { id: true, accurateId: true } })
-    const byAccurateId = new Map(existing.map(s => [s.accurateId, s]))
-
     let inserted = 0, updated = 0, skipped = 0
+
+    // Deduplicate customers from Accurate by accurateId
+    // (some databases may have duplicate no/customer codes)
+    const seen = new Set<string>()
 
     for (const c of customers) {
       const no   = String(c.no   ?? '').trim()
       const name = String(c.name ?? '').trim()
       if (!name) { skipped++; continue }
 
+      // Use no if available, otherwise fall back to Accurate's internal id
       const accurateId = no || String(c.id)
+
+      // Skip if already processed in this batch (duplicate no in Accurate)
+      if (seen.has(accurateId)) { skipped++; continue }
+      seen.add(accurateId)
 
       // Parse lat/lng from charfield3/charfield4 — stored as string in Accurate
       const latRaw = String(c.charfield4 ?? '').trim()
       const lngRaw = String(c.charfield3 ?? '').trim()
-      const latitude  = latRaw  && latRaw  !== '0' ? parseFloat(latRaw)  : null
-      const longitude = lngRaw  && lngRaw  !== '0' ? parseFloat(lngRaw)  : null
+      const latitude  = latRaw && latRaw !== '0' ? parseFloat(latRaw)  : null
+      const longitude = lngRaw && lngRaw !== '0' ? parseFloat(lngRaw)  : null
 
       const storeData = {
         name,
@@ -58,14 +63,17 @@ export async function POST() {
         longitude: longitude && !isNaN(longitude) ? longitude : null,
       }
 
-      const found = byAccurateId.get(accurateId)
-      if (found) {
-        await prisma.store.update({ where: { id: found.id }, data: storeData })
-        updated++
-      } else {
-        await prisma.store.create({ data: { ...storeData, accurateId } })
-        inserted++
-      }
+      // Use upsert to safely handle both insert and update without race conditions
+      const result = await prisma.store.upsert({
+        where:  { accurateId },
+        update: storeData,
+        create: { ...storeData, accurateId },
+      })
+
+      // Determine if it was a new record (createdAt ≈ updatedAt means just created)
+      const isNew = Math.abs(result.createdAt.getTime() - result.updatedAt.getTime()) < 1000
+      if (isNew) inserted++
+      else updated++
     }
 
     return NextResponse.json({
