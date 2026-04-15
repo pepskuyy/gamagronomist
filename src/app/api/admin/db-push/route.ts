@@ -1,21 +1,39 @@
 import { NextResponse } from 'next/server'
-import { execSync } from 'child_process'
+import { PrismaClient } from '@prisma/client'
 
-// ONE-TIME USE: Run npx prisma db push via Vercel serverless
+const prisma = new PrismaClient()
+
+// ONE-TIME USE: Add snapshotAreaId columns via raw SQL
 // DELETE THIS FILE after use!
 export async function GET(req: Request) {
   const secret = new URL(req.url).searchParams.get('secret')
-  if (secret !== process.env.ADMIN_SECRET && secret !== 'gamagronomist-dbpush-2025') {
+  if (secret !== 'gamagronomist-dbpush-2025') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
-  try {
-    const out = execSync('npx prisma db push --accept-data-loss', {
-      cwd: process.cwd(),
-      timeout: 60000,
-      encoding: 'utf-8'
-    })
-    return NextResponse.json({ success: true, output: out })
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message, stderr: err.stderr }, { status: 500 })
+
+  const tables = [
+    'Request',
+    'DemoPlot',
+    'SpotDemplot',
+    'CustomerBehavior',
+    'VisitKios',
+    'FarmerGathering',
+    'VisitCompany',
+    'Ledger',
+  ]
+
+  const results: Record<string, string> = {}
+
+  for (const table of tables) {
+    try {
+      await prisma.$executeRawUnsafe(
+        `ALTER TABLE "${table}" ADD COLUMN IF NOT EXISTS "snapshotAreaId" TEXT`
+      )
+      results[table] = 'OK'
+    } catch (err: any) {
+      results[table] = `ERROR: ${err.message}`
+    }
   }
+
+  return NextResponse.json({ success: true, results })
 }
