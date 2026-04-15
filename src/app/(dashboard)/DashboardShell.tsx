@@ -73,7 +73,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
   const navItems = [
     { href: '/dashboard',          label: 'Dashboard',          icon: Icons.dashboard, show: true },
     { href: '/dashboard/master',   label: 'Master Data',        icon: Icons.master,    show: session?.role === 'ADMIN' || session?.role === 'SPV' },
-    { href: '/dashboard/stock',    label: 'Manajemen Stok',     icon: Icons.stock,     show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
+    { href: '/dashboard/stock',    label: ['FAM','WHM'].includes(session?.role) ? 'Approval Stok' : 'Manajemen Stok', icon: Icons.stock, show: session?.role !== 'BD' },
     { href: '/dashboard/reports',  label: 'Laporan Aktivitas',  icon: Icons.reports,   show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
     { href: '/dashboard/opname',   label: 'Stock Opname',       icon: Icons.opname,    show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
     { href: '/dashboard/so',       label: 'Tracking SO',        icon: Icons.so,        show: ['SPV', 'ADMIN', 'BD'].includes(session?.role) },
