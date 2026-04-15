@@ -34,7 +34,7 @@ export async function GET(req: any) {
         farmer: true,
         request: {
           include: {
-            fo: { select: { name: true } },
+            fo: { select: { name: true, area: { select: { name: true } } } },
             details: { include: { product: { select: { name: true } } } }
           }
         },
@@ -42,6 +42,10 @@ export async function GET(req: any) {
       },
       orderBy: { createdAt: 'desc' }
     })
+
+    // Manual map for snapshotAreaId to area name (fallbacks)
+    const allAreas = await prisma.area.findMany()
+    const areaMap = new Map(allAreas.map(a => [a.id, a.name]))
 
     const result = demoPlots
       .filter(dp => dp.latitude !== null && dp.longitude !== null)
@@ -52,13 +56,17 @@ export async function GET(req: any) {
           : dp.request?.details?.map(d => d.product.name) ?? []
 
         const type = classify(products.length)
+        
+        // Priority for Area: snapshotAreaId -> FO's current area -> recorded area
+        const mappedSnapshotArea = dp.snapshotAreaId ? areaMap.get(dp.snapshotAreaId) : null
+        const internalArea = mappedSnapshotArea ?? dp.request?.fo?.area?.name ?? dp.area ?? '-'
 
         return {
           id: dp.id,
           lat: dp.latitude!,
           lng: dp.longitude!,
-          farmerName: dp.farmer?.name ?? dp.request?.['area'] ?? 'Tidak diketahui',
-          area: dp.area ?? dp.request?.area ?? '-',
+          farmerName: dp.farmer?.name ?? 'Tidak diketahui',
+          area: internalArea,
           commodity: dp.commodity ?? dp.request?.commodity ?? '-',
           foName: dp.request?.fo?.name ?? '-',
           date: dp.date.toISOString(),

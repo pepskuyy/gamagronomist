@@ -272,11 +272,25 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
       errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Format tanggal "${r.date}" tidak valid. Gunakan DD/MM/YYYY atau YYYY-MM-DD.` }); skipped++; continue
     }
 
-    const farmerId = r.farmerName ? farmerMap.get(r.farmerName.trim().toLowerCase()) || null : null
+    let farmerId = r.farmerName ? farmerMap.get(r.farmerName.trim().toLowerCase()) || null : null
     const lat = r.latitude ? parseFloat(r.latitude) : null
     const lng = r.longitude ? parseFloat(r.longitude) : null
     const isFinal = r.isFinalSession?.trim().toLowerCase()
     
+    // Auto-create farmer if not found
+    if (r.farmerName?.trim() && !farmerId) {
+      try {
+        const newFarmer = await prisma.farmer.create({
+          data: { name: r.farmerName.trim(), area: r.area?.trim() || null }
+        })
+        farmerId = newFarmer.id
+        farmerMap.set(r.farmerName.trim().toLowerCase(), newFarmer.id)
+      } catch (e: any) {
+        errors.push({ row: rowNum, name: r.farmerName, reason: `Gagal membuat petani otomatis: ${e.message}` })
+        skipped++
+        continue
+      }
+    }
     // Default to admin/spv if username_fo is completely missing (fallback), but we require it.
     let foId = session.userId
     if (r.username_fo) {
