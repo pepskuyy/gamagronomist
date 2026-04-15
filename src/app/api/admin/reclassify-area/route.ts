@@ -1,30 +1,46 @@
 import { NextResponse } from 'next/server'
 import { PrismaClient } from '@prisma/client'
-import { getKabupatenFromCoords } from '@/lib/geocode'
-import { normalizeKabupaten } from '@/lib/geocode'
+import { getKabupatenFromCoords, normalizeKabupaten } from '@/lib/geocode'
 import { invalidateAreaCoverageCache } from '@/lib/area-resolver'
 
 const prisma = new PrismaClient()
-
 const sleep = (ms: number) => new Promise(r => setTimeout(r, ms))
 
-// ONE-TIME USE: Reclassify existing GPS-tagged records based on area coverage mapping
+/**
+ * Reclassify GPS-tagged records based on area coverage mapping.
+ * 
+ * Params:
+ *   secret   = gamagronomist-reclassify-2025
+ *   table    = demoPlot | spotDemplot | customerBehavior (default: demoPlot)
+ *   batch    = number of records per call (default: 5, max ~8 safe for 10s timeout)
+ *   offset   = skip first N records (for pagination)
+ *   dryRun   = true → log only, don't update
+ * 
+ * Example flow:
+ *   /api/admin/reclassify-area?secret=...&table=demoPlot&batch=5&offset=0
+ *   /api/admin/reclassify-area?secret=...&table=demoPlot&batch=5&offset=5
+ *   ... until nextOffset >= total
+ */
 export async function GET(req: Request) {
   const url = new URL(req.url)
-  const secret = url.searchParams.get('secret')
-  const limitParam = url.searchParams.get('limit')
-  const dryRun = url.searchParams.get('dryRun') === 'true'
+  const secret   = url.searchParams.get('secret')
+  const table    = (url.searchParams.get('table') || 'demoPlot') as 'demoPlot' | 'spotDemplot' | 'customerBehavior'
+  const batch    = Math.min(parseInt(url.searchParams.get('batch') || '5'), 8)
+  const offset   = parseInt(url.searchParams.get('offset') || '0')
+  const dryRun   = url.searchParams.get('dryRun') === 'true'
 
   if (secret !== 'gamagronomist-reclassify-2025') {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
   }
 
-  const limit = limitParam ? parseInt(limitParam) : 999999
+  if (!['demoPlot', 'spotDemplot', 'customerBehavior'].includes(table)) {
+    return NextResponse.json({ error: 'table harus: demoPlot | spotDemplot | customerBehavior' }, { status: 400 })
+  }
 
-  // Load all area coverages
+  // Load coverages
   const coverages = await prisma.areaCoverage.findMany()
   if (!coverages.length) {
-    return NextResponse.json({ error: 'Tidak ada area coverage yang dikonfigurasi. Tambahkan dulu di Master Data → Area.' })
+    return NextResponse.json({ error: 'Tidak ada area coverage. Tambahkan di Master Data → Area.' }, { status: 400 })
   }
 
   function matchArea(kabRaw: string): string | null {
@@ -40,51 +56,72 @@ export async function GET(req: Request) {
     return partial?.areaId ?? null
   }
 
-  const stats = {
-    demoPlot:        { processed: 0, updated: 0, notFound: 0, noGps: 0 },
-    spotDemplot:     { processed: 0, updated: 0, notFound: 0, noGps: 0 },
-    customerBehavior:{ processed: 0, updated: 0, notFound: 0, noGps: 0 },
+  // Fetch only the batch + count total
+  type Row = { id: string; latitude: number | null; longitude: number | null }
+  let records: Row[] = []
+  let total = 0
+
+  if (table === 'demoPlot') {
+    const [rows, count] = await Promise.all([
+      prisma.demoPlot.findMany({ select: { id: true, latitude: true, longitude: true }, skip: offset, take: batch }),
+      prisma.demoPlot.count(),
+    ])
+    records = rows; total = count
+  } else if (table === 'spotDemplot') {
+    const [rows, count] = await Promise.all([
+      prisma.spotDemplot.findMany({ select: { id: true, latitude: true, longitude: true }, skip: offset, take: batch }),
+      prisma.spotDemplot.count(),
+    ])
+    records = rows; total = count
+  } else {
+    const [rows, count] = await Promise.all([
+      prisma.customerBehavior.findMany({ select: { id: true, latitude: true, longitude: true }, skip: offset, take: batch }),
+      prisma.customerBehavior.count(),
+    ])
+    records = rows; total = count
   }
 
-  // Helper to process a table
-  async function processTable(
-    table: 'demoPlot' | 'spotDemplot' | 'customerBehavior',
-    records: { id: string; latitude: number | null; longitude: number | null }[]
-  ) {
-    let count = 0
-    for (const r of records) {
-      if (count >= limit) break
-      stats[table].processed++
-      count++
-      if (!r.latitude || !r.longitude) { stats[table].noGps++; continue }
-      await sleep(1100) // Respect Nominatim 1 req/s rate limit
-      const kabRaw = await getKabupatenFromCoords(r.latitude, r.longitude)
-      if (!kabRaw) { stats[table].notFound++; continue }
-      const areaId = matchArea(kabRaw)
-      if (!areaId) { stats[table].notFound++; continue }
-      if (!dryRun) {
-        if (table === 'demoPlot') {
-          await prisma.demoPlot.update({ where: { id: r.id }, data: { snapshotAreaId: areaId } })
-        } else if (table === 'spotDemplot') {
-          await prisma.spotDemplot.update({ where: { id: r.id }, data: { snapshotAreaId: areaId } })
-        } else {
-          await prisma.customerBehavior.update({ where: { id: r.id }, data: { snapshotAreaId: areaId } })
-        }
-      }
-      stats[table].updated++
+  const results: { id: string; kabupaten: string | null; areaId: string | null; action: string }[] = []
+
+  for (const r of records) {
+    if (!r.latitude || !r.longitude) {
+      results.push({ id: r.id, kabupaten: null, areaId: null, action: 'skipped_no_gps' })
+      continue
     }
+    await sleep(1100) // Nominatim 1 req/s
+    const kabRaw = await getKabupatenFromCoords(r.latitude, r.longitude)
+    const areaId = kabRaw ? matchArea(kabRaw) : null
+
+    if (!areaId) {
+      results.push({ id: r.id, kabupaten: kabRaw, areaId: null, action: 'not_matched' })
+      continue
+    }
+
+    if (!dryRun) {
+      if (table === 'demoPlot') await prisma.demoPlot.update({ where: { id: r.id }, data: { snapshotAreaId: areaId } })
+      else if (table === 'spotDemplot') await prisma.spotDemplot.update({ where: { id: r.id }, data: { snapshotAreaId: areaId } })
+      else await prisma.customerBehavior.update({ where: { id: r.id }, data: { snapshotAreaId: areaId } })
+    }
+
+    results.push({ id: r.id, kabupaten: kabRaw, areaId, action: dryRun ? 'dry_run' : 'updated' })
   }
-
-  const [demoPlots, spots, cbs] = await Promise.all([
-    prisma.demoPlot.findMany({ select: { id: true, latitude: true, longitude: true } }),
-    prisma.spotDemplot.findMany({ select: { id: true, latitude: true, longitude: true } }),
-    prisma.customerBehavior.findMany({ select: { id: true, latitude: true, longitude: true } }),
-  ])
-
-  await processTable('demoPlot', demoPlots.slice(0, limit))
-  await processTable('spotDemplot', spots.slice(0, limit))
-  await processTable('customerBehavior', cbs.slice(0, limit))
 
   invalidateAreaCoverageCache()
-  return NextResponse.json({ success: true, dryRun, stats })
+
+  const nextOffset = offset + batch
+  const isDone = nextOffset >= total
+
+  return NextResponse.json({
+    success: true,
+    table,
+    dryRun,
+    offset,
+    batch,
+    total,
+    processed: records.length,
+    nextOffset: isDone ? null : nextOffset,
+    done: isDone,
+    nextUrl: isDone ? null : `/api/admin/reclassify-area?secret=gamagronomist-reclassify-2025&table=${table}&batch=${batch}&offset=${nextOffset}${dryRun ? '&dryRun=true' : ''}`,
+    results,
+  })
 }
