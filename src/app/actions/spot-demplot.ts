@@ -58,6 +58,7 @@ export async function submitSpotDemplot(formData: FormData) {
         observationResult,
         latitude,
         longitude,
+        snapshotAreaId: session.areaId ?? null,
         photos: JSON.stringify(photos),
       },
     })
@@ -85,6 +86,7 @@ export async function submitSpotDemplot(formData: FormData) {
             transactionType: 'USAGE_SPOT_DEMOPLOT',
             quantity: -u.actualUsage,
             referenceId: spotDemplot.id,
+            snapshotAreaId: session.areaId ?? null,
             notes: `Spot Demplot: ${districtDesa || ''} - ${districtKec || ''}`,
           },
         })

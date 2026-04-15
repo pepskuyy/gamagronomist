@@ -39,7 +39,9 @@ export async function adjustStock(formData: FormData) {
     const product = await prisma.product.findUnique({ where: { id: productId } })
     if (!product) return { error: 'Produk tidak ditemukan.' }
 
-    // Admin/SPV adjustment
+    // Admin/SPV adjustment — lookup target user's area for snapshot
+    const targetUser = await prisma.user.findUnique({ where: { id: userId }, select: { areaId: true } })
+
     await prisma.$transaction(async (tx) => {
       // 1. Create Ledger Entry
       await tx.ledger.create({
@@ -48,6 +50,7 @@ export async function adjustStock(formData: FormData) {
           productId,
           transactionType: quantity > 0 ? 'ADJUSTMENT_PLUS' : 'ADJUSTMENT_MINUS',
           quantity,
+          snapshotAreaId: targetUser?.areaId ?? null,
           notes: `[Penyesuaian oleh ${session.name}] ${notes}`
         }
       })

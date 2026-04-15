@@ -41,6 +41,7 @@ export async function submitAfaStockRequest(formData: FormData) {
         commodity: 'AFA_STOCK_IN',
         plan: notes,
         status: 'SUBMITTED',
+        snapshotAreaId: session.areaId ?? null,
         details: {
           create: validProducts.map(p => ({
             productId: p.productId,
@@ -355,6 +356,7 @@ export async function receiveSpvStockRequest(requestId: string) {
           transactionType: 'STOCK_IN_GUDANG',
           quantity: qtyToStore,
           referenceId: req.id,
+          snapshotAreaId: afaUser?.areaId ?? null,
           notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
         }
       })

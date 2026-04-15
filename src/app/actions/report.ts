@@ -32,6 +32,7 @@ export async function submitCustomerBehavior(formData: FormData) {
 
     const data = {
       userId: session.userId,
+      snapshotAreaId: session.areaId ?? null,
       farmerName: formData.get('farmerName') as string,
       age: formData.get('age') as string,
       phone: formData.get('phone') as string,
@@ -69,6 +70,7 @@ export async function submitVisitKios(formData: FormData) {
   try {
     const data = {
       userId: session.userId,
+      snapshotAreaId: session.areaId ?? null,
       kiosName: formData.get('kiosName') as string,
       activityDetail: formData.get('activityDetail') as string,
       visitResult: formData.get('visitResult') as string,
@@ -92,6 +94,7 @@ export async function submitFarmerGathering(formData: FormData) {
     const costInput = formData.get('cost')
     const data = {
       userId: session.userId,
+      snapshotAreaId: session.areaId ?? null,
       address: formData.get('address') as string,
       district: formData.get('district') as string,
       leaderName: formData.get('leaderName') as string,
@@ -118,6 +121,7 @@ export async function submitVisitCompany(formData: FormData) {
     const dateInput = formData.get('procurementDate') as string
     const data = {
       userId: session.userId,
+      snapshotAreaId: session.areaId ?? null,
       companyName: formData.get('companyName') as string,
       district: formData.get('district') as string,
       address: formData.get('address') as string,

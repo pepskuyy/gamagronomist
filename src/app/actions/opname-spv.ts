@@ -32,11 +32,12 @@ export async function approveStockOpname(opnameId: string) {
           const txType = count.variance > 0 ? 'ADJUSTMENT_PLUS' : 'ADJUSTMENT_MINUS'
           await tx.ledger.create({
             data: {
-              userId: opname.userId, // userId dari yang mengajukan opname (AFA/FO)
+              userId: opname.userId,
               productId: count.productId,
               transactionType: txType,
-              quantity: count.variance, // otomatis positif/negatif
+              quantity: count.variance,
               referenceId: opname.id,
+              snapshotAreaId: opname.user.areaId ?? null,
               notes: `Adjustment via Opname Approved by SPV (${session.name})`
             }
           })

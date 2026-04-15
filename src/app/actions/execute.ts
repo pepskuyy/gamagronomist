@@ -80,8 +80,9 @@ export async function submitDemoPlotSession(formData: FormData) {
             userId: session.userId,
             productId: u.productId,
             transactionType: transactionType,
-            quantity: -u.actualUsage, // Potong stok
+            quantity: -u.actualUsage,
             referenceId: demoPlot.id,
+            snapshotAreaId: (request as any).snapshotAreaId ?? null,
             notes: `Realisasi Demo Plot Request ${request.id.slice(0, 8)}`
           }
         })

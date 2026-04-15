@@ -55,6 +55,7 @@ export async function submitRequestDemoPlot(formData: FormData) {
         afaId: session.afaId,
         farmerId: null,
         area: notes || 'Pengajuan Stok',
+        snapshotAreaId: session.areaId ?? null,
         commodity: '-',
         problem: '-',
         plan: notes || '-',

@@ -66,6 +66,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
         afaId: session.role === 'AFA' ? session.userId : (session as any).afaId ?? null,
         farmerId: farmer.id,
         area,
+        snapshotAreaId: session.areaId ?? null,
         commodity,
         problem,
         plan,
@@ -83,14 +84,15 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     // Deduct stock — HANYA untuk produk milik user (bukan produk petani)
     for (const u of usages.filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)) {
       await prisma.ledger.create({
-        data: {
-          userId: session.userId,
-          productId: u.productId,
-          transactionType: 'USAGE_DEMOPLOT',
-          quantity: -u.actualUsage,
-          referenceId: req.id,
-          notes: `Demo plot: ${farmerName} - ${commodity}`,
-        },
+          data: {
+            userId: session.userId,
+            productId: u.productId,
+            transactionType: 'USAGE_DEMOPLOT',
+            quantity: -u.actualUsage,
+            referenceId: req.id,
+            snapshotAreaId: session.areaId ?? null,
+            notes: `Demo plot: ${farmerName} - ${commodity}`,
+          },
       })
     }
 
@@ -101,6 +103,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
         farmerId: farmer.id,
         date: new Date(date),
         area,
+        snapshotAreaId: session.areaId ?? null,
         commodity,
         landSize,
         landSizeUnit,
@@ -207,6 +210,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
         farmerId: req.farmerId ?? undefined,
         date: new Date(date),
         area: req.area ?? undefined,
+        snapshotAreaId: (req as any).snapshotAreaId ?? null,
         commodity: req.commodity ?? undefined,
         landSize,
         landSizeUnit,
@@ -239,6 +243,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
             transactionType: 'USAGE_DEMOPLOT',
             quantity: -u.actualUsage,
             referenceId: req.id,
+            snapshotAreaId: (req as any).snapshotAreaId ?? null,
             notes: `Sesi lanjutan demo plot: ${req.farmer?.name ?? ''} - ${req.commodity ?? ''}`,
           },
         })

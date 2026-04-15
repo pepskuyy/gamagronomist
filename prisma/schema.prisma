@@ -169,6 +169,7 @@ model Ledger {
   transactionType String   // "STOCK_IN_GUDANG", "TRANSFER_TO_FO", "RECEIVE_FROM_AFA", "USAGE_DEMOPLOT", "DIRECT_USAGE_AFA", "ADJUSTMENT_PLUS", "ADJUSTMENT_MINUS"
   quantity        Float    // Nilai bisa positif (masuk) atau negatif (keluar)
   referenceId     String?  // ID dari Request / DemoPlot / StockOpname
+  snapshotAreaId  String?  // areaId user saat transaksi terjadi
   notes           String?
   
   createdAt       DateTime @default(now())
@@ -188,6 +189,7 @@ model Request {
   farmer         Farmer?  @relation(fields: [farmerId], references: [id])
   
   area           String?
+  snapshotAreaId String?  // areaId saat transaksi dibuat (tidak berubah meski user rotasi)
   commodity      String?
   cbReference    String?
   problem        String?
@@ -224,6 +226,7 @@ model DemoPlot {
   
   date           DateTime
   area           String?
+  snapshotAreaId String?  // areaId FO/user saat demplot dibuat
   commodity      String?
   landSize       Float?
   landSizeUnit   String?  // "ha" atau "m2"
@@ -284,6 +287,7 @@ model CustomerBehavior {
   userId         String
   user           User     @relation(fields: [userId], references: [id])
   
+  snapshotAreaId String?  // areaId user saat record dibuat
   farmerName     String
   age            String?
   phone          String?
@@ -312,6 +316,7 @@ model VisitKios {
   id             String   @id @default(cuid())
   userId         String
   user           User     @relation(fields: [userId], references: [id])
+  snapshotAreaId String?  // areaId user saat visit dibuat
   
   kiosName       String
   activityDetail String?
@@ -326,6 +331,7 @@ model FarmerGathering {
   id             String   @id @default(cuid())
   userId         String
   user           User     @relation(fields: [userId], references: [id])
+  snapshotAreaId String?  // areaId user saat gathering dibuat
   
   address        String?
   district       String?
@@ -343,6 +349,7 @@ model VisitCompany {
   id               String   @id @default(cuid())
   userId           String
   user             User     @relation(fields: [userId], references: [id])
+  snapshotAreaId   String?  // areaId user saat visit dibuat
   
   companyName      String
   district         String?
@@ -377,6 +384,7 @@ model SpotDemplot {
   userId            String
   user              User     @relation(fields: [userId], references: [id])
   
+  snapshotAreaId    String?  // areaId user saat spot demplot dibuat
   districtDesa      String?
   districtKec       String?
   districtKab       String?

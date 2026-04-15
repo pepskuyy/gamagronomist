@@ -59,7 +59,8 @@ export async function approveRequest(formData: FormData) {
         request.foId, 
         detail.productId, 
         qtyToApprove,
-        request.id
+        request.id,
+        session.areaId ?? null
       )
       
       // Update approved qty di table RequestDetail

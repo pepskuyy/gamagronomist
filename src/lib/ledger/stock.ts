@@ -32,13 +32,14 @@ export async function getStockBalance(userId: string) {
 /**
  * Mencatat transaksi masuk ke Gudang AFA
  */
-export async function insertStockInGudang(afaId: string, productId: string, qty: number, notes?: string) {
+export async function insertStockInGudang(afaId: string, productId: string, qty: number, notes?: string, areaId?: string | null) {
   return await prisma.ledger.create({
     data: {
       userId: afaId,
       productId,
       transactionType: 'STOCK_IN_GUDANG',
-      quantity: qty, // Positif
+      quantity: qty,
+      snapshotAreaId: areaId ?? null,
       notes: notes || 'Masuk dari Gudang Pusat'
     }
   })
@@ -47,15 +48,17 @@ export async function insertStockInGudang(afaId: string, productId: string, qty:
 /**
  * Transfer Stok AFA ke FO (Ini akan memotong saldo AFA, dan menambah saldo FO)
  */
-export async function transferAfaToFo(afaId: string, foId: string, productId: string, qty: number, requestId?: string) {
+export async function transferAfaToFo(afaId: string, foId: string, productId: string, qty: number, requestId?: string, areaId?: string | null) {
   // Fetch both user names to produce readable notes
   const [afa, fo] = await Promise.all([
-    prisma.user.findUnique({ where: { id: afaId }, select: { name: true } }),
+    prisma.user.findUnique({ where: { id: afaId }, select: { name: true, areaId: true } }),
     prisma.user.findUnique({ where: { id: foId },  select: { name: true } }),
   ])
 
   const afaName = afa?.name || afaId
   const foName  = fo?.name  || foId
+  // Use provided areaId, or fallback to AFA's current area
+  const resolvedAreaId = areaId ?? afa?.areaId ?? null
 
   return await prisma.$transaction([
     // Potong stok AFA
@@ -64,8 +67,9 @@ export async function transferAfaToFo(afaId: string, foId: string, productId: st
         userId: afaId,
         productId,
         transactionType: 'TRANSFER_TO_FO',
-        quantity: -qty, // Negatif
+        quantity: -qty,
         referenceId: requestId,
+        snapshotAreaId: resolvedAreaId,
         notes: `Transfer ke FO: ${foName}`
       }
     }),
@@ -75,8 +79,9 @@ export async function transferAfaToFo(afaId: string, foId: string, productId: st
         userId: foId,
         productId,
         transactionType: 'RECEIVE_FROM_AFA',
-        quantity: qty, // Positif
+        quantity: qty,
         referenceId: requestId,
+        snapshotAreaId: resolvedAreaId,
         notes: `Terima dari AFA: ${afaName}`
       }
     })
