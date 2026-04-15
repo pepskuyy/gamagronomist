@@ -50,7 +50,10 @@ export default function AreasPage() {
 
   async function loadCoverage(areaId: string) {
     const res = await fetch(`/api/master/area-coverage?areaId=${areaId}`)
-    if (res.ok) setCoverages(prev => ({ ...prev, [areaId]: await res.json() }))
+    if (res.ok) {
+      const data = await res.json()
+      setCoverages(prev => ({ ...prev, [areaId]: data }))
+    }
   }
 
   function toggleCoveragePanel(areaId: string) {
