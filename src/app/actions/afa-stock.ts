@@ -51,12 +51,15 @@ export async function submitAfaStockRequest(formData: FormData) {
       }
     })
 
-    // Notify SPV(s) — if AFA has areaId, notify SPVs in same area; otherwise notify all SPVs
+    // Notify SPV(s) — if AFA has areaId, notify SPVs in same area + global SPVs (areaId=null)
     try {
       const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
       const spvWhere: any = { role: 'SPV', isActive: true }
       if (afaUser?.areaId) {
-        spvWhere.areaId = afaUser.areaId
+        spvWhere.OR = [
+          { areaId: afaUser.areaId },
+          { areaId: null }
+        ]
       }
       const spvs = await prisma.user.findMany({ where: spvWhere, select: { id: true } })
       
@@ -256,20 +259,25 @@ export async function approveWhmStockRequest(requestId: string) {
       data: { status: 'APPROVED_WHM' }
     })
 
-    // Notify SPV(s) in the same area as AFA to receive
+    // Notify SPV(s) in the same area as AFA + global SPVs (areaId=null)
     const afaUser = await prisma.user.findUnique({ where: { id: req.foId } })
-    if (afaUser && afaUser.areaId) {
-      const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId, isActive: true } })
-      for (const spv of spvs) {
-        await prisma.notification.create({
-          data: {
-            userId: spv.id,
-            title: '📦 Stok Siap Diterima',
-            message: `Pengajuan stok AFA (${req.fo?.name || 'AFA'}) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.`,
-            link: `/dashboard/stock`
-          }
-        })
-      }
+    const spvReceiveWhere: any = { role: 'SPV', isActive: true }
+    if (afaUser?.areaId) {
+      spvReceiveWhere.OR = [
+        { areaId: afaUser.areaId },
+        { areaId: null }
+      ]
+    }
+    const spvsToNotify = await prisma.user.findMany({ where: spvReceiveWhere, select: { id: true } })
+    for (const spv of spvsToNotify) {
+      await prisma.notification.create({
+        data: {
+          userId: spv.id,
+          title: '📦 Stok Siap Diterima',
+          message: `Pengajuan stok AFA (${req.fo?.name || 'AFA'}) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.`,
+          link: `/dashboard/stock`
+        }
+      })
     }
 
     // Notify AFA about progress
