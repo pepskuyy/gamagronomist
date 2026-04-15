@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
+import { resolveAreaIdFromCoords } from '@/lib/area-resolver'
 
 const prisma = new PrismaClient()
 
@@ -30,9 +31,17 @@ export async function submitCustomerBehavior(formData: FormData) {
       detailAddress ? detailAddress : ''
     ].filter(Boolean).join(', ')
 
+    const lat = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
+    const lng = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
+
+    // Resolve area: GPS-based (Opsi B)
+    const geoAreaId = (lat !== null && lng !== null && !isNaN(lat) && !isNaN(lng))
+      ? await resolveAreaIdFromCoords(lat, lng)
+      : null
+
     const data = {
       userId: session.userId,
-      snapshotAreaId: session.areaId ?? null,
+      snapshotAreaId: geoAreaId ?? session.areaId ?? null,
       farmerName: formData.get('farmerName') as string,
       age: formData.get('age') as string,
       phone: formData.get('phone') as string,
@@ -51,8 +60,8 @@ export async function submitCustomerBehavior(formData: FormData) {
       photos: formData.get('photos') as string,
       totalLandArea: formData.get('totalLandArea') ? parseFloat(formData.get('totalLandArea') as string) : null,
       totalLandAreaUnit: (formData.get('totalLandAreaUnit') as string) || 'ha',
-      latitude: formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null,
-      longitude: formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null,
+      latitude: lat,
+      longitude: lng,
     }
 
     const report = await prisma.customerBehavior.create({ data })

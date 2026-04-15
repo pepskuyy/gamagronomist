@@ -92,8 +92,19 @@ model Area {
   id        String   @id @default(cuid())
   name      String
   users     User[]
+  coverages AreaCoverage[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model AreaCoverage {
+  id            String   @id @default(cuid())
+  areaId        String
+  area          Area     @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  kabupatenName String   // nama kabupaten/kota lowercase & normalized
+  createdAt     DateTime @default(now())
+
+  @@unique([areaId, kabupatenName])
 }
 
 // Permintaan pembuatan akun dari calon user (self-register)

@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
+import { resolveAreaIdFromCoords } from '@/lib/area-resolver'
 
 const prisma = new PrismaClient()
 
@@ -46,6 +47,12 @@ export async function submitSpotDemplot(formData: FormData) {
   }
 
   try {
+    // Resolve area: GPS-based (Opsi B: GPS priority, fallback user.areaId)
+    const geoAreaId = (!isNaN(latitude) && !isNaN(longitude))
+      ? await resolveAreaIdFromCoords(latitude, longitude)
+      : null
+    const resolvedAreaId = geoAreaId ?? session.areaId ?? null
+
     // 1. Create SpotDemplot record
     const spotDemplot = await prisma.spotDemplot.create({
       data: {
@@ -58,7 +65,7 @@ export async function submitSpotDemplot(formData: FormData) {
         observationResult,
         latitude,
         longitude,
-        snapshotAreaId: session.areaId ?? null,
+        snapshotAreaId: resolvedAreaId,
         photos: JSON.stringify(photos),
       },
     })

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
+import { resolveAreaIdFromCoords } from '@/lib/area-resolver'
 
 const prisma = new PrismaClient()
 
@@ -60,13 +61,19 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     }
 
     // Create a standalone request (auto-approved)
+    // Resolve area: GPS-based mapping (Opsi B: GPS priority, fallback to user.areaId)
+    const geoAreaId = (!isNaN(latitude) && !isNaN(longitude))
+      ? await resolveAreaIdFromCoords(latitude, longitude)
+      : null
+    const resolvedAreaId = geoAreaId ?? session.areaId ?? null
+
     const req = await prisma.request.create({
       data: {
         foId: session.userId,
         afaId: session.role === 'AFA' ? session.userId : (session as any).afaId ?? null,
         farmerId: farmer.id,
         area,
-        snapshotAreaId: session.areaId ?? null,
+        snapshotAreaId: resolvedAreaId,
         commodity,
         problem,
         plan,
