@@ -177,11 +177,6 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
               <Link href="/dashboard/stock/history">
                 <button className="btn btn-outline">🕒 Histori Ledger</button>
               </Link>
-              {['SPV', 'ADMIN'].includes(session.role) && (
-                <Link href="/dashboard/stock/sample">
-                  <button className="btn btn-outline" style={{ borderColor: '#7c3aed', color: '#7c3aed' }}>🧪 Gudang Sampel</button>
-                </Link>
-              )}
             </div>
           </div>
 
@@ -222,7 +217,22 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
         </div>
       )}
 
-      {/* 2. PANTAUAN STOK USER */}
+      {/* 2. SPV GUDANG SAMPEL QUICK ACTION */}
+      {['SPV', 'ADMIN'].includes(session.role) && (
+        <div style={{ marginBottom: '3rem', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+             <div>
+               <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>🧪 Gudang Sampel SPV</h2>
+               <p style={{ margin: '0.3rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Kelola stok sampel mandiri yang dipisahkan dari persediaan Accurate.</p>
+             </div>
+             <Link href="/dashboard/stock/sample">
+               <button className="btn btn-primary" style={{ background: '#7c3aed', borderColor: '#7c3aed' }}>Buka Gudang Sampel →</button>
+             </Link>
+          </div>
+        </div>
+      )}
+
+      {/* 3. PANTAUAN STOK USER */}
       {['ADMIN', 'SPV', 'AFA'].includes(session.role) && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
