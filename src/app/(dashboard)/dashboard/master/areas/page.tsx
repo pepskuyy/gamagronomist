@@ -36,6 +36,13 @@ export default function AreasPage() {
   const [kabError, setKabError] = useState<string | null>(null)
   const [isPendingKab, startKab] = useTransition()
 
+  // Geocode test tool state
+  const [testLat, setTestLat] = useState('')
+  const [testLng, setTestLng] = useState('')
+  const [testResult, setTestResult] = useState<{ resolvedKabupaten: string | null; nominatim: Record<string, string | null> } | null>(null)
+  const [testLoading, setTestLoading] = useState(false)
+  const [testError, setTestError] = useState<string | null>(null)
+
   const fetchData = async () => {
     const [aRes, fRes] = await Promise.all([
       fetch('/api/master/areas'),
@@ -63,7 +70,30 @@ export default function AreasPage() {
       setExpandedAreaId(areaId)
       setNewKab('')
       setKabError(null)
+      setTestResult(null)
+      setTestError(null)
+      setTestLat('')
+      setTestLng('')
       loadCoverage(areaId)
+    }
+  }
+
+  async function handleTestGeocode() {
+    const lat = parseFloat(testLat)
+    const lng = parseFloat(testLng)
+    if (isNaN(lat) || isNaN(lng)) { setTestError('Masukkan koordinat yang valid.'); return }
+    setTestLoading(true)
+    setTestResult(null)
+    setTestError(null)
+    try {
+      const res = await fetch(`/api/admin/geocode-test?lat=${lat}&lng=${lng}`)
+      const data = await res.json()
+      if (!res.ok) { setTestError(data.error); return }
+      setTestResult(data)
+    } catch (e: any) {
+      setTestError(e.message)
+    } finally {
+      setTestLoading(false)
     }
   }
 
@@ -245,9 +275,74 @@ export default function AreasPage() {
                           </p>
                           <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>
                             Aktivitas dengan GPS di kabupaten/kota berikut akan otomatis masuk area <strong>{a.name}</strong>.
-                            Penulisan nama harus persis sama dengan yang dikembalikan oleh Google Maps / OpenStreetMap
-                            (contoh: <em>kabupaten grobogan</em>, <em>kota semarang</em>).
                           </p>
+
+                          {/* ── Geocode Test Tool ── */}
+                          <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+                            <p style={{ fontWeight: 600, fontSize: '0.82rem', marginBottom: '0.5rem' }}>
+                              🔍 Uji Koordinat — Pastikan nama kabupaten/kota sesuai
+                            </p>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
+                              Buka Google Maps → klik lokasi → salin koordinat, lalu paste di sini untuk melihat nama yang harus digunakan.
+                            </p>
+                            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                              <div>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>Latitude</label>
+                                <input
+                                  className="form-control"
+                                  placeholder="-7.0051"
+                                  value={testLat}
+                                  onChange={e => setTestLat(e.target.value)}
+                                  style={{ width: '130px', fontSize: '0.82rem' }}
+                                />
+                              </div>
+                              <div>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>Longitude</label>
+                                <input
+                                  className="form-control"
+                                  placeholder="110.4381"
+                                  value={testLng}
+                                  onChange={e => setTestLng(e.target.value)}
+                                  style={{ width: '130px', fontSize: '0.82rem' }}
+                                />
+                              </div>
+                              <button
+                                onClick={handleTestGeocode}
+                                disabled={testLoading || !testLat.trim() || !testLng.trim()}
+                                className="btn btn-outline"
+                                style={{ fontSize: '0.82rem' }}
+                              >
+                                {testLoading ? '⏳ Mengecek...' : '🔍 Cek'}
+                              </button>
+                            </div>
+                            {testError && <p style={{ color: 'var(--danger)', fontSize: '0.78rem', marginTop: '0.4rem' }}>{testError}</p>}
+                            {testResult && (
+                              <div style={{ marginTop: '0.6rem', padding: '0.65rem 0.85rem', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
+                                <p style={{ fontWeight: 700, color: '#166534', marginBottom: '0.3rem' }}>✅ Hasil:</p>
+                                {testResult.resolvedKabupaten
+                                  ? (
+                                    <>
+                                      <p>Nama yang harus digunakan di Coverage:</p>
+                                      <code style={{ display: 'inline-block', background: '#dcfce7', border: '1px solid #86efac', borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', fontWeight: 700, color: '#15803d', cursor: 'pointer', marginTop: '0.2rem' }}
+                                        onClick={() => setNewKab(testResult.resolvedKabupaten!)}
+                                        title="Klik untuk isi ke input di bawah"
+                                      >
+                                        {testResult.resolvedKabupaten} &nbsp;← klik untuk isi otomatis
+                                      </code>
+                                      <p style={{ color: 'var(--text-muted)', marginTop: '0.3rem', fontSize: '0.75rem' }}>
+                                        Raw Nominatim: county={testResult.nominatim.county || '-'}, city={testResult.nominatim.city || '-'}
+                                      </p>
+                                    </>
+                                  )
+                                  : (
+                                    <p style={{ color: '#b91c1c' }}>⚠️ Kabupaten tidak terdeteksi untuk koordinat ini. Raw: county={testResult.nominatim.county || '-'}, city={testResult.nominatim.city || '-'}</p>
+                                  )
+                                }
+                              </div>
+                            )}
+                          </div>
+
+                          {/* ── Add kabupaten ── */}
                           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem', flexWrap: 'wrap' }}>
                             <input
                               className="form-control"
