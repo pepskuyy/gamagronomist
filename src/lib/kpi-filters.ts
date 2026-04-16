@@ -32,9 +32,9 @@ export async function buildActivityWhereClause(session: any, searchParams: URLSe
     whereClause.userId = qUserId
   }
 
-  // Area filter
+  // Area filter — gunakan snapshotAreaId (area saat aktivitas dibuat, berdasarkan GPS/coverage)
   if (qAreaId) {
-    whereClause.user = { areaId: qAreaId }
+    whereClause.snapshotAreaId = qAreaId
   }
 
   return whereClause
@@ -63,18 +63,14 @@ export async function buildDemoPlotWhereClause(session: any, searchParams: URLSe
     if (qEnd) whereClause.date.lte = new Date(`${qEnd}T23:59:59.999Z`)
   }
 
-  const requestFilter: any = {}
-
+  // User filter — melalui request
   if (qUserId) {
-    requestFilter.foId = qUserId
+    whereClause.request = { foId: qUserId }
   }
 
+  // Area filter — gunakan snapshotAreaId di DemoPlot (bukan via request.fo.areaId)
   if (qAreaId) {
-    requestFilter.fo = { areaId: qAreaId }
-  }
-
-  if (Object.keys(requestFilter).length > 0) {
-    whereClause.request = requestFilter
+    whereClause.snapshotAreaId = qAreaId
   }
 
   return whereClause
