@@ -239,6 +239,7 @@ model DemoPlot {
   area           String?
   snapshotAreaId String?  // areaId FO/user saat demplot dibuat
   commodity      String?
+  cropAgeDays    Int?     // umur tanaman dalam HST (hari setelah tanam)
   landSize       Float?
   landSizeUnit   String?  // "ha" atau "m2"
   resultNotes    String?

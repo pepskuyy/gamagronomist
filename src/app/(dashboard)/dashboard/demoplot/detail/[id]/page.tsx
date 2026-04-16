@@ -132,6 +132,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
               </div>
               
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem', fontSize: '0.85rem' }}>
+                {(dp as any).cropAgeDays && <div><strong>Umur Tanaman:</strong> {(dp as any).cropAgeDays} HST</div>}
                 {dp.landSize && <div><strong>Luas Lahan:</strong> {dp.landSize} {(dp as any).landSizeUnit === 'm2' ? 'm²' : 'ha'}</div>}
                 {dp.latitude && dp.longitude && (
                   <div>

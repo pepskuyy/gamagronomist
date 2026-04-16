@@ -219,6 +219,13 @@ export default function FoDemoPlotDirectPage() {
               <input type="date" name="date" className="form-control" required defaultValue={new Date().toISOString().split('T')[0]} />
             </div>
             <div>
+              <label className="form-label">Umur Tanaman <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+                <input type="number" min="1" max="999" name="cropAgeDays" className="form-control" placeholder="45" required style={{ flex: 1 }} />
+                <span style={{ whiteSpace: 'nowrap', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.875rem' }}>HST</span>
+              </div>
+            </div>
+            <div>
               <label className="form-label">Luas Lahan</label>
               <div style={{ display: 'flex', gap: '0.5rem' }}>
                 <input type="number" step="0.01" name="landSize" className="form-control" placeholder="0.5" style={{ flex: 2 }} />

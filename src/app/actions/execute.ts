@@ -16,6 +16,7 @@ export async function submitDemoPlotSession(formData: FormData) {
 
   const requestId = formData.get('requestId') as string
   const date = formData.get('date') as string
+  const cropAgeDays = formData.get('cropAgeDays') ? parseInt(formData.get('cropAgeDays') as string) : null
   const landSize = Number(formData.get('landSize'))
   const landSizeUnit = (formData.get('landSizeUnit') as string) || 'ha'
   const resultNotes = formData.get('resultNotes') as string
@@ -25,6 +26,7 @@ export async function submitDemoPlotSession(formData: FormData) {
   const photos = formData.get('photos') as string || null
 
   if (!requestId || !date) return { error: 'Data tidak lengkap' }
+  if (!cropAgeDays || isNaN(cropAgeDays) || cropAgeDays <= 0) return { error: 'Umur tanaman (HST) wajib diisi.' }
 
   // Array of actual usages
   const usageJSON = formData.get('usages') as string
@@ -57,6 +59,7 @@ export async function submitDemoPlotSession(formData: FormData) {
           date: new Date(date),
           area: request.area,
           commodity: request.commodity,
+          cropAgeDays,
           landSize: landSize || null,
           landSizeUnit,
           resultNotes,

@@ -28,6 +28,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
   const problem         = (formData.get('problem')      as string)?.trim() || '-'
   const plan            = (formData.get('plan')         as string)?.trim() || '-'
   const date            = (formData.get('date')         as string)
+  const cropAgeDays     = formData.get('cropAgeDays') ? parseInt(formData.get('cropAgeDays') as string) : null
   const landSize        = formData.get('landSize') ? parseFloat(formData.get('landSize') as string) : null
   const landSizeUnit    = (formData.get('landSizeUnit') as string) || 'ha'
   const resultNotes     = (formData.get('resultNotes')  as string)?.trim() || null
@@ -48,6 +49,9 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
 
   if (!farmerName || !area || !commodity) {
     return { error: 'Nama petani, area, dan komoditas wajib diisi.' }
+  }
+  if (!cropAgeDays || isNaN(cropAgeDays) || cropAgeDays <= 0) {
+    return { error: 'Umur tanaman (HST) wajib diisi dan harus lebih dari 0.' }
   }
   if (isNaN(latitude) || isNaN(longitude)) {
     return { error: 'GPS wajib diaktifkan sebelum menyimpan realisasi.' }
@@ -110,8 +114,9 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
         farmerId: farmer.id,
         date: new Date(date),
         area,
-        snapshotAreaId: session.areaId ?? null,
+        snapshotAreaId: resolvedAreaId,
         commodity,
+        cropAgeDays,
         landSize,
         landSizeUnit,
         resultNotes,
