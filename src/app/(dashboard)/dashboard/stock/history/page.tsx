@@ -11,6 +11,8 @@ type LedgerItem = {
   notes: string | null
   referenceId: string | null
   createdAt: string
+  stockBefore: number | null
+  stockAfter: number | null
   product: { id: string; name: string; unit: string; unitGramasi?: string | null }
 }
 
@@ -104,7 +106,9 @@ export default function LedgerHistoryPage() {
         'Tanggal'          : new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.createdAt)),
         'Jenis Transaksi'  : TRANSACTION_TYPES.find(t => t.value === item.transactionType)?.label || item.transactionType,
         'Produk'           : item.product.name,
+        'Stok Awal'        : item.stockBefore ?? '-',
         'Kuantitas'        : item.quantity,
+        'Stok Akhir'       : item.stockAfter ?? '-',
         'Satuan'           : unit,
         'Masuk/Keluar'     : item.quantity > 0 ? 'Masuk' : 'Keluar',
         'Ref ID'           : item.referenceId || '-',
@@ -220,7 +224,7 @@ export default function LedgerHistoryPage() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead>
               <tr style={{ background: 'var(--surface-2)' }}>
-                {['Tanggal', 'Jenis Transaksi', 'Produk', 'Kuantitas', 'Catatan'].map(h => (
+                {['Tanggal', 'Jenis Transaksi', 'Produk', 'Stok Awal', 'Kuantitas', 'Stok Akhir', 'Catatan'].map(h => (
                   <th key={h} style={{ padding: '0.7rem 1rem', fontSize: '0.73rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
                     {h}
                   </th>
@@ -230,7 +234,7 @@ export default function LedgerHistoryPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={5} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 0.75rem' }} />
                     Memuat data...
                   </td>
@@ -245,6 +249,12 @@ export default function LedgerHistoryPage() {
                 ledgers.map((item) => {
                   const isOut = item.quantity < 0
                   const unit  = item.product.unitGramasi || item.product.unit
+
+                  const balanceTdStyle: React.CSSProperties = {
+                    ...tdStyle, fontFamily: 'monospace', fontSize: '0.82rem',
+                    color: 'var(--text-muted)', textAlign: 'right', whiteSpace: 'nowrap'
+                  }
+
                   return (
                     <tr key={item.id} style={{ transition: 'background 0.1s' }}
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
@@ -259,6 +269,11 @@ export default function LedgerHistoryPage() {
                       <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>
                         {item.product.name}
                       </td>
+                      {/* Stok Awal */}
+                      <td style={balanceTdStyle}>
+                        {item.stockBefore !== null ? `${item.stockBefore} ${unit}` : '–'}
+                      </td>
+                      {/* Kuantitas */}
                       <td style={tdStyle}>
                         <span style={{
                           color: isOut ? '#dc2626' : '#16a34a',
@@ -271,7 +286,11 @@ export default function LedgerHistoryPage() {
                           <span style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--text-muted)' }}>{unit}</span>
                         </span>
                       </td>
-                      <td style={{ ...tdStyle, color: 'var(--text-muted)', maxWidth: 280, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {/* Stok Akhir */}
+                      <td style={{ ...balanceTdStyle, fontWeight: 700, color: isOut ? '#dc2626' : '#16a34a' }}>
+                        {item.stockAfter !== null ? `${item.stockAfter} ${unit}` : '–'}
+                      </td>
+                      <td style={{ ...tdStyle, color: 'var(--text-muted)', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.notes || '-'}
                       </td>
                     </tr>
