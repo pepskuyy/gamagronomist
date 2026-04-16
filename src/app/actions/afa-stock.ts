@@ -20,6 +20,7 @@ export async function submitAfaStockRequest(formData: FormData) {
   }
 
   const notes = (formData.get('notes') as string)?.trim() || '-'
+  const warehouseSource = (formData.get('warehouseSource') as string) || 'MAIN'
   const productsJSON = formData.get('products') as string
   let products: { productId: string; qtyRequested: number }[] = []
 
@@ -42,6 +43,7 @@ export async function submitAfaStockRequest(formData: FormData) {
         plan: notes,
         status: 'SUBMITTED',
         snapshotAreaId: session.areaId ?? null,
+        warehouseSource,
         details: {
           create: validProducts.map(p => ({
             productId: p.productId,
@@ -95,7 +97,9 @@ export async function submitAfaStockRequest(formData: FormData) {
   }
 }
 
-// ─── STEP 1: SPV approves → APPROVED_SPV ──────────────────────────
+// ─── STEP 1: SPV approves ─────────────────────────────────────────
+// MAIN:   → APPROVED_SPV (→ FAM → WHM → SPV final)
+// SAMPLE: → APPROVED directly (deduct SampleLedger now)
 export async function approveAfaStockRequest(requestId: string) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -118,6 +122,78 @@ export async function approveAfaStockRequest(requestId: string) {
       return { error: 'Pengajuan ini sudah pernah diproses.' }
     }
 
+    // ── SAMPLE WAREHOUSE FLOW ────────────────────────────────────────
+    if ((req as any).warehouseSource === 'SAMPLE') {
+      // Validate sample stock availability per product
+      const spvId = session.userId
+
+      // Get current sample balances for this SPV
+      const sampleLedgers = await prisma.sampleLedger.findMany({
+        where: { userId: spvId },
+        select: { productId: true, quantity: true },
+      })
+      const balanceMap = new Map<string, number>()
+      for (const l of sampleLedgers) {
+        balanceMap.set(l.productId, (balanceMap.get(l.productId) ?? 0) + l.quantity)
+      }
+
+      // Validate all items have enough balance
+      for (const detail of req.details) {
+        const available = balanceMap.get(detail.productId) ?? 0
+        if (available < detail.qtyRequested) {
+          return { error: `Stok sampel tidak mencukupi untuk produk (tersedia: ${available}, diminta: ${detail.qtyRequested})` }
+        }
+      }
+
+      // Deduct SampleLedger + update request → APPROVED in one transaction
+      await prisma.$transaction(async (tx) => {
+        // Deduct each product from sample ledger
+        for (const detail of req.details) {
+          await tx.sampleLedger.create({
+            data: {
+              userId: spvId,
+              productId: detail.productId,
+              quantity: -detail.qtyRequested,
+              transactionType: 'SAMPLE_OUT',
+              referenceId: requestId,
+              notes: `Sampel ke AFA ${req.fo?.name || ''} (req ${requestId.slice(0, 8).toUpperCase()})`,
+            }
+          })
+          // Credit to AFA ledger (RECEIVE_FROM_AFA)
+          await tx.ledger.create({
+            data: {
+              userId: req.foId,
+              productId: detail.productId,
+              transactionType: 'RECEIVE_FROM_AFA',
+              quantity: detail.qtyApproved ?? detail.qtyRequested,
+              referenceId: requestId,
+              notes: `Terima sampel dari SPV (Gudang Sampel)`,
+            }
+          })
+        }
+
+        // Update request: APPROVED directly, record which SPV approved
+        await tx.request.update({
+          where: { id: requestId },
+          data: { status: 'APPROVED', afaId: session.userId },
+        })
+      })
+
+      // Notify AFA — sampel siap
+      await prisma.notification.create({
+        data: {
+          userId: req.foId,
+          title: '🧪 Sampel Disetujui SPV — Stok Masuk',
+          message: `Pengajuan sampel Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.`,
+          link: `/dashboard/stock`,
+        }
+      })
+
+      revalidatePath('/dashboard/stock')
+      return { success: true, warehouseSource: 'SAMPLE' }
+    }
+
+    // ── MAIN WAREHOUSE FLOW (existing) ───────────────────────────────
     // Update to APPROVED_SPV — no ledger entry yet
     await prisma.request.update({
       where: { id: requestId },

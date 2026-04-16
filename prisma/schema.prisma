@@ -37,6 +37,7 @@ model User {
 
   // Relasi Transaksional
   ledgers           Ledger[]
+  sampleLedgers     SampleLedger[]
   requestsAsFo      Request[]  @relation("FoRequests")
   requestsAsAfa     Request[]  @relation("AfaApprovals")
   stockOpnames      StockOpname[]
@@ -147,6 +148,7 @@ model Product {
   updatedAt       DateTime @updatedAt
 
   ledgers           Ledger[]
+  sampleLedgers     SampleLedger[]
   requestDetails    RequestDetail[]
   demoPlotDetails   DemoPlotDetail[]
   opnameDetails     OpnameDetail[]
@@ -208,12 +210,26 @@ model Request {
   status         String   @default("SUBMITTED") // "SUBMITTED", "APPROVED_SPV", "APPROVED_FAM", "APPROVED_WHM", "APPROVED", "REJECTED", "DEMO_PLOT_SELESAI"
   rejectReason   String?  // Keterangan/alasan penolakan (diisi oleh approver saat reject)
   accurateInvoiceNo String? // Nomor faktur dari Accurate Online (terisi saat SPV terima stok)
+  warehouseSource String? @default("MAIN") // "MAIN" (Accurate) | "SAMPLE" (Gudang Sampel SPV)
   
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   
   details        RequestDetail[]
   demoPlots      DemoPlot[]
+}
+
+model SampleLedger {
+  id              String   @id @default(cuid())
+  userId          String   // SPV pemilik gudang sampel
+  user            User     @relation(fields: [userId], references: [id])
+  productId       String
+  product         Product  @relation(fields: [productId], references: [id])
+  quantity        Float    // + masuk (SAMPLE_IN), - keluar (SAMPLE_OUT)
+  transactionType String   // "SAMPLE_IN" | "SAMPLE_OUT"
+  notes           String?
+  referenceId     String?  // requestId jika keluar ke AFA
+  createdAt       DateTime @default(now())
 }
 
 model RequestDetail {

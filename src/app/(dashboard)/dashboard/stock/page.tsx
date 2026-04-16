@@ -177,6 +177,11 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
               <Link href="/dashboard/stock/history">
                 <button className="btn btn-outline">🕒 Histori Ledger</button>
               </Link>
+              {['SPV', 'ADMIN'].includes(session.role) && (
+                <Link href="/dashboard/stock/sample">
+                  <button className="btn btn-outline" style={{ borderColor: '#7c3aed', color: '#7c3aed' }}>🧪 Gudang Sampel</button>
+                </Link>
+              )}
             </div>
           </div>
 

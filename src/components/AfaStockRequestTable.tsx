@@ -12,6 +12,7 @@ type RequestProps = {
   foId: string
   rejectReason?: string | null
   accurateInvoiceNo?: string | null
+  warehouseSource?: string | null
   fo?: { id: string; name: string } | null
   afaId?: string | null
   afa?: { id: string; name: string } | null
@@ -216,6 +217,20 @@ export default function AfaStockRequestTable({
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
                     {getStatusBadge(req.status)}
+                    {/* Warehouse badge */}
+                    {req.warehouseSource === 'SAMPLE' ? (
+                      <div style={{ marginTop: '0.3rem' }}>
+                        <span style={{ padding: '0.15rem 0.55rem', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 700, background: '#ede9fe', color: '#7c3aed', whiteSpace: 'nowrap' }}>
+                          🧪 Sampel
+                        </span>
+                      </div>
+                    ) : (
+                      <div style={{ marginTop: '0.3rem' }}>
+                        <span style={{ padding: '0.15rem 0.55rem', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 600, background: '#dbeafe', color: '#1d4ed8', whiteSpace: 'nowrap' }}>
+                          🏭 Utama
+                        </span>
+                      </div>
+                    )}
                     {/* Show rejection reason */}
                     {req.status === 'REJECTED' && req.rejectReason && (
                       <div style={{ marginTop: '0.35rem', fontSize: '0.75rem', color: '#b91c1c', fontStyle: 'italic', maxWidth: 220 }}>

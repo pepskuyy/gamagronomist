@@ -53,6 +53,7 @@ export default function StockInPage() {
   const [currentProduct, setCurrentProduct]     = useState('')
   const [currentQty, setCurrentQty]             = useState('')
   const [notes, setNotes]               = useState('')
+  const [warehouseSource, setWarehouseSource] = useState<'MAIN' | 'SAMPLE'>('MAIN')
   const [error, setError]               = useState<string | null>(null)
   const [isPending, startTransition]    = useTransition()
 
@@ -119,6 +120,7 @@ export default function StockInPage() {
     const formData = new FormData()
     formData.append('notes', notes)
     formData.append('products', JSON.stringify(payload))
+    formData.append('warehouseSource', warehouseSource)
     startTransition(async () => {
       const res = await submitAfaStockRequest(formData)
       if (res?.error) setError(res.error)
@@ -138,6 +140,30 @@ export default function StockInPage() {
           <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Minta persetujuan tambahan stok dari SPV area Anda. Pengajuan dalam satuan kemasan utuh.
           </p>
+        </div>
+      </div>
+
+      {/* Warehouse Source Toggle */}
+      <div className="card" style={{ marginBottom: '1rem', padding: '1rem 1.25rem' }}>
+        <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.75rem' }}>🏭 Ambil Stok dari:</p>
+        <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
+          {([['MAIN', '🏭 Gudang Utama (Accurate)', 'Alur persetujuan: SPV → FA Manager → WH Manager → SPV', '#dbeafe', '#1d4ed8'],
+             ['SAMPLE', '🧪 Gudang Sampel', 'Alur persetujuan: SPV saja — lebih cepat', '#ede9fe', '#7c3aed']] as const).map(([val, label, desc, bg, color]) => (
+            <label key={val} onClick={() => setWarehouseSource(val)}
+              style={{
+                flex: 1, minWidth: 220, cursor: 'pointer', padding: '0.85rem 1rem',
+                border: `2px solid ${warehouseSource === val ? color : 'var(--border)'}`,
+                borderRadius: 'var(--radius-sm)', background: warehouseSource === val ? bg : 'white',
+                transition: 'all 0.15s',
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.25rem' }}>
+                <input type="radio" name="warehouseSource" value={val} checked={warehouseSource === val} onChange={() => setWarehouseSource(val)} />
+                <span style={{ fontWeight: 700, color }}>{label}</span>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', paddingLeft: '1.4rem' }}>{desc}</p>
+            </label>
+          ))}
         </div>
       </div>
 
