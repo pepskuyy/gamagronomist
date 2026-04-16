@@ -1,194 +1,173 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getKpiDataForFieldUser } from '@/app/actions/kpi'
+import type { AreaTargetData, Targets } from '@/app/actions/kpi'
 
 interface KpiFieldDashboardProps {
   userId: string
   role: string
+  areaId: string | null         // area user ini
+  areaName: string              // label area
   initialMonth: number
   initialYear: number
+  allAreas: { id: string; name: string }[]  // untuk dropdown filter area lain
 }
 
-type Actuals = { demoPlot: number; visitKios: number; gathering: number; company: number; behavior: number }
-type Targets = { targetDemoPlot: number; targetVisitKios: number; targetGathering: number; targetCompany: number; targetBehavior: number }
-
-const ACTIVITY_CARDS: { key: keyof Actuals; targetKey: keyof Targets; label: string; icon: string; desc: string }[] = [
-  { key: 'demoPlot',  targetKey: 'targetDemoPlot',  label: 'Demo Plot',            icon: '🌱', desc: 'Jumlah demo plot yang dilakukan' },
-  { key: 'visitKios', targetKey: 'targetVisitKios', label: 'Kunjungan Kios',       icon: '🏪', desc: 'Kunjungan ke kios mitra' },
-  { key: 'gathering', targetKey: 'targetGathering', label: 'Farmer Gathering',     icon: '🤝', desc: 'Pertemuan kelompok tani' },
-  { key: 'company',   targetKey: 'targetCompany',   label: 'Kunjungan Perusahaan', icon: '🏢', desc: 'Kunjungan perusahaan mitra' },
-  { key: 'behavior',  targetKey: 'targetBehavior',  label: 'Customer Behavior',    icon: '📋', desc: 'Survey perilaku pelanggan' },
+const INDICATORS: { key: keyof AreaTargetData['actuals']; targetKey: keyof Targets; label: string; icon: string }[] = [
+  { key: 'demoPlot',  targetKey: 'targetDemoPlot',  label: 'Demo Plot',            icon: '🌱' },
+  { key: 'visitKios', targetKey: 'targetVisitKios', label: 'Kunjungan Kios',       icon: '🏪' },
+  { key: 'gathering', targetKey: 'targetGathering', label: 'Farmer Gathering',     icon: '🤝' },
+  { key: 'company',   targetKey: 'targetCompany',   label: 'Kunjungan Perusahaan', icon: '🏢' },
+  { key: 'behavior',  targetKey: 'targetBehavior',  label: 'Customer Behavior',    icon: '📋' },
 ]
 
 const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
 
-function pctColor(pct: number) {
-  if (pct >= 91) return '#16a34a'
-  if (pct >= 71) return '#d97706'
-  return '#dc2626'
-}
-function pctBg(pct: number) {
-  if (pct >= 91) return '#dcfce7'
-  if (pct >= 71) return '#fef3c7'
-  return '#fee2e2'
+function pctColor(pct: number) { return pct >= 91 ? '#16a34a' : pct >= 71 ? '#d97706' : '#dc2626' }
+function pctBg(pct: number)    { return pct >= 91 ? '#dcfce7' : pct >= 71 ? '#fef3c7' : '#fee2e2' }
+
+const EMPTY_DATA: AreaTargetData = {
+  targets: { targetDemoPlot: 0, targetVisitKios: 0, targetGathering: 0, targetCompany: 0, targetBehavior: 0 },
+  actuals: { demoPlot: 0, visitKios: 0, gathering: 0, company: 0, behavior: 0 },
+  contributions: { demoPlot: [], visitKios: [], gathering: [], company: [], behavior: [] },
 }
 
-function KpiCard({ label, icon, desc, actual, target }: { label: string; icon: string; desc: string; actual: number; target: number }) {
-  const pct     = target > 0 ? Math.round((actual / target) * 100) : 0
-  const barPct  = Math.min(pct, 100)
-  const color   = target === 0 ? '#9ca3af' : pctColor(pct)
-  const bg      = target === 0 ? { color: '#6b7280', background: '#f3f4f6' } : { color: pctColor(pct), background: pctBg(pct) }
-
-  return (
-    <div style={{ background: '#fff', borderRadius: '0.875rem', border: '1px solid #e5e7eb', padding: '1.5rem', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.15rem' }}>{icon} {label}</div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{desc}</div>
-        </div>
-        <div style={{ ...bg, fontSize: '0.8rem', fontWeight: 700, padding: '0.25rem 0.6rem', borderRadius: '999px' }}>
-          {target === 0 ? '–' : `${pct}%`}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem' }}>
-        <span style={{ fontSize: '2.5rem', fontWeight: 800, color, lineHeight: 1.1 }}>{actual}</span>
-        <span style={{ fontSize: '1rem', color: '#9ca3af' }}>aktivitas</span>
-      </div>
-      <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>
-        Target: <strong style={{ color: '#374151' }}>{target === 0 ? 'Belum diset' : target}</strong>
-      </div>
-      <div>
-        <div style={{ height: '6px', background: '#f3f4f6', borderRadius: '999px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', width: `${barPct}%`, background: color, borderRadius: '999px', transition: 'width 0.7s ease' }} />
-        </div>
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
-          <span style={{ fontSize: '0.72rem', color, fontWeight: 600 }}>{target > 0 ? `${barPct}%` : ''}</span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function OverallCard({ actuals, targets }: { actuals: Actuals; targets: Targets }) {
-  const totalActual = Object.values(actuals).reduce((a, b) => a + b, 0)
-  const totalTarget = targets.targetDemoPlot + targets.targetVisitKios + targets.targetGathering + targets.targetCompany + targets.targetBehavior
-  const pct    = totalTarget > 0 ? Math.min(Math.round((totalActual / totalTarget) * 100), 100) : 0
-  const color  = totalTarget === 0 ? '#9ca3af' : pctColor(pct)
-
-  return (
-    <div style={{ background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)', borderRadius: '0.875rem', border: '2px solid #bbf7d0', padding: '1.5rem', display: 'flex', flexDirection: 'column', gap: '0.75rem', gridColumn: 'span 2' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📊 Total Capaian</div>
-          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.1rem' }}>Semua aktivitas bulan ini</div>
-        </div>
-        <div style={{ fontSize: '1rem', fontWeight: 800, padding: '0.35rem 0.9rem', borderRadius: '999px', background: totalTarget === 0 ? '#f3f4f6' : pctBg(pct), color: totalTarget === 0 ? '#9ca3af' : pctColor(pct) }}>
-          {totalTarget === 0 ? '–' : `${pct}%`}
-        </div>
-      </div>
-      <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-        <span style={{ fontSize: '3rem', fontWeight: 900, color, lineHeight: 1.1 }}>{totalActual}</span>
-        <span style={{ fontSize: '1rem', color: '#6b7280' }}>dari {totalTarget} aktivitas</span>
-      </div>
-      <div style={{ height: '10px', background: '#d1fae5', borderRadius: '999px', overflow: 'hidden' }}>
-        <div style={{ height: '100%', width: `${pct}%`, background: color, borderRadius: '999px', transition: 'width 0.7s ease' }} />
-      </div>
-      <div style={{ fontSize: '0.82rem', fontWeight: 600, color }}>
-        {totalTarget === 0 ? '⚠️ SPV belum menetapkan target untuk periode ini' : pct >= 100 ? '✅ Target Tercapai!' : pct >= 71 ? '⚡ Mendekati Target' : '🔴 Perlu Perhatian'}
-      </div>
-    </div>
-  )
-}
-
-export default function KpiFieldDashboard({ userId, role, initialMonth, initialYear }: KpiFieldDashboardProps) {
-  const now = new Date()
+export default function KpiFieldDashboard({
+  userId, role, areaId, areaName, initialMonth, initialYear, allAreas
+}: KpiFieldDashboardProps) {
+  const now   = new Date()
   const years = [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1]
 
-  const [month, setMonth]   = useState(initialMonth)
-  const [year, setYear]     = useState(initialYear)
-  const [loading, setLoading] = useState(false)
-  const [actuals, setActuals] = useState<Actuals>({ demoPlot: 0, visitKios: 0, gathering: 0, company: 0, behavior: 0 })
-  const [targets, setTargets] = useState<Targets>({ targetDemoPlot: 0, targetVisitKios: 0, targetGathering: 0, targetCompany: 0, targetBehavior: 0 })
-  const [hasTarget, setHasTarget] = useState(false)
+  // Use own area as default; user can switch to any area
+  const [selectedAreaId, setSelectedAreaId] = useState<string>(areaId ?? 'none')
+  const [month, setMonth] = useState(initialMonth)
+  const [year, setYear]   = useState(initialYear)
+  const [data, setData]   = useState<AreaTargetData>(EMPTY_DATA)
+  const [loading, setLoading] = useState(true)
 
-  const fetchData = async () => {
+  const selectedAreaLabel =
+    selectedAreaId === 'all'  ? 'Semua Area' :
+    selectedAreaId === 'none' ? 'Tanpa Area' :
+    allAreas.find(a => a.id === selectedAreaId)?.name ?? '–'
+
+  async function fetchData() {
     setLoading(true)
-    const res = await getKpiDataForFieldUser(userId, role, month, year)
-    setActuals(res.actuals)
-    setTargets(res.targets as Targets)
-    setHasTarget(res.hasTarget)
+    const res = await fetch(`/api/target-data?areaId=${selectedAreaId}&month=${month}&year=${year}`)
+    if (res.ok) setData(await res.json())
     setLoading(false)
   }
 
-  useEffect(() => { fetchData() }, [month, year])
+  useEffect(() => { fetchData() }, [selectedAreaId, month, year])
 
   const selectStyle: React.CSSProperties = {
-    border: '1px solid #d1d5db',
-    borderRadius: '0.5rem',
-    padding: '0.45rem 0.75rem',
-    fontSize: '0.875rem',
-    color: '#374151',
-    background: '#fff',
-    cursor: 'pointer',
-    outline: 'none',
+    border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.4rem 0.65rem',
+    fontSize: '0.85rem', color: '#374151', background: '#fff', cursor: 'pointer', outline: 'none',
   }
 
-  const legendItems = [
-    { color: '#16a34a', label: '≥ 91%' },
-    { color: '#d97706', label: '71–90%' },
-    { color: '#dc2626', label: '≤ 70%' },
-  ]
+  const totalActual = Object.values(data.actuals).reduce((a, b) => a + b, 0)
+  const totalTarget = data.targets.targetDemoPlot + data.targets.targetVisitKios + data.targets.targetGathering + data.targets.targetCompany + data.targets.targetBehavior
+  const totalPct = totalTarget > 0 ? Math.min(Math.round((totalActual / totalTarget) * 100), 100) : 0
 
   return (
     <div>
-      {/* Section Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
-        <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>📊 KPI Capaian Aktivitas Bulan Ini</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-            {hasTarget ? `Target ditetapkan oleh SPV · Capaian pribadi ${role}` : 'SPV belum menetapkan target untuk periode ini.'}
-          </p>
-        </div>
+      {/* Header */}
+      <div style={{ marginBottom: '1.25rem' }}>
+        <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>🎯 Target Aktivitas</h2>
+        <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+          Progres capaian aktivitas vs target area · bisa pilih area lain
+        </p>
       </div>
 
-      {/* Filters Row */}
-      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: 500 }}>Bulan:</span>
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Area:</span>
+          <select style={selectStyle} value={selectedAreaId} onChange={e => setSelectedAreaId(e.target.value)}>
+            <option value="all">— Semua Area —</option>
+            <option value="none">Tanpa Area</option>
+            {allAreas.map(a => (
+              <option key={a.id} value={a.id}>
+                {a.name}{a.id === areaId ? ' (Area saya)' : ''}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Bulan:</span>
           <select style={selectStyle} value={month} onChange={e => setMonth(Number(e.target.value))}>
             {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: 500 }}>Tahun:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Tahun:</span>
           <select style={selectStyle} value={year} onChange={e => setYear(Number(e.target.value))}>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
         </div>
-        {/* Legend */}
-        <div style={{ display: 'flex', gap: '0.75rem', marginLeft: 'auto', flexWrap: 'wrap' }}>
-          {legendItems.map(l => (
-            <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#6b7280' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: l.color }} />
-              {l.label}
-            </div>
-          ))}
-        </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af', fontSize: '0.9rem' }}>Memuat data KPI...</div>
+        <div style={{ textAlign: 'center', padding: '2rem', color: '#9ca3af', fontSize: '0.9rem' }}>Memuat data target...</div>
       ) : (
         <>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem', marginBottom: '1rem' }}>
-            <OverallCard actuals={actuals} targets={targets} />
-            {ACTIVITY_CARDS.map(c => (
-              <KpiCard key={c.key} label={c.label} icon={c.icon} desc={c.desc} actual={actuals[c.key]} target={targets[c.targetKey]} />
-            ))}
+          {/* Overall */}
+          <div style={{
+            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+            borderRadius: '0.875rem', border: '2px solid #bbf7d0', padding: '1.25rem',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem',
+            marginBottom: '1rem',
+          }}>
+            <div>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📊 Total Capaian — {selectedAreaLabel}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginTop: '0.4rem' }}>
+                <span style={{ fontSize: '2.5rem', fontWeight: 900, color: totalTarget === 0 ? '#9ca3af' : pctColor(totalPct), lineHeight: 1 }}>{totalActual}</span>
+                <span style={{ fontSize: '0.9rem', color: '#6b7280' }}>dari {totalTarget === 0 ? '?' : totalTarget}</span>
+              </div>
+            </div>
+            <div style={{
+              fontSize: '1.25rem', fontWeight: 800, padding: '0.5rem 1.25rem', borderRadius: '999px',
+              background: totalTarget === 0 ? '#f3f4f6' : pctBg(totalPct),
+              color: totalTarget === 0 ? '#9ca3af' : pctColor(totalPct),
+            }}>
+              {totalTarget === 0 ? '–' : `${totalPct}%`}
+            </div>
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', textAlign: 'right' }}>
-            Capaian Anda · {MONTHS[month - 1]} {year}
+
+          {/* Per indicator */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '0.75rem' }}>
+            {INDICATORS.map(c => {
+              const actual = data.actuals[c.key]
+              const target = data.targets[c.targetKey]
+              const pct    = target > 0 ? Math.min(Math.round((actual / target) * 100), 100) : 0
+              const color  = target === 0 ? '#9ca3af' : pctColor(pct)
+              const badge  = target === 0 ? { color: '#6b7280', background: '#f3f4f6' } : { color: pctColor(pct), background: pctBg(pct) }
+              return (
+                <div key={c.key} style={{ background: '#fff', borderRadius: '0.75rem', border: '1px solid #e5e7eb', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{c.icon} {c.label}</span>
+                    <span style={{ ...badge, fontSize: '0.72rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '999px' }}>
+                      {target === 0 ? '–' : `${pct}%`}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem' }}>
+                    <span style={{ fontSize: '1.75rem', fontWeight: 800, color, lineHeight: 1 }}>{actual}</span>
+                    <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>/ {target === 0 ? '?' : target}</span>
+                  </div>
+                  <div style={{ height: '4px', background: '#f3f4f6', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: color, borderRadius: '999px', transition: 'width 0.7s ease' }} />
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          {totalTarget === 0 && (
+            <p style={{ fontSize: '0.8rem', color: '#92400e', background: '#fef9c3', padding: '0.65rem 1rem', borderRadius: '0.5rem', margin: 0 }}>
+              ⚠️ SPV belum menetapkan target untuk area <strong>{selectedAreaLabel}</strong> di periode ini.
+            </p>
+          )}
+          <div style={{ fontSize: '0.72rem', color: '#9ca3af', textAlign: 'right', marginTop: '0.5rem' }}>
+            {selectedAreaLabel} · {MONTHS[month - 1]} {year}
           </div>
         </>
       )}

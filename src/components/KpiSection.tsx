@@ -1,21 +1,16 @@
-import KpiDashboard from '@/components/KpiDashboard'
+import TargetDashboard from '@/components/TargetDashboard'
 
-interface User {
-  id: string
-  username: string
-  name: string
-  role: string
+type Area = { id: string; name: string }
+
+interface TargetSectionProps {
+  isSPV: boolean
+  areas: Area[]
 }
 
-interface KpiSectionProps {
-  ownerUserId: string
-  subordinates: User[]
-}
-
-export default function KpiSection({ ownerUserId, subordinates }: KpiSectionProps) {
+export default function KpiSection({ isSPV, areas }: TargetSectionProps) {
   return (
     <div className="card" style={{ marginBottom: '2.5rem' }}>
-      <KpiDashboard ownerUserId={ownerUserId} subordinates={subordinates} />
+      <TargetDashboard isSPV={isSPV} areas={areas} />
     </div>
   )
 }

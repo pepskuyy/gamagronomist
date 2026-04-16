@@ -47,7 +47,6 @@ model User {
   visitKios         VisitKios[]
   farmerGatherings  FarmerGathering[]
   visitCompanies    VisitCompany[]
-  kpiTargets        KpiTarget[]
   spotDemplot       SpotDemplot[]
 
   // Notifikasi
@@ -71,8 +70,8 @@ model Store {
 
 model KpiTarget {
   id              String   @id @default(cuid())
-  userId          String
-  user            User     @relation(fields: [userId], references: [id])
+  areaId          String?  // null = "Tanpa Area" (target global/unassigned)
+  area            Area?    @relation(fields: [areaId], references: [id])
   
   month           Int      // 1-12
   year            Int
@@ -86,16 +85,17 @@ model KpiTarget {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  @@unique([userId, month, year])
+  @@unique([areaId, month, year])
 }
 
 model Area {
-  id        String   @id @default(cuid())
-  name      String
-  users     User[]
-  coverages AreaCoverage[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String       @id @default(cuid())
+  name       String
+  users      User[]
+  coverages  AreaCoverage[]
+  kpiTargets KpiTarget[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
 }
 
 model AreaCoverage {

@@ -5,144 +5,217 @@ import { revalidatePath } from 'next/cache'
 
 const prisma = new PrismaClient()
 
-export async function setKpiTarget(data: {
-  userId: string
-  month: number
-  year: number
-  targetDemoPlot: number
+// ── Types ──────────────────────────────────────────────────────────────────
+
+export type Targets = {
+  targetDemoPlot:  number
   targetVisitKios: number
   targetGathering: number
-  targetCompany: number
-  targetBehavior: number
-}) {
+  targetCompany:   number
+  targetBehavior:  number
+}
+
+export type UserContribution = {
+  userId: string
+  userName: string
+  role: string
+  count: number
+}
+
+export type AreaTargetData = {
+  targets: Targets
+  actuals: {
+    demoPlot:  number
+    visitKios: number
+    gathering: number
+    company:   number
+    behavior:  number
+  }
+  contributions: {
+    demoPlot:  UserContribution[]
+    visitKios: UserContribution[]
+    gathering: UserContribution[]
+    company:   UserContribution[]
+    behavior:  UserContribution[]
+  }
+}
+
+const EMPTY_TARGETS: Targets = {
+  targetDemoPlot: 0, targetVisitKios: 0,
+  targetGathering: 0, targetCompany: 0, targetBehavior: 0,
+}
+
+// ── Set Target (SPV/ADMIN only, per area) ─────────────────────────────────
+
+export async function setAreaTarget(data: {
+  areaId: string | null   // null = "Tanpa Area"
+  month: number
+  year: number
+} & Targets) {
   try {
-    const { userId, month, year, ...targets } = data
+    const { areaId, month, year, ...targets } = data
     await prisma.kpiTarget.upsert({
-      where: { userId_month_year: { userId, month, year } },
+      where: { areaId_month_year: { areaId: areaId ?? null, month, year } },
       update: targets,
-      create: { userId, month, year, ...targets },
+      create: { areaId: areaId ?? null, month, year, ...targets },
     })
     revalidatePath('/dashboard')
     return { success: true }
   } catch (error) {
-    console.error('Error setting KPI target:', error)
-    return { success: false, error: 'Failed to update target' }
+    console.error('Error setting area target:', error)
+    return { success: false, error: 'Gagal menyimpan target.' }
   }
 }
 
-/**
- * Get KPI data for a specific user (by their own userId + month).
- * targetUserId = the field user whose actuals to show
- * ownerUserId  = the SPV/AFA who owns the target record
- */
-export async function getKpiData(
-  ownerUserId: string,
-  targetUserId: string,
+// ── Get all areas (for dropdown) ──────────────────────────────────────────
+
+export async function getAreas() {
+  return prisma.area.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } })
+}
+
+// ── Core: get target + actuals + user contributions for one area ──────────
+
+async function computeForArea(
+  userIds: string[],
   month: number,
-  year: number
-) {
+  year: number,
+  areaId: string | null
+): Promise<AreaTargetData> {
   const startDate = new Date(year, month - 1, 1)
-  const endDate = new Date(year, month, 0, 23, 59, 59)
-  const dateFilter = { createdAt: { gte: startDate, lte: endDate } }
+  const endDate   = new Date(year, month, 0, 23, 59, 59, 999)
+  const df = { createdAt: { gte: startDate, lte: endDate } }
 
-  // Actuals are counted for the targetUser AND any FOs under them
-  const foRecords = await prisma.user.findMany({
-    where: { afaId: targetUserId },
-    select: { id: true }
+  // fetch target record for this area
+  const target = await prisma.kpiTarget.findUnique({
+    where: { areaId_month_year: { areaId: areaId ?? null, month, year } }
   })
-  const userIds = [targetUserId, ...foRecords.map(f => f.id)]
 
-  const [demoPlots, visitKios, gatherings, companies, behaviors, target] = await Promise.all([
-    prisma.demoPlot.count({ where: { ...dateFilter, request: { foId: { in: userIds } } } }),
-    prisma.visitKios.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    prisma.farmerGathering.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    prisma.visitCompany.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    prisma.customerBehavior.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    prisma.kpiTarget.findUnique({
-      where: { userId_month_year: { userId: targetUserId, month, year } }
-    })
-  ])
+  const targets: Targets = target
+    ? { targetDemoPlot: target.targetDemoPlot, targetVisitKios: target.targetVisitKios,
+        targetGathering: target.targetGathering, targetCompany: target.targetCompany, targetBehavior: target.targetBehavior }
+    : { ...EMPTY_TARGETS }
 
-  return {
-    targets: target ?? {
-      targetDemoPlot: 0,
-      targetVisitKios: 0,
-      targetGathering: 0,
-      targetCompany: 0,
-      targetBehavior: 0
-    },
-    actuals: { demoPlot: demoPlots, visitKios, gathering: gatherings, company: companies, behavior: behaviors }
+  if (userIds.length === 0) {
+    return {
+      targets,
+      actuals: { demoPlot: 0, visitKios: 0, gathering: 0, company: 0, behavior: 0 },
+      contributions: { demoPlot: [], visitKios: [], gathering: [], company: [], behavior: [] }
+    }
   }
-}
 
-/** Get all subordinate users visible to the SPV (AFA + FO) */
-export async function getSubordinateUsers() {
+  // fetch user info for contribution labels
   const users = await prisma.user.findMany({
-    where: { role: { in: ['AFA', 'FO', 'INTERN'] } },
-    select: { id: true, username: true, name: true, role: true, afaId: true },
-    orderBy: [{ role: 'asc' }, { name: 'asc' }]
+    where: { id: { in: userIds } },
+    select: { id: true, name: true, role: true }
   })
-  return users
-}
+  const userMap = new Map(users.map(u => [u.id, u]))
 
-/**
- * Get KPI data for an AFA or FO user.
- * The target is looked up from SPV accounts — we search all KpiTarget records
- * for any SPV whose target period matches, treating it as the team target.
- * For the AFA/FO view we show their PERSONAL actuals against the SPV-set target.
- */
-export async function getKpiDataForFieldUser(
-  userId: string,
-  role: string,
-  month: number,
-  year: number
-) {
-  const startDate = new Date(year, month - 1, 1)
-  const endDate   = new Date(year, month, 0, 23, 59, 59)
-  const dateFilter = { createdAt: { gte: startDate, lte: endDate } }
-
-  // For FO: actuals are only this user's own activities
-  // For AFA: actuals include their own + their FOs
-  let userIds: string[] = [userId]
-  if (role === 'AFA') {
-    const fos = await prisma.user.findMany({ where: { afaId: userId }, select: { id: true } })
-    userIds = [userId, ...fos.map(f => f.id)]
-  }
-
-  // Find the SPV target that covers this user.
-  // Strategy: find an SPV who has a target for (month, year). 
-  // If multiple SPVs, take the most recent one.
-  const spvUsers = await prisma.user.findMany({
-    where: { role: { in: ['SPV', 'ADMIN'] } },
-    select: { id: true }
-  })
-  const spvIds = spvUsers.map(u => u.id)
-
-  const [demoPlots, visitKios, gatherings, companies, behaviors, target] = await Promise.all([
-    prisma.demoPlot.count({ where: { ...dateFilter, request: { foId: { in: userIds } } } }),
-    prisma.visitKios.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    prisma.farmerGathering.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    prisma.visitCompany.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    prisma.customerBehavior.count({ where: { ...dateFilter, userId: { in: userIds } } }),
-    // Look up the field user's own target first (set by SPV via dropdown),
-    // then fall back to any SPV-wide target if none exists.
-    prisma.kpiTarget.findFirst({
-      where: { userId, month, year }
-    }).then(async ownTarget => {
-      if (ownTarget) return ownTarget
-      return prisma.kpiTarget.findFirst({
-        where: { userId: { in: spvIds }, month, year },
-        orderBy: { updatedAt: 'desc' }
-      })
-    })
+  // Per-user counts in parallel
+  const [dpCounts, kiosCounts, gatherCounts, compCounts, cbCounts] = await Promise.all([
+    // Demo plot: counted per foId on the request
+    Promise.all(userIds.map(uid =>
+      prisma.demoPlot.count({ where: { ...df, request: { foId: uid } } }).then(c => ({ uid, c }))
+    )),
+    Promise.all(userIds.map(uid =>
+      prisma.visitKios.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
+    )),
+    Promise.all(userIds.map(uid =>
+      prisma.farmerGathering.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
+    )),
+    Promise.all(userIds.map(uid =>
+      prisma.visitCompany.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
+    )),
+    Promise.all(userIds.map(uid =>
+      prisma.customerBehavior.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
+    )),
   ])
 
-  return {
-    hasTarget: !!target,
-    targets: target ?? {
-      targetDemoPlot: 0, targetVisitKios: 0,
-      targetGathering: 0, targetCompany: 0, targetBehavior: 0
-    },
-    actuals: { demoPlot: demoPlots, visitKios, gathering: gatherings, company: companies, behavior: behaviors }
+  function toContrib(counts: { uid: string; c: number }[]): UserContribution[] {
+    return counts
+      .filter(x => x.c > 0)
+      .sort((a, b) => b.c - a.c)
+      .map(x => ({
+        userId: x.uid,
+        userName: userMap.get(x.uid)?.name ?? x.uid,
+        role: userMap.get(x.uid)?.role ?? '',
+        count: x.c
+      }))
   }
+
+  const contribDP    = toContrib(dpCounts)
+  const contribKios  = toContrib(kiosCounts)
+  const contribGath  = toContrib(gatherCounts)
+  const contribComp  = toContrib(compCounts)
+  const contribCB    = toContrib(cbCounts)
+
+  return {
+    targets,
+    actuals: {
+      demoPlot:  contribDP.reduce((s, x) => s + x.count, 0),
+      visitKios: contribKios.reduce((s, x) => s + x.count, 0),
+      gathering: contribGath.reduce((s, x) => s + x.count, 0),
+      company:   contribComp.reduce((s, x) => s + x.count, 0),
+      behavior:  contribCB.reduce((s, x) => s + x.count, 0),
+    },
+    contributions: {
+      demoPlot:  contribDP,
+      visitKios: contribKios,
+      gathering: contribGath,
+      company:   contribComp,
+      behavior:  contribCB,
+    }
+  }
+}
+
+// ── Public API ─────────────────────────────────────────────────────────────
+
+/**
+ * Get target data for one area OR all areas combined.
+ * areaId = null → aggregate all areas (including "Tanpa Area" users)
+ * areaId = 'none' → only "Tanpa Area" users (no area assigned)
+ * areaId = '<id>'  → specific area
+ */
+export async function getAreaTargetData(
+  areaId: string | null,
+  month: number,
+  year: number
+): Promise<AreaTargetData & { hasTarget: boolean }> {
+
+  if (areaId === null) {
+    // ALL areas combined
+    const allUsers = await prisma.user.findMany({
+      where: { role: { in: ['AFA', 'FO', 'INTERN'] }, isActive: true },
+      select: { id: true }
+    })
+    const userIds = allUsers.map(u => u.id)
+
+    // Sum targets across all KpiTarget records for this period
+    const allTargets = await prisma.kpiTarget.findMany({ where: { month, year } })
+    const sumTargets: Targets = allTargets.reduce((acc, t) => ({
+      targetDemoPlot:  acc.targetDemoPlot  + t.targetDemoPlot,
+      targetVisitKios: acc.targetVisitKios + t.targetVisitKios,
+      targetGathering: acc.targetGathering + t.targetGathering,
+      targetCompany:   acc.targetCompany   + t.targetCompany,
+      targetBehavior:  acc.targetBehavior  + t.targetBehavior,
+    }), { ...EMPTY_TARGETS })
+
+    const data = await computeForArea(userIds, month, year, null)
+    return { ...data, targets: sumTargets, hasTarget: allTargets.length > 0 }
+  }
+
+  // Specific area OR "Tanpa Area"
+  const actualAreaId = areaId === 'none' ? null : areaId
+
+  const users = await prisma.user.findMany({
+    where: {
+      role: { in: ['AFA', 'FO', 'INTERN'] },
+      isActive: true,
+      areaId: actualAreaId,
+    },
+    select: { id: true }
+  })
+  const userIds = users.map(u => u.id)
+
+  const data = await computeForArea(userIds, month, year, actualAreaId)
+  return { ...data, hasTarget: Object.values(data.targets).some(v => v > 0) }
 }

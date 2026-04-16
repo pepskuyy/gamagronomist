@@ -1,7 +1,7 @@
 import { PrismaClient } from '@prisma/client'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { getSubordinateUsers, getKpiDataForFieldUser } from '@/app/actions/kpi'
+import { getAreas } from '@/app/actions/kpi'
 import KpiSection from '@/components/KpiSection'
 import KpiFieldDashboard from '@/components/KpiFieldDashboard'
 import DemoPlotMap from '@/components/DemoPlotMap'
@@ -55,20 +55,21 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
     })
   ])
 
-  // ----- KPI DATA (for SPV / ADMIN) -----
+  // ----- TARGET DATA -----
   const now = new Date()
   const currentMonth = now.getMonth() + 1
-  const currentYear = now.getFullYear()
-  
-  let subordinates: { id: string; username: string; name: string; role: string }[] = []
-  if (isSPV) {
-    subordinates = await getSubordinateUsers()
-  }
+  const currentYear  = now.getFullYear()
 
-  // ----- KPI DATA (for AFA / FO) — shows target set by SPV -----
-  let fieldKpi: Awaited<ReturnType<typeof getKpiDataForFieldUser>> | null = null
+  // All areas for dropdowns
+  const allAreas = await getAreas()
+
+  // AFA/FO field user: find their area
+  let userAreaId: string | null = null
+  let userAreaName = 'Tanpa Area'
   if (session.role === 'AFA' || session.role === 'FO' || session.role === 'INTERN') {
-    fieldKpi = await getKpiDataForFieldUser(session.userId, session.role, currentMonth, currentYear)
+    const userRecord = await prisma.user.findUnique({ where: { id: session.userId }, select: { areaId: true, area: { select: { name: true } } } })
+    userAreaId   = userRecord?.areaId ?? null
+    userAreaName = userRecord?.area?.name ?? 'Tanpa Area'
   }
 
   // ----- GLOBAL DASHBOARD FILTER DATA -----
@@ -157,22 +158,22 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
       <h1 style={{ marginBottom: '0.5rem' }}>Selamat Datang, {session?.name}!</h1>
       <p style={{ marginBottom: '2rem' }}>Anda login sebagai <strong>{session?.role}</strong>. Berikut ringkasan operasional terbaru.</p>
 
-      {/* SPV KPI Section */}
+      {/* SPV: Target per Area Section */}
       {isSPV && (
-        <KpiSection
-          ownerUserId={session.userId}
-          subordinates={subordinates}
-        />
+        <KpiSection isSPV={true} areas={allAreas} />
       )}
 
-      {/* AFA / FO KPI Section — full card layout, read-only */}
+      {/* AFA / FO: Target Area Dashboard — read + area filter */}
       {(session.role === 'AFA' || session.role === 'FO' || session.role === 'INTERN') && (
         <div className="card" style={{ marginBottom: '2.5rem' }}>
           <KpiFieldDashboard
             userId={session.userId}
             role={session.role}
+            areaId={userAreaId}
+            areaName={userAreaName}
             initialMonth={currentMonth}
             initialYear={currentYear}
+            allAreas={allAreas}
           />
         </div>
       )}
