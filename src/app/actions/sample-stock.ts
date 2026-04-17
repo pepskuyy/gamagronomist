@@ -16,14 +16,43 @@ export async function addSampleStock(formData: FormData) {
     return { error: 'Hanya SPV yang dapat mengelola Gudang Sampel.' }
   }
 
-  const productId = (formData.get('productId') as string)?.trim()
-  const quantity  = parseFloat(formData.get('quantity') as string)
-  const notes     = (formData.get('notes') as string)?.trim() || null
+  const mode     = (formData.get('mode') as string) || 'existing'
+  const quantity = parseFloat(formData.get('quantity') as string)
+  const notes    = (formData.get('notes') as string)?.trim() || null
 
-  if (!productId) return { error: 'Produk wajib dipilih.' }
   if (!quantity || quantity <= 0) return { error: 'Jumlah harus lebih dari 0.' }
 
   try {
+    let productId: string
+
+    if (mode === 'new') {
+      // ── Buat produk baru ──────────────────────────────────────────────
+      const newName  = (formData.get('newName') as string)?.trim()
+      const newCode  = (formData.get('newCode') as string)?.trim() || null
+      const newUnit  = (formData.get('newUnit') as string)?.trim() || 'PCS'
+      const newUnitGramasi    = (formData.get('newUnitGramasi') as string)?.trim() || null
+      const newGramasiPerUnit = formData.get('newGramasiPerUnit') ? parseFloat(formData.get('newGramasiPerUnit') as string) : null
+
+      if (!newName) return { error: 'Nama produk baru wajib diisi.' }
+
+      const product = await prisma.product.create({
+        data: {
+          name: newName,
+          code: newCode,
+          unit: newUnit,
+          unitGramasi: newUnitGramasi,
+          gramasiPerUnit: newGramasiPerUnit,
+          // accurateId sengaja dikosongkan — produk sampel tidak terdaftar di Accurate
+        }
+      })
+      productId = product.id
+
+    } else {
+      // ── Pilih dari produk existing ────────────────────────────────────
+      productId = (formData.get('productId') as string)?.trim()
+      if (!productId) return { error: 'Produk wajib dipilih.' }
+    }
+
     await prisma.sampleLedger.create({
       data: {
         userId: session.userId,
@@ -35,11 +64,13 @@ export async function addSampleStock(formData: FormData) {
     })
     revalidatePath('/dashboard/stock/sample')
     return { success: true }
+
   } catch (err: any) {
     console.error('addSampleStock error:', err)
     return { error: 'Gagal menyimpan stok sampel.' }
   }
 }
+
 
 /** Ambil saldo stok sampel per produk untuk SPV tertentu */
 export async function getSampleBalance(userId: string): Promise<{ productId: string; productName: string; unit: string; balance: number }[]> {
