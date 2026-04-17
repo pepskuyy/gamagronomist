@@ -267,7 +267,7 @@ export default function SampleStockPage() {
                 transition: 'all 0.15s',
               }}
             >
-              📦 Produk dari Gudang Utama
+              📋 Pilih dari Katalog
             </button>
             <button
               type="button"
