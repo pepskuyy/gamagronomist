@@ -19,8 +19,9 @@ model User {
   username  String   @unique
   password  String   // Akan di-hash untuk MVP
   name      String
+  photo     String?  // URL foto profil
   email     String?  // Email untuk fitur lupa password
-  role      String   // "ADMIN", "SPV", "AFA", "FO", "INTERN"
+  role      String   // "ADMIN", "SPV", "AFA", "FO", "INTERN", dsb
   phone     String?  // Nomor WhatsApp (digunakan untuk notifikasi WAHA)
   isActive  Boolean  @default(true)
   

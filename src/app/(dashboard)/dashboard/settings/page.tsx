@@ -4,6 +4,7 @@ import { PrismaClient } from '@prisma/client'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
 import UpdateEmailForm from '@/components/UpdateEmailForm'
 import UpdatePhoneForm from '@/components/UpdatePhoneForm'
+import UpdateProfilePhotoForm from '@/components/UpdateProfilePhotoForm'
 import WahaSettingsClient from './WahaSettingsClient'
 
 const prisma = new PrismaClient()
@@ -18,7 +19,7 @@ export default async function SettingsPage() {
   // Fetch current email & phone from DB
   const user = await prisma.user.findUnique({
     where: { id: session.userId },
-    select: { email: true, phone: true }
+    select: { email: true, phone: true, photo: true }
   })
 
   return (
@@ -27,6 +28,15 @@ export default async function SettingsPage() {
       <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
         Kelola pengaturan pribadi untuk akun <strong>{session.name}</strong> ({session.role})
       </p>
+
+      {/* Profil Avatar Section */}
+      <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>
+        <h3 style={{ marginBottom: '0.4rem' }}>📷 Foto Profil</h3>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
+          Gunakan foto diri yang jelas agar mudah dikenali oleh tim lain.
+        </p>
+        <UpdateProfilePhotoForm currentPhoto={user?.photo ?? null} />
+      </div>
 
       {/* WhatsApp Phone Section */}
       <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>

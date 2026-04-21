@@ -43,6 +43,7 @@ export async function login(formData: FormData) {
       username: user.username,
       role: user.role,
       name: user.name,
+      photo: user.photo,
       areaId: user.areaId,
       afaId: user.afaId,
       isActive: user.isActive
@@ -181,8 +182,41 @@ export async function resetPasswordWithEmail(formData: FormData) {
     })
 
     return { success: true }
+  } catch (error) {
+    console.error('Reset password error:', error)
+    return { error: 'Terjadi kesalahan sistem.' }
+  }
+}
+
+/**
+ * Update user's profile photo and refresh the session
+ */
+export async function updateProfilePhoto(photoUrl: string | null) {
+  try {
+    const cookieStore = await cookies()
+    const token = cookieStore.get('session')?.value
+    const session = await decrypt(token as string)
+
+    if (!session?.userId) return { error: 'Unauthorized' }
+
+    // Update DB
+    await prisma.user.update({
+      where: { id: session.userId },
+      data: { photo: photoUrl }
+    })
+
+    // Update Session
+    const newToken = await encrypt({ ...session, photo: photoUrl })
+    cookieStore.set('session', newToken, { 
+      httpOnly: true, 
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/'
+    })
+
+    return { success: true }
   } catch (err) {
-    console.error('Reset password error', err)
-    return { error: 'Terjadi kesalahan. Coba lagi.' }
+    console.error('Update profile photo error:', err)
+    return { error: 'Gagal memperbarui foto profil.' }
   }
 }

@@ -57,11 +57,12 @@ export async function createUser(formData: FormData) {
   const role     = formData.get('role')     as string
   const areaId   = (formData.get('areaId')   as string) || null
   const afaId    = (formData.get('afaId')    as string) || null
+  const photo    = (formData.get('photo')    as string) || null
 
   if (!username || !name || !password || !role) return { error: 'Semua field wajib diisi.' }
   try {
     const hashed = await bcrypt.hash(password, 10)
-    await prisma.user.create({ data: { username, name, password: hashed, role, areaId: areaId || null, afaId: afaId || null } })
+    await prisma.user.create({ data: { username, name, password: hashed, role, areaId: areaId || null, afaId: afaId || null, photo } })
     revalidatePath('/dashboard/master/users')
     return { success: true }
   } catch (e: any) {
@@ -77,12 +78,14 @@ export async function updateUser(id: string, formData: FormData) {
   const areaId   = (formData.get('areaId')   as string) || null
   const afaId    = (formData.get('afaId')    as string) || null
   const isActiveRaw = formData.get('isActive') as string
+  const photo    = (formData.get('photo')    as string) || undefined
 
   if (!name || !role) return { error: 'Nama dan role wajib diisi.' }
   try {
     const data: any = { name, role, areaId: areaId || null, afaId: afaId || null }
     if (password) data.password = await bcrypt.hash(password, 10)
     if (isActiveRaw !== null && isActiveRaw !== undefined) data.isActive = isActiveRaw === 'true'
+    if (photo !== undefined) data.photo = photo || null // Handle empty string as null
     await prisma.user.update({ where: { id }, data })
     revalidatePath('/dashboard/master/users')
     return { success: true }

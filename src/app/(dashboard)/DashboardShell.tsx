@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import Link from 'next/link'
 
 type SidebarProps = {
-  session: { name: string; role: string }
+  session: { name: string; role: string; photo?: string | null }
   children: React.ReactNode
 }
 
@@ -123,8 +123,12 @@ export default function DashboardShell({ session, children }: SidebarProps) {
 
         {/* User avatar + logout */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', width: '100%' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', borderRadius: 'var(--radius-full)', background: 'var(--primary-light)', color: 'var(--primary)', fontWeight: 700, fontSize: '0.95rem', flexShrink: 0 }}>
-            {session?.name?.charAt(0)?.toUpperCase()}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', borderRadius: 'var(--radius-full)', background: 'var(--primary-light)', color: 'var(--primary)', fontWeight: 700, fontSize: '0.95rem', flexShrink: 0, overflow: 'hidden' }}>
+            {session?.photo ? (
+              <img src={session.photo} alt={session.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            ) : (
+              session?.name?.charAt(0)?.toUpperCase()
+            )}
           </div>
           <form action="/api/auth/logout" method="POST" style={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
             <button type="submit" className="nav-icon-btn" data-label="Keluar" title="Keluar" style={{ color: 'var(--danger)' }}>

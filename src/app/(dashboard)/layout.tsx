@@ -18,7 +18,7 @@ export default async function DashboardLayout({
   const session = await decrypt(sessionToken)
   
   return (
-    <DashboardShell session={{ name: session?.name || '', role: session?.role || '' }}>
+    <DashboardShell session={{ name: session?.name || '', role: session?.role || '', photo: session?.photo || null }}>
       {children}
     </DashboardShell>
   )

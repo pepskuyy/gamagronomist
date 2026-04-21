@@ -3,8 +3,9 @@
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { createUser, updateUser, deleteUser, bulkDeleteUsers } from '@/app/actions/master'
+import ImageUploader from '@/components/ImageUploader'
 
-type User = { id: string; name: string; username: string; role: string; isActive: boolean; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
+type User = { id: string; name: string; username: string; role: string; isActive: boolean; photo: string | null; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
 type Area = { id: string; name: string }
 
 const ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN', 'FAM', 'WHM']
@@ -27,6 +28,7 @@ export default function UsersMasterPage() {
   const [modal,  setModal]  = useState<'add' | 'edit' | null>(null)
   const [selected, setSelected] = useState<User | null>(null)
   const [error, setError]   = useState<string | null>(null)
+  const [formPhoto, setFormPhoto] = useState<string | null>(null)
   const [isPending, start]  = useTransition()
 
   // Bulk selection
@@ -45,8 +47,8 @@ export default function UsersMasterPage() {
 
   useEffect(() => { fetchData() }, [])
 
-  function openAdd() { setSelected(null); setError(null); setModal('add') }
-  function openEdit(u: User) { setSelected(u); setError(null); setModal('edit') }
+  function openAdd() { setSelected(null); setFormPhoto(null); setError(null); setModal('add') }
+  function openEdit(u: User) { setSelected(u); setFormPhoto(u.photo || null); setError(null); setModal('edit') }
   function closeModal() { setModal(null) }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -110,6 +112,25 @@ export default function UsersMasterPage() {
               <div>
                 <label style={labelStyle}>Nama Lengkap <span style={{ color: 'red' }}>*</span></label>
                 <input name="name" style={inputStyle} required defaultValue={selected?.name} placeholder="contoh: Budi Santoso" />
+              </div>
+              <div>
+                <label style={labelStyle}>Foto Profil</label>
+                <input type="hidden" name="photo" value={formPhoto || ''} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginTop: '0.25rem' }}>
+                  <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'var(--surface-hover)', border: '1px solid var(--border)', overflow: 'hidden', flexShrink: 0 }}>
+                    {formPhoto ? (
+                      <img src={formPhoto} alt="Avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ) : (
+                      <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>Kosong</div>
+                    )}
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <ImageUploader onUploadSuccess={(urls) => setFormPhoto(urls[0] || null)} maxFiles={1} label="Upload" />
+                  </div>
+                  {formPhoto && (
+                    <button type="button" onClick={() => setFormPhoto(null)} className="btn btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)', padding: '0.4rem 0.75rem' }}>Hapus</button>
+                  )}
+                </div>
               </div>
               <div>
                 <label style={labelStyle}>{modal === 'add' ? 'Password' : 'Password Baru'} {modal === 'add' && <span style={{ color: 'red' }}>*</span>}</label>
@@ -194,7 +215,14 @@ export default function UsersMasterPage() {
                   <td style={{ padding: '0.85rem 1rem', width: '40px', textAlign: 'center' }}>
                     <input type="checkbox" checked={selectedUsers.has(u.id)} onChange={() => toggleUser(u.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
                   </td>
-                  <td style={{ padding: '0.85rem 1rem', fontWeight: 600 }}>{u.name}</td>
+                  <td style={{ padding: '0.85rem 1rem' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', flexShrink: 0, overflow: 'hidden' }}>
+                        {u.photo ? <img src={u.photo} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : u.name.charAt(0).toUpperCase()}
+                      </div>
+                      <span style={{ fontWeight: 600 }}>{u.name}</span>
+                    </div>
+                  </td>
                   <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.username}</td>
                   <td style={{ padding: '0.85rem 1rem' }}>
                     <span className={`badge ${roleBadge[u.role] ?? 'badge-neutral'}`}>{u.role}</span>
