@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react'
 import Link from 'next/link'
-import { addSampleStock, adjustSampleStock } from '@/app/actions/sample-stock'
+import { addSampleStock } from '@/app/actions/sample-stock'
 
 type Balance  = { productId: string; productName: string; unit: string; balance: number }
 type LedgerRow = {
@@ -122,7 +122,7 @@ function ProductCombobox({
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function SampleStockPage() {
-  const [tab, setTab]       = useState<'balance' | 'add' | 'opname' | 'history'>('balance')
+  const [tab, setTab]       = useState<'balance' | 'add' | 'history'>('balance')
   const [balances, setBalances] = useState<Balance[]>([])
   const [ledger, setLedger]     = useState<LedgerRow[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -220,7 +220,7 @@ export default function SampleStockPage() {
     })
   }
 
-  const tdStyle: React.CSSProperties = { padding: '0.65rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem', verticalAlign: 'middle' }
+  const tdStyle = { padding: '0.65rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem', verticalAlign: 'middle' }
   const thStyle: React.CSSProperties = { padding: '0.6rem 1rem', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }
 
   const UNITS = ['PCS', 'Btl', 'Bks', 'Box', 'Sak', 'gl', 'Pack', 'Rol', 'Kg', 'Lt']
@@ -240,7 +240,7 @@ export default function SampleStockPage() {
 
       {/* Tab Bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--border)', flexWrap: 'wrap' }}>
-        {([['balance', '📦 Saldo Stok'], ['add', '➕ Tambah Stok Masuk'], ['opname', '⚖️ Opname Stok'], ['history', '📋 Riwayat']] as const).map(([key, label]) => (
+        {([['balance', '📦 Saldo Stok'], ['add', '➕ Tambah Stok Masuk'], ['history', '📋 Riwayat']] as const).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', border: 'none', background: 'none', cursor: 'pointer',
             fontWeight: tab === key ? 700 : 400,

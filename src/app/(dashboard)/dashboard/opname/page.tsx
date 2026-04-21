@@ -3,6 +3,7 @@ import { decrypt } from '@/lib/auth'
 import OpnameFormClient from './OpnameFormClient'
 import ApproveListServer from './ApproveListServer'
 import { OpnameTabs } from './OpnameTabs'
+import SampleOpnameClient from './SampleOpnameClient'
 
 export default async function OpnamePage() {
   const cookieStore = await cookies()
@@ -12,15 +13,15 @@ export default async function OpnamePage() {
   const isSPVorADMIN = session?.role === 'ADMIN' || session?.role === 'SPV'
 
   if (!isSPVorADMIN) {
-    // Regular AFA or FO only sees the Form
+    // AFA / FO hanya melihat form pengajuan opname biasa
     return <OpnameFormClient />
   }
 
-  // SPV or ADMIN sees Tabs
+  // SPV / ADMIN: Tab Persetujuan + Tab Opname Gudang Sampel
   return (
     <OpnameTabs
-      formTab={<OpnameFormClient />}
       approvalTab={<ApproveListServer />}
+      sampleTab={<SampleOpnameClient />}
     />
   )
 }
