@@ -37,10 +37,10 @@ export async function GET(req: Request) {
       return NextResponse.json(withBalance.reverse())
     }
 
-    // Compute balance per product
+    // Compute balance per product — always use packaging unit (unit), not gramasi
     const balanceMap = new Map<string, { productId: string; productName: string; unit: string; balance: number }>()
     for (const l of ledgers) {
-      const unit = l.product.unitGramasi || l.product.unit
+      const unit = l.product.unit  // selalu satuan kemasan
       const existing = balanceMap.get(l.productId)
       if (existing) {
         existing.balance += l.quantity

@@ -8,7 +8,7 @@ type Balance  = { productId: string; productName: string; unit: string; balance:
 type LedgerRow = {
   id: string; transactionType: string; quantity: number; notes: string | null
   referenceId: string | null; createdAt: string; stockBefore: number; stockAfter: number
-  product: { name: string; unit: string; unitGramasi?: string | null }
+  product: { name: string; unit: string }
 }
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
 
@@ -521,10 +521,25 @@ export default function SampleStockPage() {
                 {ledger.map(row => {
                   const isOut = row.quantity < 0
                   const unit  = row.product.unit
+
+                  // Tentukan label jenis transaksi berdasarkan transactionType
+                  let labelText = ''
+                  let labelBg   = ''
+                  let labelColor = ''
+                  if (row.transactionType === 'SAMPLE_IN') {
+                    labelText = '📥 Stok Masuk'; labelBg = '#dcfce7'; labelColor = '#166534'
+                  } else if (row.transactionType === 'SAMPLE_OUT') {
+                    labelText = '📤 Keluar ke AFA'; labelBg = '#fee2e2'; labelColor = '#991b1b'
+                  } else if (row.transactionType === 'OPNAME_PLUS') {
+                    labelText = '⚖️ Opname (+)'; labelBg = '#dbeafe'; labelColor = '#1e40af'
+                  } else if (row.transactionType === 'OPNAME_MINUS') {
+                    labelText = '⚖️ Opname (-)'; labelBg = '#fef9c3'; labelColor = '#92400e'
+                  } else {
+                    labelText = row.transactionType; labelBg = 'var(--surface-2)'; labelColor = 'var(--text-muted)'
+                  }
                   return (
                     <tr key={row.id}
-                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
-                      onMouseLeave={e => (e.currentTarget.style.background = '')}
+                      onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')} onMouseLeave={e => (e.currentTarget.style.background = '')}
                     >
                       <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.8rem', fontFamily: 'monospace' }}>
                         {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(row.createdAt))}
@@ -533,10 +548,9 @@ export default function SampleStockPage() {
                       <td style={tdStyle}>
                         <span style={{
                           padding: '0.2rem 0.65rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
-                          background: isOut ? '#fee2e2' : '#dcfce7',
-                          color: isOut ? '#991b1b' : '#166534', whiteSpace: 'nowrap',
+                          background: labelBg, color: labelColor, whiteSpace: 'nowrap',
                         }}>
-                          {isOut ? '📤 Keluar ke AFA' : '📥 Stok Masuk'}
+                          {labelText}
                         </span>
                       </td>
                       <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'right' }}>

@@ -113,7 +113,7 @@ export async function adjustSampleStock(formData: FormData) {
 
     // Buat transaksi secara bulk untuk setiap perubahan
     const operations = adjustments.filter(adj => adj.difference !== 0).map(adj => {
-      const type = adj.difference > 0 ? 'SAMPLE_IN' : 'SAMPLE_OUT'
+      const type = adj.difference > 0 ? 'OPNAME_PLUS' : 'OPNAME_MINUS'
       return prisma.sampleLedger.create({
         data: {
           userId: session.userId,
