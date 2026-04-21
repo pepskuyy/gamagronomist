@@ -163,8 +163,12 @@ export default function DashboardShell({ session, children }: SidebarProps) {
                 <div style={{ fontSize: '0.82rem', fontWeight: 600, color: 'var(--text-main)' }}>{session?.name?.split(' ')[0]}</div>
                 <div style={{ fontSize: '0.72rem', fontWeight: 700, color: roleColor[session?.role] || 'var(--text-muted)' }}>{session?.role}</div>
               </div>
-              <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0 }}>
-                {session?.name?.charAt(0)?.toUpperCase()}
+              <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0, overflow: 'hidden' }}>
+                {session?.photo ? (
+                  <img src={session.photo} alt={session.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                ) : (
+                  session?.name?.charAt(0)?.toUpperCase()
+                )}
               </div>
             </div>
           </div>
