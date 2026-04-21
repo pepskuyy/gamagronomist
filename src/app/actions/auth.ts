@@ -1,7 +1,7 @@
 'use server'
 
 import { cookies } from 'next/headers'
-import { encrypt } from '@/lib/auth'
+import { encrypt, decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
 import bcrypt from 'bcryptjs'
 
