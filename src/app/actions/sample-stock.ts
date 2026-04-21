@@ -94,3 +94,45 @@ export async function getSampleBalance(userId: string): Promise<{ productId: str
 
   return Array.from(balanceMap.values()).filter(b => b.balance !== 0)
 }
+
+/** Melakukan penyesuaian (opname) stok sampel secara langsung tanpa approval */
+export async function adjustSampleStock(formData: FormData) {
+  const cookieStore = await cookies()
+  const session = await decrypt(cookieStore.get('session')?.value as string)
+
+  if (!session?.userId || !['SPV', 'ADMIN'].includes(session.role)) {
+    return { error: 'Hanya SPV yang dapat melakukan Opname Gudang Sampel.' }
+  }
+
+  const adjustmentsRaw = formData.get('adjustments') as string
+  if (!adjustmentsRaw) return { error: 'Data penyesuaian kosong.' }
+
+  try {
+    const adjustments = JSON.parse(adjustmentsRaw) as { productId: string, difference: number, notes: string }[]
+    if (!adjustments.length) return { error: 'Tidak ada data yang disesuaikan.' }
+
+    // Buat transaksi secara bulk untuk setiap perubahan
+    const operations = adjustments.filter(adj => adj.difference !== 0).map(adj => {
+      const type = adj.difference > 0 ? 'SAMPLE_IN' : 'SAMPLE_OUT'
+      return prisma.sampleLedger.create({
+        data: {
+          userId: session.userId,
+          productId: adj.productId,
+          quantity: adj.difference, // difference is positive (in) or negative (out)
+          transactionType: type,
+          notes: adj.notes || 'Penyesuaian Opname',
+        }
+      })
+    })
+
+    if (operations.length > 0) {
+      await prisma.$transaction(operations)
+      revalidatePath('/dashboard/stock/sample')
+    }
+
+    return { success: true }
+  } catch (err: any) {
+    console.error('adjustSampleStock error:', err)
+    return { error: 'Terjadi kesalahan saat memproses Opname Stok Sampel.' }
+  }
+}

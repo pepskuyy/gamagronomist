@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react'
 import Link from 'next/link'
-import { addSampleStock } from '@/app/actions/sample-stock'
+import { addSampleStock, adjustSampleStock } from '@/app/actions/sample-stock'
 
 type Balance  = { productId: string; productName: string; unit: string; balance: number }
 type LedgerRow = {
@@ -122,7 +122,7 @@ function ProductCombobox({
 // ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function SampleStockPage() {
-  const [tab, setTab]       = useState<'balance' | 'add' | 'history'>('balance')
+  const [tab, setTab]       = useState<'balance' | 'add' | 'opname' | 'history'>('balance')
   const [balances, setBalances] = useState<Balance[]>([])
   const [ledger, setLedger]     = useState<LedgerRow[]>([])
   const [products, setProducts] = useState<Product[]>([])
@@ -147,6 +147,9 @@ export default function SampleStockPage() {
   const [newGramasiPerUnit, setNewGramasiPerUnit] = useState('')
   const [newQty, setNewQty]         = useState('')
   const [newNotes, setNewNotes]     = useState('')
+
+  // Opname state
+  const [opnameData, setOpnameData] = useState<Record<string, { actual: string, notes: string }>>({})
 
   useEffect(() => { fetchAll() }, [])
 
@@ -181,6 +184,42 @@ export default function SampleStockPage() {
     })
   }
 
+  function handleOpnameSubmit() {
+    setError(null); setSuccess(null)
+    const adjustments: { productId: string, difference: number, notes: string }[] = []
+    
+    for (const b of balances) {
+      const data = opnameData[b.productId]
+      if (data && data.actual !== '') {
+        const actual = parseFloat(data.actual)
+        if (!isNaN(actual) && actual !== b.balance) {
+          adjustments.push({
+            productId: b.productId,
+            difference: actual - b.balance,
+            notes: data.notes
+          })
+        }
+      }
+    }
+
+    if (adjustments.length === 0) {
+      setError('Tidak ada penyesuaian yang perlu disimpan.')
+      return
+    }
+
+    const fd = new FormData()
+    fd.append('adjustments', JSON.stringify(adjustments))
+    startTransition(async () => {
+      const res = await adjustSampleStock(fd)
+      if (res?.error) setError(res.error)
+      else { 
+        setSuccess('Opname berhasil disimpan!')
+        setOpnameData({})
+        fetchAll()
+      }
+    })
+  }
+
   const tdStyle: React.CSSProperties = { padding: '0.65rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem', verticalAlign: 'middle' }
   const thStyle: React.CSSProperties = { padding: '0.6rem 1rem', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }
 
@@ -200,8 +239,8 @@ export default function SampleStockPage() {
       </div>
 
       {/* Tab Bar */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--border)' }}>
-        {([['balance', '📦 Saldo Stok'], ['add', '➕ Tambah Stok Masuk'], ['history', '📋 Riwayat']] as const).map(([key, label]) => (
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--border)', flexWrap: 'wrap' }}>
+        {([['balance', '📦 Saldo Stok'], ['add', '➕ Tambah Stok Masuk'], ['opname', '⚖️ Opname Stok'], ['history', '📋 Riwayat']] as const).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', border: 'none', background: 'none', cursor: 'pointer',
             fontWeight: tab === key ? 700 : 400,
@@ -389,6 +428,75 @@ export default function SampleStockPage() {
                 {isPending ? 'Menyimpan...' : '✨ Buat SKU & Tambah Stok'}
               </button>
             </form>
+          )}
+        </div>
+      )}
+
+      {/* ── OPNAME (PENYESUAIAN STOK) ── */}
+      {tab === 'opname' && (
+        <div className="table-card">
+          <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
+            <div>
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>⚖️ Penyesuaian / Opname Stok Sampel</h3>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Input stok aktual barang di gudang. Sistem akan otomatis melakukan adjustment jika ada selisih tanpa perlu approval.</p>
+            </div>
+            <button onClick={handleOpnameSubmit} disabled={isPending} className="btn btn-primary">
+              {isPending ? 'Menyimpan...' : '✅ Simpan Semua Penyesuaian'}
+            </button>
+          </div>
+
+          {error   && <div className="alert alert-danger"   style={{ margin: '1rem' }}>{error}</div>}
+          {success && <div className="alert alert-success" style={{ margin: '1rem' }}>{success}</div>}
+
+          {loading ? (
+            <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat...</p>
+          ) : balances.length === 0 ? (
+            <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada stok di Gudang Sampel.</p>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  {['Produk', 'Sistem', 'Aktual', 'Selisih', 'Catatan'].map(h => <th key={h} style={thStyle}>{h}</th>)}
+                </tr>
+              </thead>
+              <tbody>
+                {balances.map(b => {
+                  const data = opnameData[b.productId] || { actual: '', notes: '' }
+                  const actual = parseFloat(data.actual)
+                  const diff = !data.actual || isNaN(actual) ? 0 : actual - b.balance
+                  const statusColor = diff === 0 ? 'var(--text-muted)' : (diff > 0 ? '#16a34a' : '#dc2626')
+
+                  return (
+                    <tr key={b.productId} style={{ background: diff !== 0 ? 'var(--surface-hover)' : 'var(--surface)' }}>
+                      <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{b.productName}</td>
+                      <td style={{ ...tdStyle, fontSize: '1rem', fontWeight: 700, fontFamily: 'monospace' }}>
+                        {b.balance} <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--text-muted)' }}>{b.unit}</span>
+                      </td>
+                      <td style={{ ...tdStyle, width: '160px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <input type="number" step="any" min="0" placeholder={b.balance.toString()} 
+                            className="form-control" style={{ width: '80px', padding: '0.4rem 0.5rem' }} 
+                            value={data.actual}
+                            onChange={e => setOpnameData({ ...opnameData, [b.productId]: { ...data, actual: e.target.value } })}
+                          />
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.unit}</span>
+                        </div>
+                      </td>
+                      <td style={{ ...tdStyle, color: statusColor, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem' }}>
+                        {diff > 0 ? `+${diff}` : diff}
+                      </td>
+                      <td style={{ ...tdStyle, width: '25%' }}>
+                        <input type="text" placeholder="opsional"
+                          className="form-control" style={{ width: '100%', padding: '0.4rem 0.5rem' }}
+                          value={data.notes}
+                          onChange={e => setOpnameData({ ...opnameData, [b.productId]: { ...data, notes: e.target.value } })}
+                        />
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
           )}
         </div>
       )}
