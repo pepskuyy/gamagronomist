@@ -28,7 +28,8 @@ export async function addSampleStock(formData: FormData) {
     if (mode === 'new') {
       // ── Buat produk baru ──────────────────────────────────────────────
       const newName  = (formData.get('newName') as string)?.trim()
-      const newCode  = (formData.get('newCode') as string)?.trim() || null
+      // Automatically generate SKU code starting with SMPL-
+      const newCode  = `SMPL-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
       const newUnit  = (formData.get('newUnit') as string)?.trim() || 'PCS'
       const newUnitGramasi    = (formData.get('newUnitGramasi') as string)?.trim() || null
       const newGramasiPerUnit = formData.get('newGramasiPerUnit') ? parseFloat(formData.get('newGramasiPerUnit') as string) : null
@@ -83,7 +84,7 @@ export async function getSampleBalance(userId: string): Promise<{ productId: str
   const balanceMap = new Map<string, { productId: string; productName: string; unit: string; balance: number }>()
   for (const l of ledgers) {
     const existing = balanceMap.get(l.productId)
-    const unit = l.product.unitGramasi || l.product.unit
+    const unit = l.product.unit // Selalu gunakan satuan kemasan (PCS, Botol, dsb)
     if (existing) {
       existing.balance += l.quantity
     } else {

@@ -70,7 +70,7 @@ function ProductCombobox({
     }
   }, [highlighted])
 
-  const displayVal = open ? query : (selected ? `${selected.name} (${selected.unitGramasi || selected.unit})` : query)
+  const displayVal = open ? query : (selected ? `${selected.name} (${selected.unit})` : query)
 
   return (
     <div ref={wrapRef} style={{ position: 'relative' }}>
@@ -109,7 +109,7 @@ function ProductCombobox({
             >
               <span>{p.name}</span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                {p.unitGramasi || p.unit}
+                {p.unit}
               </span>
             </div>
           ))}
@@ -142,7 +142,6 @@ export default function SampleStockPage() {
 
   // New product form
   const [newName, setNewName]       = useState('')
-  const [newCode, setNewCode]       = useState('')
   const [newUnit, setNewUnit]       = useState('PCS')
   const [newUnitGramasi, setNewUnitGramasi] = useState('')
   const [newGramasiPerUnit, setNewGramasiPerUnit] = useState('')
@@ -167,7 +166,7 @@ export default function SampleStockPage() {
   function resetForms() {
     setSelectedProduct(''); setSelectedProductObj(null)
     setQty(''); setNotes('')
-    setNewName(''); setNewCode(''); setNewUnit('PCS')
+    setNewName(''); setNewUnit('PCS')
     setNewUnitGramasi(''); setNewGramasiPerUnit(''); setNewQty(''); setNewNotes('')
   }
 
@@ -310,7 +309,7 @@ export default function SampleStockPage() {
                     placeholder="0" value={qty} onChange={e => setQty(e.target.value)} required style={{ flex: 1 }} />
                   {selectedProductObj && (
                     <span style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                      {selectedProductObj.unitGramasi || selectedProductObj.unit}
+                      {selectedProductObj.unit}
                     </span>
                   )}
                 </div>
@@ -345,8 +344,7 @@ export default function SampleStockPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Kode / SKU</label>
-                  <input type="text" name="newCode" className="form-control"
-                    placeholder="Opsional" value={newCode} onChange={e => setNewCode(e.target.value)} />
+                  <input type="text" className="form-control" value="Dibuat otomatis oleh sistem" readOnly disabled style={{ background: 'var(--surface-hover)', cursor: 'not-allowed' }} />
                 </div>
                 <div className="form-group">
                   <label className="form-label">Satuan Kemasan <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -373,9 +371,9 @@ export default function SampleStockPage() {
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <input type="number" min="1" step="1" name="quantity" className="form-control"
                       placeholder="0" value={newQty} onChange={e => setNewQty(e.target.value)} required style={{ flex: 1 }} />
-                    {(newUnitGramasi || newUnit) && (
+                    {(newUnit) && (
                       <span style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
-                        {newUnitGramasi || newUnit}
+                        {newUnit}
                       </span>
                     )}
                   </div>
@@ -414,7 +412,7 @@ export default function SampleStockPage() {
               <tbody>
                 {ledger.map(row => {
                   const isOut = row.quantity < 0
-                  const unit  = row.product.unitGramasi || row.product.unit
+                  const unit  = row.product.unit
                   return (
                     <tr key={row.id}
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
