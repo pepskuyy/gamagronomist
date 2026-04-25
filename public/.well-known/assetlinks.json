@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "id.co.gamaagrosejati.agrolens.twa",
+    "sha256_cert_fingerprints": [
+      "74:65:62:5C:43:3D:28:99:F8:B4:B4:82:AC:7F:F9:DC:F0:39:3B:B1:1C:37:C0:62:19:DA:C3:43:77:B7:94:57"
+    ]
+  }
+}]
