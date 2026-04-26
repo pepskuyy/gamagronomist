@@ -1,0 +1,115 @@
+import { NextRequest, NextResponse } from 'next/server'
+import { PrismaClient } from '@prisma/client'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
+
+export const maxDuration = 60
+
+const prisma = new PrismaClient()
+
+function parseDate(raw: string): Date | null {
+  if (!raw?.trim()) return null
+  try {
+    const d = raw.trim()
+    let parsed: Date
+    if (d.includes('/')) {
+      const [day, month, year] = d.split('/')
+      parsed = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`)
+    } else {
+      parsed = new Date(d)
+    }
+    return isNaN(parsed.getTime()) ? null : parsed
+  } catch { return null }
+}
+
+export async function POST(req: NextRequest) {
+  try {
+    const cookieStore = await cookies()
+    const session = await decrypt(cookieStore.get('session')?.value as string)
+    if (!['ADMIN', 'SPV'].includes(session?.role ?? '')) {
+      return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 })
+    }
+
+    const { rows } = await req.json()
+    if (!Array.isArray(rows) || rows.length === 0) {
+      return NextResponse.json({ error: 'Data kosong.' }, { status: 400 })
+    }
+
+    let inserted = 0, skipped = 0
+    const errors: { row: number; name: string; reason: string }[] = []
+
+    // Pre-load all reference data upfront
+    const products = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
+    const productByName = new Map(products.map(p => [p.name.toLowerCase().trim(), p.id]))
+    const productByCode = new Map(products.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
+
+    const users = await prisma.user.findMany({ select: { id: true, username: true, areaId: true } })
+    const userByUsername = new Map(users.map(u => [u.username.toLowerCase().trim(), u]))
+
+    for (let idx = 0; idx < rows.length; idx++) {
+      const r = rows[idx]
+      const rowNum = idx + 2
+
+      if (!r.date?.trim()) { errors.push({ row: rowNum, name: '-', reason: 'Tanggal kosong.' }); skipped++; continue }
+      if (!r.username_fo?.trim()) { errors.push({ row: rowNum, name: '-', reason: 'username_fo kosong.' }); skipped++; continue }
+
+      const parsedDate = parseDate(r.date)
+      if (!parsedDate) {
+        errors.push({ row: rowNum, name: r.username_fo, reason: `Format tanggal "${r.date}" tidak valid.` }); skipped++; continue
+      }
+
+      const foUser = userByUsername.get(r.username_fo.trim().toLowerCase())
+      if (!foUser) {
+        errors.push({ row: rowNum, name: r.username_fo, reason: `Username FO "${r.username_fo}" tidak ditemukan.` }); skipped++; continue
+      }
+
+      const lat = r.latitude ? parseFloat(r.latitude) : null
+      const lng = r.longitude ? parseFloat(r.longitude) : null
+
+      try {
+        const dp = await prisma.spotDemplot.create({
+          data: {
+            userId: foUser.id,
+            snapshotAreaId: foUser.areaId,
+            date: parsedDate,
+            districtKab: r.kabupaten?.trim() || null,
+            districtKec: r.kecamatan?.trim() || null,
+            districtDesa: r.desa?.trim() || null,
+            weeds: r.weeds?.trim() || null,
+            observationResult: r.observationResult?.trim() || null,
+            latitude: lat !== null && isNaN(lat) ? null : lat,
+            longitude: lng !== null && isNaN(lng) ? null : lng,
+          }
+        })
+
+        if (r.produk?.trim()) {
+          const entries = r.produk.split(',').map((s: string) => s.trim()).filter(Boolean)
+          for (const entry of entries) {
+            const colonIdx = entry.lastIndexOf(':')
+            let productKey: string
+            let qty = 1
+            if (colonIdx !== -1) {
+              productKey = entry.slice(0, colonIdx).trim()
+              qty = parseFloat(entry.slice(colonIdx + 1).trim()) || 1
+            } else {
+              productKey = entry.trim()
+            }
+            const productId = productByName.get(productKey.toLowerCase()) ?? productByCode.get(productKey.toLowerCase())
+            if (productId) {
+              await prisma.spotDemplotDetail.create({
+                data: { spotDemplotId: dp.id, productId, usage: qty }
+              })
+            }
+          }
+        }
+        inserted++
+      } catch (e: any) {
+        errors.push({ row: rowNum, name: r.username_fo, reason: 'Gagal disimpan: ' + e.message }); skipped++
+      }
+    }
+
+    return NextResponse.json({ success: true, inserted, skipped, errors })
+  } catch (err: any) {
+    return NextResponse.json({ error: 'Terjadi kesalahan server: ' + (err.message || 'Unknown') }, { status: 500 })
+  }
+}

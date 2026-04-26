@@ -3,12 +3,6 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import MigrationImportModal from '@/components/MigrationImportModal'
-import {
-  bulkImportAreas, AreaRow,
-  bulkImportCustomerBehaviors, CBRow,
-  bulkImportDemoPlots, DemoPlotRow,
-  bulkImportSpotDemoPlots, SpotDemoPlotRow
-} from '@/app/actions/migration'
 
 type ImportCategory = {
   id: string
@@ -17,14 +11,14 @@ type ImportCategory = {
   description: string
   order: number
   columns: { key: string; label: string; required?: boolean }[]
-  importFn: (rows: any[]) => Promise<any>
+  apiPath: string
 }
 
 const categories: ImportCategory[] = [
   {
     id: 'area', icon: '🌏', title: 'Area', description: 'Import daftar area/wilayah kerja.', order: 1,
     columns: [{ key: 'name', label: 'nama_area', required: true }],
-    importFn: (rows) => bulkImportAreas(rows as AreaRow[])
+    apiPath: '/api/migration/area',
   },
   {
     id: 'user', icon: '👤', title: 'User (SPV/AFA/FO/INTERN)', description: 'Import akun pengguna. Pastikan Area sudah di-import terlebih dahulu. Role yang valid: ADMIN, SPV, AFA, FO, INTERN.', order: 2,
@@ -37,16 +31,7 @@ const categories: ImportCategory[] = [
       { key: 'afaName', label: 'nama_afa' },
       { key: 'status', label: 'status' },
     ],
-    importFn: async (rows) => {
-      const res = await fetch('/api/migration/users', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rows }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Import gagal')
-      return data
-    }
+    apiPath: '/api/migration/users',
   },
   {
     id: 'cb', icon: '📝', title: 'Customer Behavior', description: 'Import data CB. Pastikan User sudah di-import terlebih dahulu. Data petani akan otomatis dibuat dari CB. Kolom komoditas dan produk_preferensi dipisah koma.', order: 3,
@@ -70,7 +55,7 @@ const categories: ImportCategory[] = [
       { key: 'references', label: 'referensi' },
       { key: 'notes', label: 'catatan' },
     ],
-    importFn: (rows) => bulkImportCustomerBehaviors(rows as CBRow[])
+    apiPath: '/api/migration/cb',
   },
   {
     id: 'demoplot', icon: '🌱', title: 'Demo Plot', description: 'Import data demo plot. Kolom produk diisi nama produk dipisah koma (misal: "Bion-M:100,Virtako:50"). Jika tanpa jumlah, defaultnya 1. Nama produk harus sesuai dengan nama di Master Produk.', order: 4,
@@ -87,6 +72,7 @@ const categories: ImportCategory[] = [
       { key: 'latitude', label: 'latitude' },
       { key: 'longitude', label: 'longitude' },
     ],
+    apiPath: '/api/migration/demoplot',
   },
   {
     id: 'spot-demoplot', icon: '🎯', title: 'Spot Demo Plot', description: 'Import data Spot Demo Plot. Kolom produk diisi nama produk dipisah koma (misal: "Bion-M:100,Virtako:50").', order: 5,
@@ -102,12 +88,23 @@ const categories: ImportCategory[] = [
       { key: 'latitude', label: 'latitude' },
       { key: 'longitude', label: 'longitude' },
     ],
-    importFn: (rows) => bulkImportSpotDemoPlots(rows as SpotDemoPlotRow[])
+    apiPath: '/api/migration/spot-demoplot',
   },
 ]
 
 export default function MigrationHubPage() {
   const [activeImport, setActiveImport] = useState<ImportCategory | null>(null)
+
+  async function handleImport(apiPath: string, rows: any[]) {
+    const res = await fetch(apiPath, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ rows }),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Import gagal')
+    return data
+  }
 
   return (
     <div>
@@ -115,7 +112,7 @@ export default function MigrationHubPage() {
         <MigrationImportModal
           title={activeImport.title}
           columns={activeImport.columns}
-          onImport={activeImport.importFn}
+          onImport={(rows) => handleImport(activeImport.apiPath, rows)}
           onClose={() => setActiveImport(null)}
           onSuccess={() => {}}
         />
@@ -127,7 +124,7 @@ export default function MigrationHubPage() {
       </div>
 
       <div style={{ padding: '1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', marginBottom: '2rem', fontSize: '0.875rem', color: '#1e40af' }}>
-        <strong>⚠️ Penting — Urutan Import:</strong> Lakukan import secara berurutan: <strong>Area → User → Customer Behavior → Demo Plot</strong>. Data petani akan otomatis dibuat dari data CB.
+        <strong>⚠️ Penting — Urutan Import:</strong> Lakukan import secara berurutan: <strong>Area → User → Customer Behavior → Demo Plot → Spot Demo Plot</strong>. Data petani akan otomatis dibuat dari data CB.
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
