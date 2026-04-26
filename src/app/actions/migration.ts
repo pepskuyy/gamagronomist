@@ -247,10 +247,14 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
   const farmers = await prisma.farmer.findMany({ select: { id: true, name: true } })
   const farmerMap = new Map(farmers.map(f => [f.name.toLowerCase().trim(), f.id]))
 
-  // Build a product name → id map for DemoPlotDetail creation
+  // Pre-load products to resolve names to IDs
   const products = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
   const productByName = new Map(products.map(p => [p.name.toLowerCase().trim(), p.id]))
   const productByCode = new Map(products.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
+
+  // Pre-load users to avoid slow queries in the loop
+  const users = await prisma.user.findMany({ select: { id: true, username: true } })
+  const userByUsername = new Map(users.map(u => [u.username.toLowerCase().trim(), u.id]))
 
   for (let i = 0; i < rows.length; i++) {
     const r = rows[i]
@@ -294,12 +298,10 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
     // Default to admin/spv if username_fo is completely missing (fallback), but we require it.
     let foId = session.userId
     if (r.username_fo) {
-      const u = await prisma.user.findFirst({
-        where: { username: { equals: r.username_fo.trim(), mode: 'insensitive' } },
-        select: { id: true }
-      })
-      if (u) foId = u.id
-      else {
+      const foundUserId = userByUsername.get(r.username_fo.trim().toLowerCase())
+      if (foundUserId) {
+        foId = foundUserId
+      } else {
         errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Username FO "${r.username_fo}" tidak ditemukan.` })
         skipped++; continue
       }

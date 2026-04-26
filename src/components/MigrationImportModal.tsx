@@ -73,7 +73,7 @@ export default function MigrationImportModal({ title, columns, onImport, onClose
     setProgress({ current: 0, total: preview.length })
 
     try {
-      const CHUNK_SIZE = 100
+      const CHUNK_SIZE = 20
       let totalInserted = 0
       let totalSkipped = 0
       let allErrors: any[] = []
