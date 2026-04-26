@@ -6,7 +6,8 @@ import MigrationImportModal from '@/components/MigrationImportModal'
 import {
   bulkImportAreas, AreaRow,
   bulkImportCustomerBehaviors, CBRow,
-  bulkImportDemoPlots, DemoPlotRow
+  bulkImportDemoPlots, DemoPlotRow,
+  bulkImportSpotDemoPlots, SpotDemoPlotRow
 } from '@/app/actions/migration'
 
 type ImportCategory = {
@@ -86,7 +87,22 @@ const categories: ImportCategory[] = [
       { key: 'latitude', label: 'latitude' },
       { key: 'longitude', label: 'longitude' },
     ],
-    importFn: (rows) => bulkImportDemoPlots(rows as DemoPlotRow[])
+  },
+  {
+    id: 'spot-demoplot', icon: '🎯', title: 'Spot Demo Plot', description: 'Import data Spot Demo Plot. Kolom produk diisi nama produk dipisah koma (misal: "Bion-M:100,Virtako:50").', order: 5,
+    columns: [
+      { key: 'date', label: 'tanggal', required: true },
+      { key: 'username_fo', label: 'username_fo', required: true },
+      { key: 'kabupaten', label: 'kabupaten' },
+      { key: 'kecamatan', label: 'kecamatan' },
+      { key: 'desa', label: 'desa' },
+      { key: 'weeds', label: 'gulma' },
+      { key: 'produk', label: 'produk' },
+      { key: 'observationResult', label: 'hasil_observasi' },
+      { key: 'latitude', label: 'latitude' },
+      { key: 'longitude', label: 'longitude' },
+    ],
+    importFn: (rows) => bulkImportSpotDemoPlots(rows as SpotDemoPlotRow[])
   },
 ]
 

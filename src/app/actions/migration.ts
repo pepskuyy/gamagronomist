@@ -369,3 +369,106 @@ export async function bulkImportDemoPlots(rows: DemoPlotRow[]) {
   }
   return { success: true, inserted, skipped, errors }
 }
+
+// ─── SPOT DEMO PLOT ────────────────────────────
+export type SpotDemoPlotRow = {
+  date: string; username_fo: string; kabupaten?: string; kecamatan?: string;
+  desa?: string; weeds?: string; produk?: string; observationResult?: string;
+  latitude?: string; longitude?: string;
+}
+
+export async function bulkImportSpotDemoPlots(rows: SpotDemoPlotRow[]) {
+  await requireAdmin()
+  const cookieStore = await cookies()
+  const token = cookieStore.get('session')?.value
+  const session = await decrypt(token as string)
+  let inserted = 0, skipped = 0
+  const errors: { row: number; name: string; reason: string }[] = []
+
+  // Pre-load products to resolve names to IDs
+  const products = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
+  const productByName = new Map(products.map(p => [p.name.toLowerCase().trim(), p.id]))
+  const productByCode = new Map(products.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
+
+  for (let i = 0; i < rows.length; i++) {
+    const r = rows[i]
+    const rowNum = i + 2
+    if (!r.date?.trim()) { errors.push({ row: rowNum, name: '-', reason: 'Tanggal kosong.' }); skipped++; continue }
+    if (!r.username_fo?.trim()) { errors.push({ row: rowNum, name: '-', reason: 'username_fo kosong.' }); skipped++; continue }
+
+    let parsedDate: Date
+    try {
+      const d = r.date.trim()
+      if (d.includes('/')) {
+        const [day, month, year] = d.split('/')
+        parsedDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`)
+      } else {
+        parsedDate = new Date(d)
+      }
+      if (isNaN(parsedDate.getTime())) throw new Error('Invalid')
+    } catch {
+      errors.push({ row: rowNum, name: r.username_fo, reason: `Format tanggal "${r.date}" tidak valid.` }); skipped++; continue
+    }
+
+    let foId = session.userId
+    const u = await prisma.user.findFirst({
+      where: { username: { equals: r.username_fo.trim(), mode: 'insensitive' } },
+      select: { id: true, areaId: true }
+    })
+    if (u) {
+      foId = u.id
+    } else {
+      errors.push({ row: rowNum, name: r.username_fo, reason: `Username FO "${r.username_fo}" tidak ditemukan.` })
+      skipped++; continue
+    }
+
+    const lat = r.latitude ? parseFloat(r.latitude) : null
+    const lng = r.longitude ? parseFloat(r.longitude) : null
+
+    try {
+      const dp = await prisma.spotDemplot.create({
+        data: {
+          userId: foId,
+          snapshotAreaId: u.areaId,
+          date: parsedDate,
+          districtKab: r.kabupaten?.trim() || null,
+          districtKec: r.kecamatan?.trim() || null,
+          districtDesa: r.desa?.trim() || null,
+          weeds: r.weeds?.trim() || null,
+          observationResult: r.observationResult?.trim() || null,
+          latitude: isNaN(lat as number) ? null : lat,
+          longitude: isNaN(lng as number) ? null : lng,
+        }
+      })
+
+      // Parse products "ProductA:2, ProductB"
+      if (r.produk?.trim()) {
+        const entries = r.produk.split(',').map(s => s.trim()).filter(Boolean)
+        for (const entry of entries) {
+          const colonIdx = entry.lastIndexOf(':')
+          let productKey: string
+          let qty = 1
+          if (colonIdx !== -1) {
+            productKey = entry.slice(0, colonIdx).trim()
+            qty = parseFloat(entry.slice(colonIdx + 1).trim()) || 1
+          } else {
+            productKey = entry.trim()
+          }
+          const productId =
+            productByName.get(productKey.toLowerCase()) ??
+            productByCode.get(productKey.toLowerCase())
+          
+          if (productId) {
+            await prisma.spotDemplotDetail.create({
+              data: { spotDemplotId: dp.id, productId, usage: qty }
+            })
+          }
+        }
+      }
+      inserted++
+    } catch (e: any) {
+      errors.push({ row: rowNum, name: r.username_fo, reason: 'Gagal disimpan: ' + e.message }); skipped++
+    }
+  }
+  return { success: true, inserted, skipped, errors }
+}
