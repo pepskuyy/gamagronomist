@@ -52,12 +52,12 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 })
     }
 
-    const { rows } = await req.json()
+    const { rows, repairMode } = await req.json()
     if (!Array.isArray(rows) || rows.length === 0) {
       return NextResponse.json({ error: 'Data kosong.' }, { status: 400 })
     }
 
-    let inserted = 0, skipped = 0
+    let inserted = 0, skipped = 0, repaired = 0
     const errors: { row: number; name: string; reason: string }[] = []
 
     // Pre-load all reference data upfront
@@ -85,6 +85,63 @@ export async function POST(req: NextRequest) {
         errors.push({ row: rowNum, name: r.username_fo, reason: `Username FO "${r.username_fo}" tidak ditemukan.` }); skipped++; continue
       }
 
+      // In repair mode: find existing SpotDemplot and add missing products
+      if (repairMode) {
+        try {
+          const dateStart = new Date(parsedDate)
+          dateStart.setHours(0, 0, 0, 0)
+          const dateEnd = new Date(parsedDate)
+          dateEnd.setHours(23, 59, 59, 999)
+
+          const existingSPs = await prisma.spotDemplot.findMany({
+            where: {
+              date: { gte: dateStart, lte: dateEnd },
+              userId: foUser.id,
+              ...(r.desa?.trim() ? {
+                districtDesa: { equals: r.desa.trim(), mode: 'insensitive' as const }
+              } : {}),
+            },
+            include: { details: true },
+          })
+
+          if (existingSPs.length > 0) {
+            const sp = existingSPs[0]
+            // Only repair if no details exist yet
+            if (sp.details.length === 0 && r.produk?.trim()) {
+              const entries = r.produk.split(',').map((s: string) => s.trim()).filter(Boolean)
+              let productsAdded = 0
+              for (const entry of entries) {
+                const colonIdx = entry.lastIndexOf(':')
+                let productKey: string
+                let qty = 1
+                if (colonIdx !== -1) {
+                  productKey = entry.slice(0, colonIdx).trim()
+                  qty = parseFloat(entry.slice(colonIdx + 1).trim()) || 1
+                } else {
+                  productKey = entry.trim()
+                }
+                const productId = findProductId(productKey, productByName, productByCode, allProducts)
+                if (productId) {
+                  await prisma.spotDemplotDetail.create({
+                    data: { spotDemplotId: sp.id, productId, usage: qty }
+                  })
+                  productsAdded++
+                }
+              }
+              if (productsAdded > 0) repaired++
+              else skipped++
+            } else {
+              skipped++ // Already has products or no product data
+            }
+            continue
+          }
+          // If not found in repair mode, fall through to create new
+        } catch {
+          // If repair fails, fall through to create new
+        }
+      }
+
+      // Normal import: create new SpotDemplot
       const lat = r.latitude ? parseFloat(r.latitude) : null
       const lng = r.longitude ? parseFloat(r.longitude) : null
 
@@ -130,7 +187,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, inserted, skipped, errors })
+    return NextResponse.json({ success: true, inserted, skipped, repaired, errors })
   } catch (err: any) {
     return NextResponse.json({ error: 'Terjadi kesalahan server: ' + (err.message || 'Unknown') }, { status: 500 })
   }

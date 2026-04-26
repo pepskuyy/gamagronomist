@@ -91,6 +91,7 @@ const categories: ImportCategory[] = [
       { key: 'longitude', label: 'longitude' },
     ],
     apiPath: '/api/migration/spot-demoplot',
+    supportsRepair: true,
   },
 ]
 
