@@ -12,7 +12,11 @@ function parseDate(raw: string): Date | null {
   try {
     const d = raw.trim()
     let parsed: Date
-    if (d.includes('/')) {
+    if (/^\d+$/.test(d)) {
+      // Excel serial date (days since Jan 1, 1900)
+      const excelDays = parseInt(d, 10)
+      parsed = new Date(Math.round((excelDays - 25569) * 86400 * 1000))
+    } else if (d.includes('/')) {
       const [day, month, year] = d.split('/')
       parsed = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`)
     } else {

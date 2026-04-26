@@ -46,7 +46,10 @@ export async function POST(req: NextRequest) {
       if (r.tanggal?.trim()) {
         try {
           const d = r.tanggal.trim()
-          if (d.includes('/')) {
+          if (/^\d+$/.test(d)) {
+            const excelDays = parseInt(d, 10)
+            parsedDate = new Date(Math.round((excelDays - 25569) * 86400 * 1000))
+          } else if (d.includes('/')) {
             const [day, month, year] = d.split('/')
             parsedDate = new Date(`${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`)
           } else {
