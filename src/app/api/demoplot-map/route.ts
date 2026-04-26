@@ -85,46 +85,31 @@ export async function GET(req: any) {
       })
 
     // Fetch Spot Demo Plots (separate model: SpotDemplot)
-    // Build a basic where clause for spot demo plots based on role
+    // Apply the same dashboard filters (areaId, userId, start, end) as DemoPlot
     const spotWhere: any = {
       latitude: { not: null },
       longitude: { not: null },
     }
 
-    // Apply role-based filtering for spot demo plots
-    const role = session.role
-    if (role === 'FO' || role === 'INTERN') {
-      spotWhere.userId = session.userId
-    } else if (role === 'AFA') {
-      const fos = await prisma.user.findMany({
-        where: { afaId: session.userId },
-        select: { id: true }
-      })
-      spotWhere.userId = { in: [session.userId, ...fos.map(f => f.id)] }
-    } else if (role === 'SPV') {
-      const user = await prisma.user.findUnique({ where: { id: session.userId }, select: { areaId: true } })
-      if (user?.areaId) {
-        const areaUsers = await prisma.user.findMany({
-          where: { areaId: user.areaId },
-          select: { id: true }
-        })
-        spotWhere.userId = { in: areaUsers.map(u => u.id) }
-      }
+    // Apply areaId filter
+    const qAreaId = searchParams.get('areaId')
+    if (qAreaId) {
+      spotWhere.snapshotAreaId = qAreaId
     }
-    // ADMIN sees all
 
-    // Apply date filters if present
-    if (searchParams.get('month') && searchParams.get('year')) {
-      const month = parseInt(searchParams.get('month'))
-      const year = parseInt(searchParams.get('year'))
-      const start = new Date(year, month - 1, 1)
-      const end = new Date(year, month, 1)
-      spotWhere.date = { gte: start, lt: end }
-    } else if (searchParams.get('year')) {
-      const year = parseInt(searchParams.get('year'))
-      const start = new Date(year, 0, 1)
-      const end = new Date(year + 1, 0, 1)
-      spotWhere.date = { gte: start, lt: end }
+    // Apply userId filter
+    const qUserId = searchParams.get('userId')
+    if (qUserId) {
+      spotWhere.userId = qUserId
+    }
+
+    // Apply date range filters (start / end from dashboard)
+    const qStart = searchParams.get('start')
+    const qEnd = searchParams.get('end')
+    if (qStart || qEnd) {
+      spotWhere.date = {}
+      if (qStart) spotWhere.date.gte = new Date(`${qStart}T00:00:00.000Z`)
+      if (qEnd) spotWhere.date.lte = new Date(`${qEnd}T23:59:59.999Z`)
     }
 
     const spotDemoPlots = await prisma.spotDemplot.findMany({
