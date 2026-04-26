@@ -30,7 +30,7 @@ type StorePoint = {
 const TYPE_CONFIG = {
   spot: {
     label: 'Spot Demo Plot',
-    desc: '1 produk',
+    desc: 'Kegiatan terpisah',
     color: '#f59e0b',
     emoji: '⭐',
     bg: '#fffbeb',
@@ -39,7 +39,7 @@ const TYPE_CONFIG = {
   },
   mini: {
     label: 'Mini Demo Plot',
-    desc: '2–3 produk',
+    desc: '1–3 produk',
     color: '#3b82f6',
     emoji: '🔵',
     bg: '#eff6ff',
@@ -194,9 +194,9 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
 
       {/* Legend indicator */}
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-        <span>⭐ Spot (amber)</span>
-        <span>🔵 Mini (biru)</span>
-        <span>🟢 Full (hijau)</span>
+        <span>⭐ Spot Demo Plot — kegiatan terpisah (amber)</span>
+        <span>🔵 Mini Demo Plot — 1–3 produk (biru)</span>
+        <span>🟢 Full Demo Plot — ≥4 produk (hijau)</span>
         <span style={{ color: '#7c3aed', fontWeight: 600 }}>🟣 Toko/Kios (ungu)</span>
       </div>
 
