@@ -65,23 +65,55 @@ export default function MigrationImportModal({ title, columns, onImport, onClose
 
   const [importError, setImportError] = useState<string | null>(null)
 
+  const [progress, setProgress] = useState<{ current: number, total: number } | null>(null)
+
   async function handleImport() {
     setLoading(true)
     setImportError(null)
+    setProgress({ current: 0, total: preview.length })
+
     try {
-      const res = await onImport(preview)
-      setResult(res)
+      const CHUNK_SIZE = 100
+      let totalInserted = 0
+      let totalSkipped = 0
+      let allErrors: any[] = []
+
+      for (let i = 0; i < preview.length; i += CHUNK_SIZE) {
+        const chunk = preview.slice(i, i + CHUNK_SIZE)
+        const res = await onImport(chunk)
+        
+        totalInserted += res.inserted || 0
+        totalSkipped += res.skipped || 0
+        
+        if (res.errors && Array.isArray(res.errors)) {
+          // Correct the row number based on the chunk offset
+          const correctedErrors = res.errors.map((e: any) => ({
+            ...e,
+            row: i + e.row // e.row is usually chunkIndex + 2
+          }))
+          allErrors = [...allErrors, ...correctedErrors]
+        }
+        
+        setProgress({ current: Math.min(i + CHUNK_SIZE, preview.length), total: preview.length })
+      }
+
+      setResult({
+        inserted: totalInserted,
+        skipped: totalSkipped,
+        errors: allErrors
+      })
       setStep('done')
-      if (res.inserted > 0) onSuccess()
+      if (totalInserted > 0) onSuccess()
     } catch (err: any) {
       console.error('Import error:', err)
       setImportError(
         err?.message?.includes('timed out') || err?.message?.includes('FUNCTION_INVOCATION_TIMEOUT')
-          ? '⏱️ Server timeout! Data terlalu banyak untuk diproses sekaligus. Coba import dengan jumlah data yang lebih kecil (misal 5-10 baris).'
+          ? '⏱️ Server timeout! Koneksi terputus saat memproses data. Silakan coba lagi.'
           : `❌ Terjadi kesalahan saat import: ${err?.message || 'Unknown error'}. Silakan coba lagi.`
       )
     } finally {
       setLoading(false)
+      setProgress(null)
     }
   }
 
@@ -151,9 +183,14 @@ export default function MigrationImportModal({ title, columns, onImport, onClose
             )}
 
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button onClick={() => { setStep('upload'); setPreview([]); setImportError(null); if (fileRef.current) fileRef.current.value = '' }} className="btn btn-outline" style={{ flex: 1 }}>← Ganti File</button>
-              <button onClick={handleImport} disabled={loading} className="btn btn-primary" style={{ flex: 2 }}>
-                {loading ? '⏳ Sedang Mengimpor...' : `✅ Import ${preview.length} Data`}
+              <button onClick={() => { setStep('upload'); setPreview([]); setImportError(null); if (fileRef.current) fileRef.current.value = '' }} disabled={loading} className="btn btn-outline" style={{ flex: 1 }}>← Ganti File</button>
+              <button onClick={handleImport} disabled={loading} className="btn btn-primary" style={{ flex: 2, position: 'relative', overflow: 'hidden' }}>
+                {loading && progress ? (
+                  <>
+                    <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, background: 'rgba(255,255,255,0.2)', width: `${(progress.current / progress.total) * 100}%`, transition: 'width 0.3s ease' }} />
+                    <span style={{ position: 'relative', zIndex: 1 }}>⏳ Mengimpor {progress.current} / {progress.total}...</span>
+                  </>
+                ) : `✅ Import ${preview.length} Data`}
               </button>
             </div>
           </>
