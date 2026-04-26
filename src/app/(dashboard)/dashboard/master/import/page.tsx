@@ -12,6 +12,7 @@ type ImportCategory = {
   order: number
   columns: { key: string; label: string; required?: boolean }[]
   apiPath: string
+  supportsRepair?: boolean
 }
 
 const categories: ImportCategory[] = [
@@ -73,6 +74,7 @@ const categories: ImportCategory[] = [
       { key: 'longitude', label: 'longitude' },
     ],
     apiPath: '/api/migration/demoplot',
+    supportsRepair: true,
   },
   {
     id: 'spot-demoplot', icon: '🎯', title: 'Spot Demo Plot', description: 'Import data Spot Demo Plot. Kolom produk diisi nama produk dipisah koma (misal: "Bion-M:100,Virtako:50").', order: 5,
@@ -94,12 +96,13 @@ const categories: ImportCategory[] = [
 
 export default function MigrationHubPage() {
   const [activeImport, setActiveImport] = useState<ImportCategory | null>(null)
+  const [repairMode, setRepairMode] = useState(false)
 
   async function handleImport(apiPath: string, rows: any[]) {
     const res = await fetch(apiPath, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ rows }),
+      body: JSON.stringify({ rows, repairMode }),
     })
     const data = await res.json()
     if (!res.ok) throw new Error(data.error || 'Import gagal')
@@ -110,10 +113,10 @@ export default function MigrationHubPage() {
     <div>
       {activeImport && (
         <MigrationImportModal
-          title={activeImport.title}
+          title={repairMode ? `🔧 Repair Produk — ${activeImport.title}` : activeImport.title}
           columns={activeImport.columns}
           onImport={(rows) => handleImport(activeImport.apiPath, rows)}
-          onClose={() => setActiveImport(null)}
+          onClose={() => { setActiveImport(null); setRepairMode(false) }}
           onSuccess={() => {}}
         />
       )}
@@ -142,9 +145,16 @@ export default function MigrationHubPage() {
                 <strong>Kolom:</strong> {cat.columns.map(c => c.label).join(', ')}
               </div>
             </div>
-            <button onClick={() => setActiveImport(cat)} className="btn btn-primary" style={{ width: '100%' }}>
-              📥 Import {cat.title}
-            </button>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              <button onClick={() => { setRepairMode(false); setActiveImport(cat) }} className="btn btn-primary" style={{ flex: 1 }}>
+                📥 Import {cat.title}
+              </button>
+              {cat.supportsRepair && (
+                <button onClick={() => { setRepairMode(true); setActiveImport(cat) }} className="btn btn-outline" style={{ flex: 0, whiteSpace: 'nowrap', fontSize: '0.8rem' }} title="Upload ulang file yang sama untuk memperbaiki data produk yang hilang pada data migrasi sebelumnya">
+                  🔧 Repair
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>

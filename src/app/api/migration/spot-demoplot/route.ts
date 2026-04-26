@@ -26,6 +26,24 @@ function parseDate(raw: string): Date | null {
   } catch { return null }
 }
 
+function findProductId(
+  key: string,
+  productByName: Map<string, string>,
+  productByCode: Map<string, string>,
+  allProducts: { id: string; name: string; code: string | null }[]
+): string | null {
+  const k = key.toLowerCase().trim()
+  if (productByName.has(k)) return productByName.get(k)!
+  if (productByCode.has(k)) return productByCode.get(k)!
+  const startsWithMatch = allProducts.find(p => p.name.toLowerCase().startsWith(k))
+  if (startsWithMatch) return startsWithMatch.id
+  const reverseMatch = allProducts.find(p => k.startsWith(p.name.toLowerCase()))
+  if (reverseMatch) return reverseMatch.id
+  const containsMatch = allProducts.find(p => p.name.toLowerCase().includes(k) || k.includes(p.name.toLowerCase()))
+  if (containsMatch) return containsMatch.id
+  return null
+}
+
 export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies()
@@ -43,9 +61,9 @@ export async function POST(req: NextRequest) {
     const errors: { row: number; name: string; reason: string }[] = []
 
     // Pre-load all reference data upfront
-    const products = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
-    const productByName = new Map(products.map(p => [p.name.toLowerCase().trim(), p.id]))
-    const productByCode = new Map(products.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
+    const allProducts = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
+    const productByName = new Map(allProducts.map(p => [p.name.toLowerCase().trim(), p.id]))
+    const productByCode = new Map(allProducts.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
 
     const users = await prisma.user.findMany({ select: { id: true, username: true, areaId: true } })
     const userByUsername = new Map(users.map(u => [u.username.toLowerCase().trim(), u]))
@@ -98,7 +116,7 @@ export async function POST(req: NextRequest) {
             } else {
               productKey = entry.trim()
             }
-            const productId = productByName.get(productKey.toLowerCase()) ?? productByCode.get(productKey.toLowerCase())
+            const productId = findProductId(productKey, productByName, productByCode, allProducts)
             if (productId) {
               await prisma.spotDemplotDetail.create({
                 data: { spotDemplotId: dp.id, productId, usage: qty }

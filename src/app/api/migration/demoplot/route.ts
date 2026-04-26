@@ -26,6 +26,33 @@ function parseDate(raw: string): Date | null {
   } catch { return null }
 }
 
+/**
+ * Fuzzy product lookup: tries exact match first, then partial (startsWith / includes).
+ * Returns the first matching product ID, or null.
+ */
+function findProductId(
+  key: string,
+  productByName: Map<string, string>,
+  productByCode: Map<string, string>,
+  allProducts: { id: string; name: string; code: string | null }[]
+): string | null {
+  const k = key.toLowerCase().trim()
+  // 1. Exact match by name
+  if (productByName.has(k)) return productByName.get(k)!
+  // 2. Exact match by code
+  if (productByCode.has(k)) return productByCode.get(k)!
+  // 3. Partial match: product name starts with the key
+  const startsWithMatch = allProducts.find(p => p.name.toLowerCase().startsWith(k))
+  if (startsWithMatch) return startsWithMatch.id
+  // 4. Partial match: key starts with product name (e.g., "Biogent 30" matches "Biogent")
+  const reverseMatch = allProducts.find(p => k.startsWith(p.name.toLowerCase()))
+  if (reverseMatch) return reverseMatch.id
+  // 5. Contains match (least specific)
+  const containsMatch = allProducts.find(p => p.name.toLowerCase().includes(k) || k.includes(p.name.toLowerCase()))
+  if (containsMatch) return containsMatch.id
+  return null
+}
+
 export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies()
@@ -34,21 +61,21 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 })
     }
 
-    const { rows } = await req.json()
+    const { rows, repairMode } = await req.json()
     if (!Array.isArray(rows) || rows.length === 0) {
       return NextResponse.json({ error: 'Data kosong.' }, { status: 400 })
     }
 
-    let inserted = 0, skipped = 0
+    let inserted = 0, skipped = 0, repaired = 0
     const errors: { row: number; name: string; reason: string }[] = []
 
     // Pre-load all reference data upfront
     const farmers = await prisma.farmer.findMany({ select: { id: true, name: true } })
     const farmerMap = new Map(farmers.map(f => [f.name.toLowerCase().trim(), f.id]))
 
-    const products = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
-    const productByName = new Map(products.map(p => [p.name.toLowerCase().trim(), p.id]))
-    const productByCode = new Map(products.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
+    const allProducts = await prisma.product.findMany({ select: { id: true, name: true, code: true } })
+    const productByName = new Map(allProducts.map(p => [p.name.toLowerCase().trim(), p.id]))
+    const productByCode = new Map(allProducts.filter(p => p.code).map(p => [p.code!.toLowerCase().trim(), p.id]))
 
     const users = await prisma.user.findMany({ select: { id: true, username: true, areaId: true } })
     const userByUsername = new Map(users.map(u => [u.username.toLowerCase().trim(), u]))
@@ -62,7 +89,7 @@ export async function POST(req: NextRequest) {
 
       const parsedDate = parseDate(r.date)
       if (!parsedDate) {
-        errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Format tanggal "${r.date}" tidak valid. Gunakan DD/MM/YYYY atau YYYY-MM-DD.` }); skipped++; continue
+        errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Format tanggal "${r.date}" tidak valid.` }); skipped++; continue
       }
 
       const foUser = userByUsername.get(r.username_fo.trim().toLowerCase())
@@ -70,6 +97,67 @@ export async function POST(req: NextRequest) {
         errors.push({ row: rowNum, name: r.farmerName || '-', reason: `Username FO "${r.username_fo}" tidak ditemukan.` }); skipped++; continue
       }
 
+      // In repair mode: find existing migrated DemoPlot and add missing products
+      if (repairMode) {
+        try {
+          // Find a matching migrated demo plot
+          const dateStart = new Date(parsedDate)
+          dateStart.setHours(0, 0, 0, 0)
+          const dateEnd = new Date(parsedDate)
+          dateEnd.setHours(23, 59, 59, 999)
+
+          const existingDPs = await prisma.demoPlot.findMany({
+            where: {
+              date: { gte: dateStart, lte: dateEnd },
+              request: {
+                foId: foUser.id,
+                plan: 'Migrated Standalone Demo Plot',
+              },
+              ...(r.farmerName?.trim() ? {
+                farmer: { name: { equals: r.farmerName.trim(), mode: 'insensitive' as const } }
+              } : {}),
+            },
+            include: { details: true },
+          })
+
+          if (existingDPs.length > 0) {
+            const dp = existingDPs[0]
+            // Only repair if no details exist yet
+            if (dp.details.length === 0 && r.produk?.trim()) {
+              const entries = r.produk.split(',').map((s: string) => s.trim()).filter(Boolean)
+              let productsAdded = 0
+              for (const entry of entries) {
+                const colonIdx = entry.lastIndexOf(':')
+                let productKey: string
+                let qty = 1
+                if (colonIdx !== -1) {
+                  productKey = entry.slice(0, colonIdx).trim()
+                  qty = parseFloat(entry.slice(colonIdx + 1).trim()) || 1
+                } else {
+                  productKey = entry.trim()
+                }
+                const productId = findProductId(productKey, productByName, productByCode, allProducts)
+                if (productId) {
+                  await prisma.demoPlotDetail.create({
+                    data: { demoPlotId: dp.id, productId, actualUsage: qty }
+                  })
+                  productsAdded++
+                }
+              }
+              if (productsAdded > 0) repaired++
+              else skipped++
+            } else {
+              skipped++ // Already has products or no product data
+            }
+            continue
+          }
+          // If not found in repair mode, fall through to create new
+        } catch {
+          // If repair fails, fall through to create new
+        }
+      }
+
+      // Normal import: create new DemoPlot
       let farmerId = r.farmerName ? farmerMap.get(r.farmerName.trim().toLowerCase()) || null : null
       const lat = r.latitude ? parseFloat(r.latitude) : null
       const lng = r.longitude ? parseFloat(r.longitude) : null
@@ -117,6 +205,7 @@ export async function POST(req: NextRequest) {
           }
         })
 
+        // Parse products with fuzzy matching
         if (r.produk?.trim()) {
           const entries = r.produk.split(',').map((s: string) => s.trim()).filter(Boolean)
           for (const entry of entries) {
@@ -129,7 +218,7 @@ export async function POST(req: NextRequest) {
             } else {
               productKey = entry.trim()
             }
-            const productId = productByName.get(productKey.toLowerCase()) ?? productByCode.get(productKey.toLowerCase())
+            const productId = findProductId(productKey, productByName, productByCode, allProducts)
             if (productId) {
               await prisma.demoPlotDetail.create({
                 data: { demoPlotId: dp.id, productId, actualUsage: qty }
@@ -143,7 +232,7 @@ export async function POST(req: NextRequest) {
       }
     }
 
-    return NextResponse.json({ success: true, inserted, skipped, errors })
+    return NextResponse.json({ success: true, inserted, skipped, repaired, errors })
   } catch (err: any) {
     return NextResponse.json({ error: 'Terjadi kesalahan server: ' + (err.message || 'Unknown') }, { status: 500 })
   }
