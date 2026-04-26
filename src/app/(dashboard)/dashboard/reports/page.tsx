@@ -300,7 +300,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                   <td style={tdStyle}>{rp.districtDesa || rp.districtKab || '-'}</td>
                   <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.observationResult || '-'}</td>
                   <td style={tdStyle}>
-                    <button className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }} onClick={() => alert('Detail belum tersedia')}>Detail</button>
+                    <button className="btn btn-outline" disabled style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', opacity: 0.5, cursor: 'not-allowed' }}>Detail</button>
                   </td>
                 </tr>
               ))}
