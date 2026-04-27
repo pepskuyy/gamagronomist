@@ -33,17 +33,14 @@ export default function NewSpotDemplotPage() {
     fetch('/api/products').then(res => res.json()).then(data => {
       setProducts(data || [])
     })
-    fetch('/api/stock')
+    fetch('/api/stock/balance')
       .then(r => r.json())
-      .then(d => {
-        if (d?.ledger) {
-          const bal: Record<string, number> = {}
-          d.ledger.forEach((tx: any) => {
-            bal[tx.productId] = (bal[tx.productId] || 0) + tx.quantity
-          })
-          setStockBalance(bal)
-        }
+      .then((data: { productId: string; quantity: number }[]) => {
+        const bal: Record<string, number> = {}
+        data.forEach(s => { bal[s.productId] = s.quantity })
+        setStockBalance(bal)
       })
+      .catch(() => {})
   }, [])
 
   function toggleWeed(weed: string) {
