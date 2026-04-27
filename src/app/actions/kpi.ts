@@ -54,11 +54,13 @@ export async function setAreaTarget(data: {
 } & Targets) {
   try {
     const { areaId, month, year, ...targets } = data
-    await prisma.kpiTarget.upsert({
+    console.log(`[KPI SET] Saving target: areaId=${areaId}, month=${month}, year=${year}`, targets)
+    const result = await prisma.kpiTarget.upsert({
       where: { areaId_month_year: { areaId: areaId ?? null, month, year } },
       update: targets,
       create: { areaId: areaId ?? null, month, year, ...targets },
     })
+    console.log(`[KPI SET] Saved record id=${result.id}, areaId=${result.areaId}`)
     revalidatePath('/dashboard')
     return { success: true }
   } catch (error) {
@@ -189,21 +191,35 @@ export async function getAreaTargetData(
     })
     const userIds = allUsers.map(u => u.id)
 
-    // Sum targets across ALL KpiTarget records for this period
-    const allTargets = await prisma.kpiTarget.findMany({ where: { month, year } })
-    console.log(`[KPI] Semua Area: found ${allTargets.length} KpiTarget records for ${month}/${year}`, allTargets.map(t => ({ areaId: t.areaId, dp: t.targetDemoPlot, kios: t.targetVisitKios, gather: t.targetGathering, comp: t.targetCompany, cb: t.targetBehavior })))
-    
-    const sumTargets: Targets = allTargets.reduce((acc, t) => ({
-      targetDemoPlot:  acc.targetDemoPlot  + t.targetDemoPlot,
-      targetVisitKios: acc.targetVisitKios + t.targetVisitKios,
-      targetGathering: acc.targetGathering + t.targetGathering,
-      targetCompany:   acc.targetCompany   + t.targetCompany,
-      targetBehavior:  acc.targetBehavior  + t.targetBehavior,
-    }), { ...EMPTY_TARGETS })
-    console.log(`[KPI] Aggregated targets:`, sumTargets)
+    // Use Prisma aggregate for reliable SUM across all KpiTarget records
+    const agg = await prisma.kpiTarget.aggregate({
+      where: { month, year },
+      _sum: {
+        targetDemoPlot: true,
+        targetVisitKios: true,
+        targetGathering: true,
+        targetCompany: true,
+        targetBehavior: true,
+      },
+      _count: true,
+    })
+
+    console.log(`[KPI] Semua Area aggregate for ${month}/${year}: count=${agg._count}`, agg._sum)
+
+    // Also log individual records for debugging
+    const allRecords = await prisma.kpiTarget.findMany({ where: { month, year }, select: { areaId: true, targetDemoPlot: true } })
+    console.log(`[KPI] Individual records:`, JSON.stringify(allRecords))
+
+    const sumTargets: Targets = {
+      targetDemoPlot:  agg._sum.targetDemoPlot  ?? 0,
+      targetVisitKios: agg._sum.targetVisitKios ?? 0,
+      targetGathering: agg._sum.targetGathering ?? 0,
+      targetCompany:   agg._sum.targetCompany   ?? 0,
+      targetBehavior:  agg._sum.targetBehavior  ?? 0,
+    }
 
     const data = await computeForArea(userIds, month, year, null)
-    return { ...data, targets: sumTargets, hasTarget: allTargets.length > 0 }
+    return { ...data, targets: sumTargets, hasTarget: agg._count > 0 }
   }
 
   // Specific area OR "Tanpa Area"
