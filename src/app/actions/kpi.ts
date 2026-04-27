@@ -55,11 +55,23 @@ export async function setAreaTarget(data: {
   try {
     const { areaId, month, year, ...targets } = data
     console.log(`[KPI SET] Saving target: areaId=${areaId}, month=${month}, year=${year}`, targets)
-    const result = await prisma.kpiTarget.upsert({
-      where: { areaId_month_year: { areaId: areaId ?? null, month, year } },
-      update: targets,
-      create: { areaId: areaId ?? null, month, year, ...targets },
+    // Prisma upsert does not allow null in compound unique constraints.
+    // So we manually find and update or create.
+    const existing = await prisma.kpiTarget.findFirst({
+      where: { areaId: areaId ?? null, month, year }
     })
+    
+    let result;
+    if (existing) {
+      result = await prisma.kpiTarget.update({
+        where: { id: existing.id },
+        data: targets
+      })
+    } else {
+      result = await prisma.kpiTarget.create({
+        data: { areaId: areaId ?? null, month, year, ...targets }
+      })
+    }
     console.log(`[KPI SET] Saved record id=${result.id}, areaId=${result.areaId}`)
     revalidatePath('/dashboard')
     return { success: true }
@@ -88,8 +100,8 @@ async function computeForArea(
   const df = { createdAt: { gte: startDate, lte: endDate } }
 
   // fetch target record for this area
-  const target = await prisma.kpiTarget.findUnique({
-    where: { areaId_month_year: { areaId: areaId ?? null, month, year } }
+  const target = await prisma.kpiTarget.findFirst({
+    where: { areaId: areaId ?? null, month, year }
   })
 
   const targets: Targets = target
