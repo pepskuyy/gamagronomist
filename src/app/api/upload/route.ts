@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { put } from '@vercel/blob'
 
 export async function POST(req: NextRequest) {
   try {
@@ -29,33 +28,39 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Ukuran file maksimal 8MB.' }, { status: 400 })
     }
 
-    // Generate a unique filename
-    const ext = file.name.split('.').pop() || 'jpg'
-    const timestamp = Date.now()
-    const random = Math.random().toString(36).substring(2, 8)
-    const filename = `gamagronomist/${timestamp}-${random}.${ext}`
+    const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'djfhtirfk'
+    const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET || 'gamagronomist'
 
-    // Upload to Vercel Blob
-    const blob = await put(filename, file, {
-      access: 'public',
-      addRandomSuffix: false,
+    // Upload to Cloudinary (unsigned preset)
+    const cdnForm = new FormData()
+    cdnForm.append('file', file)
+    cdnForm.append('upload_preset', uploadPreset)
+    cdnForm.append('folder', 'gamagronomist')
+
+    const cdnRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+      method: 'POST',
+      body: cdnForm,
     })
+
+    if (!cdnRes.ok) {
+      const err = await cdnRes.json().catch(() => ({}))
+      console.error('Cloudinary error', err)
+      return NextResponse.json({ error: 'Gagal upload ke Cloudinary: ' + (err?.error?.message || 'Unknown') }, { status: 500 })
+    }
+
+    const result = await cdnRes.json()
+
+    // Apply inline transformation for compression (resize max 1280px, quality 78, auto format)
+    const rawUrl = result.secure_url as string
+    const finalUrl = rawUrl.replace('/upload/', '/upload/c_limit,w_1280,h_1280,q_78,f_auto/')
 
     return NextResponse.json({
       success: true,
-      url: blob.url,
+      url: finalUrl,
     })
 
   } catch (error: any) {
     console.error('Upload Error:', error)
-
-    // Provide helpful error message if BLOB_READ_WRITE_TOKEN is missing
-    if (error.message?.includes('BLOB_READ_WRITE_TOKEN') || error.message?.includes('No token')) {
-      return NextResponse.json({
-        error: 'BLOB_READ_WRITE_TOKEN belum diset. Tambahkan Blob Store di Vercel Dashboard → Storage.'
-      }, { status: 500 })
-    }
-
     return NextResponse.json({ error: 'Gagal mengunggah file: ' + (error.message || 'Unknown') }, { status: 500 })
   }
 }
