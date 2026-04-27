@@ -34,14 +34,14 @@ export default async function OpnameApproveDetail({ params }: { params: Promise<
   })
 
   if (!opname) {
-    redirect('/dashboard/opname/approve')
+    redirect('/dashboard/opname')
   }
 
   return (
     <div className="space-y-6">
       <div className="flex-between">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/dashboard/opname/approve" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+          <Link href="/dashboard/opname" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
           <h2 style={{ margin: 0 }}>Review Opname: {opname.user.name}</h2>
         </div>
       </div>

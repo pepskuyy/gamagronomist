@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { PrismaClient } from '@prisma/client'
+import { revalidatePath } from 'next/cache'
 
 const prisma = new PrismaClient()
 
@@ -51,6 +52,7 @@ export async function approveStockOpname(opnameId: string) {
       })
     })
 
+    revalidatePath('/dashboard/opname')
     return { success: true }
   } catch (err: any) {
     console.error('Opname Approve Error:', err)
@@ -79,6 +81,7 @@ export async function rejectStockOpname(opnameId: string) {
       data: { status: 'REJECTED' }
     })
 
+    revalidatePath('/dashboard/opname')
     return { success: true }
   } catch (err: any) {
     console.error('Opname Reject Error:', err)

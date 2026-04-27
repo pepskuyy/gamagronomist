@@ -16,7 +16,7 @@ export default function ApproveClient({ opname }: { opname: any }) {
     startTransition(async () => {
       const res = await approveStockOpname(opname.id)
       if (res?.error) setError(res.error)
-      else router.push('/dashboard/opname/approve')
+      else router.push('/dashboard/opname')
     })
   }
 
@@ -27,7 +27,7 @@ export default function ApproveClient({ opname }: { opname: any }) {
     startTransition(async () => {
       const res = await rejectStockOpname(opname.id)
       if (res?.error) setError(res.error)
-      else router.push('/dashboard/opname/approve')
+      else router.push('/dashboard/opname')
     })
   }
 
