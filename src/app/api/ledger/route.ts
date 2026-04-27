@@ -19,8 +19,26 @@ export async function GET(request: Request) {
     const from    = searchParams.get('from') || ''
     const to      = searchParams.get('to') || ''
     const product = searchParams.get('product') || ''
+    const targetUserId = searchParams.get('userId') || ''
 
-    const where: any = { userId: session.userId }
+    let effectiveUserId = session.userId
+
+    if (targetUserId && targetUserId !== session.userId) {
+      if (session.role === 'AFA') {
+        // Verify target is an FO in the same area
+        const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } })
+        if (!targetUser || targetUser.role !== 'FO' || targetUser.areaId !== session.areaId) {
+          return NextResponse.json({ error: 'Unauthorized to view this user\'s ledger' }, { status: 403 })
+        }
+        effectiveUserId = targetUserId
+      } else if (session.role === 'ADMIN' || session.role === 'SPV') {
+        effectiveUserId = targetUserId
+      } else {
+        return NextResponse.json({ error: 'Unauthorized to view this user\'s ledger' }, { status: 403 })
+      }
+    }
+
+    const where: any = { userId: effectiveUserId }
     if (type)    where.transactionType = type
     if (product) where.productId = product
     if (from || to) {
@@ -49,7 +67,7 @@ export async function GET(request: Request) {
 
     // Fetch full ledger history per product (for running balance calculation)
     const allByProduct = await prisma.ledger.findMany({
-      where: { userId: session.userId, productId: { in: productIds } },
+      where: { userId: effectiveUserId, productId: { in: productIds } },
       select: { id: true, productId: true, quantity: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
     })

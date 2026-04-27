@@ -55,8 +55,10 @@ export default function LedgerHistoryPage() {
   const [ledgers,  setLedgers]  = useState<LedgerItem[]>([])
   const [loading,  setLoading]  = useState(true)
   const [products, setProducts] = useState<{ id: string; name: string }[]>([])
+  const [subordinates, setSubordinates] = useState<{ id: string; name: string; role: string }[]>([])
 
   // Filters
+  const [filterUserId,  setFilterUserId]  = useState('')
   const [filterType,    setFilterType]    = useState('')
   const [filterProduct, setFilterProduct] = useState('')
   const [filterFrom,    setFilterFrom]    = useState(oneMonth)
@@ -69,13 +71,26 @@ export default function LedgerHistoryPage() {
     if (filterProduct) params.set('product', filterProduct)
     if (filterFrom)    params.set('from',    filterFrom)
     if (filterTo)      params.set('to',      filterTo)
+    if (filterUserId)  params.set('userId',  filterUserId)
     const res  = await fetch(`/api/ledger?${params}`)
     const data = await res.json()
     setLedgers(Array.isArray(data) ? data : [])
     setLoading(false)
-  }, [filterType, filterProduct, filterFrom, filterTo])
+  }, [filterType, filterProduct, filterFrom, filterTo, filterUserId])
 
   useEffect(() => { fetchData() }, [fetchData])
+
+  // Fetch subordinates on mount
+  useEffect(() => {
+    fetch('/api/users/subordinates')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setSubordinates(data)
+        }
+      })
+      .catch(console.error)
+  }, [])
 
   // Build unique product list from ledgers for filter dropdown
   useEffect(() => {
@@ -166,6 +181,16 @@ export default function LedgerHistoryPage() {
       {/* Filter Card */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem', alignItems: 'flex-end' }}>
+          {/* User Filter (For AFA/ADMIN) */}
+          {subordinates.length > 0 && (
+            <div>
+              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Akun</label>
+              <select className="form-control" value={filterUserId} onChange={e => setFilterUserId(e.target.value)}>
+                <option value="">Stok Sendiri</option>
+                {subordinates.map(u => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
+              </select>
+            </div>
+          )}
           {/* Date From */}
           <div>
             <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Dari</label>
@@ -194,7 +219,7 @@ export default function LedgerHistoryPage() {
           {/* Actions */}
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-end' }}>
             <button className="btn btn-outline" style={{ flex: 1, whiteSpace: 'nowrap' }} onClick={() => {
-              setFilterType(''); setFilterProduct(''); setFilterFrom(oneMonth); setFilterTo(today)
+              setFilterType(''); setFilterProduct(''); setFilterFrom(oneMonth); setFilterTo(today); setFilterUserId('');
             }}>Reset</button>
             <button
               className="btn btn-primary"
