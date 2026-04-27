@@ -81,14 +81,14 @@ export default function ApproveClient({ opname }: { opname: any }) {
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{d.product.code}</div>
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
-                  {d.systemStock} {d.product.unit}
+                  {d.systemStock} {d.product.unitGramasi || d.product.unit}
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>
-                  {d.physicalStock} {d.product.unit}
+                  {d.physicalStock} {d.product.unitGramasi || d.product.unit}
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
                   <span style={{ fontWeight: 600, color: d.variance > 0 ? 'var(--success)' : d.variance < 0 ? 'var(--danger)' : 'var(--text-muted)' }}>
-                    {d.variance > 0 ? '+' : ''}{d.variance} {d.product.unit}
+                    {d.variance > 0 ? '+' : ''}{d.variance} {d.product.unitGramasi || d.product.unit}
                   </span>
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontStyle: d.variance === 0 ? 'italic' : 'normal', color: d.variance === 0 ? 'var(--text-muted)' : 'inherit' }}>

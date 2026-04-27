@@ -27,7 +27,7 @@ export default async function OpnameApproveDetail({ params }: { params: Promise<
       },
       details: {
         include: {
-          product: { select: { name: true, unit: true, code: true } }
+          product: { select: { name: true, unit: true, unitGramasi: true, code: true } }
         }
       }
     }
