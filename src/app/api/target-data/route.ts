@@ -3,6 +3,8 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { getAreaTargetData } from '@/app/actions/kpi'
 
+export const dynamic = 'force-dynamic'
+
 // GET /api/target-data?areaId=...&month=...&year=...
 // areaId: omit or 'all' → all areas | 'none' → Tanpa Area | '<id>' → specific area
 export async function GET(req: Request) {

@@ -207,8 +207,9 @@ export default function TargetDashboard({ isSPV, areas }: TargetDashboardProps) 
       areaId: selectedAreaId,
       month:  String(selectedMonth),
       year:   String(selectedYear),
+      _t:     String(Date.now()), // cache buster
     })
-    const res = await fetch(`/api/target-data?${params}`)
+    const res = await fetch(`/api/target-data?${params}`, { cache: 'no-store' })
     if (res.ok) {
       const json = await res.json()
       setData(json)
