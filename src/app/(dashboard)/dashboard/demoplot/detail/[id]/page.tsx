@@ -130,6 +130,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                   <tr>
                     <th style={{ padding: '0.5rem' }}>Produk</th>
                     <th style={{ padding: '0.5rem' }}>Actual Usage</th>
+                    <th style={{ padding: '0.5rem' }}>Sumber Produk</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -137,6 +138,13 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                     <tr key={det.id} style={{ borderBottom: '1px solid var(--border)' }}>
                       <td style={{ padding: '0.5rem' }}>{det.product.name}</td>
                       <td style={{ padding: '0.5rem', fontWeight: 600 }}>{det.actualUsage} {(det.product as any).unitGramasi || det.product.unit}</td>
+                      <td style={{ padding: '0.5rem' }}>
+                        {det.usedFarmerProduct ? (
+                          <span className="badge" style={{ background: '#fef3c7', color: '#b45309' }}>Produk Petani</span>
+                        ) : (
+                          <span className="badge" style={{ background: '#dcfce7', color: '#15803d' }}>Stok Sendiri</span>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
