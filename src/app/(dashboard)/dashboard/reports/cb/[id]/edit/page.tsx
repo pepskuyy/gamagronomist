@@ -70,8 +70,8 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
               <input type="text" name="farmerName" className="form-control" required defaultValue={data.farmerName || ''} />
             </div>
             <div className="form-group">
-              <label className="form-label">Umur</label>
-              <input type="text" name="age" className="form-control" defaultValue={data.age || ''} inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" />
+              <label className="form-label">Umur <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="age" className="form-control" defaultValue={data.age || ''} inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" required />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Apakah Petani Memiliki No. HP?</label>
@@ -94,12 +94,12 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
               </div>
             )}
             <div className="form-group">
-              <label className="form-label">Kabupaten/Kota Area</label>
-              <input type="text" name="district" className="form-control" defaultValue={data.district || ''} />
+              <label className="form-label">Kabupaten/Kota Area <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="district" className="form-control" defaultValue={data.district || ''} required />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Alamat Lengkap</label>
-              <textarea name="address" className="form-control" rows={2} defaultValue={data.address || ''} />
+              <label className="form-label">Alamat Lengkap <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <textarea name="address" className="form-control" rows={2} defaultValue={data.address || ''} required />
             </div>
           </div>
         </div>
@@ -108,25 +108,25 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
           <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>🌾 Data Pertanian &amp; Kendala</h3>
           <div className="form-grid">
             <div className="form-group">
-              <label className="form-label">Komoditas</label>
-              <input type="text" name="commodity" className="form-control" defaultValue={data.commodity || ''} />
+              <label className="form-label">Komoditas <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="commodity" className="form-control" defaultValue={data.commodity || ''} required />
             </div>
             <div className="form-group">
-              <label className="form-label">Alasan Pilih</label>
-              <input type="text" name="reasonChoice" className="form-control" defaultValue={data.reasonChoice || ''} />
+              <label className="form-label">Alasan Pilih <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="reasonChoice" className="form-control" defaultValue={data.reasonChoice || ''} required />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Kendala yang dialami (selain opt)</label>
-              <textarea name="constraints" className="form-control" rows={2} defaultValue={data.constraints || ''} />
+              <label className="form-label">Kendala yang dialami (selain opt) <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <textarea name="constraints" className="form-control" rows={2} defaultValue={data.constraints || ''} required />
             </div>
             <div className="form-group">
-              <label className="form-label">Jenis OPT (pisahkan dengan koma)</label>
-              <input type="text" name="optTypes" className="form-control" defaultValue={data.optTypes || ''} />
+              <label className="form-label">Jenis OPT (pisahkan dengan koma) <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="optTypes" className="form-control" defaultValue={data.optTypes || ''} required />
               <small style={{ color: 'var(--text-muted)' }}>Contoh: Hama,Penyakit</small>
             </div>
             <div className="form-group">
-              <label className="form-label">Detail OPT (pisahkan dengan koma)</label>
-              <input type="text" name="optDetails" className="form-control" defaultValue={data.optDetails || ''} />
+              <label className="form-label">Detail OPT (pisahkan dengan koma) <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="optDetails" className="form-control" defaultValue={data.optDetails || ''} required />
             </div>
           </div>
         </div>
@@ -135,20 +135,20 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
           <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>🛒 Preferensi Produk</h3>
           <div className="form-grid">
             <div className="form-group">
-              <label className="form-label">Produk Preferensi</label>
-              <input type="text" name="usedProducts" className="form-control" defaultValue={data.usedProducts || ''} />
+              <label className="form-label">Produk Preferensi <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="usedProducts" className="form-control" defaultValue={data.usedProducts || ''} required />
             </div>
             <div className="form-group">
-              <label className="form-label">Lokasi Beli</label>
-              <input type="text" name="buyLocation" className="form-control" defaultValue={data.buyLocation || ''} />
+              <label className="form-label">Lokasi Beli <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="buyLocation" className="form-control" defaultValue={data.buyLocation || ''} required />
             </div>
             <div className="form-group">
-              <label className="form-label">Alasan Beli</label>
-              <input type="text" name="buyReason" className="form-control" defaultValue={data.buyReason || ''} />
+              <label className="form-label">Alasan Beli <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="buyReason" className="form-control" defaultValue={data.buyReason || ''} required />
             </div>
             <div className="form-group">
-              <label className="form-label">Referensi</label>
-              <input type="text" name="references" className="form-control" defaultValue={data.references || ''} />
+              <label className="form-label">Referensi <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="references" className="form-control" defaultValue={data.references || ''} required />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Catatan</label>

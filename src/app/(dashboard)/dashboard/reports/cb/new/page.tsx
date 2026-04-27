@@ -143,6 +143,13 @@ export default function NewCustomerBehaviorRef() {
     setLoading(true)
     setError(null)
     if (lat === null || lng === null) { setError('Lokasi GPS wajib diambil sebelum mengirim laporan.'); setLoading(false); return }
+    if (photos.length === 0) { setError('Minimal 1 foto dokumentasi wajib diunggah.'); setLoading(false); return }
+
+    if (selectedCommodities.length === 0 && !commodityOther.trim()) { setError('Komoditas wajib dipilih.'); setLoading(false); return }
+    if (selectedConstraints.length === 0 && !constraintsOther.trim()) { setError('Kendala yang dialami wajib dipilih.'); setLoading(false); return }
+    if (selectedOptDetails.length === 0) { setError('Minimal 1 jenis OPT wajib dipilih.'); setLoading(false); return }
+    if (selectedBrands.length === 0 && !brandsOther.trim()) { setError('Produk preferensi wajib dipilih.'); setLoading(false); return }
+    if (selectedRefs.length === 0 && !refsOther.trim()) { setError('Referensi wajib dipilih.'); setLoading(false); return }
 
     const formData = new FormData(e.currentTarget)
     formData.set('commodity', buildMultiValue(selectedCommodities, commodityOther))
@@ -191,8 +198,8 @@ export default function NewCustomerBehaviorRef() {
               <input type="text" name="farmerName" className="form-control" required />
             </div>
             <div className="form-group">
-              <label className="form-label">Umur</label>
-              <input type="text" name="age" className="form-control" inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" />
+              <label className="form-label">Umur <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="age" className="form-control" inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" required />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Apakah Petani Memiliki No. HP?</label>
@@ -218,13 +225,13 @@ export default function NewCustomerBehaviorRef() {
               <RegionSelect nameKabupaten="district" nameKecamatan="districtKecamatan" nameDesa="districtDesa" required={false} />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Detail Alamat (Jalan / RT / RW)</label>
-              <textarea name="address" className="form-control" rows={2} placeholder="Samping masjid Al-Ikhlas..." />
+              <label className="form-label">Detail Alamat (Jalan / RT / RW) <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <textarea name="address" className="form-control" rows={2} placeholder="Samping masjid Al-Ikhlas..." required />
             </div>
 
             {/* Luas Lahan Total */}
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Luas Lahan Total</label>
+              <label className="form-label">Luas Lahan Total <span style={{ color: 'var(--danger)' }}>*</span></label>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <input
                   type="number"
@@ -234,6 +241,7 @@ export default function NewCustomerBehaviorRef() {
                   min="0"
                   placeholder="Contoh: 2.5"
                   style={{ flex: 2 }}
+                  required
                 />
                 <select name="totalLandAreaUnit" className="form-control" style={{ flex: 1, maxWidth: 140 }}>
                   <option value="ha">Hektare (ha)</option>
@@ -249,7 +257,7 @@ export default function NewCustomerBehaviorRef() {
           <h3 style={{ marginBottom: '1.5rem' }}>Data Pertanian &amp; Kendala</h3>
 
           <div className="form-group">
-            <label className="form-label">Komoditas (Pilih satu atau lebih)</label>
+            <label className="form-label">Komoditas (Pilih satu atau lebih) <span style={{ color: 'var(--danger)' }}>*</span></label>
             <MultiChip
               options={COMMODITIES} selected={selectedCommodities}
               onToggle={toggle(selectedCommodities, setSelectedCommodities)}
@@ -259,11 +267,11 @@ export default function NewCustomerBehaviorRef() {
           </div>
 
           <div className="form-group" style={{ marginTop: '1.5rem', gridColumn: '1 / -1' }}>
-            <label className="form-label">Alasan memilih komoditas</label>
-            <input type="text" name="reasonChoice" className="form-control" />
+            <label className="form-label">Alasan memilih komoditas <span style={{ color: 'var(--danger)' }}>*</span></label>
+            <input type="text" name="reasonChoice" className="form-control" required />
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-            <label className="form-label">Kendala yang dialami (selain OPT)</label>
+            <label className="form-label">Kendala yang dialami (selain OPT) <span style={{ color: 'var(--danger)' }}>*</span></label>
             <MultiChip
               options={CONSTRAINTS} selected={selectedConstraints}
               onToggle={toggle(selectedConstraints, setSelectedConstraints)}
@@ -273,7 +281,7 @@ export default function NewCustomerBehaviorRef() {
           </div>
 
           <div className="form-group" style={{ marginTop: '1.5rem' }}>
-            <label className="form-label" style={{ marginBottom: '1rem', display: 'block', fontSize: '1.1rem', fontWeight: 600 }}>Organisme Pengganggu Tanaman (OPT)</label>
+            <label className="form-label" style={{ marginBottom: '1rem', display: 'block', fontSize: '1.1rem', fontWeight: 600 }}>Organisme Pengganggu Tanaman (OPT) <span style={{ color: 'var(--danger)' }}>*</span></label>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '1.5rem' }}>
               {Object.entries(OPT_DATA).map(([category, details]) => (
                 <div key={category} style={{ background: 'var(--surface-2)', padding: '1rem', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
@@ -302,7 +310,7 @@ export default function NewCustomerBehaviorRef() {
           <h3 style={{ marginBottom: '1.5rem' }}>Preferensi Produk</h3>
 
           <div className="form-group">
-            <label className="form-label">Produk Preferensi Petani (Pilih satu atau lebih)</label>
+            <label className="form-label">Produk Preferensi Petani (Pilih satu atau lebih) <span style={{ color: 'var(--danger)' }}>*</span></label>
             <MultiChip
               options={PRODUCT_BRANDS} selected={selectedBrands}
               onToggle={toggle(selectedBrands, setSelectedBrands)}
@@ -313,16 +321,16 @@ export default function NewCustomerBehaviorRef() {
 
           <div className="form-grid" style={{ marginTop: '1.5rem' }}>
             <div className="form-group">
-              <label className="form-label">Kios tempat membeli</label>
-              <input type="text" name="buyLocation" className="form-control" />
+              <label className="form-label">Kios tempat membeli <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="buyLocation" className="form-control" required />
             </div>
             <div className="form-group">
-              <label className="form-label">Alasan membeli produk</label>
-              <input type="text" name="buyReason" className="form-control" />
+              <label className="form-label">Alasan membeli produk <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input type="text" name="buyReason" className="form-control" required />
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
-              <label className="form-label">Referensi yang biasa digunakan (Pilih satu atau lebih)</label>
+              <label className="form-label">Referensi yang biasa digunakan (Pilih satu atau lebih) <span style={{ color: 'var(--danger)' }}>*</span></label>
               <MultiChip
                 options={REFERENCES} selected={selectedRefs}
                 onToggle={toggle(selectedRefs, setSelectedRefs)}
@@ -340,7 +348,7 @@ export default function NewCustomerBehaviorRef() {
 
         {/* ── Dokumentasi ── */}
         <div className="card" style={{ marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1.5rem' }}>Dokumentasi</h3>
+          <h3 style={{ marginBottom: '1.5rem' }}>Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
           <GpsCapture onCapture={(la, lo) => { setLat(la); setLng(lo) }} onClear={() => { setLat(null); setLng(null) }} />
           <div style={{ marginTop: '1rem' }}>
             <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} />
