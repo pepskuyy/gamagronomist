@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-
-// Cloudinary transformation: resize ke max 1280px, quality 78, format auto (WebP di browser modern)
-// Menghemat ~60-70% storage dibanding upload raw tanpa kompresi
-const EAGER_TRANSFORMS = 'c_limit,w_1280,h_1280,q_78,f_auto'
+import { put } from '@vercel/blob'
 
 export async function POST(req: NextRequest) {
   try {
@@ -27,55 +24,38 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Format file tidak didukung. Harap unggah gambar (JPG/PNG/WebP)' }, { status: 400 })
     }
 
-    // Max 8MB input — Cloudinary akan mengompres output jauh lebih kecil
+    // Max 8MB
     if (file.size > 8 * 1024 * 1024) {
       return NextResponse.json({ error: 'Ukuran file maksimal 8MB.' }, { status: 400 })
     }
 
-    const cloudName    = process.env.CLOUDINARY_CLOUD_NAME
-    const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET
+    // Generate a unique filename
+    const ext = file.name.split('.').pop() || 'jpg'
+    const timestamp = Date.now()
+    const random = Math.random().toString(36).substring(2, 8)
+    const filename = `gamagronomist/${timestamp}-${random}.${ext}`
 
-    if (!cloudName || !uploadPreset) {
-      return NextResponse.json({ error: 'Konfigurasi upload belum diset. Hubungi admin.' }, { status: 500 })
-    }
-
-    // Upload ke Cloudinary dengan eager transformation
-    const cdnForm = new FormData()
-    cdnForm.append('file', file)
-    cdnForm.append('upload_preset', uploadPreset)
-    cdnForm.append('folder', 'gamagronomist')
-    // Eager: resize max 1280px + compress quality 78 + auto-format WebP
-    cdnForm.append('eager', EAGER_TRANSFORMS)
-    cdnForm.append('eager_async', 'false') // Tunggu transformasi selesai sebelum return
-
-    const cdnRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
-      method: 'POST',
-      body: cdnForm,
+    // Upload to Vercel Blob
+    const blob = await put(filename, file, {
+      access: 'public',
+      addRandomSuffix: false,
     })
-
-    if (!cdnRes.ok) {
-      const err = await cdnRes.json().catch(() => ({}))
-      console.error('Cloudinary error', err)
-      return NextResponse.json({ error: 'Gagal upload ke server gambar.' }, { status: 500 })
-    }
-
-    const result = await cdnRes.json()
-
-    // Gunakan URL dari eager transformation jika tersedia (sudah dikompres & diubah ke WebP)
-    // Jika tidak (preset unsigned tidak mengizinkan eager), inject transformasi inline ke URL
-    const eagerUrl = result.eager?.[0]?.secure_url as string | undefined
-    const rawUrl   = result.secure_url as string
-
-    const finalUrl = eagerUrl
-      ?? rawUrl.replace('/upload/', `/upload/${EAGER_TRANSFORMS}/`)
 
     return NextResponse.json({
       success: true,
-      url: finalUrl,
+      url: blob.url,
     })
 
-  } catch (error) {
+  } catch (error: any) {
     console.error('Upload Error:', error)
-    return NextResponse.json({ error: 'Gagal mengunggah file.' }, { status: 500 })
+
+    // Provide helpful error message if BLOB_READ_WRITE_TOKEN is missing
+    if (error.message?.includes('BLOB_READ_WRITE_TOKEN') || error.message?.includes('No token')) {
+      return NextResponse.json({
+        error: 'BLOB_READ_WRITE_TOKEN belum diset. Tambahkan Blob Store di Vercel Dashboard → Storage.'
+      }, { status: 500 })
+    }
+
+    return NextResponse.json({ error: 'Gagal mengunggah file: ' + (error.message || 'Unknown') }, { status: 500 })
   }
 }
