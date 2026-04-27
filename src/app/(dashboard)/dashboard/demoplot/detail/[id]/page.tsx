@@ -88,29 +88,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
         </div>
       </div>
 
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '1rem' }}>Produk yang Diajukan</h3>
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-              <thead style={{ background: 'var(--surface-hover)' }}>
-                <tr>
-                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Produk</th>
-                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Qty Diajukan</th>
-                </tr>
-              </thead>
-              <tbody>
-                {request.details.map(d => (
-                  <tr key={d.id}>
-                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>{d.product.name}</td>
-                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600 }}>
-                      {d.qtyRequested} {d.product.unit}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-          </table>
-        </div>
-      </div>
+
 
       {request.demoPlots.length > 0 && (
         <div className="card">
