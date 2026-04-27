@@ -164,6 +164,34 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                 </tbody>
               </table>
 
+              {/* Dokumentasi Foto */}
+              {dp.photos && (() => {
+                try {
+                  const photoUrls: string[] = JSON.parse(dp.photos)
+                  if (photoUrls.length === 0) return null
+                  return (
+                    <div style={{ marginTop: '1rem' }}>
+                      <strong style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>📷 Dokumentasi</strong>
+                      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
+                        {photoUrls.map((url, i) => (
+                          <a key={i} href={url} target="_blank" rel="noopener noreferrer">
+                            <img
+                              src={url}
+                              alt={`Dokumentasi ${i + 1}`}
+                              style={{
+                                width: '120px', height: '120px', objectFit: 'cover',
+                                borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
+                                cursor: 'pointer', transition: 'transform 0.15s',
+                              }}
+                            />
+                          </a>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                } catch { return null }
+              })()}
+
               {dp.isFinalSession && (
                 <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#D1FAE5', color: '#065F46', borderRadius: '4px', fontSize: '0.85rem', textAlign: 'center', fontWeight: 600 }}>
                   ✅ Sesi ini ditandai sebagai sesi terakhir. Demo plot selesai.
