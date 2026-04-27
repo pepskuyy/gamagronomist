@@ -106,3 +106,19 @@ export async function submitSpotDemplot(formData: FormData) {
     return { error: 'Gagal menyimpan data Spot Demplot.' }
   }
 }
+
+export async function deleteSpotDemplot(id: string) {
+  const cookieStore = await cookies()
+  const session = await decrypt(cookieStore.get('session')?.value as string)
+  if (!session?.userId || session.role !== 'ADMIN') {
+    return { error: 'Tidak memiliki akses.' }
+  }
+
+  try {
+    await prisma.spotDemplot.delete({ where: { id } })
+    return { success: true }
+  } catch (err: any) {
+    console.error('Delete Spot Demplot Error:', err)
+    return { error: 'Gagal menghapus data.' }
+  }
+}
