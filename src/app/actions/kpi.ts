@@ -189,8 +189,10 @@ export async function getAreaTargetData(
     })
     const userIds = allUsers.map(u => u.id)
 
-    // Sum targets across all KpiTarget records for this period
+    // Sum targets across ALL KpiTarget records for this period
     const allTargets = await prisma.kpiTarget.findMany({ where: { month, year } })
+    console.log(`[KPI] Semua Area: found ${allTargets.length} KpiTarget records for ${month}/${year}`, allTargets.map(t => ({ areaId: t.areaId, dp: t.targetDemoPlot, kios: t.targetVisitKios, gather: t.targetGathering, comp: t.targetCompany, cb: t.targetBehavior })))
+    
     const sumTargets: Targets = allTargets.reduce((acc, t) => ({
       targetDemoPlot:  acc.targetDemoPlot  + t.targetDemoPlot,
       targetVisitKios: acc.targetVisitKios + t.targetVisitKios,
@@ -198,6 +200,7 @@ export async function getAreaTargetData(
       targetCompany:   acc.targetCompany   + t.targetCompany,
       targetBehavior:  acc.targetBehavior  + t.targetBehavior,
     }), { ...EMPTY_TARGETS })
+    console.log(`[KPI] Aggregated targets:`, sumTargets)
 
     const data = await computeForArea(userIds, month, year, null)
     return { ...data, targets: sumTargets, hasTarget: allTargets.length > 0 }
