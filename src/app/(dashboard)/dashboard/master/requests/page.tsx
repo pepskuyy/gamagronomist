@@ -131,7 +131,7 @@ export default function AccountRequestsPage() {
                     <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>@{r.username}</div>
                   </td>
                   <td style={td}>
-                    <span className={`badge ${r.role === 'AFA' ? 'badge-success' : 'badge-neutral'}`}>{r.role}</span>
+                    <span className={`badge ${['AFA', 'PLANTATION'].includes(r.role) ? 'badge-success' : 'badge-neutral'}`}>{r.role}</span>
                   </td>
                   <td style={{ ...td, color: 'var(--text-muted)' }}>{r.areaName || '-'}</td>
                   <td style={{ ...td, color: 'var(--text-muted)' }}>{r.afaName || '-'}</td>

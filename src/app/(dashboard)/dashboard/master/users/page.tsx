@@ -8,7 +8,7 @@ import ImageUploader from '@/components/ImageUploader'
 type User = { id: string; name: string; username: string; role: string; isActive: boolean; photo: string | null; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
 type Area = { id: string; name: string }
 
-const ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN', 'FAM', 'WHM']
+const ROLES = ['ADMIN', 'SPV', 'AFA', 'PLANTATION', 'FO', 'INTERN', 'FAM', 'WHM']
 const roleBadge: Record<string, string> = { ADMIN: 'badge-danger', SPV: 'badge-warning', AFA: 'badge-success', FO: 'badge-neutral', INTERN: 'badge-neutral', FAM: 'badge-neutral', WHM: 'badge-neutral' }
 
 const overlayStyle: React.CSSProperties = {
@@ -40,7 +40,7 @@ export default function UsersMasterPage() {
       fetch('/api/master/areas'),
     ])
     const users = uRes.ok ? await uRes.json() : []
-    if (uRes.ok) { setUsers(users); setAfas(users.filter((u: User) => u.role === 'AFA')) }
+    if (uRes.ok) { setUsers(users); setAfas(users.filter((u: User) => ['AFA', 'PLANTATION'].includes(u.role))) }
     if (aRes.ok) setAreas(await aRes.json())
     setLoading(false)
   }

@@ -48,11 +48,11 @@ export async function bulkImportUsers(rows: UserRow[]) {
   const areas = await prisma.area.findMany({ select: { id: true, name: true } })
   const areaMap = new Map(areas.map(a => [a.name.toLowerCase().trim(), a.id]))
 
-  const afas = await prisma.user.findMany({ where: { role: 'AFA' }, select: { id: true, name: true } })
+  const afas = await prisma.user.findMany({ where: { role: { in: ['AFA', 'PLANTATION'] } }, select: { id: true, name: true } })
   const afaMap = new Map(afas.map(a => [a.name.toLowerCase().trim(), a.id]))
 
   const existingUsernames = new Set((await prisma.user.findMany({ select: { username: true } })).map(u => u.username.toLowerCase()))
-  const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN']
+  const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'PLANTATION', 'FO', 'INTERN']
 
   // Phase 1: Validate all rows and pre-hash passwords in parallel
   type ValidatedRow = { rowNum: number; username: string; password: string; name: string; role: string; areaId: string | null; afaId: string | null; isActive: boolean }
@@ -97,7 +97,7 @@ export async function bulkImportUsers(rows: UserRow[]) {
       const user = await prisma.user.create({
         data: { username: vr.username, password: vr.password, name: vr.name, role: vr.role, areaId: vr.areaId, afaId: vr.afaId, isActive: vr.isActive }
       })
-      if (vr.role === 'AFA') afaMap.set(vr.name.toLowerCase(), user.id)
+      if (['AFA', 'PLANTATION'].includes(vr.role)) afaMap.set(vr.name.toLowerCase(), user.id)
       inserted++
     } catch (e: any) {
       errors.push({ row: vr.rowNum, name: vr.name, reason: e?.code === 'P2002' ? 'Username duplikat.' : 'Gagal disimpan.' }); skipped++

@@ -23,12 +23,12 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
 
   // ----- KPI QUERIES -----
   const isSPV = session.role === 'SPV' || session.role === 'ADMIN'
-  const isAFA = session.role === 'AFA'
+  const isAFA = ['AFA', 'PLANTATION'].includes(session.role)
   
   // Build filter based on role
   const requestFilter: any = {}
   if (session.role === 'FO' || session.role === 'INTERN') requestFilter.foId = session.userId
-  else if (session.role === 'AFA') requestFilter.afaId = session.userId
+  else if (['AFA', 'PLANTATION'].includes(session.role)) requestFilter.afaId = session.userId
 
   const [
     totalRequests,
@@ -67,7 +67,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
   // AFA/FO field user: find their area
   let userAreaId: string | null = null
   let userAreaName = 'Tanpa Area'
-  if (session.role === 'AFA' || session.role === 'FO' || session.role === 'INTERN') {
+  if (['AFA', 'PLANTATION'].includes(session.role) || session.role === 'FO' || session.role === 'INTERN') {
     const userRecord = await prisma.user.findUnique({ where: { id: session.userId }, select: { areaId: true, area: { select: { name: true } } } })
     userAreaId   = userRecord?.areaId ?? null
     userAreaName = userRecord?.area?.name ?? 'Tanpa Area'
@@ -85,7 +85,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
 
   // Subordinates for filter dropdown - EVERYONE can see all users so they can filter the global charts freely
   const filterSubordinates = await prisma.user.findMany({ 
-    where: { role: { in: ['AFA', 'FO', 'INTERN'] } }, 
+    where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } }, 
     select: { id: true, name: true, role: true }, 
     orderBy: { name: 'asc' } 
   })
@@ -103,7 +103,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
     }
     
     const users = await prisma.user.findMany({
-      where: Object.keys(userFilter).length ? userFilter : { role: { in: ['AFA', 'FO', 'INTERN'] } },
+      where: Object.keys(userFilter).length ? userFilter : { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } },
       select: { id: true, name: true, role: true }
     })
 
@@ -165,7 +165,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
       )}
 
       {/* AFA / FO: Target Area Dashboard — read + area filter */}
-      {(session.role === 'AFA' || session.role === 'FO' || session.role === 'INTERN') && (
+      {(['AFA', 'PLANTATION'].includes(session.role) || session.role === 'FO' || session.role === 'INTERN') && (
         <div className="card" style={{ marginBottom: '2.5rem' }}>
           <KpiFieldDashboard
             userId={session.userId}
@@ -244,7 +244,7 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
                   {stockSummary.map((s, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 500 }}>{s.userName}</td>
-                      <td><span className={`badge ${s.role === 'AFA' ? 'badge-success' : 'badge-neutral'}`}>{s.role}</span></td>
+                      <td><span className={`badge ${['AFA', 'PLANTATION'].includes(s.role) ? 'badge-success' : 'badge-neutral'}`}>{s.role}</span></td>
                       <td>{s.productName}</td>
                       <td style={{ fontWeight: 700, color: s.balance > 0 ? 'var(--success)' : 'var(--danger)' }}>
                         {s.balance} {s.unit}

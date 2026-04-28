@@ -146,7 +146,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   // ── User scope ─────────────────────────────────────────────────────────────
   let userIds: string[] | null = null // null = no restriction (ADMIN/SPV sees all)
-  if (session.role === 'AFA') {
+  if (['AFA', 'PLANTATION'].includes(session.role)) {
     const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
     userIds = [session.userId, ...fos.map(u => u.id)]
   } else if (!['ADMIN', 'SPV'].includes(session.role)) {
@@ -161,7 +161,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   function dpWhere(q: string, startP: string, endP: string) {
     let base: any = { commodity: { not: '-' }, farmer: { isNot: null } }
     if (!['ADMIN', 'SPV'].includes(session.role)) {
-      if (session.role === 'AFA') {
+      if (['AFA', 'PLANTATION'].includes(session.role)) {
         const foIds = userIds || []
         base = { ...base, OR: [{ foId: { in: foIds } }, { afaId: session.userId }] }
       } else {

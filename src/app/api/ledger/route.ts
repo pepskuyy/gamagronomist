@@ -24,7 +24,7 @@ export async function GET(request: Request) {
     let effectiveUserId = session.userId
 
     if (targetUserId && targetUserId !== session.userId) {
-      if (session.role === 'AFA') {
+      if (['AFA', 'PLANTATION'].includes(session.role)) {
         // Verify target is an FO in the same area
         const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } })
         if (!targetUser || targetUser.role !== 'FO' || targetUser.areaId !== session.areaId) {

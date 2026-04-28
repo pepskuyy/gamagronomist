@@ -16,7 +16,7 @@ export default async function DemoPlotIndexPage() {
   let requests: any[] = []
   if (session.role === 'FO' || session.role === 'INTERN') {
     requests = await prisma.request.findMany({ where: { foId: session.userId }, include, orderBy: { createdAt: 'desc' } })
-  } else if (session.role === 'AFA') {
+  } else if (['AFA', 'PLANTATION'].includes(session.role)) {
     requests = await prisma.request.findMany({ where: { OR: [{ afaId: session.userId }, { foId: session.userId }] }, include, orderBy: { createdAt: 'desc' } })
   } else {
     requests = await prisma.request.findMany({ include, orderBy: { createdAt: 'desc' } })
@@ -53,7 +53,7 @@ export default async function DemoPlotIndexPage() {
             </>
           )}
           {/* AFA: direct demo plot + review stock requests */}
-          {session.role === 'AFA' && (
+          {['AFA', 'PLANTATION'].includes(session.role) && (
             <>
               <Link href="/dashboard/demoplot/afa-plan">
                 <button className="btn btn-outline">📋 Perencanaan Mandiri</button>
@@ -67,7 +67,7 @@ export default async function DemoPlotIndexPage() {
       </div>
 
       {/* Stock Requests Section (AFA approving FO requests) */}
-      {session.role === 'AFA' && stockRequests.length > 0 && (
+      {['AFA', 'PLANTATION'].includes(session.role) && stockRequests.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
           <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             📦 Permintaan Stok FO

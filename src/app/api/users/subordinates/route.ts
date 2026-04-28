@@ -17,7 +17,7 @@ export async function GET(request: Request) {
 
     let users = []
     
-    if (session.role === 'AFA') {
+    if (['AFA', 'PLANTATION'].includes(session.role)) {
       // AFA can see FOs in their area
       users = await prisma.user.findMany({
         where: { role: 'FO', areaId: session.areaId },

@@ -76,7 +76,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
     { href: '/dashboard/stock',    label: ['FAM','WHM'].includes(session?.role) ? 'Approval Stok' : 'Manajemen Stok', icon: Icons.stock, show: session?.role !== 'BD' },
     { href: '/dashboard/reports',  label: 'Laporan Aktivitas',  icon: Icons.reports,   show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
     { href: '/dashboard/opname',   label: 'Stock Opname',       icon: Icons.opname,    show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
-    { href: '/dashboard/so',       label: 'Tracking SO',        icon: Icons.so,        show: ['SPV', 'ADMIN', 'BD'].includes(session?.role) },
+    { href: '/dashboard/so',       label: 'Tracking SO',        icon: Icons.so,        show: ['SPV', 'ADMIN', 'BD', 'PLANTATION'].includes(session?.role) },
     { href: '/dashboard/settings', label: 'Pengaturan Akun',    icon: Icons.settings,  show: true },
   ]
 
@@ -84,7 +84,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
     href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
 
   const roleColor: Record<string, string> = {
-    ADMIN: '#b91c1c', SPV: '#a16207', AFA: '#15803d', FO: '#1d4ed8', FAM: '#7c3aed', WHM: '#0891b2', BD: '#c2410c'
+    ADMIN: '#b91c1c', SPV: '#a16207', AFA: '#15803d', FO: '#1d4ed8', FAM: '#7c3aed', WHM: '#0891b2', BD: '#c2410c', PLANTATION: '#0f766e'
   }
 
   return (

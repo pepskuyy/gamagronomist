@@ -22,7 +22,7 @@ export async function GET() {
     let afaUserId: string | null = null
     if (session.role === 'FO' || session.role === 'INTERN') {
       afaUserId = session.afaId || null
-    } else if (session.role === 'AFA') {
+    } else if (['AFA', 'PLANTATION'].includes(session.role)) {
       afaUserId = session.userId
     }
 

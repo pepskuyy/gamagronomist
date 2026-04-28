@@ -27,7 +27,7 @@ export async function submitAccountRequest(formData: FormData) {
   if (password !== confirm) {
     return { error: 'Password dan konfirmasi password tidak cocok.' }
   }
-  if (!['AFA', 'FO', 'INTERN', 'BD'].includes(role)) {
+  if (!['AFA', 'PLANTATION', 'FO', 'INTERN', 'BD'].includes(role)) {
     return { error: 'Role tidak valid.' }
   }
 
@@ -91,7 +91,7 @@ export async function approveAccountRequest(requestId: string) {
     // Find AFA by name if provided (for FO role)
     let afaId: string | null = null
     if ((req.role === 'FO' || req.role === 'INTERN') && req.afaName) {
-      const afa = await prisma.user.findFirst({ where: { role: 'AFA', name: { contains: req.afaName, mode: 'insensitive' } } })
+      const afa = await prisma.user.findFirst({ where: { role: { in: ['AFA', 'PLANTATION'] }, name: { contains: req.afaName, mode: 'insensitive' } } })
       afaId = afa?.id ?? null
     }
 

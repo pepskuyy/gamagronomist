@@ -24,7 +24,7 @@ export async function GET() {
     if (!currentUser) return NextResponse.json([])
 
     const whereClause: any = {}
-    if (['AFA', 'FO', 'INTERN'].includes(currentUser.role) && currentUser.areaId) {
+    if (['AFA', 'PLANTATION', 'FO', 'INTERN'].includes(currentUser.role) && currentUser.areaId) {
       whereClause.user = { areaId: currentUser.areaId }
     }
 

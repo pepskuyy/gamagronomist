@@ -65,7 +65,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                       {user.role}
                     </span>
                   </div>
-                  {role !== 'AFA' && user.parentName && (
+                  {!['AFA', 'PLANTATION'].includes(role) && user.parentName && (
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {user.parentName}
                     </div>

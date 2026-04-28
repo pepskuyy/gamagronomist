@@ -46,8 +46,8 @@ function ContribTable({ rows }: { rows: UserContribution[] }) {
               {r.userName}
               <span style={{
                 marginLeft: '0.4rem', fontSize: '0.68rem', fontWeight: 700,
-                color: r.role === 'AFA' ? '#15803d' : '#1d4ed8',
-                background: r.role === 'AFA' ? '#dcfce7' : '#dbeafe',
+                color: ['AFA', 'PLANTATION'].includes(r.role) ? '#15803d' : '#1d4ed8',
+                background: ['AFA', 'PLANTATION'].includes(r.role) ? '#dcfce7' : '#dbeafe',
                 padding: '0.1rem 0.45rem', borderRadius: '999px',
               }}>{r.role}</span>
             </span>

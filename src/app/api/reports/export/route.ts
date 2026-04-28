@@ -34,7 +34,7 @@ export async function GET(req: Request) {
   let userFilter: any = {}
   if (['ADMIN', 'SPV'].includes(session.role)) {
     userFilter = {}
-  } else if (session.role === 'AFA') {
+  } else if (['AFA', 'PLANTATION'].includes(session.role)) {
     const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
     const userIds = [session.userId, ...fos.map(u => u.id)]
     userFilter = { userId: { in: userIds } }
@@ -82,7 +82,7 @@ export async function GET(req: Request) {
       let dpRequestFilter: any = { commodity: { not: '-' }, farmer: { isNot: null } }
       if (['ADMIN', 'SPV'].includes(session.role)) {
         // empty
-      } else if (session.role === 'AFA') {
+      } else if (['AFA', 'PLANTATION'].includes(session.role)) {
         const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
         const foIds = [session.userId, ...fos.map(u => u.id)]
         dpRequestFilter = { ...dpRequestFilter, OR: [{ foId: { in: foIds } }, { afaId: session.userId }] }

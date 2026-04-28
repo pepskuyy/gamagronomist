@@ -9,7 +9,7 @@ export async function submitStockIn(formData: FormData) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (session?.role !== 'AFA' && session?.role !== 'ADMIN') {
+  if (!['AFA', 'PLANTATION'].includes(session?.role as string) && session?.role !== 'ADMIN') {
     return { error: 'Anda tidak memiliki akses untuk aksi ini.' }
   }
 

@@ -16,7 +16,7 @@ export async function GET() {
     let whereClause: any = {}
     if (session.role === 'FO' || session.role === 'INTERN') {
       whereClause = { request: { foId: session.userId } }
-    } else if (session.role === 'AFA') {
+    } else if (['AFA', 'PLANTATION'].includes(session.role)) {
       whereClause = { request: { OR: [{ afaId: session.userId }, { foId: session.userId }] } }
     }
 

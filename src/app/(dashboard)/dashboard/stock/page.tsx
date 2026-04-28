@@ -40,16 +40,16 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   let teamUsers: { id: string; name: string; role: string; parentName?: string }[] = []
   let hasMoreUsers = false
 
-  if (['ADMIN', 'SPV', 'AFA'].includes(session.role)) {
+  if (['ADMIN', 'SPV', 'AFA', 'PLANTATION'].includes(session.role)) {
     const userWhere: any = { 
-      role: { in: ['AFA', 'FO', 'INTERN'] },
+      role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] },
       isActive: true,
       ...(qu ? { name: { contains: qu, mode: 'insensitive' } } : {})
     }
     
     if (session.role === 'SPV' && session.areaId) {
       userWhere.areaId = session.areaId
-    } else if (session.role === 'AFA') {
+    } else if (['AFA', 'PLANTATION'].includes(session.role)) {
       userWhere.afaId = session.userId
     }
 
@@ -66,7 +66,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
 
     teamUsers = users.map(u => ({
       id: u.id, name: u.name, role: u.role, 
-      parentName: u.role === 'AFA' ? (u.area?.name || 'Pusat') : (u.afa?.name || u.area?.name || '-')
+      parentName: ['AFA', 'PLANTATION'].includes(u.role) ? (u.area?.name || 'Pusat') : (u.afa?.name || u.area?.name || '-')
     }))
   }
 
@@ -83,10 +83,10 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   let afaStockRequests: any[] = []
   let hasMoreAfaReqs = false
 
-  if (['SPV', 'AFA', 'FAM', 'WHM'].includes(session.role)) {
+  if (['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM'].includes(session.role)) {
     let afaStockWhere: any = { commodity: 'AFA_STOCK_IN' }
     
-    if (session.role === 'AFA') {
+    if (['AFA', 'PLANTATION'].includes(session.role)) {
       afaStockWhere.foId = session.userId
     } else if (session.role === 'SPV' && session.areaId) {
       afaStockWhere.fo = { areaId: session.areaId }
@@ -121,7 +121,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   let foStockWhere: any = { OR: [{ commodity: '-' }, { farmerId: null }] }
   if (['FO', 'INTERN'].includes(session.role)) {
     foStockWhere.foId = session.userId
-  } else if (session.role === 'AFA') {
+  } else if (['AFA', 'PLANTATION'].includes(session.role)) {
     foStockWhere.afaId = session.userId
   }
 
@@ -164,7 +164,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
             <h2 style={{ margin: 0 }}>📦 Saldo Stok Saat Ini</h2>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              {session.role === 'AFA' && (
+              {['AFA', 'PLANTATION'].includes(session.role) && (
                 <Link href="/dashboard/stock/in">
                   <button className="btn btn-primary">➕ Pengajuan Stok</button>
                 </Link>
@@ -233,7 +233,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       )}
 
       {/* 3. PANTAUAN STOK USER */}
-      {['ADMIN', 'SPV', 'AFA'].includes(session.role) && (
+      {['ADMIN', 'SPV', 'AFA', 'PLANTATION'].includes(session.role) && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
@@ -261,10 +261,10 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       )}
 
       {/* 3. PENGAJUAN STOK AFA */}
-      {['SPV', 'AFA', 'FAM', 'WHM'].includes(session.role) && (
+      {['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM'].includes(session.role) && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>📨 Pengajuan Stok {session.role === 'AFA' ? 'Saya' : session.role === 'SPV' ? 'dari AFA' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>📨 Pengajuan Stok {['AFA', 'PLANTATION'].includes(session.role) ? 'Saya' : session.role === 'SPV' ? 'dari AFA/PLANTATION' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
           </div>
           <TableFilter prefix="a" showDateRange={true} />
 
@@ -334,7 +334,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>{getStatusBadge(req.status)}</td>
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
                         <div className="action-row" style={{ justifyContent: 'center' }}>
-                          {req.status === 'SUBMITTED' && session.role === 'AFA' && (
+                          {req.status === 'SUBMITTED' && ['AFA', 'PLANTATION'].includes(session.role) && (
                             <Link href={`/dashboard/demoplot/approve/${req.id}`}>
                               <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Approve Stok</button>
                             </Link>

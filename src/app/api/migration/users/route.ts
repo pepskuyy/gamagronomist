@@ -28,13 +28,13 @@ export async function POST(req: NextRequest) {
     const areas = await prisma.area.findMany({ select: { id: true, name: true } })
     const areaMap = new Map(areas.map(a => [a.name.toLowerCase().trim(), a.id]))
 
-    const afas = await prisma.user.findMany({ where: { role: 'AFA' }, select: { id: true, name: true } })
+    const afas = await prisma.user.findMany({ where: { role: { in: ['AFA', 'PLANTATION'] } }, select: { id: true, name: true } })
     const afaMap = new Map(afas.map(a => [a.name.toLowerCase().trim(), a.id]))
 
     const existingUsernames = new Set(
       (await prisma.user.findMany({ select: { username: true } })).map(u => u.username.toLowerCase())
     )
-    const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'FO', 'INTERN']
+    const VALID_ROLES = ['ADMIN', 'SPV', 'AFA', 'PLANTATION', 'FO', 'INTERN']
 
     // Pre-hash all passwords in parallel
     const validItems: { idx: number; r: any; role: string; areaId: string | null; afaId: string | null; isActive: boolean }[] = []
@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
             isActive,
           }
         })
-        if (role === 'AFA') afaMap.set(r.name.trim().toLowerCase(), user.id)
+        if (['AFA', 'PLANTATION'].includes(role)) afaMap.set(r.name.trim().toLowerCase(), user.id)
         inserted++
       } catch (e: any) {
         errors.push({ row: validItems[i].r.rowNum || i + 2, name: r.name, reason: e?.code === 'P2002' ? 'Username duplikat.' : 'Gagal disimpan.' })

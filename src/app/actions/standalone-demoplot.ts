@@ -17,7 +17,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (!session?.userId || !['FO', 'AFA', 'INTERN'].includes(session.role)) {
+  if (!session?.userId || !['FO', 'AFA', 'PLANTATION', 'INTERN'].includes(session.role)) {
     return { error: 'Hanya FO dan AFA yang dapat membuat realisasi demo plot langsung.' }
   }
 
@@ -74,7 +74,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     const req = await prisma.request.create({
       data: {
         foId: session.userId,
-        afaId: session.role === 'AFA' ? session.userId : (session as any).afaId ?? null,
+        afaId: ['AFA', 'PLANTATION'].includes(session.role) ? session.userId : (session as any).afaId ?? null,
         farmerId: farmer.id,
         area,
         snapshotAreaId: resolvedAreaId,
@@ -150,7 +150,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
           link: `/dashboard/demoplot/detail/${req.id}`
         }
       })
-    } else if (session.role === 'AFA') {
+    } else if (['AFA', 'PLANTATION'].includes(session.role)) {
       const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
       if (afaUser && afaUser.areaId) {
         const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId } })
@@ -183,7 +183,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (!session?.userId || !['FO', 'AFA', 'INTERN'].includes(session.role)) {
+  if (!session?.userId || !['FO', 'AFA', 'PLANTATION', 'INTERN'].includes(session.role)) {
     return { error: 'Hanya FO dan AFA yang dapat menambah sesi demo plot.' }
   }
 
@@ -280,7 +280,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
           link: `/dashboard/demoplot/detail/${req.id}`
         }
       })
-    } else if (session.role === 'AFA') {
+    } else if (['AFA', 'PLANTATION'].includes(session.role)) {
       const afaUser = await prisma.user.findUnique({ where: { id: session.userId } })
       if (afaUser && afaUser.areaId) {
         const spvs = await prisma.user.findMany({ where: { role: 'SPV', areaId: afaUser.areaId } })

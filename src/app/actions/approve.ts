@@ -20,7 +20,7 @@ export async function approveRequest(formData: FormData) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (session?.role !== 'AFA' && session?.role !== 'ADMIN') {
+  if (!['AFA', 'PLANTATION'].includes(session?.role as string) && session?.role !== 'ADMIN') {
     return { error: 'Hanya AFA yang dapat menyetujui pengajuan' }
   }
 
@@ -109,7 +109,7 @@ export async function rejectRequest(formData: FormData) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (session?.role !== 'AFA' && session?.role !== 'ADMIN') {
+  if (!['AFA', 'PLANTATION'].includes(session?.role as string) && session?.role !== 'ADMIN') {
     return { error: 'Akses ditolak' }
   }
 

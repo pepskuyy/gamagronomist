@@ -14,7 +14,7 @@ export default async function ApprovePage({ params }: { params: Promise<{ id: st
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (session?.role !== 'AFA' && session?.role !== 'ADMIN') {
+  if (!['AFA', 'PLANTATION'].includes(session?.role as string) && session?.role !== 'ADMIN') {
     return redirect('/dashboard')
   }
 

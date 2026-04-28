@@ -199,7 +199,7 @@ export default function AfaStockRequestTable({
               <tr>
                 <th style={{ ...thStyle, textAlign: 'left' }}>ID</th>
                 <th style={{ ...thStyle, textAlign: 'left' }}>Tanggal</th>
-                {role !== 'AFA' && <th style={{ ...thStyle, textAlign: 'left' }}>Nama AFA</th>}
+                {!['AFA', 'PLANTATION'].includes(role) && <th style={{ ...thStyle, textAlign: 'left' }}>Nama AFA</th>}
                 <th style={{ ...thStyle, textAlign: 'left' }}>Produk Diminta</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Status</th>
                 <th style={{ ...thStyle, textAlign: 'center' }}>Invoice</th>
@@ -211,7 +211,7 @@ export default function AfaStockRequestTable({
                 <tr key={req.id}>
                   <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
                   <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(req.createdAt))}</td>
-                  {role !== 'AFA' && <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{req.fo?.name}</td>}
+                  {!['AFA', 'PLANTATION'].includes(role) && <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{req.fo?.name}</td>}
                   <td style={{ ...tdStyle, fontSize: '0.82rem' }}>
                     {req.details.map(d => `${d.product.name}: ${d.qtyRequested} ${d.product.unit}`).join(', ')}
                   </td>
