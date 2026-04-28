@@ -126,9 +126,9 @@ async function computeForArea(
 
   // Per-user counts in parallel
   const [dpCounts, kiosCounts, gatherCounts, compCounts, cbCounts] = await Promise.all([
-    // Demo plot: counted per foId on the request
+    // Demo plot: counted per foId on the request, filtered by actual activity 'date'
     Promise.all(userIds.map(uid =>
-      prisma.demoPlot.count({ where: { ...df, request: { foId: uid } } }).then(c => ({ uid, c }))
+      prisma.demoPlot.count({ where: { date: { gte: startDate, lte: endDate }, request: { foId: uid } } }).then(c => ({ uid, c }))
     )),
     Promise.all(userIds.map(uid =>
       prisma.visitKios.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))

@@ -46,7 +46,7 @@ export async function GET(req: Request) {
 
     if (doAll || activity === 'demoPlot') {
       const dps = await prisma.demoPlot.findMany({
-        where: df,
+        where: { date: { gte: startDate, lte: endDate } },
         select: { request: { select: { foId: true } } }
       })
       for (const dp of dps) addScore(dp.request?.foId, 1)
