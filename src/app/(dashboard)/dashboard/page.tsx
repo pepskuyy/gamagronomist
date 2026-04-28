@@ -9,6 +9,7 @@ import CommodityChart from '@/components/CommodityChart'
 import CbProductChart from '@/components/CbProductChart'
 import CbBuyReasonChart from '@/components/CbBuyReasonChart'
 import DashboardChartFilter from '@/components/DashboardChartFilter'
+import AreaLeaderboard from '@/components/AreaLeaderboard'
 
 const prisma = new PrismaClient()
 
@@ -178,6 +179,9 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
         </div>
       )}
       
+      {/* Area Leaderboard Section (Visible to all) */}
+      <AreaLeaderboard />
+
       {/* KPI Cards */}
       <div className="kpi-grid">
         <div className="card" style={{ borderLeft: '4px solid var(--warning)' }}>
