@@ -14,6 +14,14 @@ type SpvProduct = {
   gramasiPerUnit?:number | null
   spvStock?:      number | null  // stok SPV dari Accurate (dalam kemasan)
 }
+type SampleProduct = {
+  productId:      string
+  productName:    string
+  unit:           string
+  unitGramasi:    string | null
+  gramasiPerUnit: number | null
+  balance:        number  // stok sampel SPV (kemasan)
+}
 type SelectedProduct = {
   productId:      string
   qtyRequested:   number
@@ -49,6 +57,9 @@ export default function StockInPage() {
   const [loadingProducts, setLoadingProducts] = useState(true)
   const [lastSyncedAt, setLastSyncedAt] = useState<string | null>(null)
 
+  const [sampleProducts, setSampleProducts]     = useState<SampleProduct[]>([])
+  const [loadingSample, setLoadingSample]       = useState(true)
+
   const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>([])
   const [currentProduct, setCurrentProduct]     = useState('')
   const [currentQty, setCurrentQty]             = useState('')
@@ -58,6 +69,7 @@ export default function StockInPage() {
   const [isPending, startTransition]    = useTransition()
 
   useEffect(() => {
+    // Fetch Accurate (main warehouse) products
     fetch('/api/spv-stock')
       .then(r => r.json())
       .then(data => {
@@ -66,9 +78,32 @@ export default function StockInPage() {
         setLoadingProducts(false)
       })
       .catch(() => setLoadingProducts(false))
+
+    // Fetch sample warehouse products
+    fetch('/api/sample-stock-for-afa')
+      .then(r => r.json())
+      .then(data => {
+        setSampleProducts(Array.isArray(data) ? data : [])
+        setLoadingSample(false)
+      })
+      .catch(() => setLoadingSample(false))
   }, [])
 
-  const selectedDetail = products.find(p => p.id === currentProduct)
+  // Clear selected products whenever warehouse source changes to avoid cross-source items
+  useEffect(() => {
+    setSelectedProducts([])
+    setCurrentProduct('')
+    setCurrentQty('')
+  }, [warehouseSource])
+
+  // Active product list depends on warehouse source
+  const isSample = warehouseSource === 'SAMPLE'
+  const selectedDetail = isSample
+    ? null  // no need — sample products have different type
+    : products.find(p => p.id === currentProduct)
+  const selectedSampleDetail = isSample
+    ? sampleProducts.find(p => p.productId === currentProduct)
+    : null
 
   function addProduct() {
     const qty = Number(currentQty)
@@ -84,7 +119,32 @@ export default function StockInPage() {
     const detail = products.find(p => p.id === currentProduct)
     if (!detail) return
 
-    // Validasi tidak boleh melebihi stok SPV
+    if (isSample) {
+      // Sample warehouse: pull from sampleProducts
+      const sDetail = sampleProducts.find(p => p.productId === currentProduct)
+      if (!sDetail) return
+      if (qty > sDetail.balance) {
+        alert(`Jumlah melebihi stok sampel SPV! Tersedia: ${sDetail.balance} ${sDetail.unit}`)
+        return
+      }
+      if (selectedProducts.find(p => p.productId === currentProduct)) {
+        alert('Produk ini sudah ada dalam daftar.'); return
+      }
+      setSelectedProducts(prev => [...prev, {
+        productId:      sDetail.productId,
+        qtyRequested:   qty,
+        name:           sDetail.productName,
+        unit:           sDetail.unit,
+        unitGramasi:    sDetail.unitGramasi,
+        gramasiPerUnit: sDetail.gramasiPerUnit,
+        spvStock:       sDetail.balance,
+      }])
+      setCurrentProduct('')
+      setCurrentQty('')
+      return
+    }
+
+    // Main warehouse: pull from Accurate products
     if (detail.spvStock != null && qty > detail.spvStock) {
       alert(`Jumlah melebihi stok SPV! Tersedia: ${detail.spvStock} ${detail.unit}`)
       return
@@ -167,19 +227,33 @@ export default function StockInPage() {
         </div>
       </div>
 
-      {/* Info sync freshness */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.5rem 0.9rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-        <span>🔄 Data stok SPV dari Accurate</span>
-        {lastSyncedAt ? (
-          <span style={{ color: new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? '#d97706' : '#166534', fontWeight: 500 }}>
-            Terakhir disinkron: {new Date(lastSyncedAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-            {new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? ' ⚠️ (lebih dari 1 jam lalu)' : ' ✓'}
-          </span>
-        ) : (
-          <span style={{ color: '#d97706' }}>⚠️ Belum pernah disinkron — hubungi admin</span>
-        )}
-        <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>• Auto-sync setiap 30 menit</span>
-      </div>
+      {/* Info sync freshness — only shown for MAIN warehouse */}
+      {!isSample && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.5rem 0.9rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          <span>🔄 Data stok SPV dari Accurate</span>
+          {lastSyncedAt ? (
+            <span style={{ color: new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? '#d97706' : '#166534', fontWeight: 500 }}>
+              Terakhir disinkron: {new Date(lastSyncedAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
+              {new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? ' ⚠️ (lebih dari 1 jam lalu)' : ' ✓'}
+            </span>
+          ) : (
+            <span style={{ color: '#d97706' }}>⚠️ Belum pernah disinkron — hubungi admin</span>
+          )}
+          <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>• Auto-sync setiap 30 menit</span>
+        </div>
+      )}
+
+      {/* Sample warehouse info bar */}
+      {isSample && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.5rem 0.9rem', background: '#ede9fe', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: '#5b21b6' }}>
+          <span>🧪 Data stok dari Gudang Sampel SPV area Anda</span>
+          {loadingSample ? (
+            <span>Memuat...</span>
+          ) : (
+            <span style={{ fontWeight: 600 }}>{sampleProducts.length} produk tersedia dengan stok &gt; 0</span>
+          )}
+        </div>
+      )}
 
       <div className="card">
         {error && (
@@ -195,22 +269,41 @@ export default function StockInPage() {
             <div className="picker-row">
               <div style={{ flex: 2 }}>
                 <label className="form-label">Pilih Produk</label>
-                <SearchableSelect
-                  options={products.map(p => ({
-                    value: p.id,
-                    label: p.unitGramasi
-                      ? `${p.name} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`
-                      : `${p.name} (${p.unit}) • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`,
-                  }))}
-                  value={currentProduct}
-                  onChange={setCurrentProduct}
-                  placeholder={loadingProducts ? 'Memuat produk...' : '-- Ketik nama produk --'}
-                />
+                {isSample ? (
+                  <SearchableSelect
+                    options={sampleProducts.map(p => ({
+                      value: p.productId,
+                      label: p.unitGramasi
+                        ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • Stok Sampel: ${p.balance} ${p.unit}`
+                        : `${p.productName} (${p.unit}) • Stok Sampel: ${p.balance} ${p.unit}`,
+                    }))}
+                    value={currentProduct}
+                    onChange={setCurrentProduct}
+                    placeholder={loadingSample ? 'Memuat stok sampel...' : sampleProducts.length === 0 ? '— Tidak ada stok sampel tersedia —' : '-- Ketik nama produk --'}
+                  />
+                ) : (
+                  <SearchableSelect
+                    options={products.map(p => ({
+                      value: p.id,
+                      label: p.unitGramasi
+                        ? `${p.name} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`
+                        : `${p.name} (${p.unit}) • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`,
+                    }))}
+                    value={currentProduct}
+                    onChange={setCurrentProduct}
+                    placeholder={loadingProducts ? 'Memuat produk...' : '-- Ketik nama produk --'}
+                  />
+                )}
               </div>
               <div style={{ flex: 1 }}>
                 <label className="form-label">
-                  Kuantitas ({selectedDetail?.unit || 'kemasan'})
-                  {selectedDetail?.spvStock != null && (
+                  Kuantitas ({(isSample ? selectedSampleDetail?.unit : selectedDetail?.unit) || 'kemasan'})
+                  {isSample && selectedSampleDetail && (
+                    <span style={{ fontWeight: 400, color: '#7c3aed', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
+                      maks {selectedSampleDetail.balance} {selectedSampleDetail.unit}
+                    </span>
+                  )}
+                  {!isSample && selectedDetail?.spvStock != null && (
                     <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
                       maks {selectedDetail.spvStock} {selectedDetail.unit}
                     </span>
@@ -218,7 +311,7 @@ export default function StockInPage() {
                 </label>
                 <input
                   type="number" step="1" min="1"
-                  max={selectedDetail?.spvStock ?? undefined}
+                  max={isSample ? (selectedSampleDetail?.balance ?? undefined) : (selectedDetail?.spvStock ?? undefined)}
                   className="form-control"
                   value={currentQty}
                   onChange={e => setCurrentQty(e.target.value)}
@@ -228,8 +321,26 @@ export default function StockInPage() {
               <button type="button" onClick={addProduct} className="btn btn-outline" style={{ height: '42px', padding: '0 1.5rem' }}>Tambah</button>
             </div>
 
-            {/* Info produk terpilih */}
-            {selectedDetail && (
+            {/* Info produk terpilih — Sample */}
+            {isSample && selectedSampleDetail && (
+              <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: '#ede9fe', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                {selectedSampleDetail.unitGramasi && selectedSampleDetail.gramasiPerUnit && (
+                  <span>📐 <strong>{selectedSampleDetail.gramasiPerUnit}{selectedSampleDetail.unitGramasi}</strong> per {selectedSampleDetail.unit}</span>
+                )}
+                <span style={{ color: selectedSampleDetail.balance > 0 ? '#5b21b6' : '#6b7280' }}>
+                  🧪 Stok Sampel SPV: <strong>{selectedSampleDetail.balance} {selectedSampleDetail.unit}</strong>
+                </span>
+                {selectedSampleDetail.unitGramasi && selectedSampleDetail.gramasiPerUnit && (
+                  <span style={{ color: '#7c3aed' }}>
+                    = {(selectedSampleDetail.balance * selectedSampleDetail.gramasiPerUnit).toLocaleString('id-ID')}{selectedSampleDetail.unitGramasi} total
+                  </span>
+                )}
+                <span style={{ color: '#92400e' }}>⚠️ Pengajuan hanya dalam kemasan utuh</span>
+              </div>
+            )}
+
+            {/* Info produk terpilih — Accurate (Main) */}
+            {!isSample && selectedDetail && (
               <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                 {selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
                   <span>📐 <strong>{selectedDetail.gramasiPerUnit}{selectedDetail.unitGramasi}</strong> per {selectedDetail.unit}</span>
