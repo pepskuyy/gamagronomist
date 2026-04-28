@@ -101,12 +101,13 @@ export default function OpnameFormClient() {
         {success && <div className="badge badge-success" style={{ marginBottom: '1rem', display: 'block', textAlign: 'center', padding: '1rem' }}>✅ Pengajuan opname berhasil dikirim ke SPV! Mengalihkan...</div>}
 
         <form onSubmit={handleSubmit}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', marginBottom: '2rem' }}>
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left', marginBottom: '2rem' }}>
              <thead style={{ background: 'var(--surface-hover)' }}>
                <tr>
                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Produk</th>
                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Stok Sistem (Ledger)</th>
-                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '200px' }}>Fisik Aktual</th>
+                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', minWidth: '120px' }}>Fisik Aktual</th>
                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '120px' }}>Selisih</th>
                  <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '250px' }}>Keterangan</th>
                </tr>
@@ -127,7 +128,7 @@ export default function OpnameFormClient() {
                           min="0"
                           step="0.01" 
                           className="form-control" 
-                          style={{ padding: '0.4rem', margin: 0 }}
+                          style={{ padding: '0.4rem', margin: 0, minWidth: '80px' }}
                           value={counts[p.id]}
                           onChange={(e) => handleCountChange(p.id, e.target.value)}
                         />
@@ -156,8 +157,9 @@ export default function OpnameFormClient() {
                    </td>
                  </tr>
                )})}
-             </tbody>
-          </table>
+              </tbody>
+            </table>
+          </div>
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }} disabled={submitting}>
              {submitting ? 'Mengirim Pengajuan...' : 'Ajukan Penyesuaian ke SPV'}

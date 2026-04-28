@@ -302,8 +302,9 @@ export default function TargetDashboard({ isSPV, areas }: TargetDashboardProps) 
                 <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#374151', marginBottom: '0.25rem' }}>{c.icon} {c.label}</label>
                 <input
                   type="number" min={0}
-                  value={targetInputs[c.targetKey]}
-                  onChange={e => setTargetInputs(prev => ({ ...prev, [c.targetKey]: Number(e.target.value) }))}
+                  value={targetInputs[c.targetKey] === 0 ? '' : targetInputs[c.targetKey]}
+                  onChange={e => setTargetInputs(prev => ({ ...prev, [c.targetKey]: e.target.value === '' ? 0 : Number(e.target.value) }))}
+                  placeholder="0"
                   style={{ width: '100%', border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.4rem 0.6rem', fontSize: '0.9rem', fontWeight: 600, outline: 'none', boxSizing: 'border-box' }}
                 />
               </div>
