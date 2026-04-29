@@ -4,6 +4,7 @@ import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
 import ExportExcelButton from '@/components/ExportExcelButton'
+import ExportDemoplotPhotosButton from '@/components/ExportDemoplotPhotosButton'
 
 const prisma = new PrismaClient()
 
@@ -319,7 +320,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <h3 style={{ margin: 0 }}>🌾 Riwayat Realisasi Demo Plot</h3>
-          <ExportExcelButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <ExportExcelButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
+            <ExportDemoplotPhotosButton search={dpQ} start={dpStart} end={dpEnd} />
+          </div>
         </div>
         <TableFilter prefix="dp" searchLabel="Cari Nama Petani" currentQ={dpQ} currentStart={dpStart} currentEnd={dpEnd} allParams={allParams} />
         <div className="table-responsive">
