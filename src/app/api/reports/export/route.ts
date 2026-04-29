@@ -5,6 +5,20 @@ import { decrypt } from '@/lib/auth'
 
 const prisma = new PrismaClient()
 
+// Standarisasi area ke format kabupaten
+function extractKabupaten(areaStr: string | null | undefined, foAreaName?: string | null): string {
+  const area = (areaStr || '').trim()
+  // Sudah dalam format KABUPATEN/KOTA
+  const kabStart = area.match(/^(KABUPATEN|KOTA)\s+\w+/i)
+  if (kabStart) return kabStart[0].toUpperCase()
+  // Format "Kab. X" di dalam string
+  const kabIn = area.match(/\bKab(?:upaten)?\.?\s+([\w]+)/i)
+  if (kabIn) return `KABUPATEN ${kabIn[1].toUpperCase()}`
+  // Fallback ke nama area FO (sudah normalized)
+  if (foAreaName) return foAreaName.toUpperCase()
+  return area || '-'
+}
+
 export async function GET(req: Request) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -101,21 +115,31 @@ export async function GET(req: Request) {
             ]
           } : {})
         },
-        include: { fo: { select: { name: true } }, farmer: true, demoPlots: true },
+        include: { fo: { include: { area: true } }, farmer: true, demoPlots: true },
         orderBy: { createdAt: 'desc' }
       })
 
-      data = q.map(i => ({
-        'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
-        'ID Tiket': i.id,
-        'Pelaksana (FO/AFA)': i.fo?.name || '-',
-        'Nama Petani': i.farmer?.name || '-',
-        'No. HP': i.farmer?.phone || '-',
-        'Area/Desa': i.area || '-',
-        'Komoditas': i.commodity || '-',
-        'Status': i.status,
-        'Jumlah Sesi Dilakukan': i.demoPlots.length
-      }))
+      data = q.map((i: any) => {
+        // Kumpulkan semua foto dari semua sesi demo plot
+        const allPhotos: string[] = []
+        i.demoPlots.forEach((dp: any) => {
+          if (dp.photos) {
+            try { const urls = JSON.parse(dp.photos); if (Array.isArray(urls)) allPhotos.push(...urls) } catch {}
+          }
+        })
+        return {
+          'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
+          'ID Tiket': i.id,
+          'Pelaksana (FO/AFA)': i.fo?.name || '-',
+          'Nama Petani': i.farmer?.name || '-',
+          'No. HP': i.farmer?.phone || '-',
+          'Kabupaten': extractKabupaten(i.area, i.fo?.area?.name),
+          'Komoditas': i.commodity || '-',
+          'Status': i.status,
+          'Jumlah Sesi Dilakukan': i.demoPlots.length,
+          'Link Foto Dokumentasi': allPhotos.length > 0 ? allPhotos.join('\n') : '-'
+        }
+      })
 
     } else if (type === 'kios') {
       const q = await prisma.visitKios.findMany({

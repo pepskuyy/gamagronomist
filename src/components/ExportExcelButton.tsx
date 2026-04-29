@@ -37,7 +37,8 @@ export default function ExportExcelButton({ type, search, start, end, label = 'ð
       const wb = XLSX.utils.book_new()
       const ws = XLSX.utils.json_to_sheet(json.data)
       XLSX.utils.book_append_sheet(wb, ws, 'Data')
-      XLSX.writeFile(wb, `Laporan_${type}_${new Date().toISOString().slice(0,10)}.xlsx`)
+      const dateTag = start && end ? `_${start}_sd_${end}` : start ? `_ab_${start}` : end ? `_sd_${end}` : ''
+      XLSX.writeFile(wb, `Laporan_${type}${dateTag}.xlsx`)
       
     } catch (e: any) {
       alert(e.message)
