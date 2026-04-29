@@ -32,9 +32,8 @@ export default function LoginPage() {
         <div className="login-header">
           <div className="logo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/agrolens-logo.png" alt="Agrolens" style={{ width: '200px', height: 'auto', objectFit: 'contain' }} />
+            <img src="/agrolens-logo.png" alt="Agrolens" style={{ width: '220px', height: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }} />
           </div>
-          <p>Sistem Tracking Stok &amp; Demo Plot</p>
         </div>
         
         {error && <div className="alert-error">{error}</div>}
@@ -111,7 +110,8 @@ export default function LoginPage() {
         .logo {
           display: flex;
           justify-content: center;
-          margin-bottom: 0.5rem;
+          margin-bottom: 1.5rem;
+          background: white;
         }
         .login-header p {
           color: var(--text-muted);
