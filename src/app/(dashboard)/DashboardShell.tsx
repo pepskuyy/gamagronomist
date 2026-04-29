@@ -148,7 +148,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
               </svg>
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <Image src="/logo.png" alt="Agrolens" width={100} height={36} priority style={{ objectFit: 'contain' }} />
+              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>Agrolens</span>
               <span style={{ color: 'var(--border)', fontWeight: 300 }}>|</span>
               <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Portal Agronomi</span>
             </div>

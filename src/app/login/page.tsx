@@ -1,4 +1,4 @@
-﻿'use client'
+'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
@@ -31,8 +31,10 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo">ðŸŒ± Agrolens</div>
-          <p>Sistem Tracking Stok & Demo Plot</p>
+          <div className="logo">
+            <Image src="/logo.png" alt="Agrolens" width={220} height={80} priority style={{ objectFit: 'contain' }} />
+          </div>
+          <p>Sistem Tracking Stok &amp; Demo Plot</p>
         </div>
         
         {error && <div className="alert-error">{error}</div>}
@@ -70,7 +72,7 @@ export default function LoginPage() {
         {/* Forgot password */}
         <div style={{ textAlign: 'center', marginTop: '1rem' }}>
           <a href="/forgot-password" style={{ color: 'var(--primary)', fontSize: '0.85rem', textDecoration: 'none' }}>
-            ðŸ”‘ Lupa Password?
+            Lupa Password?
           </a>
         </div>
 
@@ -79,7 +81,7 @@ export default function LoginPage() {
           <div style={{ height: '1px', background: 'var(--border)', marginBottom: '1.25rem' }} />
           <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem' }}>Belum punya akun?</p>
           <a href="/register" className="btn btn-outline" style={{ width: '100%', display: 'flex', justifyContent: 'center', fontSize: '0.9rem', padding: '0.7rem' }}>
-            âœï¸ Buat Akun
+            Buat Akun
           </a>
         </div>
       </div>
@@ -143,4 +145,3 @@ export default function LoginPage() {
     </div>
   )
 }
-
