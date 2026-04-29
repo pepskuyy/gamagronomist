@@ -4,7 +4,7 @@ import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
 import ExportExcelButton from '@/components/ExportExcelButton'
-import ExportDemoplotPhotosButton from '@/components/ExportDemoplotPhotosButton'
+import ExportPhotosButton from '@/components/ExportPhotosButton'
 
 const prisma = new PrismaClient()
 
@@ -266,11 +266,17 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
       {/* ══ Customer Behavior ══════════════════════════════════════════════════ */}
       <div style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <h3 style={{ margin: 0 }}>📝 Customer Behavior</h3>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <ExportExcelButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
+            <ExportPhotosButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
+          </div>
+        </div>
         <TableFilter prefix="cb" searchLabel="Cari Nama Petani" currentQ={cbQ} currentStart={cbStart} currentEnd={cbEnd} allParams={allParams} />
         <CbReportTable
           reports={cbSlice.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
           isAdmin={session.role === 'ADMIN'}
-          exportNode={<ExportExcelButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />}
         />
         {(cbHasMore || pcb > 1) && <TablePager paramName="pcb" currentPage={pcb} hasMore={cbHasMore} allParams={allParams} />}
       </div>
@@ -279,7 +285,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <h3 style={{ margin: 0 }}>🌿 Riwayat Spot Demplot</h3>
-          <ExportExcelButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <ExportExcelButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
+            <ExportPhotosButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
+          </div>
         </div>
         <TableFilter prefix="spot" searchLabel="Cari Desa / Kecamatan" currentQ={spotQ} currentStart={spotStart} currentEnd={spotEnd} allParams={allParams} />
         <div className="table-responsive">
@@ -320,9 +329,9 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <h3 style={{ margin: 0 }}>🌾 Riwayat Realisasi Demo Plot</h3>
-        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
-            <ExportDemoplotPhotosButton search={dpQ} start={dpStart} end={dpEnd} />
+            <ExportPhotosButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
           </div>
         </div>
         <TableFilter prefix="dp" searchLabel="Cari Nama Petani" currentQ={dpQ} currentStart={dpStart} currentEnd={dpEnd} allParams={allParams} />
@@ -378,7 +387,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <h3 style={{ margin: 0 }}>🏪 Visit Kios</h3>
-          <ExportExcelButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <ExportExcelButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
+            <ExportPhotosButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
+          </div>
         </div>
         <TableFilter prefix="kios" searchLabel="Cari Nama Kios" currentQ={kiosQ} currentStart={kiosStart} currentEnd={kiosEnd} allParams={allParams} />
         <div className="table-responsive">
@@ -417,7 +429,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <h3 style={{ margin: 0 }}>🤝 Farmer Gathering</h3>
-          <ExportExcelButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <ExportExcelButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
+            <ExportPhotosButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
+          </div>
         </div>
         <TableFilter prefix="gather" searchLabel="Cari Ketua Kelompok" currentQ={gatherQ} currentStart={gatherStart} currentEnd={gatherEnd} allParams={allParams} />
         <div className="table-responsive">
@@ -456,7 +471,10 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
           <h3 style={{ margin: 0 }}>🏢 Visit Company</h3>
-          <ExportExcelButton type="company" search={compQ} start={compStart} end={compEnd} />
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <ExportExcelButton type="company" search={compQ} start={compStart} end={compEnd} />
+            <ExportPhotosButton type="company" search={compQ} start={compStart} end={compEnd} />
+          </div>
         </div>
         <TableFilter prefix="comp" searchLabel="Cari Nama Perusahaan" currentQ={compQ} currentStart={compStart} currentEnd={compEnd} allParams={allParams} />
         <div className="table-responsive">
