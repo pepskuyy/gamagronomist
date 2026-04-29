@@ -21,8 +21,12 @@ export default function ExportDemoplotPhotosButton({ search, start, end }: Props
 
       const res = await fetch(`/api/reports/export-demoplot-photos?${q.toString()}`)
       if (!res.ok) {
-        const json = await res.json()
-        throw new Error(json.error || 'Gagal export')
+        const ct = res.headers.get('content-type') || ''
+        if (ct.includes('application/json')) {
+          const json = await res.json()
+          throw new Error(json.error || `Server error (${res.status})`)
+        }
+        throw new Error(`Server error (${res.status}) — coba filter tanggal lebih sempit atau cek Vercel logs`)
       }
 
       const blob = await res.blob()
