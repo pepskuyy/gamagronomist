@@ -1,8 +1,9 @@
-'use client'
+﻿'use client'
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { login } from '../actions/auth'
+import Image from 'next/image'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -30,7 +31,7 @@ export default function LoginPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo">🌱 Agrolens</div>
+          <div className="logo">ðŸŒ± Agrolens</div>
           <p>Sistem Tracking Stok & Demo Plot</p>
         </div>
         
@@ -69,7 +70,7 @@ export default function LoginPage() {
         {/* Forgot password */}
         <div style={{ textAlign: 'center', marginTop: '1rem' }}>
           <a href="/forgot-password" style={{ color: 'var(--primary)', fontSize: '0.85rem', textDecoration: 'none' }}>
-            🔑 Lupa Password?
+            ðŸ”‘ Lupa Password?
           </a>
         </div>
 
@@ -78,7 +79,7 @@ export default function LoginPage() {
           <div style={{ height: '1px', background: 'var(--border)', marginBottom: '1.25rem' }} />
           <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem' }}>Belum punya akun?</p>
           <a href="/register" className="btn btn-outline" style={{ width: '100%', display: 'flex', justifyContent: 'center', fontSize: '0.9rem', padding: '0.7rem' }}>
-            ✍️ Buat Akun
+            âœï¸ Buat Akun
           </a>
         </div>
       </div>
@@ -106,9 +107,8 @@ export default function LoginPage() {
           margin-bottom: 2rem;
         }
         .logo {
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: var(--primary);
+          display: flex;
+          justify-content: center;
           margin-bottom: 0.5rem;
         }
         .login-header p {
@@ -143,3 +143,4 @@ export default function LoginPage() {
     </div>
   )
 }
+

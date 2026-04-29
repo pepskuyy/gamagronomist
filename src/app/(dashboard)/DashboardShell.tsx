@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 
 type SidebarProps = {
   session: { name: string; role: string; photo?: string | null }
@@ -95,11 +96,8 @@ export default function DashboardShell({ session, children }: SidebarProps) {
       {/* Sidebar */}
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '48px', height: '48px', background: 'var(--primary)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', flexShrink: 0 }}>
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="rgba(255,255,255,0.2)"/>
-            <path d="M12 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 10c-2.7 0-5.8 1.29-6 2h12c-.2-.71-3.3-2-6-2z" fill="white"/>
-          </svg>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', flexShrink: 0 }}>
+          <Image src="/logo.png" alt="Agrolens" width={44} height={44} priority style={{ objectFit: 'contain', borderRadius: '8px' }} />
         </div>
 
         {/* Mobile close */}
@@ -150,7 +148,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
               </svg>
             </button>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>Agrolens</span>
+              <Image src="/logo.png" alt="Agrolens" width={100} height={36} priority style={{ objectFit: 'contain' }} />
               <span style={{ color: 'var(--border)', fontWeight: 300 }}>|</span>
               <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Portal Agronomi</span>
             </div>
