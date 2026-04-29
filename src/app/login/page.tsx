@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { login } from '../actions/auth'
-import Image from 'next/image'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -32,7 +31,8 @@ export default function LoginPage() {
       <div className="login-card">
         <div className="login-header">
           <div className="logo">
-            <Image src="/logo.png" alt="Agrolens" width={220} height={80} priority style={{ objectFit: 'contain' }} />
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/logo.png" alt="Agrolens" style={{ width: '200px', height: 'auto', objectFit: 'contain' }} />
           </div>
           <p>Sistem Tracking Stok &amp; Demo Plot</p>
         </div>

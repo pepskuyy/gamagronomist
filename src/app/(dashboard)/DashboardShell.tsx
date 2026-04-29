@@ -3,7 +3,6 @@
 import { useState } from 'react'
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
-import Image from 'next/image'
 
 type SidebarProps = {
   session: { name: string; role: string; photo?: string | null }
@@ -97,7 +96,8 @@ export default function DashboardShell({ session, children }: SidebarProps) {
       <aside className={`sidebar ${sidebarOpen ? 'open' : ''}`}>
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', flexShrink: 0 }}>
-          <Image src="/logo.png" alt="Agrolens" width={44} height={44} priority style={{ objectFit: 'contain', borderRadius: '8px' }} />
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src="/logo.png" alt="Agrolens" style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '8px' }} />
         </div>
 
         {/* Mobile close */}
