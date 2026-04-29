@@ -32,7 +32,7 @@ export default function LoginPage() {
         <div className="login-header">
           <div className="logo">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logo.png" alt="Agrolens" style={{ width: '200px', height: 'auto', objectFit: 'contain' }} />
+            <img src="/agrolens-logo.png" alt="Agrolens" style={{ width: '200px', height: 'auto', objectFit: 'contain' }} />
           </div>
           <p>Sistem Tracking Stok &amp; Demo Plot</p>
         </div>

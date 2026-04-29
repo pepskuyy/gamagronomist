@@ -97,7 +97,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
         {/* Logo */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '1.5rem', flexShrink: 0 }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logo.png" alt="Agrolens" style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '8px' }} />
+          <img src="/agrolens-logo.png" alt="Agrolens" style={{ width: '44px', height: '44px', objectFit: 'contain', borderRadius: '8px' }} />
         </div>
 
         {/* Mobile close */}
