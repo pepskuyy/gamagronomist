@@ -31,6 +31,13 @@ type SelectedProduct = {
   gramasiPerUnit?:number | null
   spvStock?:      number | null
 }
+type CustomProduct = {
+  tempId:   string  // local-only identifier
+  name:     string
+  unit:     string
+  qty:      number
+  notes:    string  // e.g. deskripsi tambahan
+}
 
 /** Format stok SPV: "12 Btl" atau "Belum tersedia" */
 function formatSpvStock(stock: number | null | undefined, unit: string) {
@@ -68,6 +75,13 @@ export default function StockInPage() {
   const [error, setError]               = useState<string | null>(null)
   const [isPending, startTransition]    = useTransition()
 
+  // Custom (non-SKU) products — only for SAMPLE mode
+  const [customProducts, setCustomProducts]         = useState<CustomProduct[]>([])
+  const [customName, setCustomName]                 = useState('')
+  const [customUnit, setCustomUnit]                 = useState('')
+  const [customQty, setCustomQty]                   = useState('')
+  const [customNotes, setCustomNotes]               = useState('')
+
   useEffect(() => {
     // Fetch Accurate (main warehouse) products
     fetch('/api/spv-stock')
@@ -92,8 +106,13 @@ export default function StockInPage() {
   // Clear selected products whenever warehouse source changes to avoid cross-source items
   useEffect(() => {
     setSelectedProducts([])
+    setCustomProducts([])
     setCurrentProduct('')
     setCurrentQty('')
+    setCustomName('')
+    setCustomUnit('')
+    setCustomQty('')
+    setCustomNotes('')
   }, [warehouseSource])
 
   // Active product list depends on warehouse source
@@ -160,18 +179,53 @@ export default function StockInPage() {
     setSelectedProducts(prev => prev.filter(p => p.productId !== id))
   }
 
+  function addCustomProduct() {
+    const trimName = customName.trim()
+    const trimUnit = customUnit.trim()
+    const qty = Number(customQty)
+    if (!trimName) { alert('Nama produk tidak boleh kosong.'); return }
+    if (!trimUnit) { alert('Satuan tidak boleh kosong.'); return }
+    if (!qty || qty <= 0 || !Number.isInteger(qty)) { alert('Masukkan jumlah kemasan yang valid (bilangan bulat).'); return }
+    setCustomProducts(prev => [...prev, {
+      tempId: `custom-${Date.now()}-${Math.random()}`,
+      name:   trimName,
+      unit:   trimUnit,
+      qty,
+      notes:  customNotes.trim(),
+    }])
+    setCustomName('')
+    setCustomUnit('')
+    setCustomQty('')
+    setCustomNotes('')
+  }
+
+  function removeCustomProduct(tempId: string) {
+    setCustomProducts(prev => prev.filter(p => p.tempId !== tempId))
+  }
+
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     setError(null)
-    if (selectedProducts.length === 0) {
-      setError('Masukkan minimal satu produk untuk diajukan.'); return
+    const hasSkuProducts    = selectedProducts.length > 0
+    const hasCustomProducts = customProducts.length > 0
+    if (!hasSkuProducts && !hasCustomProducts) {
+      setError('Masukkan minimal satu produk (dari SKU atau produk baru) untuk diajukan.'); return
     }
     const payload = selectedProducts.map(p => ({
       productId: p.productId,
       qtyRequested: p.qtyRequested,
     }))
+    // Append custom product requests to notes as structured text
+    let finalNotes = notes
+    if (hasCustomProducts) {
+      const customSection = '\n\n[PERMINTAAN PRODUK DI LUAR SKU]\n' +
+        customProducts.map((c, i) =>
+          `${i + 1}. ${c.name} — ${c.qty} ${c.unit}${c.notes ? ` (${c.notes})` : ''}`
+        ).join('\n')
+      finalNotes = (finalNotes.trim() + customSection).trim()
+    }
     const formData = new FormData()
-    formData.append('notes', notes)
+    formData.append('notes', finalNotes || '-')
     formData.append('products', JSON.stringify(payload))
     formData.append('warehouseSource', warehouseSource)
     startTransition(async () => {
@@ -397,6 +451,107 @@ export default function StockInPage() {
               </div>
             )}
           </div>
+
+          {/* ── Custom / Non-SKU Product Section (SAMPLE mode only) ──────────── */}
+          {isSample && (
+            <div style={{ marginBottom: '2rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1.1rem', margin: 0 }}>🆕 Produk Di Luar SKU</h3>
+                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                  Untuk produk yang belum terdaftar di sistem — isi detailnya secara manual
+                </span>
+              </div>
+
+              {/* Input row */}
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr auto', gap: '0.75rem', alignItems: 'end', marginBottom: '0.75rem' }}>
+                <div>
+                  <label className="form-label">Nama Produk</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={customName}
+                    onChange={e => setCustomName(e.target.value)}
+                    placeholder="Cth: Fungisida XYZ 500ml"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Satuan</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    value={customUnit}
+                    onChange={e => setCustomUnit(e.target.value)}
+                    placeholder="Cth: Btl, Kg, Pcs"
+                  />
+                </div>
+                <div>
+                  <label className="form-label">Jumlah</label>
+                  <input
+                    type="number"
+                    step="1"
+                    min="1"
+                    className="form-control"
+                    value={customQty}
+                    onChange={e => setCustomQty(e.target.value)}
+                    placeholder="Qty"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={addCustomProduct}
+                  className="btn btn-outline"
+                  style={{ height: '42px', padding: '0 1.5rem', whiteSpace: 'nowrap' }}
+                >
+                  Tambah
+                </button>
+              </div>
+              {/* Optional notes for custom product */}
+              <input
+                type="text"
+                className="form-control"
+                value={customNotes}
+                onChange={e => setCustomNotes(e.target.value)}
+                placeholder="Keterangan tambahan (opsional) — misal: merek, kemasan, spesifikasi"
+                style={{ marginBottom: '0.75rem' }}
+              />
+
+              {/* Custom product list */}
+              {customProducts.length > 0 ? (
+                <div style={{ border: '1px solid #c4b5fd', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                    <thead>
+                      <tr>
+                        <th style={{ ...thStyle, background: '#ede9fe' }}>Nama Produk</th>
+                        <th style={{ ...thStyle, background: '#ede9fe' }}>Satuan</th>
+                        <th style={{ ...thStyle, background: '#ede9fe' }}>Jumlah</th>
+                        <th style={{ ...thStyle, background: '#ede9fe' }}>Keterangan</th>
+                        <th style={{ ...thStyle, background: '#ede9fe', width: '50px', textAlign: 'center' }}>✕</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {customProducts.map(c => (
+                        <tr key={c.tempId}>
+                          <td style={tdStyle}>
+                            <span style={{ fontWeight: 600, color: '#5b21b6' }}>🆕 {c.name}</span>
+                          </td>
+                          <td style={tdStyle}>{c.unit}</td>
+                          <td style={tdStyle}><strong>{c.qty}</strong></td>
+                          <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '0.82rem' }}>{c.notes || '—'}</td>
+                          <td style={{ ...tdStyle, textAlign: 'center' }}>
+                            <button type="button" onClick={() => removeCustomProduct(c.tempId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div style={{ textAlign: 'center', padding: '1.25rem', border: '1px dashed #c4b5fd', borderRadius: 'var(--radius-md)', color: '#7c3aed', fontSize: '0.85rem' }}>
+                  Belum ada produk di luar SKU yang ditambahkan.
+                </div>
+              )}
+            </div>
+          )}
 
           <div className="form-group" style={{ marginBottom: '1.5rem' }}>
             <label className="form-label">Catatan Pengajuan <span style={{ color: 'var(--danger)' }}>*</span></label>
