@@ -28,7 +28,20 @@ export async function getVillages(districtId: string) {
   try {
     const res = await fetch(`${BASE_URL}/villages/${districtId}.json`, { cache: 'force-cache' })
     if (!res.ok) return []
-    return await res.json()
+    const data: any[] = await res.json()
+    
+    // PATCH: Desa Brumbung tidak ada di API Emsifa untuk Kecamatan Mranggen (Demak)
+    // ID Mranggen adalah '3321010'. Kita tambahkan secara manual.
+    if (districtId === '3321010') {
+      if (!data.find(v => v.name === 'BRUMBUNG')) {
+        data.push({ id: '3321010999', name: 'BRUMBUNG', district_id: '3321010' })
+        
+        // Sort agar berurutan sesuai alfabet
+        data.sort((a, b) => a.name.localeCompare(b.name))
+      }
+    }
+
+    return data
   } catch (err) {
     console.error('getVillages error', err)
     return []
