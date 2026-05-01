@@ -152,3 +152,44 @@ export async function submitVisitCompany(formData: FormData) {
     return { error: 'Gagal mengirim laporan Visit Company.' }
   }
 }
+
+export async function submitVideoKonten(formData: FormData) {
+  const session = await getSession()
+  if (!session?.userId) return { error: 'Unauthorized' }
+
+  try {
+    const uploadDateStr = formData.get('uploadDate') as string
+    if (!uploadDateStr) return { error: 'Tanggal Upload wajib diisi.' }
+    
+    // Parse products json string into an array of product IDs
+    const productsStr = formData.get('products') as string
+    let productIds: string[] = []
+    if (productsStr) {
+      try {
+        productIds = JSON.parse(productsStr)
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    const data = {
+      userId: session.userId,
+      snapshotAreaId: session.areaId ?? null,
+      uploadDate: new Date(uploadDateStr),
+      theme: formData.get('theme') as string,
+      notes: formData.get('notes') as string,
+      photos: formData.get('photos') as string,
+      products: {
+        create: productIds.map(id => ({
+          product: { connect: { id } }
+        }))
+      }
+    }
+
+    const report = await prisma.contentVideo.create({ data })
+    return { success: true, id: report.id }
+  } catch (err: any) {
+    console.error('Submit Video Konten Error:', err)
+    return { error: 'Gagal mengirim laporan Video Konten.' }
+  }
+}

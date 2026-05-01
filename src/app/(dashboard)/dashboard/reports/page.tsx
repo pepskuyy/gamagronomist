@@ -131,6 +131,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const pgather = Math.max(1, parseInt(rp.pgather || '1'))
   const pcomp   = Math.max(1, parseInt(rp.pcomp   || '1'))
   const pspot   = Math.max(1, parseInt(rp.pspot   || '1'))
+  const pvideo  = Math.max(1, parseInt(rp.pvideo  || '1'))
 
   // Per-table filter params  (prefix_q, prefix_start, prefix_end)
   const cbQ      = rp.cb_q      || ''; const cbStart = rp.cb_start    || ''; const cbEnd  = rp.cb_end    || ''
@@ -139,6 +140,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const gatherQ  = rp.gather_q  || ''; const gatherStart = rp.gather_start || ''; const gatherEnd = rp.gather_end  || ''
   const compQ    = rp.comp_q    || ''; const compStart = rp.comp_start  || ''; const compEnd = rp.comp_end   || ''
   const spotQ    = rp.spot_q    || ''; const spotStart = rp.spot_start  || ''; const spotEnd = rp.spot_end   || ''
+  const videoQ   = rp.video_q   || ''; const videoStart = rp.video_start || ''; const videoEnd = rp.video_end  || ''
 
   // Snapshot of ALL current params (for pagination links that preserve filters)
   const allParams = new URLSearchParams(
@@ -185,7 +187,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   }
 
   // ── Fetch all tables ────────────────────────────────────────────────────────
-  const [cbRows, dpRows, kiosRows, gatherRows, compRows, spotRows] = await Promise.all([
+  const [cbRows, dpRows, kiosRows, gatherRows, compRows, spotRows, videoRows] = await Promise.all([
     prisma.customerBehavior.findMany({
       where: activityWhere('farmerName', cbQ, cbStart, cbEnd),
       include: { user: true }, orderBy: { createdAt: 'desc' },
@@ -217,6 +219,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       include: { user: true }, orderBy: { createdAt: 'desc' },
       skip: (pspot - 1) * take, take: take + 1,
     }),
+    prisma.contentVideo.findMany({
+      where: activityWhere('theme', videoQ, videoStart, videoEnd),
+      include: { user: true, products: { include: { product: true } } }, orderBy: { createdAt: 'desc' },
+      skip: (pvideo - 1) * take, take: take + 1,
+    }),
   ])
 
   const cbHasMore     = cbRows.length     > take
@@ -225,6 +232,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const gatherHasMore = gatherRows.length > take
   const compHasMore   = compRows.length   > take
   const spotHasMore   = spotRows.length   > take
+  const videoHasMore  = videoRows.length  > take
 
   const cbSlice     = cbRows.slice(0, take)
   const dpSlice     = dpRows.slice(0, take)
@@ -232,6 +240,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const gatherSlice = gatherRows.slice(0, take)
   const compSlice   = compRows.slice(0, take)
   const spotSlice   = spotRows.slice(0, take)
+  const videoSlice  = videoRows.slice(0, take)
 
   const tdStyle = { padding: '0.75rem', borderBottom: '1px solid var(--border)' }
   const thStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem', textTransform: 'uppercase', background: 'var(--surface-hover)' }
@@ -261,6 +270,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           {['FO', 'INTERN', 'AFA'].includes(session.role) && (
             <Link href="/dashboard/demoplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🌾 Rekam Demo Plot</Link>
           )}
+          <Link href="/dashboard/reports/video-konten/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 📹 Video Konten</Link>
         </div>
       </div>
 
@@ -507,6 +517,49 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           </table>
         </div>
         {(compHasMore || pcomp > 1) && <TablePager paramName="pcomp" currentPage={pcomp} hasMore={compHasMore} allParams={allParams} />}
+      </div>
+
+      {/* ══ Video Konten ══════════════════════════════════════════════════ */}
+      <div className="card" style={{ marginBottom: '2rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+          <h3 style={{ margin: 0 }}>📹 Video Konten</h3>
+          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <ExportExcelButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />
+            <ExportPhotosButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />
+          </div>
+        </div>
+        <TableFilter prefix="video" searchLabel="Cari Tema Video" currentQ={videoQ} currentStart={videoStart} currentEnd={videoEnd} allParams={allParams} />
+        <div className="table-responsive">
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+            <thead>
+              <tr>
+                <th style={thStyle}>Tanggal Upload</th>
+                {['ADMIN', 'SPV'].includes(session.role) && <th style={thStyle}>Pelapor</th>}
+                <th style={thStyle}>Tema</th>
+                <th style={thStyle}>Produk Terkait</th>
+                <th style={thStyle}>Catatan</th>
+                <th style={thStyle}>Aksi</th>
+              </tr>
+            </thead>
+            <tbody>
+              {videoSlice.length === 0 ? (
+                <tr><td colSpan={6} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada data Video Konten.</td></tr>
+              ) : videoSlice.map((i: any) => (
+                <tr key={i.id}>
+                  <td style={tdStyle}>{formatDate(new Date(i.uploadDate))}</td>
+                  {['ADMIN', 'SPV'].includes(session.role) && <td style={tdStyle}>{i.user?.name}</td>}
+                  <td style={tdStyle}>{i.theme}</td>
+                  <td style={tdStyle}>{i.products?.map((p: any) => p.product?.name).join(', ') || '-'}</td>
+                  <td style={tdStyle}>{i.notes || '-'}</td>
+                  <td style={tdStyle}>
+                    <Link href={`/dashboard/reports/video-konten/${i.id}`} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>Detail</Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {(videoHasMore || pvideo > 1) && <TablePager paramName="pvideo" currentPage={pvideo} hasMore={videoHasMore} allParams={allParams} />}
       </div>
     </div>
   )

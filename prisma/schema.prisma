@@ -48,6 +48,7 @@ model User {
   visitKios         VisitKios[]
   farmerGatherings  FarmerGathering[]
   visitCompanies    VisitCompany[]
+  contentVideos     ContentVideo[]
   spotDemplot       SpotDemplot[]
 
   // Notifikasi
@@ -154,6 +155,7 @@ model Product {
   demoPlotDetails   DemoPlotDetail[]
   opnameDetails     OpnameDetail[]
   spotDemplotDetails SpotDemplotDetail[]
+  contentVideoProducts ContentVideoProduct[]
 }
 
 model Farmer {
@@ -438,4 +440,28 @@ model SpotDemplotDetail {
   product        Product     @relation(fields: [productId], references: [id])
   usage                Float
   usedFarmerProduct    Boolean  @default(false) // true = produk milik petani, tidak memotong stok user
+}
+
+model ContentVideo {
+  id             String   @id @default(cuid())
+  userId         String
+  user           User     @relation(fields: [userId], references: [id])
+  snapshotAreaId String?
+  
+  uploadDate     DateTime
+  theme          String
+  notes          String?
+  photos         String?  // JSON Array of URLs
+  
+  createdAt      DateTime @default(now())
+  
+  products       ContentVideoProduct[]
+}
+
+model ContentVideoProduct {
+  id              String       @id @default(cuid())
+  contentVideoId  String
+  contentVideo    ContentVideo @relation(fields: [contentVideoId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product      @relation(fields: [productId], references: [id])
 }

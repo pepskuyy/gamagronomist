@@ -1,0 +1,64 @@
+{
+  "packageId": "id.co.gamaagrosejati.agrolens.twa",
+  "host": "agrolens.gamaagrosejati.co.id",
+  "name": "Agrolens",
+  "launcherName": "Agrolens",
+  "display": "standalone",
+  "themeColor": "#1A9B55",
+  "themeColorDark": "#000000",
+  "navigationColor": "#000000",
+  "navigationColorDark": "#000000",
+  "navigationDividerColor": "#000000",
+  "navigationDividerColorDark": "#000000",
+  "backgroundColor": "#FFFFFF",
+  "enableNotifications": true,
+  "startUrl": "/dashboard",
+  "iconUrl": "https://agrolens.gamaagrosejati.co.id/icons/icon-512x512.png",
+  "maskableIconUrl": "https://agrolens.gamaagrosejati.co.id/icons/icon-512x512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": {
+    "path": "C:\\Users\\febri\\Downloads\\Gamagronomist\\android.keystore",
+    "alias": "android"
+  },
+  "appVersionName": "1.0.1",
+  "appVersionCode": 3,
+  "shortcuts": [
+    {
+      "name": "Input Demo Plot",
+      "shortName": "Demo Plot",
+      "url": "https://agrolens.gamaagrosejati.co.id/dashboard/demoplot/new",
+      "chosenIconUrl": "https://agrolens.gamaagrosejati.co.id/icons/icon-96x96.png"
+    },
+    {
+      "name": "Laporan Aktivitas",
+      "shortName": "Laporan",
+      "url": "https://agrolens.gamaagrosejati.co.id/dashboard/activity",
+      "chosenIconUrl": "https://agrolens.gamaagrosejati.co.id/icons/icon-96x96.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "webManifestUrl": "https://agrolens.gamaagrosejati.co.id/manifest.json",
+  "fallbackType": "customtabs",
+  "features": {
+    "locationDelegation": {
+      "enabled": true
+    }
+  },
+  "alphaDependencies": {
+    "enabled": false
+  },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "fullScopeUrl": "https://agrolens.gamaagrosejati.co.id/",
+  "minSdkVersion": 21,
+  "orientation": "portrait-primary",
+  "fingerprints": [],
+  "additionalTrustedOrigins": [],
+  "retainedBundles": [],
+  "protocolHandlers": [],
+  "fileHandlers": [],
+  "launchHandlerClientMode": "",
+  "displayOverride": [],
+  "appVersion": "1.0.1"
+}

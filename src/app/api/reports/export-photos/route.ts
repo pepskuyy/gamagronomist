@@ -421,6 +421,49 @@ export async function GET(req: Request) {
         await addPhotosToRow(ws, workbook, row, rowIndex, allPhotoUrls, 10)
         rowIndex++
       }
+
+    } else if (type === 'video-konten') {
+      sheetName = 'Video Konten'
+      const ws = workbook.addWorksheet(sheetName)
+      ws.columns = [
+        { header: 'Tanggal Upload',    key: 'tanggal',     width: 18 },
+        { header: 'Tanggal Submit',    key: 'submit',      width: 18 },
+        { header: 'Pelapor',           key: 'pelapor',     width: 18 },
+        { header: 'Tema',              key: 'tema',        width: 30 },
+        { header: 'Produk Terkait',    key: 'produk',      width: 30 },
+        { header: 'Catatan',           key: 'catatan',     width: 30 },
+        { header: 'Foto 1',            key: 'foto1',       width: 20 },
+        { header: 'Foto 2',            key: 'foto2',       width: 20 },
+        { header: 'Foto 3',            key: 'foto3',       width: 20 },
+      ]
+
+      const videoQ = await prisma.contentVideo.findMany({
+        where: {
+          ...dateFilter,
+          ...userFilter,
+          ...(search ? { theme: { contains: search, mode: 'insensitive' } } : {})
+        },
+        include: { user: { select: { name: true } }, products: { include: { product: { select: { name: true } } } } },
+        orderBy: { createdAt: 'desc' }
+      })
+
+      let rowIndex = 2
+      for (const i of videoQ) {
+        const row = ws.addRow({
+          tanggal: new Date(i.uploadDate).toLocaleDateString('id-ID'),
+          submit: new Date(i.createdAt).toLocaleString('id-ID'),
+          pelapor: i.user.name,
+          tema: i.theme || '-',
+          produk: i.products?.map((p: any) => p.product?.name).join(', ') || '-',
+          catatan: i.notes || '-',
+          foto1: '', foto2: '', foto3: ''
+        })
+        row.alignment = { vertical: 'middle', wrapText: true }
+        let allPhotoUrls: string[] = []
+        if (i.photos) { try { allPhotoUrls = JSON.parse(i.photos) } catch {} }
+        await addPhotosToRow(ws, workbook, row, rowIndex, allPhotoUrls, 7)
+        rowIndex++
+      }
     }
 
     const ws = workbook.worksheets[0]

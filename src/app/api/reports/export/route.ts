@@ -230,6 +230,29 @@ export async function GET(req: Request) {
           'Hasil Pengamatan': i.observationResult || '-'
         }
       })
+    } else if (type === 'video-konten') {
+      const videoQ = await prisma.contentVideo.findMany({
+        where: {
+          ...dateFilter,
+          ...userFilter,
+          ...(search ? { theme: { contains: search, mode: 'insensitive' } } : {})
+        },
+        include: { user: { select: { name: true } }, products: { include: { product: { select: { name: true } } } } },
+        orderBy: { createdAt: 'desc' }
+      })
+      data = videoQ.map(i => {
+        let allPhotos: string[] = []
+        if (i.photos) { try { const urls = JSON.parse(i.photos); if (Array.isArray(urls)) allPhotos.push(...urls) } catch {} }
+        return {
+          'Tanggal Upload': new Date(i.uploadDate).toLocaleDateString('id-ID'),
+          'Tanggal Submit': new Date(i.createdAt).toLocaleString('id-ID'),
+          'Pelapor': i.user.name,
+          'Tema': i.theme || '-',
+          'Produk Terkait': i.products?.map((p: any) => p.product?.name).join(', ') || '-',
+          'Catatan': i.notes || '-',
+          'Link Foto Dokumentasi': allPhotos.length > 0 ? allPhotos.join('\n') : '-'
+        }
+      })
     }
 
     return NextResponse.json({ data })
