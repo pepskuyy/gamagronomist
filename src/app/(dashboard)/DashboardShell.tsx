@@ -10,6 +10,8 @@ type SidebarProps = {
 }
 
 import NotificationBell from '@/components/NotificationBell'
+import ConnectionStatus from '@/components/ConnectionStatus'
+import OfflineDraftBanner from '@/components/OfflineDraftBanner'
 
 // Nav icon SVGs — clean, modern look matching the reference
 const Icons = {
@@ -155,6 +157,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+            <ConnectionStatus />
             <NotificationBell />
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', borderLeft: '1px solid var(--border)', paddingLeft: '1rem' }}>
               <div style={{ textAlign: 'right' }}>
@@ -173,6 +176,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
         </header>
 
         <div className="dashboard-container">
+          <OfflineDraftBanner />
           {children}
         </div>
       </main>
