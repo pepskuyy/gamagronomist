@@ -1,6 +1,17 @@
 'use client'
 
+/**
+ * RegionSelect — Hybrid Online/Offline
+ *
+ * Strategi:
+ * 1. Online  → panggil server action (fetch di sisi server, tidak ada CORS issue)
+ *              → simpan hasil ke localStorage sebagai cache offline
+ * 2. Offline → gunakan localStorage cache (data yg sudah pernah diambil)
+ * 3. Offline tanpa cache → tampilkan kosong + pesan info
+ */
+
 import { useState, useEffect } from 'react'
+import { getRegencies, getDistricts, getVillages } from '@/app/actions/region'
 import SearchableSelect from './SearchableSelect'
 
 type Region = { id: string; name: string }
@@ -16,16 +27,10 @@ interface RegionSelectProps {
   nameDesa?: string
 }
 
-// ── Patch lokal: desa yang hilang dari API EMSIFA ─────────────────
-const VILLAGE_PATCHES: Record<string, Region[]> = {
-  '3321010': [{ id: '3321010999', name: 'BRUMBUNG' }], // Mranggen, Demak
-}
+// ── localStorage cache helpers ─────────────────────────────────────
+const CACHE_TTL_MS = 30 * 24 * 60 * 60 * 1000 // 30 hari
 
-const EMSIFA_BASE = 'https://emsifa.github.io/api-wilayah-indonesia/api'
-const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 hari
-
-// ── localStorage helpers ──────────────────────────────────────────
-function cacheGet(key: string): Region[] | null {
+function lsGet(key: string): Region[] | null {
   try {
     const raw = localStorage.getItem(key)
     if (!raw) return null
@@ -40,7 +45,7 @@ function cacheGet(key: string): Region[] | null {
   }
 }
 
-function cacheSet(key: string, data: Region[]) {
+function lsSet(key: string, data: Region[]) {
   try {
     localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }))
   } catch {
@@ -48,64 +53,52 @@ function cacheSet(key: string, data: Region[]) {
   }
 }
 
-// ── Fetch wilayah langsung dari EMSIFA (bisa offline jika SW cache) ──
-async function fetchRegions(url: string, cacheKey: string): Promise<Region[]> {
-  // 1. Coba dari localStorage cache
-  const cached = cacheGet(cacheKey)
-  if (cached) return cached
+// ── Fetch dengan cache ─────────────────────────────────────────────
 
-  // 2. Fetch dari EMSIFA API (langsung dari browser, bukan server action)
+async function cachedGetRegencies(provinceId: string): Promise<Region[]> {
+  const key = `region_regencies_${provinceId}`
+  const cached = lsGet(key)
+  if (cached && cached.length > 0) return cached
+
   try {
-    const res = await fetch(url, { cache: 'no-store' })
-    if (!res.ok) throw new Error(`HTTP ${res.status}`)
-    const data: Region[] = await res.json()
-    cacheSet(cacheKey, data)
+    const data: Region[] = await getRegencies(provinceId)
+    if (data.length > 0) lsSet(key, data)
     return data
   } catch {
-    // 3. Jika gagal (offline), kembalikan array kosong
-    return []
+    return lsGet(key) || []
   }
 }
 
-async function fetchRegencies(provinceId: string): Promise<Region[]> {
-  return fetchRegions(
-    `${EMSIFA_BASE}/regencies/${provinceId}.json`,
-    `region_regencies_${provinceId}`
-  )
-}
+async function cachedGetDistricts(regencyId: string): Promise<Region[]> {
+  const key = `region_districts_${regencyId}`
+  const cached = lsGet(key)
+  if (cached && cached.length > 0) return cached
 
-async function fetchDistricts(regencyId: string): Promise<Region[]> {
-  return fetchRegions(
-    `${EMSIFA_BASE}/districts/${regencyId}.json`,
-    `region_districts_${regencyId}`
-  )
-}
-
-async function fetchVillages(districtId: string): Promise<Region[]> {
-  const data = await fetchRegions(
-    `${EMSIFA_BASE}/villages/${districtId}.json`,
-    `region_villages_${districtId}`
-  )
-
-  // Terapkan patch lokal jika ada
-  const patches = VILLAGE_PATCHES[districtId] || []
-  const patched = [...data]
-  for (const patch of patches) {
-    if (!patched.find(v => v.name === patch.name)) {
-      patched.push({ ...patch, id: patch.id })
-    }
+  try {
+    const data: Region[] = await getDistricts(regencyId)
+    if (data.length > 0) lsSet(key, data)
+    return data
+  } catch {
+    return lsGet(key) || []
   }
-  patched.sort((a, b) => a.name.localeCompare(b.name))
-
-  // Update cache dengan data yang sudah di-patch
-  if (patches.length > 0) {
-    cacheSet(`region_villages_${districtId}`, patched)
-  }
-
-  return patched
 }
 
-// ── Komponen Utama ────────────────────────────────────────────────
+async function cachedGetVillages(districtId: string): Promise<Region[]> {
+  const key = `region_villages_${districtId}`
+  const cached = lsGet(key)
+  if (cached && cached.length > 0) return cached
+
+  try {
+    const data: Region[] = await getVillages(districtId)
+    if (data.length > 0) lsSet(key, data)
+    return data
+  } catch {
+    return lsGet(key) || []
+  }
+}
+
+// ── Komponen ───────────────────────────────────────────────────────
+
 export default function RegionSelect({
   required = true,
   initialKabupaten = '',
@@ -131,8 +124,11 @@ export default function RegionSelect({
   const [desaName, setDesaName] = useState(initialDesa)
 
   const [isOffline, setIsOffline] = useState(false)
+  const [loadingKab, setLoadingKab] = useState(true)
+  const [loadingKec, setLoadingKec] = useState(false)
+  const [loadingDesa, setLoadingDesa] = useState(false)
 
-  // Deteksi status koneksi
+  // Deteksi koneksi
   useEffect(() => {
     const update = () => setIsOffline(!navigator.onLine)
     update()
@@ -146,8 +142,10 @@ export default function RegionSelect({
 
   // 1. Fetch Kabupaten
   useEffect(() => {
-    fetchRegencies(PROVINCE_ID).then(data => {
+    setLoadingKab(true)
+    cachedGetRegencies(PROVINCE_ID).then(data => {
       setKabupatens(data)
+      setLoadingKab(false)
       if (initialKabupaten) {
         const found = data.find((d: Region) => d.name === initialKabupaten)
         if (found) setSelectedKabId(found.id)
@@ -155,7 +153,7 @@ export default function RegionSelect({
     })
   }, [initialKabupaten])
 
-  // 2. Fetch Kecamatan saat Kabupaten dipilih
+  // 2. Fetch Kecamatan
   useEffect(() => {
     if (!selectedKabId) {
       setKecamatans([])
@@ -163,8 +161,10 @@ export default function RegionSelect({
       setKecName('')
       return
     }
-    fetchDistricts(selectedKabId).then(data => {
+    setLoadingKec(true)
+    cachedGetDistricts(selectedKabId).then(data => {
       setKecamatans(data)
+      setLoadingKec(false)
       if (initialKecamatan) {
         const found = data.find((d: Region) => d.name === initialKecamatan)
         if (found) {
@@ -180,7 +180,7 @@ export default function RegionSelect({
     })
   }, [selectedKabId, initialKecamatan])
 
-  // 3. Fetch Desa saat Kecamatan dipilih
+  // 3. Fetch Desa
   useEffect(() => {
     if (!selectedKecId) {
       setDesas([])
@@ -188,8 +188,10 @@ export default function RegionSelect({
       setDesaName('')
       return
     }
-    fetchVillages(selectedKecId).then(data => {
+    setLoadingDesa(true)
+    cachedGetVillages(selectedKecId).then(data => {
       setDesas(data)
+      setLoadingDesa(false)
       if (initialDesa) {
         const found = data.find((d: Region) => d.name === initialDesa)
         if (found) {
@@ -236,28 +238,24 @@ export default function RegionSelect({
 
   return (
     <div>
-      {/* Indikator offline — hanya muncul jika data kosong saat offline */}
-      {isOffline && kabupatens.length === 0 && (
+      {/* Indikator offline dengan cache kosong */}
+      {isOffline && !loadingKab && kabupatens.length === 0 && (
         <div style={{
           fontSize: '0.78rem', color: '#92400e',
           background: '#fef3c7', border: '1px solid #fde68a',
-          borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem',
+          borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.75rem',
           marginBottom: '0.5rem'
         }}>
-          📵 Offline — Data wilayah akan muncul dari cache. Pilih kabupaten terlebih dahulu untuk koneksi berikutnya agar ter-cache.
+          📵 Offline — Data wilayah belum ter-cache. Buka halaman ini sekali saat ada sinyal agar tersimpan untuk penggunaan offline.
         </div>
       )}
       {isOffline && kabupatens.length > 0 && (
-        <div style={{
-          fontSize: '0.75rem', color: '#64748b',
-          marginBottom: '0.4rem'
-        }}>
+        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.4rem' }}>
           📵 Menggunakan data wilayah dari cache lokal
         </div>
       )}
 
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-        {/* Hidden inputs */}
         {nameKabupaten && <input type="hidden" name={nameKabupaten} value={kabName} />}
         {nameKecamatan && <input type="hidden" name={nameKecamatan} value={kecName} />}
         {nameDesa && <input type="hidden" name={nameDesa} value={desaName} />}
@@ -272,7 +270,7 @@ export default function RegionSelect({
             value={selectedKabId}
             onChange={handleKabChange}
             required={required}
-            placeholder={kabupatens.length === 0 ? '(Memuat...)' : '-- Pilih Kabupaten --'}
+            placeholder={loadingKab ? '⏳ Memuat...' : '-- Pilih Kabupaten --'}
           />
         </div>
 
@@ -287,7 +285,7 @@ export default function RegionSelect({
               value={selectedKecId}
               onChange={handleKecChange}
               required={required}
-              placeholder={kecamatans.length === 0 ? '(Memuat...)' : '-- Pilih Kecamatan --'}
+              placeholder={loadingKec ? '⏳ Memuat...' : kecamatans.length === 0 ? '(Tidak ada data)' : '-- Pilih Kecamatan --'}
             />
           ) : (
             <select className="form-control" disabled required={required}>
@@ -307,7 +305,7 @@ export default function RegionSelect({
               value={selectedDesaId}
               onChange={handleDesaChange}
               required={required}
-              placeholder={desas.length === 0 ? '(Memuat...)' : '-- Pilih Desa --'}
+              placeholder={loadingDesa ? '⏳ Memuat...' : desas.length === 0 ? '(Tidak ada data)' : '-- Pilih Desa --'}
             />
           ) : (
             <select className="form-control" disabled required={required}>
