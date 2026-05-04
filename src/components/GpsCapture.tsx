@@ -17,6 +17,10 @@ export default function GpsCapture({ onCapture, onClear }: Props) {
   function capture() {
     if (!navigator.geolocation) { setStatus('error'); return }
     setStatus('loading')
+
+    // Coba dulu dengan high-accuracy (GPS hardware)
+    // maximumAge: 60000 → izinkan pakai cache posisi sampai 1 menit lalu (penting saat offline)
+    // timeout: 30000 → beri waktu 30 detik untuk GPS hardware lock
     navigator.geolocation.getCurrentPosition(
       pos => {
         setLat(pos.coords.latitude)
@@ -24,8 +28,20 @@ export default function GpsCapture({ onCapture, onClear }: Props) {
         setStatus('success')
         onCapture(pos.coords.latitude, pos.coords.longitude)
       },
-      () => setStatus('error'),
-      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+      () => {
+        // High-accuracy gagal → coba fallback low-accuracy (lebih toleran saat offline)
+        navigator.geolocation.getCurrentPosition(
+          pos => {
+            setLat(pos.coords.latitude)
+            setLng(pos.coords.longitude)
+            setStatus('success')
+            onCapture(pos.coords.latitude, pos.coords.longitude)
+          },
+          () => setStatus('error'),
+          { enableHighAccuracy: false, timeout: 30000, maximumAge: 300000 }
+        )
+      },
+      { enableHighAccuracy: true, timeout: 30000, maximumAge: 60000 }
     )
   }
 
@@ -75,7 +91,13 @@ export default function GpsCapture({ onCapture, onClear }: Props) {
         )}
         {status === 'error' && (
           <p style={{ marginTop: '0.3rem', fontSize: '0.8rem', color: '#dc2626' }}>
-            Izin lokasi ditolak atau tidak tersedia. Pastikan GPS aktif dan izinkan akses.
+            Tidak bisa mendapatkan lokasi. Pastikan izin GPS sudah diberikan di browser/perangkat, 
+            lalu tunggu beberapa detik agar sinyal satelit terkunci (bisa sampai 1 menit di area tertutup).
+          </p>
+        )}
+        {status === 'loading' && (
+          <p style={{ marginTop: '0.2rem', fontSize: '0.8rem', color: '#92400e' }}>
+            Mencari sinyal GPS... bisa memakan waktu hingga 30 detik. Pastikan berada di area terbuka.
           </p>
         )}
         {status === 'idle' && (
