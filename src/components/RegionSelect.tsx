@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { getRegencies, getDistricts, getVillages } from '@/app/actions/region'
 import SearchableSelect from './SearchableSelect'
 
 type Region = { id: string; name: string }
@@ -11,14 +10,102 @@ interface RegionSelectProps {
   initialKabupaten?: string
   initialKecamatan?: string
   initialDesa?: string
-  // If provided, calls back with the full concatenated string "Desa X, Kec Y, Kabupaten Z"
   onChangeFullString?: (fullStr: string) => void
-  // Optional field names for raw form submission
   nameKabupaten?: string
   nameKecamatan?: string
   nameDesa?: string
 }
 
+// ── Patch lokal: desa yang hilang dari API EMSIFA ─────────────────
+const VILLAGE_PATCHES: Record<string, Region[]> = {
+  '3321010': [{ id: '3321010999', name: 'BRUMBUNG' }], // Mranggen, Demak
+}
+
+const EMSIFA_BASE = 'https://emsifa.github.io/api-wilayah-indonesia/api'
+const CACHE_TTL_MS = 7 * 24 * 60 * 60 * 1000 // 7 hari
+
+// ── localStorage helpers ──────────────────────────────────────────
+function cacheGet(key: string): Region[] | null {
+  try {
+    const raw = localStorage.getItem(key)
+    if (!raw) return null
+    const { data, ts } = JSON.parse(raw)
+    if (Date.now() - ts > CACHE_TTL_MS) {
+      localStorage.removeItem(key)
+      return null
+    }
+    return data as Region[]
+  } catch {
+    return null
+  }
+}
+
+function cacheSet(key: string, data: Region[]) {
+  try {
+    localStorage.setItem(key, JSON.stringify({ data, ts: Date.now() }))
+  } catch {
+    // Ignore QuotaExceededError
+  }
+}
+
+// ── Fetch wilayah langsung dari EMSIFA (bisa offline jika SW cache) ──
+async function fetchRegions(url: string, cacheKey: string): Promise<Region[]> {
+  // 1. Coba dari localStorage cache
+  const cached = cacheGet(cacheKey)
+  if (cached) return cached
+
+  // 2. Fetch dari EMSIFA API (langsung dari browser, bukan server action)
+  try {
+    const res = await fetch(url, { cache: 'no-store' })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const data: Region[] = await res.json()
+    cacheSet(cacheKey, data)
+    return data
+  } catch {
+    // 3. Jika gagal (offline), kembalikan array kosong
+    return []
+  }
+}
+
+async function fetchRegencies(provinceId: string): Promise<Region[]> {
+  return fetchRegions(
+    `${EMSIFA_BASE}/regencies/${provinceId}.json`,
+    `region_regencies_${provinceId}`
+  )
+}
+
+async function fetchDistricts(regencyId: string): Promise<Region[]> {
+  return fetchRegions(
+    `${EMSIFA_BASE}/districts/${regencyId}.json`,
+    `region_districts_${regencyId}`
+  )
+}
+
+async function fetchVillages(districtId: string): Promise<Region[]> {
+  const data = await fetchRegions(
+    `${EMSIFA_BASE}/villages/${districtId}.json`,
+    `region_villages_${districtId}`
+  )
+
+  // Terapkan patch lokal jika ada
+  const patches = VILLAGE_PATCHES[districtId] || []
+  const patched = [...data]
+  for (const patch of patches) {
+    if (!patched.find(v => v.name === patch.name)) {
+      patched.push({ ...patch, id: patch.id })
+    }
+  }
+  patched.sort((a, b) => a.name.localeCompare(b.name))
+
+  // Update cache dengan data yang sudah di-patch
+  if (patches.length > 0) {
+    cacheSet(`region_villages_${districtId}`, patched)
+  }
+
+  return patched
+}
+
+// ── Komponen Utama ────────────────────────────────────────────────
 export default function RegionSelect({
   required = true,
   initialKabupaten = '',
@@ -27,7 +114,7 @@ export default function RegionSelect({
   onChangeFullString,
   nameKabupaten,
   nameKecamatan,
-  nameDesa
+  nameDesa,
 }: RegionSelectProps) {
   const PROVINCE_ID = '33' // Jawa Tengah
 
@@ -43,18 +130,32 @@ export default function RegionSelect({
   const [kecName, setKecName] = useState(initialKecamatan)
   const [desaName, setDesaName] = useState(initialDesa)
 
-  // 1. Fetch Kabupaten (Regencies)
+  const [isOffline, setIsOffline] = useState(false)
+
+  // Deteksi status koneksi
   useEffect(() => {
-    getRegencies(PROVINCE_ID).then(data => {
+    const update = () => setIsOffline(!navigator.onLine)
+    update()
+    window.addEventListener('online', update)
+    window.addEventListener('offline', update)
+    return () => {
+      window.removeEventListener('online', update)
+      window.removeEventListener('offline', update)
+    }
+  }, [])
+
+  // 1. Fetch Kabupaten
+  useEffect(() => {
+    fetchRegencies(PROVINCE_ID).then(data => {
       setKabupatens(data)
       if (initialKabupaten) {
         const found = data.find((d: Region) => d.name === initialKabupaten)
         if (found) setSelectedKabId(found.id)
       }
-    }).catch(console.error)
+    })
   }, [initialKabupaten])
 
-  // 2. Fetch Kecamatan (Districts) when Kabupaten selected
+  // 2. Fetch Kecamatan saat Kabupaten dipilih
   useEffect(() => {
     if (!selectedKabId) {
       setKecamatans([])
@@ -62,19 +163,24 @@ export default function RegionSelect({
       setKecName('')
       return
     }
-    getDistricts(selectedKabId).then(data => {
+    fetchDistricts(selectedKabId).then(data => {
       setKecamatans(data)
-      if (initialKecamatan && data.find((d: Region) => d.name === initialKecamatan)) {
+      if (initialKecamatan) {
         const found = data.find((d: Region) => d.name === initialKecamatan)
-        if (found) setSelectedKecId(found.id)
+        if (found) {
+          setSelectedKecId(found.id)
+        } else {
+          setSelectedKecId('')
+          setKecName('')
+        }
       } else {
         setSelectedKecId('')
         setKecName('')
       }
-    }).catch(console.error)
+    })
   }, [selectedKabId, initialKecamatan])
 
-  // 3. Fetch Desa (Villages) when Kecamatan selected
+  // 3. Fetch Desa saat Kecamatan dipilih
   useEffect(() => {
     if (!selectedKecId) {
       setDesas([])
@@ -82,19 +188,24 @@ export default function RegionSelect({
       setDesaName('')
       return
     }
-    getVillages(selectedKecId).then(data => {
+    fetchVillages(selectedKecId).then(data => {
       setDesas(data)
-      if (initialDesa && data.find((d: Region) => d.name === initialDesa)) {
+      if (initialDesa) {
         const found = data.find((d: Region) => d.name === initialDesa)
-        if (found) setSelectedDesaId(found.id)
+        if (found) {
+          setSelectedDesaId(found.id)
+        } else {
+          setSelectedDesaId('')
+          setDesaName('')
+        }
       } else {
         setSelectedDesaId('')
         setDesaName('')
       }
-    }).catch(console.error)
+    })
   }, [selectedKecId, initialDesa])
 
-  // Call onChangeFullString whenever the string changes completely
+  // Callback onChangeFullString
   useEffect(() => {
     if (onChangeFullString) {
       if (kabName && kecName && desaName) {
@@ -124,55 +235,86 @@ export default function RegionSelect({
   }
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
-      {/* Hidden inputs if native form submission is used */}
-      {nameKabupaten && <input type="hidden" name={nameKabupaten} value={kabName} />}
-      {nameKecamatan && <input type="hidden" name={nameKecamatan} value={kecName} />}
-      {nameDesa && <input type="hidden" name={nameDesa} value={desaName} />}
+    <div>
+      {/* Indikator offline — hanya muncul jika data kosong saat offline */}
+      {isOffline && kabupatens.length === 0 && (
+        <div style={{
+          fontSize: '0.78rem', color: '#92400e',
+          background: '#fef3c7', border: '1px solid #fde68a',
+          borderRadius: 'var(--radius-sm)', padding: '0.4rem 0.75rem',
+          marginBottom: '0.5rem'
+        }}>
+          📵 Offline — Data wilayah akan muncul dari cache. Pilih kabupaten terlebih dahulu untuk koneksi berikutnya agar ter-cache.
+        </div>
+      )}
+      {isOffline && kabupatens.length > 0 && (
+        <div style={{
+          fontSize: '0.75rem', color: '#64748b',
+          marginBottom: '0.4rem'
+        }}>
+          📵 Menggunakan data wilayah dari cache lokal
+        </div>
+      )}
 
-      <div className="form-group" style={{ margin: 0 }}>
-        <label className="form-label">Kabupaten / Kota {required && <span style={{ color: 'var(--danger)' }}>*</span>}</label>
-        <SearchableSelect
-          options={kabupatens.map(k => ({ value: k.id, label: k.name }))}
-          value={selectedKabId}
-          onChange={handleKabChange}
-          required={required}
-          placeholder="-- Pilih Kabupaten --"
-        />
-      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+        {/* Hidden inputs */}
+        {nameKabupaten && <input type="hidden" name={nameKabupaten} value={kabName} />}
+        {nameKecamatan && <input type="hidden" name={nameKecamatan} value={kecName} />}
+        {nameDesa && <input type="hidden" name={nameDesa} value={desaName} />}
 
-      <div className="form-group" style={{ margin: 0 }}>
-        <label className="form-label">Kecamatan {required && <span style={{ color: 'var(--danger)' }}>*</span>}</label>
-        {selectedKabId ? (
+        {/* Kabupaten */}
+        <div className="form-group" style={{ margin: 0 }}>
+          <label className="form-label">
+            Kabupaten / Kota {required && <span style={{ color: 'var(--danger)' }}>*</span>}
+          </label>
           <SearchableSelect
-            options={kecamatans.map(k => ({ value: k.id, label: k.name }))}
-            value={selectedKecId}
-            onChange={handleKecChange}
+            options={kabupatens.map(k => ({ value: k.id, label: k.name }))}
+            value={selectedKabId}
+            onChange={handleKabChange}
             required={required}
-            placeholder="-- Pilih Kecamatan --"
+            placeholder={kabupatens.length === 0 ? '(Memuat...)' : '-- Pilih Kabupaten --'}
           />
-        ) : (
-          <select className="form-control" disabled required={required}>
-            <option value="">-- Pilih Kabupaten Dulu --</option>
-          </select>
-        )}
-      </div>
+        </div>
 
-      <div className="form-group" style={{ margin: 0 }}>
-        <label className="form-label">Desa / Kelurahan {required && <span style={{ color: 'var(--danger)' }}>*</span>}</label>
-        {selectedKecId ? (
-          <SearchableSelect
-            options={desas.map(k => ({ value: k.id, label: k.name }))}
-            value={selectedDesaId}
-            onChange={handleDesaChange}
-            required={required}
-            placeholder="-- Pilih Desa --"
-          />
-        ) : (
-          <select className="form-control" disabled required={required}>
-            <option value="">-- Pilih Kecamatan Dulu --</option>
-          </select>
-        )}
+        {/* Kecamatan */}
+        <div className="form-group" style={{ margin: 0 }}>
+          <label className="form-label">
+            Kecamatan {required && <span style={{ color: 'var(--danger)' }}>*</span>}
+          </label>
+          {selectedKabId ? (
+            <SearchableSelect
+              options={kecamatans.map(k => ({ value: k.id, label: k.name }))}
+              value={selectedKecId}
+              onChange={handleKecChange}
+              required={required}
+              placeholder={kecamatans.length === 0 ? '(Memuat...)' : '-- Pilih Kecamatan --'}
+            />
+          ) : (
+            <select className="form-control" disabled required={required}>
+              <option value="">-- Pilih Kabupaten Dulu --</option>
+            </select>
+          )}
+        </div>
+
+        {/* Desa */}
+        <div className="form-group" style={{ margin: 0 }}>
+          <label className="form-label">
+            Desa / Kelurahan {required && <span style={{ color: 'var(--danger)' }}>*</span>}
+          </label>
+          {selectedKecId ? (
+            <SearchableSelect
+              options={desas.map(k => ({ value: k.id, label: k.name }))}
+              value={selectedDesaId}
+              onChange={handleDesaChange}
+              required={required}
+              placeholder={desas.length === 0 ? '(Memuat...)' : '-- Pilih Desa --'}
+            />
+          ) : (
+            <select className="form-control" disabled required={required}>
+              <option value="">-- Pilih Kecamatan Dulu --</option>
+            </select>
+          )}
+        </div>
       </div>
     </div>
   )

@@ -44,6 +44,24 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   if (url.protocol === 'chrome-extension:') return
 
+  // EMSIFA Wilayah API: cache agresif (data jarang berubah)
+  if (url.hostname === 'emsifa.github.io') {
+    event.respondWith(
+      caches.open(CACHE_NAME).then(async cache => {
+        const cached = await cache.match(request)
+        if (cached) return cached
+        try {
+          const response = await fetch(request)
+          if (response.ok) cache.put(request, response.clone())
+          return response
+        } catch {
+          return cached || new Response('[]', { headers: { 'Content-Type': 'application/json' } })
+        }
+      })
+    )
+    return
+  }
+
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request).catch(
