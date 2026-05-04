@@ -49,8 +49,35 @@ export default function RootLayout({
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
-                    .then(function(reg) { console.log('SW registered'); })
-                    .catch(function(err) { console.log('SW error:', err); });
+                    .then(function(reg) {
+                      console.log('[SW] Registered');
+
+                      // Pre-warm cache: simpan halaman penting saat online
+                      // agar bisa diakses saat offline
+                      if (navigator.onLine) {
+                        var pagesToCache = [
+                          '/dashboard',
+                          '/dashboard/reports',
+                          '/dashboard/reports/spot-demplot/new',
+                          '/dashboard/reports/cb/new',
+                          '/dashboard/reports/kios/new',
+                          '/dashboard/reports/gathering/new',
+                          '/dashboard/reports/company/new',
+                          '/dashboard/offline-queue',
+                        ];
+                        
+                        caches.open('agrolens-v3').then(function(cache) {
+                          pagesToCache.forEach(function(url) {
+                            fetch(url, { credentials: 'include' })
+                              .then(function(res) {
+                                if (res.ok) cache.put(url, res);
+                              })
+                              .catch(function() {});
+                          });
+                        });
+                      }
+                    })
+                    .catch(function(err) { console.log('[SW] Error:', err); });
                 });
               }
             `,

@@ -1,15 +1,21 @@
 // ============================================================
-// Service Worker — Agrolens PWA
-// Mendukung: Network-first caching + Offline Background Sync
+// Service Worker — Agrolens PWA  v3
+// Strategi:
+//   /_next/static/**  → Cache First (aset immutable, fingerprinted)
+//   emsifa.github.io  → Cache First (data wilayah, jarang berubah)
+//   /dashboard/**     → Stale-While-Revalidate (serve cache, update di background)
+//   /api/**           → Network Only (tidak di-cache, kecuali error)
+//   lainnya           → Network First dengan fallback cache
 // ============================================================
 
-const CACHE_NAME = 'agrolens-v2'
+const CACHE_NAME = 'agrolens-v3'
 const DB_NAME = 'agrolens-offline'
 const DB_VERSION = 1
 const STORE = 'pending-reports'
 
-const STATIC_ASSETS = [
-  '/',
+// Halaman yang di-pre-cache saat install (App Shell)
+// Hanya halaman statis / form yang aman di-cache
+const PRECACHE_URLS = [
   '/login',
   '/manifest.json',
   '/icons/icon-192x192.png',
@@ -20,7 +26,7 @@ const STATIC_ASSETS = [
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) =>
-      cache.addAll(STATIC_ASSETS).catch(() => Promise.resolve())
+      cache.addAll(PRECACHE_URLS).catch(() => Promise.resolve())
     )
   )
   self.skipWaiting()
@@ -44,29 +50,31 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET') return
   if (url.protocol === 'chrome-extension:') return
 
-  // EMSIFA Wilayah API: cache agresif (data jarang berubah)
-  if (url.hostname === 'emsifa.github.io') {
-    event.respondWith(
-      caches.open(CACHE_NAME).then(async cache => {
-        const cached = await cache.match(request)
-        if (cached) return cached
-        try {
-          const response = await fetch(request)
-          if (response.ok) cache.put(request, response.clone())
-          return response
-        } catch {
-          return cached || new Response('[]', { headers: { 'Content-Type': 'application/json' } })
-        }
-      })
-    )
+  // 1. Next.js static assets: Cache First (immutable, selalu fresh)
+  if (url.pathname.startsWith('/_next/static/')) {
+    event.respondWith(cacheFirst(request))
     return
   }
 
+  // 2. EMSIFA Wilayah API: Cache First (data jarang berubah)
+  if (url.hostname === 'emsifa.github.io') {
+    event.respondWith(cacheFirst(request))
+    return
+  }
+
+  // 3. Cloudinary / CDN aset gambar: Cache First
+  if (url.hostname.includes('cloudinary.com') || url.hostname.includes('res.cloudinary.com')) {
+    event.respondWith(cacheFirst(request))
+    return
+  }
+
+  // 4. API calls: Network Only (data realtime)
+  //    Jika offline → kembalikan JSON error agar app tidak crash
   if (url.pathname.startsWith('/api/')) {
     event.respondWith(
       fetch(request).catch(
         () =>
-          new Response(JSON.stringify({ error: 'Tidak ada koneksi internet.' }), {
+          new Response(JSON.stringify({ error: 'offline', message: 'Tidak ada koneksi internet.' }), {
             status: 503,
             headers: { 'Content-Type': 'application/json' },
           })
@@ -75,30 +83,112 @@ self.addEventListener('fetch', (event) => {
     return
   }
 
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        if (response.ok) {
-          const clone = response.clone()
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone))
-        }
-        return response
-      })
-      .catch(
-        () =>
-          caches.match(request).then(
-            (cached) =>
-              cached ||
-              new Response(
-                '<html><body style="font-family:sans-serif;text-align:center;padding:3rem"><h2>🌐 Tidak Ada Koneksi</h2><p>Data Anda sudah tersimpan offline dan akan otomatis terkirim saat sinyal tersedia.</p><a href="/" style="color:#1a9b55">← Kembali</a></body></html>',
-                { headers: { 'Content-Type': 'text/html' } }
-              )
-          )
-      )
-  )
+  // 5. Halaman dashboard: Stale-While-Revalidate
+  //    Serve dari cache DULU (cepat), update cache di background
+  if (url.pathname.startsWith('/dashboard') || url.pathname === '/') {
+    event.respondWith(staleWhileRevalidate(request))
+    return
+  }
+
+  // 6. Semua lainnya: Network First dengan fallback cache
+  event.respondWith(networkFirst(request))
 })
 
-// ── IndexedDB Helper (raw IDB API, compatible with SW context) ────
+// ── Strategi Cache ─────────────────────────────────────────────────
+
+/** Cache First: serve cache, baru fetch jika belum ada di cache */
+async function cacheFirst(request) {
+  const cache = await caches.open(CACHE_NAME)
+  const cached = await cache.match(request)
+  if (cached) return cached
+  try {
+    const response = await fetch(request)
+    if (response.ok) cache.put(request, response.clone())
+    return response
+  } catch {
+    return new Response('', { status: 503 })
+  }
+}
+
+/** Stale-While-Revalidate: serve cache dulu, update cache di background */
+async function staleWhileRevalidate(request) {
+  const cache = await caches.open(CACHE_NAME)
+  const cached = await cache.match(request)
+
+  // Update cache di background (tidak menunggu)
+  const networkUpdate = fetch(request)
+    .then((response) => {
+      if (response.ok) cache.put(request, response.clone())
+      return response
+    })
+    .catch(() => null)
+
+  if (cached) {
+    // Serve dari cache langsung, update jalan di background
+    return cached
+  }
+
+  // Belum ada cache → tunggu network
+  try {
+    const response = await networkUpdate
+    if (response) return response
+  } catch {
+    // ignore
+  }
+
+  // Network juga gagal → offline fallback page
+  return offlineFallbackPage()
+}
+
+/** Network First: coba network, fallback ke cache */
+async function networkFirst(request) {
+  const cache = await caches.open(CACHE_NAME)
+  try {
+    const response = await fetch(request)
+    if (response.ok) cache.put(request, response.clone())
+    return response
+  } catch {
+    const cached = await cache.match(request)
+    return cached || offlineFallbackPage()
+  }
+}
+
+function offlineFallbackPage() {
+  return new Response(
+    `<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agrolens — Offline</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #f8fafc; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem; }
+    .card { background: white; border-radius: 16px; padding: 3rem 2.5rem; max-width: 420px; width: 100%; text-align: center; box-shadow: 0 4px 24px rgba(0,0,0,0.08); }
+    .icon { font-size: 4rem; margin-bottom: 1.5rem; }
+    h1 { font-size: 1.4rem; color: #1e293b; margin-bottom: 0.75rem; }
+    p { color: #64748b; font-size: 0.9rem; line-height: 1.6; margin-bottom: 1.5rem; }
+    .btn { display: inline-block; background: #1a9b55; color: white; padding: 0.75rem 2rem; border-radius: 9999px; text-decoration: none; font-weight: 600; font-size: 0.9rem; border: none; cursor: pointer; }
+    .tip { background: #f0fdf4; border: 1px solid #86efac; border-radius: 10px; padding: 1rem; font-size: 0.82rem; color: #15803d; text-align: left; margin-top: 1.5rem; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="icon">📵</div>
+    <h1>Tidak Ada Koneksi Internet</h1>
+    <p>Halaman ini belum tersimpan di cache. Namun Anda masih bisa mengakses halaman yang pernah dikunjungi sebelumnya.</p>
+    <button class="btn" onclick="history.back()">← Kembali</button>
+    <div class="tip">
+      <strong>💡 Tips:</strong> Buka halaman form laporan (Spot Demplot, Customer Behavior) terlebih dahulu saat ada sinyal agar tersimpan di cache dan bisa diakses offline.
+    </div>
+  </div>
+</body>
+</html>`,
+    { headers: { 'Content-Type': 'text/html' } }
+  )
+}
+
+// ── IndexedDB Helper (raw IDB API, compatible dengan SW context) ───
 function openIDB() {
   return new Promise((resolve, reject) => {
     const req = self.indexedDB.open(DB_NAME, DB_VERSION)
@@ -132,15 +222,6 @@ function idbPut(db, storeName, record) {
   })
 }
 
-function idbDelete(db, storeName, id) {
-  return new Promise((resolve, reject) => {
-    const tx = db.transaction(storeName, 'readwrite')
-    const req = tx.objectStore(storeName).delete(id)
-    req.onsuccess = () => resolve()
-    req.onerror = () => reject(req.error)
-  })
-}
-
 // ── Background Sync ────────────────────────────────────────────────
 self.addEventListener('sync', (event) => {
   if (event.tag === 'sync-reports') {
@@ -148,7 +229,7 @@ self.addEventListener('sync', (event) => {
   }
 })
 
-// ── Manual sync trigger dari main thread ──────────────────────────
+// ── Manual sync trigger ────────────────────────────────────────────
 self.addEventListener('message', (event) => {
   if (event.data?.type === 'TRIGGER_SYNC') {
     syncAllPendingReports()
@@ -173,11 +254,10 @@ async function syncAllPendingReports() {
 
   for (const draft of pending) {
     try {
-      // Mark as syncing
       draft.status = 'syncing'
       await idbPut(db, STORE, draft)
 
-      // Step 1: Upload setiap photo blob ke Cloudinary via /api/upload
+      // Step 1: Upload foto blobs ke Cloudinary
       const photoUrls = []
       for (const photoEntry of draft.photoBlobs || []) {
         try {
@@ -189,11 +269,11 @@ async function syncAllPendingReports() {
             photoUrls.push(url)
           }
         } catch (uploadErr) {
-          console.warn('[SW] Gagal upload foto, skip:', uploadErr)
+          console.warn('[SW] Gagal upload foto:', uploadErr)
         }
       }
 
-      // Step 2: Submit form data ke sync endpoint
+      // Step 2: Submit ke sync endpoint
       const payload = {
         ...draft.formData,
         photos: JSON.stringify(photoUrls),
@@ -205,7 +285,7 @@ async function syncAllPendingReports() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
-        credentials: 'include', // kirim cookie session
+        credentials: 'include',
       })
 
       if (syncRes.ok) {
@@ -214,15 +294,14 @@ async function syncAllPendingReports() {
         await idbPut(db, STORE, draft)
         successCount++
 
-        // Beritahu semua open tabs
         const clients = await self.clients.matchAll({ includeUncontrolled: true })
         clients.forEach((client) =>
           client.postMessage({ type: 'DRAFT_SYNCED', draftId: draft.id })
         )
       } else {
-        const errText = await syncRes.text().catch(() => 'Unknown error')
+        const errText = await syncRes.text().catch(() => 'Unknown')
         draft.status = 'failed'
-        draft.errorMsg = `Server error ${syncRes.status}: ${errText.slice(0, 200)}`
+        draft.errorMsg = `Server ${syncRes.status}: ${errText.slice(0, 200)}`
         await idbPut(db, STORE, draft)
       }
     } catch (err) {
