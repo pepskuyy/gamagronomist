@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useTransition } from 'react'
 import Link from 'next/link'
-import { addSampleStock } from '@/app/actions/sample-stock'
+import { addSampleStock, adjustSampleStock, editSampleProduct, removeSampleProduct } from '@/app/actions/sample-stock'
 
 type Balance  = { productId: string; productName: string; unit: string; balance: number }
 type LedgerRow = {
@@ -151,6 +151,14 @@ export default function SampleStockPage() {
   // Opname state
   const [opnameData, setOpnameData] = useState<Record<string, { actual: string, notes: string }>>({})
 
+  // Edit modal state
+  const [editTarget, setEditTarget] = useState<Balance | null>(null)
+  const [editName, setEditName] = useState('')
+  const [editUnitGramasi, setEditUnitGramasi] = useState('')
+  const [editGramasi, setEditGramasi] = useState('')
+  const [editLoading, setEditLoading] = useState(false)
+  const [editError, setEditError] = useState<string | null>(null)
+
   useEffect(() => { fetchAll() }, [])
 
   async function fetchAll() {
@@ -181,6 +189,48 @@ export default function SampleStockPage() {
       const res = await addSampleStock(fd)
       if (res?.error) setError(res.error)
       else { setSuccess('Stok berhasil ditambahkan!'); resetForms(); fetchAll() }
+    })
+  }
+
+  function openEditModal(b: Balance) {
+    setEditTarget(b)
+    setEditName(b.productName)
+    setEditUnitGramasi('')
+    setEditGramasi('')
+    setEditError(null)
+  }
+
+  function closeEditModal() {
+    setEditTarget(null)
+    setEditError(null)
+  }
+
+  async function handleEditSave() {
+    if (!editTarget) return
+    if (!editName.trim()) { setEditError('Nama produk tidak boleh kosong.'); return }
+    setEditLoading(true); setEditError(null)
+    const gramasi = editGramasi ? parseFloat(editGramasi) : null
+    const res = await editSampleProduct(
+      editTarget.productId,
+      editName,
+      editUnitGramasi.trim() || null,
+      gramasi,
+    )
+    setEditLoading(false)
+    if (res?.error) { setEditError(res.error); return }
+    closeEditModal()
+    fetchAll()
+  }
+
+  async function handleRemove(b: Balance) {
+    const label = b.balance > 0
+      ? `Produk "${b.productName}" memiliki saldo ${b.balance} ${b.unit}. Saldo akan dinol-kan dan produk dihapus dari daftar. Lanjutkan?`
+      : `Hapus produk "${b.productName}" dari daftar Gudang Sampel?`
+    if (!confirm(label)) return
+    startTransition(async () => {
+      const res = await removeSampleProduct(b.productId, b.balance)
+      if (res?.error) alert('❌ ' + res.error)
+      else fetchAll()
     })
   }
 
@@ -258,14 +308,16 @@ export default function SampleStockPage() {
             <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat...</p>
           ) : balances.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📭</p>
+              <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</p>
               <p>Belum ada stok di Gudang Sampel.</p>
               <button onClick={() => setTab('add')} className="btn btn-primary" style={{ marginTop: '1rem' }}>+ Tambah Stok Masuk</button>
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
-                <tr>{['Produk', 'Saldo Stok', 'Satuan'].map(h => <th key={h} style={thStyle}>{h}</th>)}</tr>
+                <tr>
+                  {['Produk', 'Saldo Stok', 'Satuan', 'Aksi'].map(h => <th key={h} style={{ ...thStyle, textAlign: h === 'Aksi' ? 'center' : 'left' }}>{h}</th>)}
+                </tr>
               </thead>
               <tbody>
                 {balances.map(b => (
@@ -280,6 +332,31 @@ export default function SampleStockPage() {
                       </span>
                     </td>
                     <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{b.unit}</td>
+                    <td style={{ ...tdStyle, textAlign: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => openEditModal(b)}
+                          title="Edit nama / satuan isi produk"
+                          style={{
+                            background: '#dbeafe', color: '#1d4ed8', border: '1px solid #bfdbfe',
+                            borderRadius: '6px', padding: '0.3rem 0.7rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
+                          }}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          onClick={() => handleRemove(b)}
+                          disabled={isPending}
+                          title="Hapus produk dari Gudang Sampel"
+                          style={{
+                            background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca',
+                            borderRadius: '6px', padding: '0.3rem 0.7rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
+                          }}
+                        >
+                          🗑️ Hapus
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -567,5 +644,87 @@ export default function SampleStockPage() {
         </div>
       )}
     </div>
+
+      {/* ── EDIT MODAL ── */}
+      {editTarget && (
+        <div
+          style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', zIndex: 9999, padding: '1rem',
+          }}
+          onClick={closeEditModal}
+        >
+          <div
+            className="card"
+            style={{ width: '100%', maxWidth: 480, padding: '1.75rem', position: 'relative' }}
+            onClick={e => e.stopPropagation()}
+          >
+            <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 700 }}>
+              ✏️ Edit Produk Sampel
+            </h3>
+            <p style={{ margin: '0 0 1.25rem', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
+              Satuan kemasan: <strong>{editTarget.unit}</strong> &nbsp;|&nbsp; Saldo: <strong>{editTarget.balance}</strong>
+            </p>
+
+            {editError && (
+              <div style={{ marginBottom: '1rem', padding: '0.65rem 0.9rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+                {editError}
+              </div>
+            )}
+
+            <div className="form-group" style={{ marginBottom: '1rem' }}>
+              <label className="form-label">Nama Produk <span style={{ color: 'var(--danger)' }}>*</span></label>
+              <input
+                type="text"
+                className="form-control"
+                value={editName}
+                onChange={e => setEditName(e.target.value)}
+                placeholder="Nama produk"
+                autoFocus
+              />
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
+              <div className="form-group">
+                <label className="form-label">Satuan Isi (opsional)</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  value={editUnitGramasi}
+                  onChange={e => setEditUnitGramasi(e.target.value)}
+                  placeholder="ml / gr / L"
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">Isi per Kemasan</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={editGramasi}
+                  onChange={e => setEditGramasi(e.target.value)}
+                  placeholder="Contoh: 500"
+                  min="0"
+                  step="any"
+                />
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
+              <button onClick={closeEditModal} className="btn" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
+                Batal
+              </button>
+              <button
+                onClick={handleEditSave}
+                disabled={editLoading}
+                className="btn btn-primary"
+                style={{ padding: '0.5rem 1.5rem', fontSize: '0.875rem' }}
+              >
+                {editLoading ? 'Menyimpan...' : '✅ Simpan Perubahan'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
   )
 }

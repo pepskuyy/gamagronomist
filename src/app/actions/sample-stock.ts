@@ -136,3 +136,92 @@ export async function adjustSampleStock(formData: FormData) {
     return { error: 'Terjadi kesalahan saat memproses Opname Stok Sampel.' }
   }
 }
+
+/** Edit nama dan satuan produk sampel */
+export async function editSampleProduct(
+  productId: string,
+  name: string,
+  unitGramasi: string | null,
+  gramasiPerUnit: number | null,
+) {
+  const cookieStore = await cookies()
+  const session = await decrypt(cookieStore.get('session')?.value as string)
+
+  if (!session?.userId || !['SPV', 'ADMIN'].includes(session.role)) {
+    return { error: 'Hanya SPV yang dapat mengedit produk sampel.' }
+  }
+
+  const trimName = name.trim()
+  if (!trimName) return { error: 'Nama produk tidak boleh kosong.' }
+
+  try {
+    await prisma.product.update({
+      where: { id: productId },
+      data: {
+        name: trimName,
+        unitGramasi: unitGramasi?.trim() || null,
+        gramasiPerUnit: gramasiPerUnit ?? null,
+      },
+    })
+    revalidatePath('/dashboard/stock/sample')
+    return { success: true }
+  } catch (err: any) {
+    console.error('editSampleProduct error:', err)
+    return { error: 'Gagal mengupdate produk.' }
+  }
+}
+
+/**
+ * Hapus produk dari gudang sampel:
+ * - Jika balance > 0, buat entri SAMPLE_VOID untuk zeroing stok
+ * - Jika produk SMPL- (dibuat custom), hapus dari tabel Product juga
+ * - Jika produk Accurate (punya accurateId), hanya nol-kan balance
+ */
+export async function removeSampleProduct(productId: string, currentBalance: number) {
+  const cookieStore = await cookies()
+  const session = await decrypt(cookieStore.get('session')?.value as string)
+
+  if (!session?.userId || !['SPV', 'ADMIN'].includes(session.role)) {
+    return { error: 'Hanya SPV yang dapat menghapus produk sampel.' }
+  }
+
+  try {
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      select: { id: true, code: true, accurateId: true, name: true },
+    })
+    if (!product) return { error: 'Produk tidak ditemukan.' }
+
+    // Jika masih ada saldo, buat entri void untuk zeroing
+    if (currentBalance !== 0) {
+      await prisma.sampleLedger.create({
+        data: {
+          userId: session.userId,
+          productId,
+          quantity: -currentBalance, // nol-kan saldo
+          transactionType: 'OPNAME_MINUS',
+          notes: `[VOID] Produk dihapus dari Gudang Sampel oleh SPV`,
+        },
+      })
+    }
+
+    // Jika produk custom (SMPL-) dan tidak punya accurateId, hapus dari Product
+    const isCustom = product.code?.startsWith('SMPL-') && !product.accurateId
+    if (isCustom) {
+      // Hapus semua ledger entries dulu, lalu hapus produk
+      await prisma.sampleLedger.deleteMany({ where: { productId } })
+      // Cek apakah produk dipakai di tabel lain sebelum hapus
+      const usedInRequest = await prisma.requestDetail.findFirst({ where: { productId } })
+      const usedInLedger  = await prisma.ledger.findFirst({ where: { productId } })
+      if (!usedInRequest && !usedInLedger) {
+        await prisma.product.delete({ where: { id: productId } })
+      }
+    }
+
+    revalidatePath('/dashboard/stock/sample')
+    return { success: true }
+  } catch (err: any) {
+    console.error('removeSampleProduct error:', err)
+    return { error: 'Gagal menghapus produk: ' + err.message }
+  }
+}
