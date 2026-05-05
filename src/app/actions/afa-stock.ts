@@ -478,7 +478,8 @@ export async function receiveSpvStockRequest(requestId: string) {
           transDate,
           invoiceItems,
           `Diajukan untuk kebutuhan ${afaName} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
-          'Kantor Pusat SMG' // Cabang di Accurate
+          'Kantor Pusat SMG', // Cabang di Accurate
+          'Gudang Baik'       // Sumber gudang stok di Accurate
         )
 
         if (!invoiceResult.success) {
@@ -708,7 +709,8 @@ export async function regenerateInvoice(requestId: string) {
       transDate,
       invoiceItems,
       `[REGENERATE] Kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
-      'Kantor Pusat SMG'
+      'Kantor Pusat SMG', // Cabang di Accurate
+      'Gudang Baik'       // Sumber gudang stok di Accurate
     )
 
     if (!invoiceResult.success) {

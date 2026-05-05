@@ -152,9 +152,10 @@ export async function fetchItemPrices(itemNos: string[]): Promise<Map<string, nu
 // ─── SALES INVOICE (OUTBOUND) ─────────────────────────────────────
 
 export type InvoiceLineItem = {
-  itemNo:   string   // SKU / no_barang di Accurate (= product.accurateId)
-  quantity: number   // Jumlah dalam satuan kemasan
-  unitPrice?: number // Harga satuan (opsional, default 0 untuk transfer internal)
+  itemNo:        string   // SKU / no_barang di Accurate (= product.accurateId)
+  quantity:      number   // Jumlah dalam satuan kemasan
+  unitPrice?:    number   // Harga satuan (opsional, default 0 untuk transfer internal)
+  warehouseName?: string  // Nama gudang sumber (contoh: 'Gudang Baik')
 }
 
 /**
@@ -175,7 +176,8 @@ export async function createSalesInvoice(
   transDate: string,
   items: InvoiceLineItem[],
   description?: string,
-  branchName?: string
+  branchName?: string,
+  warehouseName?: string   // Nama gudang sumber stok (contoh: 'Gudang Baik')
 ): Promise<{ success: boolean; invoiceNo?: string; error?: string; rawResponse?: any }> {
   const { token, secret, host } = getCredentials()
 
@@ -186,15 +188,21 @@ export async function createSalesInvoice(
   const params = new URLSearchParams()
   params.set('customerNo', customerNo)
   params.set('transDate', transDate)
-  if (description) params.set('description', description)
-  if (branchName) params.set('branchName', branchName)
+  if (description)   params.set('description', description)
+  if (branchName)    params.set('branchName', branchName)
+  if (warehouseName) params.set('warehouseName', warehouseName) // default warehouse for all lines
 
   // Line items use indexed array parameters: detailItem[0].itemNo, detailItem[0].quantity, etc.
   items.forEach((item, idx) => {
-    params.set(`detailItem[${idx}].itemNo`, item.itemNo)
+    params.set(`detailItem[${idx}].itemNo`,   item.itemNo)
     params.set(`detailItem[${idx}].quantity`, String(item.quantity))
     if (item.unitPrice !== undefined) {
       params.set(`detailItem[${idx}].unitPrice`, String(item.unitPrice))
+    }
+    // Gudang sumber per line item — prioritas lebih tinggi dari level invoice
+    const wh = item.warehouseName ?? warehouseName
+    if (wh) {
+      params.set(`detailItem[${idx}].warehouseName`, wh)
     }
   })
 
