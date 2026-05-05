@@ -461,8 +461,12 @@ export default function SampleStockPage() {
                 </div>
                 <div className="form-group">
                   <label className="form-label">Satuan Isi (opsional)</label>
-                  <input type="text" name="newUnitGramasi" className="form-control"
-                    placeholder="ml / gr / L" value={newUnitGramasi} onChange={e => setNewUnitGramasi(e.target.value)} />
+                  <select name="newUnitGramasi" className="form-control"
+                    value={newUnitGramasi} onChange={e => setNewUnitGramasi(e.target.value)}>
+                    <option value="">-- Tidak ada --</option>
+                    <option value="ml">ml</option>
+                    <option value="gr">gr</option>
+                  </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Isi per Kemasan</label>
@@ -687,13 +691,15 @@ export default function SampleStockPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
               <div className="form-group">
                 <label className="form-label">Satuan Isi (opsional)</label>
-                <input
-                  type="text"
+                <select
                   className="form-control"
                   value={editUnitGramasi}
                   onChange={e => setEditUnitGramasi(e.target.value)}
-                  placeholder="ml / gr / L"
-                />
+                >
+                  <option value="">-- Tidak ada --</option>
+                  <option value="ml">ml</option>
+                  <option value="gr">gr</option>
+                </select>
               </div>
               <div className="form-group">
                 <label className="form-label">Isi per Kemasan</label>
