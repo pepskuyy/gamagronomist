@@ -110,11 +110,21 @@ export default function ImageUploader({
         fd.append('file', file)
         try {
           const res = await fetch('/api/upload', { method: 'POST', body: fd })
-          const data = await res.json()
-          if (!res.ok) throw new Error(data.error || 'Gagal upload')
+
+          // Safe JSON parse — server bisa mengembalikan HTML/text error
+          let data: any = {}
+          const contentType = res.headers.get('content-type') || ''
+          if (contentType.includes('application/json')) {
+            data = await res.json()
+          } else {
+            const text = await res.text()
+            throw new Error(`Upload gagal (${res.status}): ${text.slice(0, 120)}`)
+          }
+
+          if (!res.ok) throw new Error(data.error || `Gagal upload (${res.status})`)
           newPhotos.push({ src: data.url, isOffline: false })
         } catch (err: any) {
-          setError(err.message)
+          setError(err.message || 'Gagal mengunggah foto. Coba lagi.')
         }
       }
       setPhotos(prev => [...prev, ...newPhotos])
@@ -216,7 +226,6 @@ export default function ImageUploader({
             <input
               type="file"
               accept="image/*"
-              capture="environment"
               multiple
               onChange={handleFileChange}
               style={{ display: 'none' }}

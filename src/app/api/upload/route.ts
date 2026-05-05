@@ -2,6 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
+// Naikkan batas body request ke 10MB untuk upload foto
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '10mb',
+    },
+  },
+}
+
 export async function POST(req: NextRequest) {
   try {
     const cookieStore = await cookies()
