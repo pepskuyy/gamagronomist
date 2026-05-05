@@ -643,7 +643,6 @@ export default function SampleStockPage() {
           )}
         </div>
       )}
-    </div>
 
       {/* ── EDIT MODAL ── */}
       {editTarget && (
@@ -726,5 +725,6 @@ export default function SampleStockPage() {
           </div>
         </div>
       )}
+    </div>
   )
 }
