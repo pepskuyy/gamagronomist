@@ -419,6 +419,12 @@ export async function receiveSpvStockRequest(requestId: string) {
     })
     const productMap = new Map(productInfos.map(p => [p.id, p]))
 
+    // Fetch AFA user (needed for snapshotAreaId)
+    const afaUser = await prisma.user.findUnique({
+      where: { id: req.foId },
+      select: { areaId: true, name: true, phone: true },
+    })
+
     await prisma.ledger.createMany({
       data: req.details.map(d => {
         const prod = productMap.get(d.productId)
@@ -506,7 +512,7 @@ export async function receiveSpvStockRequest(requestId: string) {
     })
 
     // WA: notify AFA directly to their registered phone number
-    const afaUserFinal = await prisma.user.findUnique({ where: { id: req.foId }, select: { phone: true, name: true } })
+    const afaUserFinal = afaUser // already fetched above
     if (afaUserFinal?.phone) {
       const invoiceStr = savedInvoiceNo ? `\nNo. Invoice Accurate: ${savedInvoiceNo}` : ''
       const msg = await getMsgTemplate('msg_spv_receive', {
@@ -594,5 +600,133 @@ export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV'
   } catch (err: any) {
     console.error('rejectAfaStockRequest error:', err)
     return { error: 'Gagal menolak pengajuan stok.' }
+  }
+}
+
+// ─── REGENERATE: Terbitkan ulang invoice + perbaiki ledger yang gagal ─
+export async function regenerateInvoice(requestId: string) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  if (session?.role !== 'SPV' && session?.role !== 'ADMIN') {
+    return { error: 'Hanya SPV atau Admin yang dapat menerbitkan ulang invoice.' }
+  }
+
+  try {
+    const req = await prisma.request.findUnique({
+      where: { id: requestId },
+      include: { details: true, fo: true },
+    })
+
+    if (!req || req.commodity !== 'AFA_STOCK_IN') {
+      return { error: 'Pengajuan stok tidak ditemukan.' }
+    }
+    if (req.status !== 'APPROVED') {
+      return { error: 'Invoice hanya bisa di-generate ulang untuk pengajuan yang sudah SELESAI.' }
+    }
+    if ((req as any).accurateInvoiceNo) {
+      return { error: 'Invoice sudah ada: ' + (req as any).accurateInvoiceNo }
+    }
+
+    // Cek apakah ledger entry sudah ada untuk request ini
+    const existingLedger = await prisma.ledger.findFirst({
+      where: { referenceId: requestId, transactionType: 'STOCK_IN_GUDANG' },
+    })
+
+    // Jika ledger belum ada, buat dulu (akibat bug afaUser)
+    if (!existingLedger) {
+      const productIds = req.details.map(d => d.productId)
+      const productInfos = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, accurateId: true, gramasiPerUnit: true, unitGramasi: true, unit: true },
+      })
+      const productMap = new Map(productInfos.map(p => [p.id, p]))
+
+      const afaUser = await prisma.user.findUnique({
+        where: { id: req.foId },
+        select: { areaId: true },
+      })
+
+      await prisma.ledger.createMany({
+        data: req.details.map(d => {
+          const prod = productMap.get(d.productId)
+          const qtyKemasan = d.qtyApproved ?? d.qtyRequested
+          const qtyToStore = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
+            ? qtyKemasan * prod.gramasiPerUnit
+            : qtyKemasan
+          return {
+            userId: req.foId,
+            productId: d.productId,
+            transactionType: 'STOCK_IN_GUDANG',
+            quantity: qtyToStore,
+            referenceId: req.id,
+            snapshotAreaId: afaUser?.areaId ?? null,
+            notes: `[REGENERATE] Penerimaan Stok (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
+          }
+        }),
+        skipDuplicates: true,
+      })
+
+      console.log(`[REGEN] Ledger entries created for request ${requestId}`)
+    }
+
+    // Generate Accurate invoice
+    const productInfos2 = await prisma.product.findMany({
+      where: { id: { in: req.details.map(d => d.productId) } },
+      select: { id: true, accurateId: true },
+    })
+    const productMap2 = new Map(productInfos2.map(p => [p.id, p]))
+
+    const itemCodes = req.details
+      .map(d => productMap2.get(d.productId)?.accurateId)
+      .filter((x): x is string => !!x)
+
+    if (itemCodes.length === 0) {
+      return { error: 'Tidak ada produk dengan Accurate ID yang terhubung. Pastikan produk sudah dikonfigurasi di master data.' }
+    }
+
+    const priceMap = await fetchItemPrices(itemCodes)
+
+    const invoiceItems = req.details
+      .map(d => {
+        const prod = productMap2.get(d.productId)
+        if (!prod?.accurateId) return null
+        return {
+          itemNo: prod.accurateId,
+          quantity: d.qtyApproved ?? d.qtyRequested,
+          unitPrice: priceMap.get(prod.accurateId) ?? undefined,
+        }
+      })
+      .filter((x): x is NonNullable<typeof x> => x !== null)
+
+    const now = new Date()
+    const transDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
+
+    const invoiceResult = await createSalesInvoice(
+      'T/027',
+      transDate,
+      invoiceItems,
+      `[REGENERATE] Kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
+      'Kantor Pusat SMG'
+    )
+
+    if (!invoiceResult.success) {
+      return { error: `Gagal membuat invoice di Accurate: ${invoiceResult.error}` }
+    }
+
+    const invoiceNo = invoiceResult.invoiceNo ?? null
+    if (invoiceNo) {
+      await prisma.request.update({
+        where: { id: requestId },
+        data: { accurateInvoiceNo: invoiceNo },
+      })
+    }
+
+    revalidatePath('/dashboard/stock')
+    return { success: true, invoiceNo, ledgerCreated: !existingLedger }
+  } catch (err: any) {
+    console.error('regenerateInvoice error:', err)
+    return { error: `Gagal generate invoice: ${err.message}` }
   }
 }
