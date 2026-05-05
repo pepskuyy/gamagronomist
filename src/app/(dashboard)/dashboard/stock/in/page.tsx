@@ -139,9 +139,12 @@ export default function StockInPage() {
     if (!detail) return
 
     if (isSample) {
-      // Sample warehouse: AFA requests any product — no balance restriction.
-      // SPV will procure and validate stock at approval time.
-      const sampleBalance = sampleProducts.find(p => p.productId === currentProduct)?.balance ?? null
+      // Sample warehouse: only allow products that have stock in sample warehouse
+      const sampleBalance = sampleProducts.find(p => p.productId === currentProduct)?.balance ?? 0
+      if (sampleBalance <= 0) {
+        alert('Produk ini tidak tersedia di gudang sampel SPV.')
+        return
+      }
       setSelectedProducts(prev => [...prev, {
         productId:      detail.id,
         qtyRequested:   qty,
@@ -149,7 +152,7 @@ export default function StockInPage() {
         unit:           detail.unit,
         unitGramasi:    detail.unitGramasi,
         gramasiPerUnit: detail.gramasiPerUnit,
-        spvStock:       sampleBalance,  // shows sample balance (can be null = not yet stocked)
+        spvStock:       sampleBalance,
       }])
       setCurrentProduct('')
       setCurrentQty('')
@@ -313,13 +316,14 @@ export default function StockInPage() {
               <div style={{ flex: 2 }}>
                 <label className="form-label">Pilih Produk</label>
                 <SearchableSelect
-                  options={products.map(p => {
-                    // Cross-reference with sample balance for informational label
+                  options={(isSample
+                    // SAMPLE mode: hanya tampilkan produk yang ada stoknya di gudang sampel
+                    ? products.filter(p => (sampleProducts.find(s => s.productId === p.id)?.balance ?? 0) > 0)
+                    : products
+                  ).map(p => {
                     const sampleBalance = sampleProducts.find(s => s.productId === p.id)?.balance ?? null
                     const sampleInfo = isSample
-                      ? (sampleBalance != null && sampleBalance > 0
-                          ? ` • 🧪 Stok Sampel: ${sampleBalance} ${p.unit}`
-                          : ' • 🧪 Belum ada di gudang sampel')
+                      ? ` • 🧪 Stok Sampel: ${sampleBalance} ${p.unit}`
                       : ` • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`
                     return {
                       value: p.id,
@@ -330,7 +334,10 @@ export default function StockInPage() {
                   })}
                   value={currentProduct}
                   onChange={setCurrentProduct}
-                  placeholder={loadingProducts ? 'Memuat produk...' : '-- Ketik nama produk --'}
+                  placeholder={isSample
+                    ? (loadingSample ? 'Memuat stok sampel...' : '-- Ketik nama produk (hanya stok tersedia) --')
+                    : (loadingProducts ? 'Memuat produk...' : '-- Ketik nama produk --')
+                  }
                 />
               </div>
               <div style={{ flex: 1 }}>

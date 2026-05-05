@@ -371,8 +371,9 @@ export default function SampleStockPage() {
           {mode === 'new' && (
             <form onSubmit={handleAdd}>
               <input type="hidden" name="mode" value="new" />
+              <input type="hidden" name="newUnit" value="PCS" />
               <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                ✨ SKU baru akan otomatis terdaftar di database produk dan langsung masuk ke Gudang Sampel.
+                ✨ SKU baru akan otomatis terdaftar di database produk dan langsung masuk ke Gudang Sampel. Satuan kemasan: <strong>PCS</strong>.
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
@@ -380,16 +381,6 @@ export default function SampleStockPage() {
                   <label className="form-label">Nama Produk <span style={{ color: 'var(--danger)' }}>*</span></label>
                   <input type="text" name="newName" className="form-control"
                     placeholder="Contoh: Furadan Gold 60kg" value={newName} onChange={e => setNewName(e.target.value)} required />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Kode / SKU</label>
-                  <input type="text" className="form-control" value="Dibuat otomatis oleh sistem" readOnly disabled style={{ background: 'var(--surface-hover)', cursor: 'not-allowed' }} />
-                </div>
-                <div className="form-group">
-                  <label className="form-label">Satuan Kemasan <span style={{ color: 'var(--danger)' }}>*</span></label>
-                  <select name="newUnit" className="form-control" value={newUnit} onChange={e => setNewUnit(e.target.value)} required>
-                    {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
                 </div>
                 <div className="form-group">
                   <label className="form-label">Satuan Isi (opsional)</label>

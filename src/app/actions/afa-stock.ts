@@ -307,7 +307,7 @@ export async function approveFamStockRequest(requestId: string) {
   }
 }
 
-// ─── STEP 3: WH Manager approves → APPROVED_WHM ──────────────────
+// ─── STEP 3: WH Manager approves → APPROVED_WHM + INVOICE ──────────
 export async function approveWhmStockRequest(requestId: string) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -330,11 +330,71 @@ export async function approveWhmStockRequest(requestId: string) {
       return { error: 'Pengajuan ini tidak dalam status menunggu WH Manager.' }
     }
 
-    // Update to APPROVED_WHM — no ledger/invoice yet, wait for SPV receive
+    // Update to APPROVED_WHM
     await prisma.request.update({
       where: { id: requestId },
       data: { status: 'APPROVED_WHM' }
     })
+
+    // ── Buat Sales Invoice di Accurate (non-blocking) ─────────────────
+    // WHM approve = konfirmasi pengeluaran stok dari gudang
+    let savedInvoiceNo: string | null = null
+    try {
+      const productIds = req.details.map(d => d.productId)
+      const productInfos = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, accurateId: true },
+      })
+      const productMap = new Map(productInfos.map(p => [p.id, p]))
+
+      const itemCodes = req.details
+        .map(d => productMap.get(d.productId)?.accurateId)
+        .filter((x): x is string => !!x)
+
+      if (itemCodes.length > 0) {
+        const priceMap = await fetchItemPrices(itemCodes)
+        const invoiceItems = req.details
+          .map(d => {
+            const prod = productMap.get(d.productId)
+            if (!prod?.accurateId) return null
+            return {
+              itemNo:    prod.accurateId,
+              quantity:  d.qtyApproved ?? d.qtyRequested,
+              unitPrice: priceMap.get(prod.accurateId) ?? undefined,
+            }
+          })
+          .filter((x): x is NonNullable<typeof x> => x !== null)
+
+        if (invoiceItems.length > 0) {
+          const now = new Date()
+          const transDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
+
+          const invoiceResult = await createSalesInvoice(
+            'T/027',
+            transDate,
+            invoiceItems,
+            `Diajukan untuk kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
+            'Kantor Pusat SMG',
+            'Gudang Baik'
+          )
+
+          if (!invoiceResult.success) {
+            console.warn(`[WHM Approve] Accurate invoice failed (non-blocking): ${invoiceResult.error}`)
+          } else {
+            savedInvoiceNo = invoiceResult.invoiceNo ?? null
+            console.log(`[WHM Approve] Accurate invoice created: ${savedInvoiceNo}`)
+            if (savedInvoiceNo) {
+              await prisma.request.update({
+                where: { id: requestId },
+                data: { accurateInvoiceNo: savedInvoiceNo },
+              })
+            }
+          }
+        }
+      }
+    } catch (accErr: any) {
+      console.warn('[WHM Approve] Accurate API error (non-blocking):', accErr.message)
+    }
 
     // Notify SPV(s) in the same area as AFA + global SPVs (areaId=null)
     const afaUser = await prisma.user.findUnique({ where: { id: req.foId } })
@@ -358,11 +418,12 @@ export async function approveWhmStockRequest(requestId: string) {
     }
 
     // Notify AFA about progress
+    const invoiceInfo = savedInvoiceNo ? ` Invoice Accurate: ${savedInvoiceNo}.` : ''
     await prisma.notification.create({
       data: {
         userId: req.foId,
         title: '✅ Disetujui WH Manager — Menunggu Penerimaan SPV',
-        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.`,
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.${invoiceInfo}`,
         link: `/dashboard/stock`
       }
     })
@@ -382,7 +443,7 @@ export async function approveWhmStockRequest(requestId: string) {
   }
 }
 
-// ─── STEP 4 (FINAL): SPV receives stock → APPROVED + LEDGER + INVOICE ─
+// ─── STEP 4 (FINAL): SPV receives stock → APPROVED + LEDGER ──────
 export async function receiveSpvStockRequest(requestId: string) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -405,7 +466,7 @@ export async function receiveSpvStockRequest(requestId: string) {
       return { error: 'Pengajuan ini tidak dalam status menunggu penerimaan SPV.' }
     }
 
-    // 1. Update to APPROVED (final) — will update invoiceNo below if available
+    // 1. Update to APPROVED (final)
     await prisma.request.update({
       where: { id: requestId },
       data: { status: 'APPROVED' }
@@ -419,7 +480,6 @@ export async function receiveSpvStockRequest(requestId: string) {
     })
     const productMap = new Map(productInfos.map(p => [p.id, p]))
 
-    // Fetch AFA user (needed for snapshotAreaId)
     const afaUser = await prisma.user.findUnique({
       where: { id: req.foId },
       select: { areaId: true, name: true, phone: true },
@@ -444,65 +504,9 @@ export async function receiveSpvStockRequest(requestId: string) {
       })
     })
 
-    // 3. Create Sales Invoice in Accurate (outbound from warehouse)
-    //    Non-blocking: approval succeeds even if Accurate API is unreachable
-    let savedInvoiceNo: string | null = null
-    try {
-      // Collect item codes that have accurateId
-      const itemCodes = req.details
-        .map(d => productMap.get(d.productId)?.accurateId)
-        .filter((x): x is string => !!x)
-
-      // Fetch prices from Accurate item master
-      const priceMap = await fetchItemPrices(itemCodes)
-
-      const invoiceItems = req.details
-        .map(d => {
-          const prod = productMap.get(d.productId)
-          if (!prod?.accurateId) return null
-          return {
-            itemNo: prod.accurateId,
-            quantity: d.qtyApproved ?? d.qtyRequested,
-            unitPrice: priceMap.get(prod.accurateId) ?? undefined,
-          }
-        })
-        .filter((x): x is NonNullable<typeof x> => x !== null)
-
-      if (invoiceItems.length > 0) {
-        const now = new Date()
-        const transDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
-        const afaName = req.fo?.name ?? 'AFA'
-
-        const invoiceResult = await createSalesInvoice(
-          'T/027', // ID Pelanggan PT Gama Agro Sejati di Accurate
-          transDate,
-          invoiceItems,
-          `Diajukan untuk kebutuhan ${afaName} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
-          'Kantor Pusat SMG', // Cabang di Accurate
-          'Gudang Baik'       // Sumber gudang stok di Accurate
-        )
-
-        if (!invoiceResult.success) {
-          console.warn(`[SPV Receive] Accurate invoice creation failed (non-blocking): ${invoiceResult.error}`)
-        } else {
-          savedInvoiceNo = invoiceResult.invoiceNo ?? null
-          console.log(`[SPV Receive] Accurate invoice created: ${savedInvoiceNo}`)
-        }
-      }
-    } catch (accErr: any) {
-      console.warn(`[SPV Receive] Accurate API error (non-blocking):`, accErr.message)
-    }
-
-    // 3b. Save invoice number to Request record
-    if (savedInvoiceNo) {
-      await prisma.request.update({
-        where: { id: requestId },
-        data: { accurateInvoiceNo: savedInvoiceNo }
-      })
-    }
-
-    // 4. Notify AFA (requester) — final
-    const invoiceInfo = savedInvoiceNo ? ` Invoice Accurate: ${savedInvoiceNo}.` : ''
+    // 3. Notify AFA — invoice sudah dibuat di step WHM approve
+    const existingInvoiceNo = (req as any).accurateInvoiceNo as string | null ?? null
+    const invoiceInfo = existingInvoiceNo ? ` Invoice Accurate: ${existingInvoiceNo}.` : ''
     await prisma.notification.create({
       data: {
         userId: req.foId,
@@ -512,16 +516,15 @@ export async function receiveSpvStockRequest(requestId: string) {
       }
     })
 
-    // WA: notify AFA directly to their registered phone number
-    const afaUserFinal = afaUser // already fetched above
-    if (afaUserFinal?.phone) {
-      const invoiceStr = savedInvoiceNo ? `\nNo. Invoice Accurate: ${savedInvoiceNo}` : ''
+    // WA: notify AFA
+    if (afaUser?.phone) {
+      const invoiceStr = existingInvoiceNo ? `\nNo. Invoice Accurate: ${existingInvoiceNo}` : ''
       const msg = await getMsgTemplate('msg_spv_receive', {
-        nama_afa: afaUserFinal.name || 'AFA',
+        nama_afa: afaUser.name || 'AFA',
         id_pengajuan: requestId.slice(0, 8).toUpperCase(),
         invoice: invoiceStr,
       })
-      await sendWhatsAppBulk(afaUserFinal.phone, msg).catch(e => console.warn('[WAHA] AFA notify failed:', e))
+      await sendWhatsAppBulk(afaUser.phone, msg).catch(e => console.warn('[WAHA] AFA notify failed:', e))
     }
 
     revalidatePath('/dashboard/stock')
