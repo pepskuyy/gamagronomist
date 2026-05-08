@@ -112,7 +112,10 @@ export async function approveAfaStockRequest(requestId: string) {
   try {
     const req = await prisma.request.findUnique({
       where: { id: requestId },
-      include: { details: true, fo: true }
+      include: {
+        details: { include: { product: { select: { name: true, unit: true } } } },
+        fo: true,
+      }
     })
 
     if (!req || req.commodity !== 'AFA_STOCK_IN') {
@@ -137,12 +140,20 @@ export async function approveAfaStockRequest(requestId: string) {
         balanceMap.set(l.productId, (balanceMap.get(l.productId) ?? 0) + l.quantity)
       }
 
-      // Validate all items have enough balance
+      // Validate all items have enough balance — collect ALL insufficient items first
+      const insufficient: string[] = []
       for (const detail of req.details) {
         const available = balanceMap.get(detail.productId) ?? 0
         if (available < detail.qtyRequested) {
-          return { error: `Stok sampel tidak mencukupi untuk produk (tersedia: ${available}, diminta: ${detail.qtyRequested})` }
+          const productName = (detail as any).product?.name ?? detail.productId
+          const unit = (detail as any).product?.unit ?? ''
+          insufficient.push(
+            `• ${productName}: tersedia ${available} ${unit}, diminta ${detail.qtyRequested} ${unit}`
+          )
         }
+      }
+      if (insufficient.length > 0) {
+        return { error: `Stok sampel tidak mencukupi untuk produk berikut:\n${insufficient.join('\n')}` }
       }
 
       // Deduct SampleLedger + update request → APPROVED in one transaction

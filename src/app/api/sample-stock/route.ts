@@ -20,7 +20,7 @@ export async function GET(req: Request) {
     // Full ledger history
     const ledgers = await prisma.sampleLedger.findMany({
       where: { userId: session.userId },
-      include: { product: { select: { id: true, name: true, unit: true, unitGramasi: true } } },
+      include: { product: { select: { id: true, name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } },
       orderBy: { createdAt: 'asc' },
     })
 
@@ -38,14 +38,24 @@ export async function GET(req: Request) {
     }
 
     // Compute balance per product — always use packaging unit (unit), not gramasi
-    const balanceMap = new Map<string, { productId: string; productName: string; unit: string; balance: number }>()
+    const balanceMap = new Map<string, {
+      productId: string; productName: string; unit: string; balance: number
+      unitGramasi: string | null; gramasiPerUnit: number | null
+    }>()
     for (const l of ledgers) {
-      const unit = l.product.unit  // selalu satuan kemasan
+      const unit = l.product.unit
       const existing = balanceMap.get(l.productId)
       if (existing) {
         existing.balance += l.quantity
       } else {
-        balanceMap.set(l.productId, { productId: l.productId, productName: l.product.name, unit, balance: l.quantity })
+        balanceMap.set(l.productId, {
+          productId: l.productId,
+          productName: l.product.name,
+          unit,
+          balance: l.quantity,
+          unitGramasi: l.product.unitGramasi ?? null,
+          gramasiPerUnit: (l.product as any).gramasiPerUnit ?? null,
+        })
       }
     }
 

@@ -4,7 +4,10 @@ import { useState, useEffect, useRef, useTransition } from 'react'
 import Link from 'next/link'
 import { addSampleStock, adjustSampleStock, editSampleProduct, removeSampleProduct } from '@/app/actions/sample-stock'
 
-type Balance  = { productId: string; productName: string; unit: string; balance: number }
+type Balance  = {
+  productId: string; productName: string; unit: string; balance: number
+  unitGramasi?: string | null; gramasiPerUnit?: number | null
+}
 type LedgerRow = {
   id: string; transactionType: string; quantity: number; notes: string | null
   referenceId: string | null; createdAt: string; stockBefore: number; stockAfter: number
@@ -325,11 +328,23 @@ export default function SampleStockPage() {
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
-                    <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{b.productName}</td>
+                    <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>
+                      {b.productName}
+                      {b.gramasiPerUnit && b.unitGramasi && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginTop: '0.15rem' }}>
+                          {b.gramasiPerUnit}{b.unitGramasi} / {b.unit}
+                        </div>
+                      )}
+                    </td>
                     <td style={tdStyle}>
                       <span style={{ fontSize: '1.1rem', fontWeight: 700, color: b.balance <= 0 ? '#dc2626' : '#16a34a' }}>
                         {b.balance}
                       </span>
+                      {b.gramasiPerUnit && b.unitGramasi && b.balance > 0 && (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
+                          ({(b.balance * b.gramasiPerUnit).toLocaleString('id-ID')}{b.unitGramasi})
+                        </span>
+                      )}
                     </td>
                     <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{b.unit}</td>
                     <td style={{ ...tdStyle, textAlign: 'center' }}>
