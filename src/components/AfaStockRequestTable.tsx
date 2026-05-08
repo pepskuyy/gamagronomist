@@ -257,11 +257,11 @@ export default function AfaStockRequestTable({
                     )}
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
-                    {req.status === 'APPROVED' && req.accurateInvoiceNo ? (
+                    {req.status === 'APPROVED' && req.warehouseSource !== 'SAMPLE' && req.accurateInvoiceNo ? (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#dcfce7', color: '#166534' }}>
                         ✅ {req.accurateInvoiceNo}
                       </span>
-                    ) : req.status === 'APPROVED' && !req.accurateInvoiceNo ? (
+                    ) : req.status === 'APPROVED' && req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo ? (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#fef3c7', color: '#92400e' }}>
                         ⚠️ Tidak Terbit
                       </span>
@@ -305,8 +305,8 @@ export default function AfaStockRequestTable({
 
                       {req.status === 'APPROVED' && (
                         <>
-                          {/* Tombol Generate Invoice — muncul hanya jika belum ada invoice */}
-                          {!req.accurateInvoiceNo && (role === 'SPV' || role === 'ADMIN') && (
+                          {/* Tombol Generate Invoice — hanya untuk gudang UTAMA (bukan SAMPEL) */}
+                          {req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && (role === 'SPV' || role === 'ADMIN') && (
                             <button
                               onClick={() => handleRegenerate(req.id)}
                               className="btn"
