@@ -130,20 +130,48 @@ export async function approveAfaStockRequest(requestId: string) {
       // Validate sample stock availability per product
       const spvId = session.userId
 
-      // Get current sample balances for this SPV
+      // Get current sample balances for this SPV — include product name for fallback matching
       const sampleLedgers = await prisma.sampleLedger.findMany({
         where: { userId: spvId },
-        select: { productId: true, quantity: true },
+        include: { product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } },
       })
       const balanceMap = new Map<string, number>()
+      // nameToSampleId: fallback for legacy requests that stored Accurate productId instead of SMPL- id
+      const nameToSampleId = new Map<string, string>() // productName -> SMPL- productId
       for (const l of sampleLedgers) {
         balanceMap.set(l.productId, (balanceMap.get(l.productId) ?? 0) + l.quantity)
+        // Keep track of first SMPL- product for each name (prefer positive balance)
+        const existing = nameToSampleId.get(l.product.name)
+        if (!existing) nameToSampleId.set(l.product.name, l.productId)
       }
 
-      // Validate all items have enough balance — collect ALL insufficient items first
+      // productIdRemap: originalId -> effectiveId (for deduction step)
+      const productIdRemap = new Map<string, string>()
+
+      // Validate all items — collect ALL insufficient items first, with name-based fallback
       const insufficient: string[] = []
       for (const detail of req.details) {
-        const available = balanceMap.get(detail.productId) ?? 0
+        let available = balanceMap.get(detail.productId) ?? 0
+        let effectiveId = detail.productId
+
+        // Fallback: if exact ID has no stock, try to match by product name (legacy requests)
+        if (available === 0) {
+          const prod = (detail as any).product
+          if (prod?.name) {
+            const altId = nameToSampleId.get(prod.name)
+            if (altId && altId !== detail.productId) {
+              const altBalance = balanceMap.get(altId) ?? 0
+              if (altBalance > 0) {
+                available = altBalance
+                effectiveId = altId
+                console.log(`[Sample Approval] Remapped ${prod.name}: ${detail.productId} → ${altId} (legacy fix)`)
+              }
+            }
+          }
+        }
+
+        productIdRemap.set(detail.productId, effectiveId)
+
         if (available < detail.qtyRequested) {
           const prod = (detail as any).product
           const productName = prod?.name ?? detail.productId
@@ -162,12 +190,13 @@ export async function approveAfaStockRequest(requestId: string) {
 
       // Deduct SampleLedger + update request → APPROVED in one transaction
       await prisma.$transaction(async (tx) => {
-        // Deduct each product from sample ledger
+        // Deduct each product from sample ledger (use remapped productId for legacy requests)
         for (const detail of req.details) {
+          const effectiveProductId = productIdRemap.get(detail.productId) ?? detail.productId
           await tx.sampleLedger.create({
             data: {
               userId: spvId,
-              productId: detail.productId,
+              productId: effectiveProductId,
               quantity: -detail.qtyRequested,
               transactionType: 'SAMPLE_OUT',
               referenceId: requestId,
