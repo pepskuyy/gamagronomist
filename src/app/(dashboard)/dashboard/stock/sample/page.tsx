@@ -73,7 +73,11 @@ function ProductCombobox({
     }
   }, [highlighted])
 
-  const displayVal = open ? query : (selected ? `${selected.name} (${selected.unit})` : query)
+  const displayVal = open ? query : (selected
+    ? (selected.gramasiPerUnit && selected.unitGramasi
+        ? `${selected.name} — ${selected.gramasiPerUnit}${selected.unitGramasi}/${selected.unit}`
+        : `${selected.name} (${selected.unit})`)
+    : query)
 
   return (
     <div ref={wrapRef} style={{ position: 'relative' }}>
@@ -110,7 +114,14 @@ function ProductCombobox({
                 display: 'flex', justifyContent: 'space-between', gap: '0.5rem', alignItems: 'center',
               }}
             >
-              <span>{p.name}</span>
+              <span style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+                <span>{p.name}</span>
+                {p.gramasiPerUnit && p.unitGramasi && (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    {p.gramasiPerUnit}{p.unitGramasi}/{p.unit}
+                  </span>
+                )}
+              </span>
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                 {p.unit}
               </span>
@@ -128,7 +139,6 @@ export default function SampleStockPage() {
   const [tab, setTab]       = useState<'balance' | 'add' | 'history'>('balance')
   const [balances, setBalances] = useState<Balance[]>([])
   const [ledger, setLedger]     = useState<LedgerRow[]>([])
-  const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading]   = useState(true)
   const [error, setError]       = useState<string | null>(null)
   const [success, setSuccess]   = useState<string | null>(null)
@@ -154,6 +164,9 @@ export default function SampleStockPage() {
   // Opname state
   const [opnameData, setOpnameData] = useState<Record<string, { actual: string, notes: string }>>({})
 
+  // Balance search filter
+  const [balanceSearch, setBalanceSearch] = useState('')
+
   // Edit modal state
   const [editTarget, setEditTarget] = useState<Balance | null>(null)
   const [editName, setEditName] = useState('')
@@ -166,14 +179,12 @@ export default function SampleStockPage() {
 
   async function fetchAll() {
     setLoading(true)
-    const [balRes, ledRes, pRes] = await Promise.all([
+    const [balRes, ledRes] = await Promise.all([
       fetch('/api/sample-stock?view=balance'),
       fetch('/api/sample-stock?view=ledger'),
-      fetch('/api/master/products'),
     ])
     if (balRes.ok) setBalances(await balRes.json())
     if (ledRes.ok) setLedger(await ledRes.json())
-    if (pRes.ok)   setProducts(await pRes.json())
     setLoading(false)
   }
 
@@ -278,6 +289,20 @@ export default function SampleStockPage() {
 
   const UNITS = ['PCS', 'Btl', 'Bks', 'Box', 'Sak', 'gl', 'Pack', 'Rol', 'Kg', 'Lt']
 
+  // Products for 'Pilih dari Katalog' — derived from sample warehouse balances
+  const sampleCatalogProducts: Product[] = balances.map(b => ({
+    id: b.productId,
+    name: b.productName,
+    unit: b.unit,
+    unitGramasi: b.unitGramasi ?? null,
+    gramasiPerUnit: b.gramasiPerUnit ?? null,
+  }))
+
+  // Filtered balances for search
+  const filteredBalances = balanceSearch.trim()
+    ? balances.filter(b => b.productName.toLowerCase().includes(balanceSearch.toLowerCase()))
+    : balances
+
   return (
     <div>
       {/* Header */}
@@ -307,6 +332,19 @@ export default function SampleStockPage() {
       {/* ── SALDO ── */}
       {tab === 'balance' && (
         <div className="table-card">
+          {/* Search bar */}
+          {balances.length > 0 && (
+            <div style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)' }}>
+              <input
+                type="text"
+                className="form-control"
+                placeholder="🔍 Cari nama produk..."
+                value={balanceSearch}
+                onChange={e => setBalanceSearch(e.target.value)}
+                style={{ maxWidth: 320 }}
+              />
+            </div>
+          )}
           {loading ? (
             <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat...</p>
           ) : balances.length === 0 ? (
@@ -314,6 +352,10 @@ export default function SampleStockPage() {
               <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</p>
               <p>Belum ada stok di Gudang Sampel.</p>
               <button onClick={() => setTab('add')} className="btn btn-primary" style={{ marginTop: '1rem' }}>+ Tambah Stok Masuk</button>
+            </div>
+          ) : filteredBalances.length === 0 ? (
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+              Tidak ada produk yang cocok dengan “{balanceSearch}”
             </div>
           ) : (
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
@@ -323,7 +365,7 @@ export default function SampleStockPage() {
                 </tr>
               </thead>
               <tbody>
-                {balances.map(b => (
+                {filteredBalances.map(b => (
                   <tr key={b.productId}
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
@@ -425,10 +467,10 @@ export default function SampleStockPage() {
                 <label className="form-label">Produk <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <input type="hidden" name="productId" value={selectedProduct} />
                 <ProductCombobox
-                  products={products}
+                  products={sampleCatalogProducts}
                   value={selectedProduct}
                   onChange={(id, p) => { setSelectedProduct(id); setSelectedProductObj(p) }}
-                  placeholder="Cari nama produk..."
+                  placeholder="Cari nama produk di gudang sampel..."
                 />
                 {selectedProduct === '' && <small style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>Ketik minimal 1 karakter untuk mencari</small>}
               </div>

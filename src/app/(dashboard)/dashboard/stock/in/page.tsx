@@ -119,9 +119,12 @@ export default function StockInPage() {
   const isSample = warehouseSource === 'SAMPLE'
   // For SAMPLE mode, use the same full product list but cross-reference sample balance
   const selectedDetail = products.find(p => p.id === currentProduct)
-  // Sample balance for the currently selected product (may be undefined if not yet in sample stock)
+  // SAMPLE mode: resolve product detail from sampleProducts (SMPL- IDs differ from Accurate IDs)
+  const sampleDetail = isSample
+    ? sampleProducts.find(s => s.productId === currentProduct)
+    : null
   const currentSampleBalance = isSample
-    ? sampleProducts.find(p => p.productId === currentProduct)?.balance ?? null
+    ? (sampleDetail?.balance ?? null)
     : null
 
   function addProduct() {
@@ -139,19 +142,21 @@ export default function StockInPage() {
     if (!detail) return
 
     if (isSample) {
-      // Sample warehouse: only allow products that have stock in sample warehouse
-      const sampleBalance = sampleProducts.find(p => p.productId === currentProduct)?.balance ?? 0
+      // SAMPLE mode: use sampleProducts (SMPL- IDs) directly
+      const sampleP = sampleProducts.find(s => s.productId === currentProduct)
+      if (!sampleP) return
+      const sampleBalance = sampleP.balance
       if (sampleBalance <= 0) {
         alert('Produk ini tidak tersedia di gudang sampel SPV.')
         return
       }
       setSelectedProducts(prev => [...prev, {
-        productId:      detail.id,
+        productId:      sampleP.productId,
         qtyRequested:   qty,
-        name:           detail.name,
-        unit:           detail.unit,
-        unitGramasi:    detail.unitGramasi,
-        gramasiPerUnit: detail.gramasiPerUnit,
+        name:           sampleP.productName,
+        unit:           sampleP.unit,
+        unitGramasi:    sampleP.unitGramasi,
+        gramasiPerUnit: sampleP.gramasiPerUnit,
         spvStock:       sampleBalance,
       }])
       setCurrentProduct('')
@@ -317,21 +322,22 @@ export default function StockInPage() {
                 <label className="form-label">Pilih Produk</label>
                 <SearchableSelect
                   options={(isSample
-                    // SAMPLE mode: hanya tampilkan produk yang ada stoknya di gudang sampel
-                    ? products.filter(p => (sampleProducts.find(s => s.productId === p.id)?.balance ?? 0) > 0)
-                    : products
-                  ).map(p => {
-                    const sampleBalance = sampleProducts.find(s => s.productId === p.id)?.balance ?? null
-                    const sampleInfo = isSample
-                      ? ` • 🧪 Stok Sampel: ${sampleBalance} ${p.unit}`
-                      : ` • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`
-                    return {
-                      value: p.id,
-                      label: p.unitGramasi
-                        ? `${p.name} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit}${sampleInfo}`
-                        : `${p.name} (${p.unit})${sampleInfo}`,
-                    }
-                  })}
+                    // SAMPLE mode: langsung dari sampleProducts (SMPL- IDs)
+                    ? sampleProducts.map(p => ({
+                        value: p.productId,
+                        label: p.gramasiPerUnit && p.unitGramasi
+                          ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • 🧪 Stok: ${p.balance} ${p.unit}`
+                          : `${p.productName} (${p.unit}) • 🧪 Stok: ${p.balance} ${p.unit}`,
+                      }))
+                    : products.map(p => {
+                        return {
+                          value: p.id,
+                          label: p.unitGramasi
+                            ? `${p.name} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`
+                            : `${p.name} (${p.unit}) • Stok SPV: ${p.spvStock != null ? p.spvStock + ' ' + p.unit : 'N/A'}`,
+                        }
+                      })
+                  )}
                   value={currentProduct}
                   onChange={setCurrentProduct}
                   placeholder={isSample
@@ -342,7 +348,7 @@ export default function StockInPage() {
               </div>
               <div style={{ flex: 1 }}>
                 <label className="form-label">
-                  Kuantitas ({selectedDetail?.unit || 'kemasan'})
+                  Kuantitas ({(isSample ? sampleDetail?.unit : selectedDetail?.unit) || 'kemasan'})
                   {!isSample && selectedDetail?.spvStock != null && (
                     <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
                       maks {selectedDetail.spvStock} {selectedDetail.unit}
@@ -350,7 +356,7 @@ export default function StockInPage() {
                   )}
                   {isSample && currentSampleBalance != null && currentSampleBalance > 0 && (
                     <span style={{ fontWeight: 400, color: '#7c3aed', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
-                      {currentSampleBalance} {selectedDetail?.unit} tersedia di sampel
+                      {currentSampleBalance} {sampleDetail?.unit} tersedia di sampel
                     </span>
                   )}
                 </label>
@@ -367,14 +373,14 @@ export default function StockInPage() {
             </div>
 
             {/* Info produk terpilih — SAMPLE mode */}
-            {isSample && selectedDetail && (
+            {isSample && sampleDetail && (
               <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: '#ede9fe', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                {selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
-                  <span>📐 <strong>{selectedDetail.gramasiPerUnit}{selectedDetail.unitGramasi}</strong> per {selectedDetail.unit}</span>
+                {sampleDetail.unitGramasi && sampleDetail.gramasiPerUnit && (
+                  <span>📐 <strong>{sampleDetail.gramasiPerUnit}{sampleDetail.unitGramasi}</strong> per {sampleDetail.unit}</span>
                 )}
                 {currentSampleBalance != null && currentSampleBalance > 0 ? (
                   <span style={{ color: '#5b21b6' }}>
-                    🧪 Stok Sampel SPV: <strong>{currentSampleBalance} {selectedDetail.unit}</strong> (tersedia)
+                    🧪 Stok Sampel SPV: <strong>{currentSampleBalance} {sampleDetail.unit}</strong> (tersedia)
                   </span>
                 ) : (
                   <span style={{ color: '#b45309' }}>
