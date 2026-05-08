@@ -113,7 +113,7 @@ export async function approveAfaStockRequest(requestId: string) {
     const req = await prisma.request.findUnique({
       where: { id: requestId },
       include: {
-        details: { include: { product: { select: { name: true, unit: true } } } },
+        details: { include: { product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
         fo: true,
       }
     })
@@ -145,10 +145,14 @@ export async function approveAfaStockRequest(requestId: string) {
       for (const detail of req.details) {
         const available = balanceMap.get(detail.productId) ?? 0
         if (available < detail.qtyRequested) {
-          const productName = (detail as any).product?.name ?? detail.productId
-          const unit = (detail as any).product?.unit ?? ''
+          const prod = (detail as any).product
+          const productName = prod?.name ?? detail.productId
+          const unit = prod?.unit ?? ''
+          const volumeLabel = prod?.gramasiPerUnit && prod?.unitGramasi
+            ? ` ${prod.gramasiPerUnit}${prod.unitGramasi}/${unit}`
+            : ''
           insufficient.push(
-            `• ${productName}: tersedia ${available} ${unit}, diminta ${detail.qtyRequested} ${unit}`
+            `• ${productName}${volumeLabel}: tersedia ${available} ${unit}, diminta ${detail.qtyRequested} ${unit}`
           )
         }
       }
