@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 // Default message templates (used as placeholder text in UI and fallback in afa-stock.ts)
 export const DEFAULT_TEMPLATES: Record<string, string> = {

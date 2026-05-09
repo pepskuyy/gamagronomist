@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
@@ -6,7 +6,6 @@ import CbReportTable from '@/components/CbReportTable'
 import ExportExcelButton from '@/components/ExportExcelButton'
 import ExportPhotosButton from '@/components/ExportPhotosButton'
 
-const prisma = new PrismaClient()
 
 // ──────────────────────────────────────────────────────────────────────────────
 // Helpers

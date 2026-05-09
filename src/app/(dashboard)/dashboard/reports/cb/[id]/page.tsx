@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 import { cookies } from 'next/headers'
@@ -6,7 +6,6 @@ import { decrypt } from '@/lib/auth'
 import ReportAdminActions from '@/components/ReportAdminActions'
 import { deleteCustomerBehavior } from '@/app/actions/cb-admin'
 
-const prisma = new PrismaClient()
 
 export default async function CustomerBehaviorDetail({ params }: { params: { id: string } }) {
   const cookieStore = await cookies()

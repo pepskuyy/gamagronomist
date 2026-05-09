@@ -1,11 +1,10 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import { getStockBalance } from '@/lib/ledger/stock'
 import ApproveClient from './ApproveClient'
 
-const prisma = new PrismaClient()
 
 export default async function ApprovePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

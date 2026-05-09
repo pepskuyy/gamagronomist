@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { fetchAccurateItems } from '@/lib/accurate'
 
-const prisma = new PrismaClient()
 
 export type SyncResult = {
   inserted: number

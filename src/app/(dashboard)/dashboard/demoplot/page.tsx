@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 
-const prisma = new PrismaClient()
 
 export default async function DemoPlotIndexPage() {
   const cookieStore = await cookies()

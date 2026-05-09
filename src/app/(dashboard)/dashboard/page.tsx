@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { getAreas } from '@/app/actions/kpi'
@@ -11,7 +11,6 @@ import CbBuyReasonChart from '@/components/CbBuyReasonChart'
 import DashboardChartFilter from '@/components/DashboardChartFilter'
 import AreaLeaderboard from '@/components/AreaLeaderboard'
 
-const prisma = new PrismaClient()
 
 export default async function DashboardPage(props: { searchParams?: Promise<{ [key: string]: string | undefined }> }) {
   const searchParams = await props.searchParams

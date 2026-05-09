@@ -1,9 +1,8 @@
+import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
-const prisma = new PrismaClient()
 
 export async function POST() {
   const cookieStore = await cookies()

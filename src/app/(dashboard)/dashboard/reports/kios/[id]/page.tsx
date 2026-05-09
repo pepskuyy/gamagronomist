@@ -1,10 +1,9 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
-const prisma = new PrismaClient()
 
 export default async function VisitKiosDetail({ params }: { params: { id: string } }) {
   const report = await prisma.visitKios.findUnique({

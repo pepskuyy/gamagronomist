@@ -1,11 +1,11 @@
 'use server'
 
+import prisma from '@/lib/prisma'
+
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import { resolveAreaIdFromCoords } from '@/lib/area-resolver'
 
-const prisma = new PrismaClient()
 
 /**
  * Creates a Spot Demplot record.

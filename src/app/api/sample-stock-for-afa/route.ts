@@ -1,11 +1,10 @@
+import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 
 export const dynamic = 'force-dynamic'
 
-const prisma = new PrismaClient()
 
 /**
  * GET /api/sample-stock-for-afa

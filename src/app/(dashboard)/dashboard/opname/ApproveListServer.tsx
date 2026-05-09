@@ -1,9 +1,8 @@
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import Link from 'next/link'
 
-const prisma = new PrismaClient()
 
 export default async function OpnameApproveListPage() {
   const cookieStore = await cookies()

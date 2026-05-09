@@ -1,11 +1,11 @@
 'use server'
 
+import prisma from '@/lib/prisma'
+
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 
-const prisma = new PrismaClient()
 
 /**
  * AFA creates their own Demo Plot plan.

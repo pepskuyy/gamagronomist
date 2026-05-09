@@ -1,11 +1,12 @@
 /**
- * WAHA (WhatsApp HTTP API) Client
- * Sends WhatsApp notifications via WAHA v2 /api/sendText endpoint
+ * Tujuan     : Client WhatsApp HTTP API (WAHA) untuk notifikasi di setiap step approval stok
+ * Caller     : actions/afa-stock.ts (semua step approval)
+ * Dependensi : lib/prisma (baca SystemConfig: waha_base_url, waha_api_key, waha_session, wa_spv/fam/whm)
+ * Main Functions: sendWhatsApp, sendWhatsAppBulk, getRolePhones, getMsgTemplate
+ * Side Effects  : HTTP POST ke WAHA server eksternal (self-hosted). Gagal = silent, TIDAK throw — hanya log warning.
  */
 
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 // Default message templates — used when admin hasn't customized them yet
 const DEFAULT_TEMPLATES: Record<string, string> = {
@@ -94,7 +95,14 @@ export async function sendWhatsApp(phone: string, message: string): Promise<bool
 
     if (!res.ok) {
       const errText = await res.text()
-      console.error(`[WAHA] Failed to send to ${phone}: ${res.status} ${errText}`)
+      console.warn('[WAHA] Send failed', {
+        event: 'waha_send_failed',
+        phone,
+        chatId,
+        status: res.status,
+        error: errText,
+        timestamp: new Date().toISOString(),
+      })
       return false
     }
 

@@ -1,13 +1,12 @@
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import ChangePasswordForm from '@/components/ChangePasswordForm'
 import UpdateEmailForm from '@/components/UpdateEmailForm'
 import UpdatePhoneForm from '@/components/UpdatePhoneForm'
 import UpdateProfilePhotoForm from '@/components/UpdateProfilePhotoForm'
 import WahaSettingsClient from './WahaSettingsClient'
 
-const prisma = new PrismaClient()
 
 export default async function SettingsPage() {
   const cookieStore = await cookies()

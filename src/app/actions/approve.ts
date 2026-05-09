@@ -1,11 +1,11 @@
 'use server'
 
+import prisma from '@/lib/prisma'
+
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import { transferAfaToFo } from '@/lib/ledger/stock'
 
-const prisma = new PrismaClient()
 
 /**
  * AFA Approve Request — with adjustable quantities per product

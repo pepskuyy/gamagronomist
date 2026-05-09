@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import ExecuteForm from './ExecuteForm'
 import { getStockBalance } from '@/lib/ledger/stock'
 
-const prisma = new PrismaClient()
 
 export default async function ExecuteDemoPlotPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

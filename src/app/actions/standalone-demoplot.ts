@@ -1,12 +1,12 @@
 'use server'
 
+import prisma from '@/lib/prisma'
+
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import { revalidatePath } from 'next/cache'
 import { resolveAreaIdFromCoords } from '@/lib/area-resolver'
 
-const prisma = new PrismaClient()
 
 /**
  * Creates a standalone demo plot session directly (without needing a pre-existing request).

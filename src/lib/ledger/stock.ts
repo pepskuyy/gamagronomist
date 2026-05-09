@@ -1,6 +1,4 @@
-import { PrismaClient } from '@prisma/client'
-
-const prisma = new PrismaClient()
+import prisma from '@/lib/prisma'
 
 /**
  * Mendapatkan Daftar Saldo (Stock On-Hand) untuk User Tertentu

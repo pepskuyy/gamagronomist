@@ -1,10 +1,9 @@
+import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import ExcelJS from 'exceljs'
 
-const prisma = new PrismaClient()
 
 function extractKabupaten(areaStr: string | null | undefined, foAreaName?: string | null): string {
   const area = (areaStr || '').trim()

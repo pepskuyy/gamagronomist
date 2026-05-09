@@ -1,5 +1,5 @@
+import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
@@ -7,7 +7,6 @@ import bcrypt from 'bcryptjs'
 // Allow up to 60 seconds for this route (Vercel Pro) or 10s (Hobby)
 export const maxDuration = 60
 
-const prisma = new PrismaClient()
 
 export async function POST(req: NextRequest) {
   try {

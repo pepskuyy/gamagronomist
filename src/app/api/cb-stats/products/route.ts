@@ -1,9 +1,8 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
-const prisma = new PrismaClient()
 
 /** Normalize a product name for grouping purposes:
  *  1. Trim whitespace

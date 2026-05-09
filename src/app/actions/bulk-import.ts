@@ -1,11 +1,11 @@
 'use server'
 
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
+
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 
-const prisma = new PrismaClient()
 
 export type BulkProductRow = {
   id?: string

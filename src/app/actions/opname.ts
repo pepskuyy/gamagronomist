@@ -1,11 +1,11 @@
 'use server'
 
+import prisma from '@/lib/prisma'
+
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import { getStockBalance } from '@/lib/ledger/stock'
 
-const prisma = new PrismaClient()
 
 export async function submitStockOpname(formData: FormData) {
   const cookieStore = await cookies()

@@ -1,11 +1,10 @@
+import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 
 export const maxDuration = 60
 
-const prisma = new PrismaClient()
 
 function parseDate(raw: string): Date | null {
   if (!raw?.trim()) return null

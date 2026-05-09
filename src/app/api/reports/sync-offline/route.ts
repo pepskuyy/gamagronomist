@@ -1,10 +1,9 @@
+import prisma from '@/lib/prisma'
 import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import { resolveAreaIdFromCoords } from '@/lib/area-resolver'
 
-const prisma = new PrismaClient()
 
 /**
  * POST /api/reports/sync-offline

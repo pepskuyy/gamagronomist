@@ -1,4 +1,4 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
@@ -6,7 +6,6 @@ import { redirect } from 'next/navigation'
 import ReportAdminActions from '@/components/ReportAdminActions'
 import { deleteDemoPlot } from '@/app/actions/demoplot-admin'
 
-const prisma = new PrismaClient()
 
 export default async function DemoPlotDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

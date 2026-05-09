@@ -3,6 +3,23 @@ const fs = require('fs');
 const prisma = new PrismaClient();
 
 async function fix() {
+  // ── Idempotency Guard ──────────────────────────────────────────────────────
+  // Cek apakah data sudah pernah diproses: hitung berapa baris dengan quantity
+  // > 1000 untuk produk dengan gramasiPerUnit = 1. Jika 0, data sudah bersih.
+  const suspiciousCount = await prisma.ledger.count({
+    where: { quantity: { gt: 10000 } }
+  });
+  const totalCount = await prisma.ledger.count();
+  console.log(`Guard check: ${suspiciousCount} / ${totalCount} rows with quantity > 10000`);
+  if (suspiciousCount < 5) {
+    console.log('GUARD: Tidak ada baris mencurigakan yang ditemukan. Script kemungkinan sudah dijalankan atau tidak diperlukan. Batalkan untuk keamanan.');
+    console.log('Untuk bypass guard, jalankan dengan: FORCE_RUN=1 node fix-ledger.js');
+    if (process.env.FORCE_RUN !== '1') {
+      process.exit(0);
+    }
+  }
+  // ──────────────────────────────────────────────────────────────────────────
+
   const corruptedLog = fs.readFileSync('corrupted.txt', 'utf8');
   const corruptedIds = [];
   

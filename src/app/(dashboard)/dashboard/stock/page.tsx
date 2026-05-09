@@ -1,14 +1,13 @@
+import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { getStockBalance } from '@/lib/ledger/stock'
-import { PrismaClient } from '@prisma/client'
 import Link from 'next/link'
 import AfaStockRequestTable from '@/components/AfaStockRequestTable'
 import TeamStockTable from '@/components/TeamStockTable'
 import TableFilter from '@/components/TableFilter'
 import TablePager from '@/components/TablePager'
 
-const prisma = new PrismaClient()
 
 export default async function StockDashboardPage(props: { searchParams: Promise<Record<string, string | undefined>> }) {
   const cookieStore = await cookies()

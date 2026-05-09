@@ -1,13 +1,20 @@
+/**
+ * Tujuan     : Server Actions untuk seluruh workflow pengajuan restock AFA (4-step approval)
+ * Caller     : UI /dashboard/stock, AfaStockRequestTable.tsx
+ * Dependensi : lib/prisma, lib/accurate (createSalesInvoice), lib/waha, lib/retry
+ * Main Functions: submitAfaStockRequest, approveSpv/Fam/WhmStockRequest, receiveSpvStockRequest, rejectAfaStockRequest
+ * Side Effects  : DB write (Ledger, Request, Notification), HTTP POST ke Accurate, WA via WAHA
+ */
 'use server'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import { createSalesInvoice, fetchItemPrices } from '@/lib/accurate'
 import { sendWhatsAppBulk, getRolePhones, getMsgTemplate } from '@/lib/waha'
+import { withRetry } from '@/lib/retry'
 
-const prisma = new PrismaClient()
 
 // ─── AFA submits a stock request ──────────────────────────────────
 export async function submitAfaStockRequest(formData: FormData) {
@@ -427,32 +434,36 @@ export async function approveWhmStockRequest(requestId: string) {
           const now = new Date()
           const transDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
 
-          const invoiceResult = await createSalesInvoice(
-            'T/027',
-            transDate,
-            invoiceItems,
-            `Diajukan untuk kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
-            'Kantor Pusat SMG',
-            'Gudang Baik',
-            'CJ R2' // Force price category
+          // BLOCKING: retry hingga 3x, jika gagal lempar error dan blokir WHM approval
+          const invoiceResult = await withRetry(
+            () => createSalesInvoice(
+              'T/027',
+              transDate,
+              invoiceItems,
+              `Diajukan untuk kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
+              'Kantor Pusat SMG',
+              'Gudang Baik',
+              'CJ R2'
+            ).then(r => {
+              if (!r.success) throw new Error(r.error ?? 'Accurate API returned failure')
+              return r
+            }),
+            { maxAttempts: 3, initialDelayMs: 1000, label: 'Accurate createSalesInvoice' }
           )
 
-          if (!invoiceResult.success) {
-            console.warn(`[WHM Approve] Accurate invoice failed (non-blocking): ${invoiceResult.error}`)
-          } else {
-            savedInvoiceNo = invoiceResult.invoiceNo ?? null
-            console.log(`[WHM Approve] Accurate invoice created: ${savedInvoiceNo}`)
-            if (savedInvoiceNo) {
-              await prisma.request.update({
-                where: { id: requestId },
-                data: { accurateInvoiceNo: savedInvoiceNo },
-              })
-            }
+          savedInvoiceNo = invoiceResult.invoiceNo ?? null
+          console.log(`[WHM Approve] Accurate invoice created: ${savedInvoiceNo}`)
+          if (savedInvoiceNo) {
+            await prisma.request.update({
+              where: { id: requestId },
+              data: { accurateInvoiceNo: savedInvoiceNo },
+            })
           }
         }
       }
     } catch (accErr: any) {
-      console.warn('[WHM Approve] Accurate API error (non-blocking):', accErr.message)
+      console.error('[WHM Approve] Accurate API error (BLOCKING — approval dibatalkan):', accErr.message)
+      return { error: `Gagal membuat invoice di Accurate: ${accErr.message}. Coba lagi dalam beberapa menit.` }
     }
 
     // Notify SPV(s) in the same area as AFA + global SPVs (areaId=null)
@@ -525,40 +536,42 @@ export async function receiveSpvStockRequest(requestId: string) {
       return { error: 'Pengajuan ini tidak dalam status menunggu penerimaan SPV.' }
     }
 
-    // 1. Update to APPROVED (final)
-    await prisma.request.update({
-      where: { id: requestId },
-      data: { status: 'APPROVED' }
-    })
-
-    // 2. Add stock to AFA's ledger (with gramasi conversion)
+    // Pre-fetch data sebelum transaction agar tidak ada query di dalam transaction
     const productIds = req.details.map(d => d.productId)
-    const productInfos = await prisma.product.findMany({
-      where: { id: { in: productIds } },
-      select: { id: true, accurateId: true, gramasiPerUnit: true, unitGramasi: true, unit: true },
-    })
+    const [productInfos, afaUser] = await Promise.all([
+      prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, accurateId: true, gramasiPerUnit: true, unitGramasi: true, unit: true },
+      }),
+      prisma.user.findUnique({
+        where: { id: req.foId },
+        select: { areaId: true, name: true, phone: true },
+      })
+    ])
     const productMap = new Map(productInfos.map(p => [p.id, p]))
 
-    const afaUser = await prisma.user.findUnique({
-      where: { id: req.foId },
-      select: { areaId: true, name: true, phone: true },
+    const ledgerData = req.details.map(d => {
+      const prod = productMap.get(d.productId)
+      const qtyGramasi = d.qtyApproved ?? d.qtyRequested
+      return {
+        userId: req.foId,
+        productId: d.productId,
+        transactionType: 'STOCK_IN_GUDANG',
+        quantity: qtyGramasi,
+        referenceId: req.id,
+        snapshotAreaId: afaUser?.areaId ?? null,
+        notes: `Penerimaan Stok oleh SPV (${qtyGramasi} ${prod?.unitGramasi || prod?.unit || ''}). Ref: ${req.plan}`,
+      }
     })
 
-    await prisma.ledger.createMany({
-      data: req.details.map(d => {
-        const prod = productMap.get(d.productId)
-        const qtyGramasi = d.qtyApproved ?? d.qtyRequested
-        return {
-          userId: req.foId,
-          productId: d.productId,
-          transactionType: 'STOCK_IN_GUDANG',
-          quantity: qtyGramasi,
-          referenceId: req.id,
-          snapshotAreaId: afaUser?.areaId ?? null,
-          notes: `Penerimaan Stok oleh SPV (${qtyGramasi} ${prod?.unitGramasi || prod?.unit || ''}). Ref: ${req.plan}`,
-        }
-      })
-    })
+    // 1 + 2: Atomic — status APPROVED + ledger masuk dalam satu transaction
+    await prisma.$transaction([
+      prisma.request.update({
+        where: { id: requestId },
+        data: { status: 'APPROVED' }
+      }),
+      prisma.ledger.createMany({ data: ledgerData })
+    ])
 
     // 3. Notify AFA — invoice sudah dibuat di step WHM approve
     const existingInvoiceNo = (req as any).accurateInvoiceNo as string | null ?? null

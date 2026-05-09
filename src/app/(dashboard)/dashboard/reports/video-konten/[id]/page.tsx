@@ -1,8 +1,7 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
-const prisma = new PrismaClient()
 
 export default async function VideoKontenDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params

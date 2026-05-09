@@ -1,10 +1,9 @@
+import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { PrismaClient } from '@prisma/client'
 import { invalidateAreaCoverageCache } from '@/lib/area-resolver'
 
-const prisma = new PrismaClient()
 
 async function requireAdmin() {
   const cookieStore = await cookies()

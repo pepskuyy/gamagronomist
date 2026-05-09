@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client'
+import prisma from '@/lib/prisma'
 import { getKabupatenFromCoords, normalizeKabupaten } from './geocode'
 
-const prisma = new PrismaClient()
 
 // In-memory cache of area coverage to avoid repeated DB hits in same request
 let _coverageCache: { areaId: string; kabupatenName: string }[] | null = null
