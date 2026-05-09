@@ -379,12 +379,21 @@ export default function SampleStockPage() {
                       )}
                     </td>
                     <td style={tdStyle}>
-                      <span style={{ fontSize: '1.1rem', fontWeight: 700, color: b.balance <= 0 ? '#dc2626' : '#16a34a' }}>
-                        {b.balance}
-                      </span>
-                      {b.gramasiPerUnit && b.unitGramasi && b.balance > 0 && (
-                        <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
-                          ({(b.balance * b.gramasiPerUnit).toLocaleString('id-ID')}{b.unitGramasi})
+                      {b.gramasiPerUnit && b.unitGramasi && b.balance > 0 ? (
+                        <>
+                          <span style={{ fontSize: '1.1rem', fontWeight: 700, color: b.balance <= 0 ? '#dc2626' : '#16a34a' }}>
+                            {(b.balance * b.gramasiPerUnit).toLocaleString('id-ID')}
+                          </span>
+                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
+                            {b.unitGramasi}
+                          </span>
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+                            = {b.balance} {b.unit} total
+                          </div>
+                        </>
+                      ) : (
+                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: b.balance <= 0 ? '#dc2626' : '#16a34a' }}>
+                          {b.balance}
                         </span>
                       )}
                     </td>

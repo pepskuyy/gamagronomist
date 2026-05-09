@@ -183,13 +183,15 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
             {myStocks.map((stock) => {
               const product = stock.product as any
-              // Ledger stores gramasi (ml/gr) internally; display in kemasan as primary
               const hasGramasi   = product.unitGramasi && product.gramasiPerUnit && product.gramasiPerUnit > 0
-              const displayQty   = hasGramasi
-                ? +(stock.quantity / product.gramasiPerUnit).toFixed(2)
-                : stock.quantity
-              const displayUnit  = product.unit              // kemasan unit: PCS, Btl, etc.
-              const totalGramasi = hasGramasi ? stock.quantity : null
+              
+              // Primary is what's actually stored in ledger (ml/gr if available, otherwise PCS)
+              const primaryQty   = stock.quantity
+              const primaryUnit  = hasGramasi ? product.unitGramasi : product.unit
+              
+              // Secondary is the converted kemasan (PCS/Btl)
+              const secondaryQty = hasGramasi ? +(stock.quantity / product.gramasiPerUnit).toFixed(2) : null
+              const secondaryUnit = product.unit
 
               return (
                 <div key={product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -199,15 +201,15 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                   </div>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
                     <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
-                      {Number.isInteger(displayQty) ? displayQty : displayQty.toFixed(1)}
+                      {primaryQty.toLocaleString()}
                     </span>
                     <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
-                      {displayUnit}
+                      {primaryUnit}
                     </span>
                   </div>
-                  {totalGramasi != null && (
+                  {secondaryQty != null && (
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      = {totalGramasi.toLocaleString()} {product.unitGramasi} total
+                      = {Number.isInteger(secondaryQty) ? secondaryQty : secondaryQty.toFixed(1)} {secondaryUnit} total
                     </div>
                   )}
                 </div>

@@ -131,6 +131,11 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                           }}>
                             {s.quantity.toLocaleString()}
                             <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-muted)' }}>{s.product.unitGramasi || s.product.unit}</span>
+                            {hasGramasi && (
+                              <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-muted)' }}>
+                                (= {Number.isInteger(s.quantity / (s.product.gramasiPerUnit || 1)) ? s.quantity / (s.product.gramasiPerUnit || 1) : (s.quantity / (s.product.gramasiPerUnit || 1)).toFixed(1)} {s.product.unit})
+                              </span>
+                            )}
                           </span>
                         </div>
                       ))}

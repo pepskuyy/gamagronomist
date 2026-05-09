@@ -1,0 +1,47 @@
+Updated Ledger cmoguuj780005jp04p8kkyh4r (Belko 500 ml): -900 -> -450000
+Updated Ledger cmoguuj780007jp04ax42he8v (Belko 500 ml): 900 -> 450000
+Updated Ledger cmoguuja8000pjp04ekmtxmr3 (Biogent 50 SC 1 L): -820 -> -820000
+Updated Ledger cmoguuja8000rjp04gm4lhjeq (Biogent 50 SC 1 L): 820 -> 820000
+Updated Ledger cmoguujba000xjp04p4jvtf8l (Zenus 276 SL 1 L): -680 -> -680000
+Updated Ledger cmoguujba000zjp04ewdhcwg6 (Zenus 276 SL 1 L): 680 -> 680000
+Updated Ledger cmoguujbs0011jp04uxnpfn4t (Rapid Zone 20 WG 250 gr): -85 -> -21250
+Updated Ledger cmogn8mey0007jy040ggwud65 (Ambition 500 ml): -25 -> -12500
+Updated Ledger cmogn8mey0009jy047hu9zmw3 (Ambition 500 ml): 25 -> 12500
+Updated Ledger cmoguuj7u0009jp041fqe022k (Biomax 1 L): -110 -> -110000
+Updated Ledger cmoguuj7u000bjp04p3sbw2x8 (Biomax 1 L): 110 -> 110000
+Updated Ledger cmoguuj8d000djp045lkh5y9m (Allmax 500 ml): -452 -> -226000
+Updated Ledger cmoguuj8d000fjp044kkms74u (Allmax 500 ml): 452 -> 226000
+Updated Ledger cmoguuj8w000hjp04lc6p3hxy (King Cobra 500 ML): -100 -> -50000
+Updated Ledger cmoguuj8x000jjp04fc7n0re3 (King Cobra 500 ML): 100 -> 50000
+Updated Ledger cmoguuj9q000ljp04re11yz3e (Biotomil 40 SP 100 gr): -1455 -> -145500
+Updated Ledger cmoguuj9q000njp041eo3qpkp (Biotomil 40 SP 100 gr): 1455 -> 145500
+Updated Ledger cmoguujas000tjp04bboa0ezy (Stadium 18 EC 1 L): -60 -> -60000
+Updated Ledger cmoguujas000vjp04u1tgxve3 (Stadium 18 EC 1 L): 60 -> 60000
+Updated Ledger cmoguujbs0013jp04kszly48s (Rapid Zone 20 WG 250 gr): 85 -> 21250
+Updated Ledger cmoguujc90015jp046lus4tcr (Ziflo 76 WG 800 gr): -900 -> -720000
+Updated Ledger cmoguujc90017jp04etotr2n2 (Ziflo 76 WG 800 gr): 900 -> 720000
+Updated Ledger cmoguujcp0019jp045sj176kg (Nefos 45 WP 500 gr): -1320 -> -660000
+Updated Ledger cmoguujcp001bjp04saq0l6he (Nefos 45 WP 500 gr): 1320 -> 660000
+Updated Ledger cmoguxqt50015l204d1nvtaa5 (Biogent 50 SC 1 L): -1000 -> -1000000
+Updated Ledger cmoguxqt50017l204xyxatvin (Biogent 50 SC 1 L): 1000 -> 1000000
+Updated Ledger cmoguxqu40019l204aeahmmy9 (Biomax 1 L): -500 -> -500000
+Updated Ledger cmoguxqu4001bl204vq25ch2p (Biomax 1 L): 500 -> 500000
+Updated Ledger cmoguxquu001dl204cq4eeklb (Belko 500 ml): -500 -> -250000
+Updated Ledger cmoguxquv001fl2044pl6rimk (Belko 500 ml): 500 -> 250000
+Updated Ledger cmoguxqwa001hl204hjwdl5mh (Biocis 25 EC 1 L): -500 -> -500000
+Updated Ledger cmoguxqwa001jl204ph7jzssa (Biocis 25 EC 1 L): 500 -> 500000
+Updated Ledger cmoguxqwy001ll204w9xiw060 (Nargis 50 WP 40 gr): -160 -> -6400
+Updated Ledger cmoguxqwy001nl204ee6ti15y (Nargis 50 WP 40 gr): 160 -> 6400
+Updated Ledger cmoguxqxh001pl20425enbv4d (Notora 60/6 WG 400 Gr): -1200 -> -480000
+Updated Ledger cmoguxqxh001rl204e1kztomv (Notora 60/6 WG 400 Gr): 1200 -> 480000
+Updated Ledger cmoguxqxz001tl204srkey6dq (Cadilac 80 WP 1 kg): -3000 -> -3000000
+Updated Ledger cmoguxqxz001vl204qiugpkon (Cadilac 80 WP 1 kg): 3000 -> 3000000
+Updated Ledger cmogv19i10001jv040g4y9b3s (Belko 500 ml): -150 -> -75000
+Updated Ledger cmogv19i10003jv049ioy4yat (Belko 500 ml): 150 -> 75000
+Updated Ledger cmoguxqyi001xl20434rrgjz8 (Nefos 45 WP 500 gr): -1500 -> -750000
+Updated Ledger cmoguxqyi001zl204sidlwdge (Nefos 45 WP 500 gr): 1500 -> 750000
+Updated Ledger cmoguxqzd0021l204f3nn7v1h (Platoon 75 WP 500 gr): -1000 -> -500000
+Updated Ledger cmoguxqzd0023l2040yovvtb8 (Platoon 75 WP 500 gr): 1000 -> 500000
+Updated Ledger cmoguxr060025l2047sb06yqh (Biozeb 80 WP 800 gr): -1600 -> -1280000
+Updated Ledger cmoguxr060027l204ab4xitgf (Biozeb 80 WP 800 gr): 1600 -> 1280000
+Updated Ledger cmoguxr0n0029l2048vlztt25 (Ziflo 76 WG 800 gr): -800 -> -640000
