@@ -138,11 +138,20 @@ export async function approveAfaStockRequest(requestId: string) {
       const balanceMap = new Map<string, number>()
       // nameToSampleId: fallback for legacy requests that stored Accurate productId instead of SMPL- id
       const nameToSampleId = new Map<string, string>() // productName -> SMPL- productId
+      // productInfoMap: productId -> gramasi details (for converting kemasan to gramasi on AFA ledger credit)
+      const productInfoMap = new Map<string, { gramasiPerUnit: number | null, unitGramasi: string | null, unit: string }>()
       for (const l of sampleLedgers) {
         balanceMap.set(l.productId, (balanceMap.get(l.productId) ?? 0) + l.quantity)
         // Keep track of first SMPL- product for each name (prefer positive balance)
         const existing = nameToSampleId.get(l.product.name)
         if (!existing) nameToSampleId.set(l.product.name, l.productId)
+        if (!productInfoMap.has(l.productId)) {
+          productInfoMap.set(l.productId, {
+            gramasiPerUnit: (l.product as any).gramasiPerUnit ?? null,
+            unitGramasi: (l.product as any).unitGramasi ?? null,
+            unit: l.product.unit,
+          })
+        }
       }
 
       // productIdRemap: originalId -> effectiveId (for deduction step)
@@ -203,15 +212,21 @@ export async function approveAfaStockRequest(requestId: string) {
               notes: `Sampel ke AFA ${req.fo?.name || ''} (req ${requestId.slice(0, 8).toUpperCase()})`,
             }
           })
-          // Credit to AFA ledger in KEMASAN units (consistent with MAIN flow)
+          // Credit to AFA ledger in GRAMASI units (same as MAIN flow)
+          // AFA receives kemasan from SPV, but ledger tracks in gramasi for precise FO deduction
+          const prodInfo = productInfoMap.get(effectiveProductId)
+          const qtyKemasan = detail.qtyApproved ?? detail.qtyRequested
+          const qtyGramasi = prodInfo?.gramasiPerUnit && prodInfo.gramasiPerUnit > 0
+            ? qtyKemasan * prodInfo.gramasiPerUnit
+            : qtyKemasan
           await tx.ledger.create({
             data: {
               userId: req.foId,
-              productId: effectiveProductId,  // use remapped ID (fixes legacy Accurate vs SMPL- mismatch)
+              productId: effectiveProductId,
               transactionType: 'RECEIVE_FROM_AFA',
-              quantity: detail.qtyApproved ?? detail.qtyRequested,  // in kemasan
+              quantity: qtyGramasi,  // in gramasi (ml/gr)
               referenceId: requestId,
-              notes: `Terima sampel dari SPV (Gudang Sampel)`,
+              notes: `Terima sampel dari SPV (${qtyKemasan} ${prodInfo?.unit ?? ''}${prodInfo?.gramasiPerUnit ? ` = ${qtyGramasi}${prodInfo.unitGramasi ?? ''}` : ''})`,
             }
           })
         }
@@ -533,15 +548,18 @@ export async function receiveSpvStockRequest(requestId: string) {
       data: req.details.map(d => {
         const prod = productMap.get(d.productId)
         const qtyKemasan = d.qtyApproved ?? d.qtyRequested
-        // Store in KEMASAN units (PCS/Btl/etc) — gramasi is secondary display info
+        // Convert to gramasi (ml/gr) for precise FO deduction tracking
+        const qtyToStore = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
+          ? qtyKemasan * prod.gramasiPerUnit
+          : qtyKemasan
         return {
           userId: req.foId,
           productId: d.productId,
           transactionType: 'STOCK_IN_GUDANG',
-          quantity: qtyKemasan,
+          quantity: qtyToStore,  // in gramasi
           referenceId: req.id,
           snapshotAreaId: afaUser?.areaId ?? null,
-          notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyKemasan * prod.gramasiPerUnit}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
+          notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
         }
       })
     })

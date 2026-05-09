@@ -183,20 +183,23 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
             {myStocks.map((stock) => {
               const product = stock.product as any
-              // Ledger quantity is now stored in KEMASAN units
-              const displayQty   = stock.quantity            // in kemasan (PCS, Btl, etc.)
-              const displayUnit  = product.unit              // e.g., "PCS", "Btl"
-              const hasGramasi   = product.unitGramasi && product.gramasiPerUnit
-              const totalGramasi = hasGramasi ? displayQty * product.gramasiPerUnit : null
+              // Ledger stores gramasi (ml/gr) internally; display in kemasan as primary
+              const hasGramasi   = product.unitGramasi && product.gramasiPerUnit && product.gramasiPerUnit > 0
+              const displayQty   = hasGramasi
+                ? +(stock.quantity / product.gramasiPerUnit).toFixed(2)
+                : stock.quantity
+              const displayUnit  = product.unit              // kemasan unit: PCS, Btl, etc.
+              const totalGramasi = hasGramasi ? stock.quantity : null
 
               return (
                 <div key={product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
                   <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
                     {product.name}
+                    {hasGramasi && <span style={{ fontWeight: 400, textTransform: 'none', marginLeft: '0.35rem' }}>({product.gramasiPerUnit}{product.unitGramasi}/{product.unit})</span>}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
                     <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
-                      {displayQty.toLocaleString()}
+                      {Number.isInteger(displayQty) ? displayQty : displayQty.toFixed(1)}
                     </span>
                     <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
                       {displayUnit}

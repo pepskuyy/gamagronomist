@@ -15,11 +15,11 @@ export async function GET(request: Request) {
 
     const stocks = await getStockBalance(sessionDetail.userId)
     
-    // Flat map for simple client consumption — quantity is in kemasan units
+    // Flat map for simple client consumption — quantity is in gramasi (ml/gr)
     const flatStocks = stocks.map(s => ({
       id: s.product.id,
       name: s.product.name,
-      unit: s.product.unit,  // kemasan unit (PCS, Btl, etc.)
+      unit: (s.product as any).unitGramasi || s.product.unit,
       systemStock: s.quantity
     }))
 

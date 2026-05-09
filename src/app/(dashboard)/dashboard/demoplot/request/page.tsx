@@ -41,10 +41,11 @@ export default function FOStockRequestPage() {
 
     const qty = Number(currentQty)
     if (qty <= 0) return
-    // balance is in KEMASAN units (PCS/Btl)
+    // balance is in gramasi (ml/gr); FO requests in gramasi
     const effectiveMax = detail.balance
     if (qty > effectiveMax) {
-      alert(`Jumlah melebihi stok AFA! Stok tersedia: ${detail.balance} ${detail.unit}`)
+      const unitLabel = detail.unitGramasi || detail.unit
+      alert(`Jumlah melebihi stok AFA! Stok tersedia: ${detail.balanceKemasan ?? detail.balance} ${detail.balanceKemasan != null ? detail.unit : unitLabel}`)
       return
     }
 
@@ -52,7 +53,7 @@ export default function FOStockRequestPage() {
       productId: detail.id,
       qtyRequested: qty,
       name: detail.name,
-      unit: detail.unit,   // kemasan unit (PCS, Btl)
+      unit: detail.unitGramasi || detail.unit,   // FO requests in gramasi (ml/gr)
       afaBalance: detail.balance,
     }])
     setCurrentProduct('')
@@ -80,8 +81,8 @@ export default function FOStockRequestPage() {
     .filter(p => !selectedProducts.find(s => s.productId === p.id))
     .map(p => ({
       value: p.id,
-      label: p.gramasiPerUnit
-        ? `${p.name} — stok: ${p.balance} ${p.unit} (= ${p.balanceGramasi ?? p.balance * (p.gramasiPerUnit || 1)} ${p.unitGramasi})`
+      label: p.balanceKemasan != null
+        ? `${p.name} — stok: ${p.balanceKemasan} ${p.unit} (${p.balance} ${p.unitGramasi})`
         : `${p.name} — stok: ${p.balance} ${p.unit}`,
     }))
 
@@ -131,10 +132,13 @@ export default function FOStockRequestPage() {
                 }}>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{p.name}</div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 800, color: p.balance > 0 ? '#16a34a' : '#dc2626' }}>
-                    {p.balance.toLocaleString()} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.unit}</span>
+                    {/* Show kemasan as primary if available */}
+                    {p.balanceKemasan != null
+                      ? <>{p.balanceKemasan} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.unit}</span></>
+                      : <>{p.balance} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.unit}</span></>}
                   </div>
-                  {p.gramasiPerUnit && p.balanceGramasi != null && (
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>= {p.balanceGramasi.toLocaleString()} {p.unitGramasi}</div>
+                  {p.balanceKemasan != null && (
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>= {p.balance.toLocaleString()} {p.unitGramasi}</div>
                   )}
                 </div>
               ))}
@@ -159,10 +163,12 @@ export default function FOStockRequestPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className="form-label">
-                    Jumlah (dalam {afaProducts.find(p => p.id === currentProduct)?.unit || 'kemasan'})
+                    Jumlah (dalam {afaProducts.find(p => p.id === currentProduct)?.unitGramasi || afaProducts.find(p => p.id === currentProduct)?.unit || 'gramasi'})
                     {selectedAfaProduct && (
                       <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
-                        (maks: {selectedAfaProduct.balance.toLocaleString()} {selectedAfaProduct.unit})
+                        (maks: {selectedAfaProduct.balanceKemasan != null
+                          ? `${selectedAfaProduct.balanceKemasan} ${selectedAfaProduct.unit} = ${selectedAfaProduct.balance} ${selectedAfaProduct.unitGramasi}`
+                          : `${selectedAfaProduct.balance} ${selectedAfaProduct.unit}`})
                       </span>
                     )}
                   </label>

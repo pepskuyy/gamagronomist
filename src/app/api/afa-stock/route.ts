@@ -53,23 +53,24 @@ export async function GET() {
     })
 
     // Merge balance info into the product data
-    // balance is stored in KEMASAN units (PCS/Btl/etc)
+    // balance is stored in GRAMASI units (ml/gr) — convert to kemasan for display
     const result = products.map(p => {
       const ledger = positiveProducts.find(l => l.productId === p.id)
-      const balanceKemasan = ledger?._sum.quantity || 0
-      // Calculate total gramasi for display
-      const balanceGramasi = (p as any).gramasiPerUnit && (p as any).gramasiPerUnit > 0
-        ? balanceKemasan * (p as any).gramasiPerUnit
+      const balanceGramasi = ledger?._sum.quantity || 0
+      // Kemasan equivalent for display and validation
+      const gramasiPerUnit = (p as any).gramasiPerUnit
+      const balanceKemasan = gramasiPerUnit && gramasiPerUnit > 0
+        ? Math.floor(balanceGramasi / gramasiPerUnit)
         : null
       return {
         id: p.id,
         name: p.name,
         unit: p.unit,
         unitGramasi: (p as any).unitGramasi || null,
-        gramasiPerUnit: (p as any).gramasiPerUnit || null,
-        balance: balanceKemasan,           // in kemasan (PCS, Btl, etc.)
-        balanceGramasi,                    // total gramasi (ml/gr) — for info display
-        balanceKemasan,                    // same as balance, kept for backward compat
+        gramasiPerUnit: gramasiPerUnit || null,
+        balance: balanceGramasi,      // in gramasi (ml/gr) — used for FO deduction validation
+        balanceGramasi,               // explicit alias
+        balanceKemasan,               // in kemasan units — for display
       }
     })
 
