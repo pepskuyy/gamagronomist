@@ -6,6 +6,8 @@ import ImageUploader from '@/components/ImageUploader'
 import RegionSelect from '@/components/RegionSelect'
 import GpsCapture from '@/components/GpsCapture'
 import { submitCustomerBehavior } from '@/app/actions/report'
+import { useOfflineDraft } from '@/hooks/useOfflineDraft'
+import type { PhotoBlob } from '@/lib/offline-db'
 
 // ── Dropdown options ──────────────────────────────────────────────
 const OPT_DATA = {
@@ -97,19 +99,38 @@ function MultiChip({
   )
 }
 
-// ── Main Form ────────────────────────────────────────────────────
-export default function NewCustomerBehaviorRef() {
+// ── Main Form ────────────────────────────────────────────────
+const NewCustomerBehaviorRef = () => {
   const router = useRouter()
+  const { isOnline, saveDraft } = useOfflineDraft('cb')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [savedOffline, setSavedOffline] = useState(false)
 
-  // OPT state (unchanged)
+  // OPT state
   const [selectedOptTypes, setSelectedOptTypes] = useState<string[]>([])
   const [selectedOptDetails, setSelectedOptDetails] = useState<string[]>([])
   const [photos, setPhotos] = useState<string[]>([])
+  const [photoBlobs, setPhotoBlobs] = useState<PhotoBlob[]>([])
   const [lat, setLat] = useState<number | null>(null)
   const [lng, setLng] = useState<number | null>(null)
   const [hasPhone, setHasPhone] = useState(true)
+
+  // Extra state for offline draft capture
+  const [farmerName, setFarmerName] = useState('')
+  const [age, setAge] = useState('')
+  const [phone, setPhone] = useState('')
+  const [address, setAddress] = useState('')
+  const [totalLandArea, setTotalLandArea] = useState('')
+  const [totalLandAreaUnit, setTotalLandAreaUnit] = useState('ha')
+  const [reasonChoice, setReasonChoice] = useState('')
+  const [buyLocation, setBuyLocation] = useState('')
+  const [buyReason, setBuyReason] = useState('')
+  const [notes, setNotes] = useState('')
+  // Region
+  const [district, setDistrict] = useState('')
+  const [districtKec, setDistrictKec] = useState('')
+  const [districtDesa, setDistrictDesa] = useState('')
 
   // Commodity multi-chip
   const [selectedCommodities, setSelectedCommodities] = useState<string[]>([])
@@ -181,12 +202,74 @@ export default function NewCustomerBehaviorRef() {
 
   const toggle = (list: string[], setList: (v: string[]) => void) => (val: string) => toggleItem(list, setList, val)
 
+  // ── Offline submit handler ───────────────────────────────────
+  const handleSaveOffline = async () => {
+    if (lat === null || lng === null) { setError('GPS wajib diambil dulu. GPS tidak butuh internet.'); return }
+    if (photoBlobs.length === 0) { setError('Minimal 1 foto dokumentasi diperlukan.'); return }
+    if (!farmerName) { setError('Nama petani wajib diisi.'); return }
+    setError(null)
+    setLoading(true)
+
+    const computedTypes = new Set<string>()
+    selectedOptDetails.forEach(detail => {
+      if (OPT_DATA.Hama.includes(detail)) computedTypes.add('Hama')
+      if (OPT_DATA.Penyakit.includes(detail)) computedTypes.add('Penyakit')
+      if (OPT_DATA.Gulma.includes(detail)) computedTypes.add('Gulma')
+    })
+
+    await saveDraft({
+      farmerName, age, phone: hasPhone ? phone : '',
+      district, districtKecamatan: districtKec, districtDesa,
+      address, totalLandArea, totalLandAreaUnit,
+      commodity: buildMultiValue(selectedCommodities, commodityOther),
+      reasonChoice,
+      constraints: buildMultiValue(selectedConstraints, constraintsOther),
+      optTypes: JSON.stringify(Array.from(computedTypes)),
+      optDetails: JSON.stringify(selectedOptDetails),
+      usedProducts: buildMultiValue(selectedBrands, brandsOther),
+      buyLocation, buyReason,
+      references: buildMultiValue(selectedRefs, refsOther),
+      notes,
+      latitude: String(lat),
+      longitude: String(lng),
+    }, photoBlobs)
+
+    setLoading(false)
+    setSavedOffline(true)
+  }
+
+  if (savedOffline) {
+    return (
+      <div className="form-container-wide" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💾</div>
+        <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Tersimpan Offline!</h2>
+        <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
+          Laporan Customer Behavior tersimpan di perangkat. Akan otomatis terkirim begitu sinyal tersedia.
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <button onClick={() => router.push('/dashboard/offline-queue')} className="btn btn-outline">Lihat Antrian</button>
+          <button onClick={() => router.push('/dashboard/reports')} className="btn btn-primary">Kembali ke Laporan</button>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="form-container-wide">
       <div className="back-header">
         <button onClick={() => router.back()} style={{ background: 'none', border: 'none', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '1rem', padding: 0 }}>← Kembali</button>
         <h2 style={{ margin: 0 }}>Form Laporan Customer Behavior</h2>
       </div>
+
+      {!isOnline && (
+        <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span>📵</span>
+          <div>
+            <strong style={{ color: '#92400e' }}>Mode Offline</strong>
+            <div style={{ fontSize: '0.8rem', color: '#92400e' }}>Isi form & ambil foto, lalu klik "Simpan Offline". GPS tidak butuh internet.</div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit}>
         {/* ── Profil Petani ── */}
@@ -195,11 +278,11 @@ export default function NewCustomerBehaviorRef() {
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Nama Petani <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <input type="text" name="farmerName" className="form-control" required />
+              <input type="text" name="farmerName" className="form-control" required value={farmerName} onChange={e => setFarmerName(e.target.value)} />
             </div>
             <div className="form-group">
               <label className="form-label">Umur <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <input type="text" name="age" className="form-control" inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" required />
+              <input type="text" name="age" className="form-control" inputMode="numeric" pattern="[0-9]*" onInput={(e) => { e.currentTarget.value = e.currentTarget.value.replace(/[^0-9]/g, '') }} placeholder="contoh: 40" required value={age} onChange={e => setAge(e.target.value)} />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Apakah Petani Memiliki No. HP?</label>
@@ -218,15 +301,28 @@ export default function NewCustomerBehaviorRef() {
             {hasPhone && (
               <div className="form-group">
                 <label className="form-label">No. HP <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <input type="tel" name="phone" className="form-control" required pattern="[0-9]+" title="Hanya angka" />
+                <input type="tel" name="phone" className="form-control" required pattern="[0-9]+" title="Hanya angka" value={phone} onChange={e => setPhone(e.target.value)} />
               </div>
             )}
             <div style={{ gridColumn: '1 / -1', marginBottom: '0.5rem' }}>
-              <RegionSelect nameKabupaten="district" nameKecamatan="districtKecamatan" nameDesa="districtDesa" required={false} />
+              <RegionSelect
+                nameKabupaten="district"
+                nameKecamatan="districtKecamatan"
+                nameDesa="districtDesa"
+                required={false}
+                onChangeFullString={(str) => {
+                  const parts = str.split(', ')
+                  if (parts.length >= 3) {
+                    setDistrictDesa(parts[0]?.replace('Desa ', ''))
+                    setDistrictKec(parts[1]?.replace('Kec. ', ''))
+                    setDistrict(parts[2])
+                  }
+                }}
+              />
             </div>
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Detail Alamat (Jalan / RT / RW) <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <textarea name="address" className="form-control" rows={2} placeholder="Samping masjid Al-Ikhlas..." required />
+              <textarea name="address" className="form-control" rows={2} placeholder="Samping masjid Al-Ikhlas..." required value={address} onChange={e => setAddress(e.target.value)} />
             </div>
 
             {/* Luas Lahan Total */}
@@ -242,8 +338,10 @@ export default function NewCustomerBehaviorRef() {
                   placeholder="Contoh: 2.5"
                   style={{ flex: 2 }}
                   required
+                  value={totalLandArea}
+                  onChange={e => setTotalLandArea(e.target.value)}
                 />
-                <select name="totalLandAreaUnit" className="form-control" style={{ flex: 1, maxWidth: 140 }}>
+                <select name="totalLandAreaUnit" className="form-control" style={{ flex: 1, maxWidth: 140 }} value={totalLandAreaUnit} onChange={e => setTotalLandAreaUnit(e.target.value)}>
                   <option value="ha">Hektare (ha)</option>
                   <option value="m2">Meter Persegi (m²)</option>
                 </select>
@@ -268,7 +366,7 @@ export default function NewCustomerBehaviorRef() {
 
           <div className="form-group" style={{ marginTop: '1.5rem', gridColumn: '1 / -1' }}>
             <label className="form-label">Alasan memilih komoditas <span style={{ color: 'var(--danger)' }}>*</span></label>
-            <input type="text" name="reasonChoice" className="form-control" required />
+            <input type="text" name="reasonChoice" className="form-control" required value={reasonChoice} onChange={e => setReasonChoice(e.target.value)} />
           </div>
           <div className="form-group" style={{ gridColumn: '1 / -1' }}>
             <label className="form-label">Kendala yang dialami (selain OPT) <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -322,11 +420,11 @@ export default function NewCustomerBehaviorRef() {
           <div className="form-grid" style={{ marginTop: '1.5rem' }}>
             <div className="form-group">
               <label className="form-label">Kios tempat membeli <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <input type="text" name="buyLocation" className="form-control" required />
+              <input type="text" name="buyLocation" className="form-control" required value={buyLocation} onChange={e => setBuyLocation(e.target.value)} />
             </div>
             <div className="form-group">
               <label className="form-label">Alasan membeli produk <span style={{ color: 'var(--danger)' }}>*</span></label>
-              <input type="text" name="buyReason" className="form-control" required />
+              <input type="text" name="buyReason" className="form-control" required value={buyReason} onChange={e => setBuyReason(e.target.value)} />
             </div>
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
@@ -341,7 +439,7 @@ export default function NewCustomerBehaviorRef() {
 
             <div className="form-group" style={{ gridColumn: '1 / -1' }}>
               <label className="form-label">Catatan Tambahan (Opsional)</label>
-              <textarea name="notes" className="form-control" rows={3} />
+              <textarea name="notes" className="form-control" rows={3} value={notes} onChange={e => setNotes(e.target.value)} />
             </div>
           </div>
         </div>
@@ -351,7 +449,12 @@ export default function NewCustomerBehaviorRef() {
           <h3 style={{ marginBottom: '1.5rem' }}>Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
           <GpsCapture onCapture={(la, lo) => { setLat(la); setLng(lo) }} onClear={() => { setLat(null); setLng(null) }} />
           <div style={{ marginTop: '1rem' }}>
-            <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} />
+            <ImageUploader
+              onUploadSuccess={setPhotos}
+              onOfflineFiles={setPhotoBlobs}
+              isOfflineMode={!isOnline}
+              maxFiles={3}
+            />
           </div>
         </div>
 
@@ -359,11 +462,25 @@ export default function NewCustomerBehaviorRef() {
 
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
           <button type="button" onClick={() => router.back()} className="btn btn-outline" disabled={loading}>Batal</button>
-          <button type="submit" className="btn btn-primary" disabled={loading || lat === null}>
-            {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : 'Kirim Laporan Customer Behavior'}
-          </button>
+          {!isOnline ? (
+            <button
+              type="button"
+              onClick={handleSaveOffline}
+              className="btn btn-primary"
+              style={{ background: '#f59e0b', borderColor: '#f59e0b' }}
+              disabled={loading || lat === null}
+            >
+              {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : '💾 Simpan Offline'}
+            </button>
+          ) : (
+            <button type="submit" className="btn btn-primary" disabled={loading || lat === null}>
+              {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : 'Kirim Laporan Customer Behavior'}
+            </button>
+          )}
         </div>
       </form>
     </div>
   )
 }
+
+export default NewCustomerBehaviorRef

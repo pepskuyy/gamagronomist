@@ -7,12 +7,17 @@ import { submitStandaloneDemoPlot } from '@/app/actions/standalone-demoplot'
 import ImageUploader from '@/components/ImageUploader'
 import RegionSelect from '@/components/RegionSelect'
 import SearchableSelect from '@/components/SearchableSelect'
+import { useOfflineDraft } from '@/hooks/useOfflineDraft'
+import type { PhotoBlob } from '@/lib/offline-db'
 
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
 type CbFarmer = { id: string; farmerName: string; phone?: string; district?: string; location?: string; address?: string; commodity?: string; constraints?: string }
 
 export default function FoDemoPlotDirectPage() {
   const router = useRouter()
+  const { isOnline, saveDraft } = useOfflineDraft('spot-demplot')
+  const [savedOffline, setSavedOffline] = useState(false)
+
   const [products, setProducts]     = useState<Product[]>([])
   const [cbFarmers, setCbFarmers]   = useState<CbFarmer[]>([])
   const [stockBalance, setStock]    = useState<Record<string, number>>({})
@@ -36,17 +41,35 @@ export default function FoDemoPlotDirectPage() {
   const [longitude, setLongitude] = useState<number | null>(null)
   const [gpsStatus, setGpsStatus] = useState<'idle'|'loading'|'success'|'error'>('idle')
   const [photos, setPhotos]       = useState<string[]>([])
+  const [photoBlobs, setPhotoBlobs] = useState<PhotoBlob[]>([])
   const [error, setError]         = useState<string | null>(null)
   const [isPending, start]        = useTransition()
 
   useEffect(() => {
-    fetch('/api/products').then(r => r.json()).then(setProducts)
-    fetch('/api/cb-farmers').then(r => r.json()).then(setCbFarmers)
-    fetch('/api/stock/balance').then(r => r.json()).then((data: {productId:string; quantity:number}[]) => {
-      const map: Record<string, number> = {}
-      data.forEach(s => { map[s.productId] = s.quantity })
-      setStock(map)
-    }).catch(() => {})
+    // Online: fetch + simpan ke localStorage sebagai cache offline
+    fetch('/api/products')
+      .then(r => r.json())
+      .then(data => { setProducts(data); try { localStorage.setItem('cache_products', JSON.stringify(data)) } catch{} })
+      .catch(() => {
+        try { const c = localStorage.getItem('cache_products'); if (c) setProducts(JSON.parse(c)) } catch{}
+      })
+    fetch('/api/cb-farmers')
+      .then(r => r.json())
+      .then(data => { setCbFarmers(data); try { localStorage.setItem('cache_cbFarmers', JSON.stringify(data)) } catch{} })
+      .catch(() => {
+        try { const c = localStorage.getItem('cache_cbFarmers'); if (c) setCbFarmers(JSON.parse(c)) } catch{}
+      })
+    fetch('/api/stock/balance')
+      .then(r => r.json())
+      .then((data: {productId:string; quantity:number}[]) => {
+        const map: Record<string, number> = {}
+        data.forEach(s => { map[s.productId] = s.quantity })
+        setStock(map)
+        try { localStorage.setItem('cache_stockBalance', JSON.stringify(map)) } catch{}
+      })
+      .catch(() => {
+        try { const c = localStorage.getItem('cache_stockBalance'); if (c) setStock(JSON.parse(c)) } catch{}
+      })
   }, [])
 
   function selectCbFarmer(id: string) {
@@ -72,6 +95,7 @@ export default function FoDemoPlotDirectPage() {
     )
   }
 
+  // ── Submit Online ─────────────────────────────────────────────
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
     if (gpsStatus !== 'success') { setError('Aktifkan GPS terlebih dahulu.'); return }
@@ -88,24 +112,78 @@ export default function FoDemoPlotDirectPage() {
     fd.set('plan', plan)
     fd.append('latitude', String(latitude))
     fd.append('longitude', String(longitude))
-    
-    // Convert dynamic list back to expected payload: { productId, actualUsage }
     const actualUsages = usageList
       .filter(u => u.productId && parseFloat(u.qty) > 0)
       .map(u => ({ productId: u.productId, actualUsage: parseFloat(u.qty), usedFarmerProduct: u.usedFarmerProduct }))
-      
     fd.append('usages', JSON.stringify(actualUsages))
     fd.append('photos', JSON.stringify(photos))
 
     start(async () => {
       const res = await submitStandaloneDemoPlot(fd)
       if (res?.error) setError(res.error)
-      else router.push('/dashboard/demoplot')
+      else {
+        navigator.serviceWorker?.controller?.postMessage({ type: 'CLEAR_PAGE_CACHE', urls: ['/dashboard/demoplot'] })
+        router.push('/dashboard/demoplot')
+      }
     })
+  }
+
+  // ── Simpan Offline ────────────────────────────────────────────
+  async function handleSaveOffline() {
+    if (gpsStatus !== 'success') {
+      setError('GPS wajib diambil dulu. GPS tidak butuh internet — aktifkan lokasi perangkat.')
+      return
+    }
+    if (photoBlobs.length === 0) {
+      setError('Minimal 1 foto dokumentasi diperlukan.')
+      return
+    }
+    if (!farmerName || !commodity) {
+      setError('Nama petani dan komoditas wajib diisi.')
+      return
+    }
+    setError(null)
+
+    const actualUsages = usageList
+      .filter(u => u.productId && parseFloat(u.qty) > 0)
+      .map(u => ({ productId: u.productId, actualUsage: parseFloat(u.qty), usedFarmerProduct: u.usedFarmerProduct }))
+
+    await saveDraft({
+      farmerName, farmerPhone, area, commodity, problem, plan,
+      latitude: String(latitude),
+      longitude: String(longitude),
+      usages: JSON.stringify(actualUsages),
+      // date dan cropAgeDays dari form element — ambil dari DOM
+      date: (document.querySelector('[name="date"]') as HTMLInputElement)?.value || new Date().toISOString().split('T')[0],
+      cropAgeDays: (document.querySelector('[name="cropAgeDays"]') as HTMLInputElement)?.value || '',
+      landSize: (document.querySelector('[name="landSize"]') as HTMLInputElement)?.value || '',
+      landSizeUnit: (document.querySelector('[name="landSizeUnit"]') as HTMLSelectElement)?.value || 'ha',
+      resultNotes: (document.querySelector('[name="resultNotes"]') as HTMLTextAreaElement)?.value || '',
+      isFinalSession: (document.querySelector('[name="isFinalSession"]') as HTMLInputElement)?.checked ? 'true' : '',
+    }, photoBlobs)
+
+    setSavedOffline(true)
   }
 
   const fc: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.75rem' }
   const gpsColor = { success: 'var(--success)', error: 'var(--danger)', loading: 'var(--warning)', idle: 'var(--border)' }[gpsStatus]
+
+  // ── Layar sukses offline ──────────────────────────────────────
+  if (savedOffline) {
+    return (
+      <div className="form-container-wide" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💾</div>
+        <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Tersimpan Offline!</h2>
+        <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
+          Data Demo Plot beserta foto tersimpan di perangkat. Akan otomatis terkirim begitu sinyal tersedia.
+        </p>
+        <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link href="/dashboard/offline-queue" className="btn btn-outline">Lihat Antrian</Link>
+          <Link href="/dashboard/demoplot" className="btn btn-primary">Kembali ke Demo Plot</Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="form-container-wide">
@@ -116,6 +194,17 @@ export default function FoDemoPlotDirectPage() {
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Rekam langsung tanpa perlu membuat pengajuan terlebih dahulu</p>
         </div>
       </div>
+
+      {/* Banner offline */}
+      {!isOnline && (
+        <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span>📵</span>
+          <div>
+            <strong style={{ color: '#92400e' }}>Mode Offline</strong>
+            <div style={{ fontSize: '0.8rem', color: '#92400e' }}>Isi form & ambil foto, lalu klik "Simpan Offline". GPS tidak butuh internet.</div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* ── FARMER SECTION ── */}
@@ -367,7 +456,13 @@ export default function FoDemoPlotDirectPage() {
         <div className="card">
           <h3 style={{ marginBottom: '0.5rem' }}>📷 Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Minimal 1 foto wajib dilampirkan.</p>
-          <ImageUploader onUploadSuccess={setPhotos} maxFiles={3} label="Upload Foto Realisasi Demo Plot" />
+          <ImageUploader
+            onUploadSuccess={setPhotos}
+            onOfflineFiles={setPhotoBlobs}
+            isOfflineMode={!isOnline}
+            maxFiles={3}
+            label="Upload Foto Realisasi Demo Plot"
+          />
         </div>
 
         {error && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
@@ -378,10 +473,22 @@ export default function FoDemoPlotDirectPage() {
             <input type="checkbox" name="isFinalSession" value="true" style={{ width: '1.1rem', height: '1.1rem' }} />
             <span style={{ fontSize: '0.9rem' }}><strong>Tandai sebagai sesi terakhir</strong> <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>(status akan menjadi Selesai)</span></span>
           </label>
-          <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap' }}
-            disabled={isPending || gpsStatus !== 'success'}>
-            {isPending ? 'Menyimpan...' : gpsStatus !== 'success' ? '📍 Aktifkan GPS Dulu' : '✅ Simpan Realisasi & Potong Stok'}
-          </button>
+          {!isOnline ? (
+            <button
+              type="button"
+              onClick={handleSaveOffline}
+              className="btn btn-primary"
+              style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap', background: '#f59e0b', borderColor: '#f59e0b' }}
+              disabled={isPending || gpsStatus !== 'success'}
+            >
+              {gpsStatus !== 'success' ? '📍 Aktifkan GPS Dulu' : '💾 Simpan Offline'}
+            </button>
+          ) : (
+            <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap' }}
+              disabled={isPending || gpsStatus !== 'success'}>
+              {isPending ? 'Menyimpan...' : gpsStatus !== 'success' ? '📍 Aktifkan GPS Dulu' : '✅ Simpan Realisasi & Potong Stok'}
+            </button>
+          )}
         </div>
       </form>
     </div>
