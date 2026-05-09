@@ -183,9 +183,11 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
             {myStocks.map((stock) => {
               const product = stock.product as any
-              const hasGramasi = product.unitGramasi && product.gramasiPerUnit
-              const displayUnit = product.unitGramasi || product.unit
-              const kemasanEquiv = hasGramasi ? (stock.quantity / product.gramasiPerUnit) : null
+              // Ledger quantity is now stored in KEMASAN units
+              const displayQty   = stock.quantity            // in kemasan (PCS, Btl, etc.)
+              const displayUnit  = product.unit              // e.g., "PCS", "Btl"
+              const hasGramasi   = product.unitGramasi && product.gramasiPerUnit
+              const totalGramasi = hasGramasi ? displayQty * product.gramasiPerUnit : null
 
               return (
                 <div key={product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
@@ -194,15 +196,15 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                   </div>
                   <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
                     <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
-                      {stock.quantity.toLocaleString()}
+                      {displayQty.toLocaleString()}
                     </span>
                     <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
                       {displayUnit}
                     </span>
                   </div>
-                  {kemasanEquiv != null && (
+                  {totalGramasi != null && (
                     <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      ≈ {Number.isInteger(kemasanEquiv) ? kemasanEquiv : kemasanEquiv.toFixed(1)} {product.unit}
+                      = {totalGramasi.toLocaleString()} {product.unitGramasi} total
                     </div>
                   )}
                 </div>

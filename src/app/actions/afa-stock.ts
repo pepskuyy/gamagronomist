@@ -203,13 +203,13 @@ export async function approveAfaStockRequest(requestId: string) {
               notes: `Sampel ke AFA ${req.fo?.name || ''} (req ${requestId.slice(0, 8).toUpperCase()})`,
             }
           })
-          // Credit to AFA ledger (RECEIVE_FROM_AFA)
+          // Credit to AFA ledger in KEMASAN units (consistent with MAIN flow)
           await tx.ledger.create({
             data: {
               userId: req.foId,
-              productId: detail.productId,
+              productId: effectiveProductId,  // use remapped ID (fixes legacy Accurate vs SMPL- mismatch)
               transactionType: 'RECEIVE_FROM_AFA',
-              quantity: detail.qtyApproved ?? detail.qtyRequested,
+              quantity: detail.qtyApproved ?? detail.qtyRequested,  // in kemasan
               referenceId: requestId,
               notes: `Terima sampel dari SPV (Gudang Sampel)`,
             }
@@ -533,17 +533,15 @@ export async function receiveSpvStockRequest(requestId: string) {
       data: req.details.map(d => {
         const prod = productMap.get(d.productId)
         const qtyKemasan = d.qtyApproved ?? d.qtyRequested
-        const qtyToStore = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
-          ? qtyKemasan * prod.gramasiPerUnit
-          : qtyKemasan
+        // Store in KEMASAN units (PCS/Btl/etc) — gramasi is secondary display info
         return {
           userId: req.foId,
           productId: d.productId,
           transactionType: 'STOCK_IN_GUDANG',
-          quantity: qtyToStore,
+          quantity: qtyKemasan,
           referenceId: req.id,
           snapshotAreaId: afaUser?.areaId ?? null,
-          notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
+          notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyKemasan * prod.gramasiPerUnit}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
         }
       })
     })
