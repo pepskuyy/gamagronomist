@@ -106,16 +106,18 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                     </div>
                   ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-                      {userStocks.map((s) => (
-                        <div 
-                          key={s.product.id}
-                          className={['ADMIN', 'SPV'].includes(role) ? "stock-row-clickable" : ""}
-                          onClick={(e) => {
-                            if (['ADMIN', 'SPV'].includes(role)) {
-                              e.stopPropagation();
-                              setSelectedUser({ ...user, initialProductId: s.product.id });
-                            }
-                          }}
+                      {userStocks.map((s) => {
+                        const hasGramasi = s.product.unitGramasi && s.product.gramasiPerUnit && s.product.gramasiPerUnit > 0;
+                        return (
+                          <div 
+                            key={s.product.id}
+                            className={['ADMIN', 'SPV'].includes(role) ? "stock-row-clickable" : ""}
+                            onClick={(e) => {
+                              if (['ADMIN', 'SPV'].includes(role)) {
+                                e.stopPropagation();
+                                setSelectedUser({ ...user, initialProductId: s.product.id });
+                              }
+                            }}
                           style={{ 
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '0.45rem 0.6rem', borderRadius: 'var(--radius)',
@@ -138,7 +140,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                             )}
                           </span>
                         </div>
-                      ))}
+                      )})}
                     </div>
                   )}
 
