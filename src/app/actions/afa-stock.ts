@@ -547,19 +547,15 @@ export async function receiveSpvStockRequest(requestId: string) {
     await prisma.ledger.createMany({
       data: req.details.map(d => {
         const prod = productMap.get(d.productId)
-        const qtyKemasan = d.qtyApproved ?? d.qtyRequested
-        // Convert to gramasi (ml/gr) for precise FO deduction tracking
-        const qtyToStore = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
-          ? qtyKemasan * prod.gramasiPerUnit
-          : qtyKemasan
+        const qtyGramasi = d.qtyApproved ?? d.qtyRequested
         return {
           userId: req.foId,
           productId: d.productId,
           transactionType: 'STOCK_IN_GUDANG',
-          quantity: qtyToStore,  // in gramasi
+          quantity: qtyGramasi,
           referenceId: req.id,
           snapshotAreaId: afaUser?.areaId ?? null,
-          notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
+          notes: `Penerimaan Stok oleh SPV (${qtyGramasi} ${prod?.unitGramasi || prod?.unit || ''}). Ref: ${req.plan}`,
         }
       })
     })

@@ -150,7 +150,7 @@ export default function AfaStockRequestTable({
         d.product.name,
         d.qtyRequested,
         d.qtyApproved || d.qtyRequested,
-        d.product.unit
+        d.product.unitGramasi || d.product.unit
       ])
 
       autoTable(doc, {
@@ -231,7 +231,7 @@ export default function AfaStockRequestTable({
                   <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(req.createdAt))}</td>
                   {!['AFA', 'PLANTATION'].includes(role) && <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{req.fo?.name}</td>}
                   <td style={{ ...tdStyle, fontSize: '0.82rem' }}>
-                    {req.details.map(d => `${d.product.name}: ${d.qtyRequested} ${d.product.unit}`).join(', ')}
+                    {req.details.map(d => `${d.product.name}: ${d.qtyRequested} ${d.product.unitGramasi || d.product.unit}`).join(', ')}
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
                     {getStatusBadge(req.status)}
