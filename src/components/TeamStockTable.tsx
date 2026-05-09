@@ -17,7 +17,7 @@ const roleBadge: Record<string, { bg: string; text: string }> = {
 }
 
 export default function TeamStockTable({ users, stocks, allProducts, role }: TeamStockTableProps) {
-  const [selectedUser, setSelectedUser] = useState<{ id: string, name: string, role: string } | null>(null)
+  const [selectedUser, setSelectedUser] = useState<{ id: string, name: string, role: string, initialProductId?: string } | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   return (
@@ -109,10 +109,19 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                       {userStocks.map((s) => (
                         <div 
                           key={s.product.id}
+                          className={['ADMIN', 'SPV'].includes(role) ? "stock-row-clickable" : ""}
+                          onClick={(e) => {
+                            if (['ADMIN', 'SPV'].includes(role)) {
+                              e.stopPropagation();
+                              setSelectedUser({ ...user, initialProductId: s.product.id });
+                            }
+                          }}
                           style={{ 
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '0.45rem 0.6rem', borderRadius: 'var(--radius)',
-                            background: 'var(--surface-2)', fontSize: '0.82rem'
+                            background: 'var(--surface-2)', fontSize: '0.82rem',
+                            cursor: ['ADMIN', 'SPV'].includes(role) ? 'pointer' : 'default',
+                            transition: 'background 0.15s ease'
                           }}
                         >
                           <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>{s.product.name}</span>
@@ -163,6 +172,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
 
       <style jsx>{`
         .card:hover { box-shadow: 0 2px 8px rgb(0 0 0 / 0.08); transform: translateY(-1px); }
+        .stock-row-clickable:hover { background: var(--surface-3) !important; filter: brightness(0.95); }
       `}</style>
     </>
   )

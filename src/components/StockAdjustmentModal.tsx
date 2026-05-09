@@ -7,7 +7,7 @@ import SearchableSelect from '@/components/SearchableSelect'
 type StockAdjustmentModalProps = {
   isOpen: boolean
   onClose: () => void
-  user: { id: string, name: string, role: string }
+  user: { id: string, name: string, role: string, initialProductId?: string }
   products: { id: string, name: string, unit: string }[]
   onSuccess: () => void
 }
@@ -26,7 +26,9 @@ function newRow(): AdjustmentRow {
 export default function StockAdjustmentModal({ isOpen, onClose, user, products, onSuccess }: StockAdjustmentModalProps) {
   const [isPending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
-  const [rows, setRows] = useState<AdjustmentRow[]>([newRow()])
+  const [rows, setRows] = useState<AdjustmentRow[]>(() => [
+    { id: Math.random().toString(36).substring(2, 9), productId: user.initialProductId || '', type: 'plus', quantity: '' }
+  ])
   const [notes, setNotes] = useState('')
 
   if (!isOpen) return null
