@@ -177,7 +177,8 @@ export async function createSalesInvoice(
   items: InvoiceLineItem[],
   description?: string,
   branchName?: string,
-  warehouseName?: string   // Nama gudang sumber stok (contoh: 'Gudang Baik')
+  warehouseName?: string,  // Nama gudang sumber stok (contoh: 'Gudang Baik')
+  priceLevelName?: string  // Nama Kategori Penjualan (contoh: 'CJ R2')
 ): Promise<{ success: boolean; invoiceNo?: string; error?: string; rawResponse?: any }> {
   const { token, secret, host } = getCredentials()
 
@@ -188,9 +189,10 @@ export async function createSalesInvoice(
   const params = new URLSearchParams()
   params.set('customerNo', customerNo)
   params.set('transDate', transDate)
-  if (description)   params.set('description', description)
-  if (branchName)    params.set('branchName', branchName)
-  if (warehouseName) params.set('warehouseName', warehouseName) // default warehouse for all lines
+  if (description)    params.set('description', description)
+  if (branchName)     params.set('branchName', branchName)
+  if (warehouseName)  params.set('warehouseName', warehouseName) // default warehouse for all lines
+  if (priceLevelName) params.set('priceLevelName', priceLevelName)
 
   // Line items use indexed array parameters: detailItem[0].itemNo, detailItem[0].quantity, etc.
   items.forEach((item, idx) => {

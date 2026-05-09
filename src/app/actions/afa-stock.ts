@@ -411,7 +411,6 @@ export async function approveWhmStockRequest(requestId: string) {
         .filter((x): x is string => !!x)
 
       if (itemCodes.length > 0) {
-        const priceMap = await fetchItemPrices(itemCodes)
         const invoiceItems = req.details
           .map(d => {
             const prod = productMap.get(d.productId)
@@ -419,7 +418,7 @@ export async function approveWhmStockRequest(requestId: string) {
             return {
               itemNo:    prod.accurateId,
               quantity:  d.qtyApproved ?? d.qtyRequested,
-              unitPrice: priceMap.get(prod.accurateId) ?? undefined,
+              // unitPrice is intentionally omitted to let Accurate use the category price
             }
           })
           .filter((x): x is NonNullable<typeof x> => x !== null)
@@ -434,7 +433,8 @@ export async function approveWhmStockRequest(requestId: string) {
             invoiceItems,
             `Diajukan untuk kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
             'Kantor Pusat SMG',
-            'Gudang Baik'
+            'Gudang Baik',
+            'CJ R2' // Force price category
           )
 
           if (!invoiceResult.success) {
@@ -750,8 +750,6 @@ export async function regenerateInvoice(requestId: string) {
       return { error: 'Tidak ada produk dengan Accurate ID yang terhubung. Pastikan produk sudah dikonfigurasi di master data.' }
     }
 
-    const priceMap = await fetchItemPrices(itemCodes)
-
     const invoiceItems = req.details
       .map(d => {
         const prod = productMap2.get(d.productId)
@@ -759,7 +757,7 @@ export async function regenerateInvoice(requestId: string) {
         return {
           itemNo: prod.accurateId,
           quantity: d.qtyApproved ?? d.qtyRequested,
-          unitPrice: priceMap.get(prod.accurateId) ?? undefined,
+          // unitPrice is intentionally omitted to let Accurate use the category price
         }
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
@@ -773,7 +771,8 @@ export async function regenerateInvoice(requestId: string) {
       invoiceItems,
       `[REGENERATE] Kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
       'Kantor Pusat SMG', // Cabang di Accurate
-      'Gudang Baik'       // Sumber gudang stok di Accurate
+      'Gudang Baik',      // Sumber gudang stok di Accurate
+      'CJ R2'             // Force price category
     )
 
     if (!invoiceResult.success) {

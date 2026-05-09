@@ -64,7 +64,7 @@ export default function AfaStockRequestTable({
   }
 
   const handleReceive = (id: string) => {
-    if (!confirm('Apakah Anda yakin telah menerima stok ini? Stok akan langsung ditambahkan ke ledger AFA dan invoice Accurate akan diterbitkan.')) return
+    if (!confirm('Apakah Anda yakin telah menerima stok ini? Stok akan langsung ditambahkan ke ledger AFA.')) return
     setActionId(id)
     startTransition(async () => {
       const res = await receiveSpvStockRequest(id)
@@ -257,11 +257,11 @@ export default function AfaStockRequestTable({
                     )}
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
-                    {req.status === 'APPROVED' && req.warehouseSource !== 'SAMPLE' && req.accurateInvoiceNo ? (
+                    {req.warehouseSource !== 'SAMPLE' && req.accurateInvoiceNo ? (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#dcfce7', color: '#166534' }}>
                         ✅ {req.accurateInvoiceNo}
                       </span>
-                    ) : req.status === 'APPROVED' && req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo ? (
+                    ) : req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && (req.status === 'APPROVED_WHM' || req.status === 'APPROVED') ? (
                       <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#fef3c7', color: '#92400e' }}>
                         ⚠️ Tidak Terbit
                       </span>
@@ -303,20 +303,21 @@ export default function AfaStockRequestTable({
                         </button>
                       )}
 
+                      {/* Tombol Generate Invoice — hanya untuk gudang UTAMA (bukan SAMPEL) */}
+                      {req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && (req.status === 'APPROVED' || req.status === 'APPROVED_WHM') && (role === 'SPV' || role === 'ADMIN' || role === 'WHM') && (
+                        <button
+                          onClick={() => handleRegenerate(req.id)}
+                          className="btn"
+                          style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
+                          disabled={isPending && actionId === req.id}
+                          title="Terbitkan invoice Accurate & perbaiki stok AFA"
+                        >
+                          {isPending && actionId === req.id ? '⏳ Proses...' : '⚡ Generate Invoice'}
+                        </button>
+                      )}
+
                       {req.status === 'APPROVED' && (
                         <>
-                          {/* Tombol Generate Invoice — hanya untuk gudang UTAMA (bukan SAMPEL) */}
-                          {req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && (role === 'SPV' || role === 'ADMIN') && (
-                            <button
-                              onClick={() => handleRegenerate(req.id)}
-                              className="btn"
-                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
-                              disabled={isPending && actionId === req.id}
-                              title="Terbitkan invoice Accurate & perbaiki stok AFA"
-                            >
-                              {isPending && actionId === req.id ? '⏳ Proses...' : '⚡ Generate Invoice'}
-                            </button>
-                          )}
                           <button
                             onClick={() => handleDownloadPdf(req)}
                             className="btn btn-outline"
