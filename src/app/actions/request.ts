@@ -32,6 +32,8 @@ export async function submitRequestDemoPlot(formData: FormData) {
   }
 
   // If requestUnit not provided, look up from Product table
+  // requestUnit HARUS menyimpan satuan kemasan (unit: PCS, Btl, dll),
+  // BUKAN unitGramasi (ml, g, dll). unitGramasi hanya dipakai untuk konversi display.
   if (productsToRequest.some(p => !p.requestUnit)) {
     const products = await prisma.product.findMany({
       where: { id: { in: productsToRequest.map(p => p.productId) } },
@@ -41,7 +43,8 @@ export async function submitRequestDemoPlot(formData: FormData) {
     for (const p of productsToRequest) {
       if (!p.requestUnit) {
         const prod = productMap.get(p.productId)
-        p.requestUnit = prod?.unitGramasi || prod?.unit || 'PCS'
+        // Gunakan unit kemasan (PCS, Botol, dsb), bukan unitGramasi (ml, g, dsb)
+        p.requestUnit = prod?.unit || 'PCS'
       }
     }
   }

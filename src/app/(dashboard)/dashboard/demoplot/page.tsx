@@ -99,9 +99,13 @@ export default async function DemoPlotIndexPage() {
                       <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
                       <td style={{ fontSize: '0.82rem' }}>
                         {req.details?.map((d: any) => {
-                          const unit = d.requestUnit || d.product?.unitGramasi || d.product?.unit
-                          const qty = d.qtyApproved != null ? `${d.qtyApproved} ${unit} (diminta: ${d.qtyRequested})` : `${d.qtyRequested} ${unit}`
-                          return `${d.product?.name}: ${qty}`
+                          const gramasiUnits = ['ml', 'g', 'kg', 'liter', 'cc', 'gr']
+                          const storedUnit = d.requestUnit || d.product?.unit || 'PCS'
+                          const unit = gramasiUnits.includes(storedUnit?.toLowerCase()) ? (d.product?.unit || storedUnit) : storedUnit
+                          const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
+                          const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
+                          const gramasiTotal = hasGramasi ? (qty * d.product.gramasiPerUnit).toLocaleString('id-ID') + d.product.unitGramasi : null
+                          return `${d.product?.name}: ${qty} ${unit}${gramasiTotal ? ` (${gramasiTotal})` : ''}${d.qtyApproved != null ? ` [diminta: ${d.qtyRequested}]` : ''}`
                         }).join(', ')}
                       </td>
                       <td>{getStatusBadge(req.status)}</td>
@@ -145,9 +149,13 @@ export default async function DemoPlotIndexPage() {
                       <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
                       <td style={{ fontSize: '0.82rem' }}>
                         {req.details?.map((d: any) => {
-                          const unit = d.requestUnit || d.product?.unitGramasi || d.product?.unit
-                          const qty = d.qtyApproved != null ? `${d.qtyApproved} ${unit} (diminta: ${d.qtyRequested})` : `${d.qtyRequested} ${unit}`
-                          return `${d.product?.name}: ${qty}`
+                          const gramasiUnits = ['ml', 'g', 'kg', 'liter', 'cc', 'gr']
+                          const storedUnit = d.requestUnit || d.product?.unit || 'PCS'
+                          const unit = gramasiUnits.includes(storedUnit?.toLowerCase()) ? (d.product?.unit || storedUnit) : storedUnit
+                          const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
+                          const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
+                          const gramasiTotal = hasGramasi ? (qty * d.product.gramasiPerUnit).toLocaleString('id-ID') + d.product.unitGramasi : null
+                          return `${d.product?.name}: ${qty} ${unit}${gramasiTotal ? ` (${gramasiTotal})` : ''}${d.qtyApproved != null ? ` [diminta: ${d.qtyRequested}]` : ''}`
                         }).join(', ')}
                       </td>
                       <td>{getStatusBadge(req.status)}</td>

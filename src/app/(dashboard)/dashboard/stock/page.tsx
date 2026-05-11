@@ -332,9 +332,19 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.82rem' }}>
                         {req.details?.map((d: any) => {
-                          const unit = d.requestUnit || d.product?.unitGramasi || d.product?.unit
-                          const qty = d.qtyApproved != null ? `${d.qtyApproved} ${unit} (diminta: ${d.qtyRequested})` : `${d.qtyRequested} ${unit}`
-                          return `${d.product?.name}: ${qty}`
+                          // requestUnit menyimpan satuan kemasan (PCS, Btl, dll)
+                          // Jika requestUnit lama salah (berisi ml/g), fallback ke product.unit
+                          const gramasiUnits = ['ml', 'g', 'kg', 'liter', 'cc', 'gr']
+                          const storedUnit = d.requestUnit || d.product?.unit || 'PCS'
+                          const unit = gramasiUnits.includes(storedUnit?.toLowerCase()) ? (d.product?.unit || storedUnit) : storedUnit
+                          const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
+                          // Konversi ke gramasi jika ada
+                          const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
+                          const gramasiTotal = hasGramasi ? (qty * d.product.gramasiPerUnit).toLocaleString('id-ID') + d.product.unitGramasi : null
+                          const label = `${d.product?.name}: ${qty} ${unit}${gramasiTotal ? ` (${gramasiTotal})` : ''}${
+                            d.qtyApproved != null ? ` [diminta: ${d.qtyRequested}]` : ''
+                          }`
+                          return label
                         }).join(', ')}
                       </td>
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>{getStatusBadge(req.status)}</td>
