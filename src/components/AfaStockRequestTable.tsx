@@ -20,7 +20,13 @@ type RequestProps = {
     id: string
     qtyRequested: number
     qtyApproved: number | null
-    product: { id: string; name: string; unit: string }
+    product: {
+      id: string
+      name: string
+      unit: string
+      unitGramasi: string | null
+      gramasiPerUnit: number | null
+    }
   }[]
 }
 
@@ -231,7 +237,18 @@ export default function AfaStockRequestTable({
                   <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(req.createdAt))}</td>
                   {!['AFA', 'PLANTATION'].includes(role) && <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{req.fo?.name}</td>}
                   <td style={{ ...tdStyle, fontSize: '0.82rem' }}>
-                    {req.details.map(d => `${d.product.name}: ${d.qtyRequested} ${d.product.unitGramasi || d.product.unit}`).join(', ')}
+                    {req.details.map(d => {
+                      const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
+                      // Selalu tampilkan satuan kemasan (PCS, Btl, dll), bukan gramasi (ml, g)
+                      const unit = d.product.unit
+                      const hasGramasi = d.product.gramasiPerUnit && d.product.unitGramasi
+                      const gramasiTotal = hasGramasi
+                        ? ` (${(qty * d.product.gramasiPerUnit!).toLocaleString('id-ID')}${d.product.unitGramasi})`
+                        : ''
+                      const approvedNote = d.qtyApproved != null && d.qtyApproved !== d.qtyRequested
+                        ? ` [diminta: ${d.qtyRequested}]` : ''
+                      return `${d.product.name}: ${qty} ${unit}${gramasiTotal}${approvedNote}`
+                    }).join(', ')}
                   </td>
                   <td style={{ ...tdStyle, textAlign: 'center' }}>
                     {getStatusBadge(req.status)}
