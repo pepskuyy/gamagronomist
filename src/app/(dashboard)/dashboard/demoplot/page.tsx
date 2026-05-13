@@ -24,7 +24,7 @@ export default async function DemoPlotIndexPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'SUBMITTED':        return <span className="badge badge-warning">Menunggu Approval</span>
-      case 'APPROVED':         return <span className="badge badge-success">Stok Disetujui</span>
+      case 'APPROVED':         return <span className="badge badge-success">Sesi Aktif</span>
       case 'REJECTED':         return <span className="badge badge-danger">Ditolak</span>
       case 'DEMO_PLOT_SELESAI':return <span className="badge badge-neutral">Selesai</span>
       default:                 return <span className="badge badge-neutral">{status}</span>
