@@ -20,9 +20,15 @@ export default function LoginPage() {
     if (res?.error) {
       setError(res.error)
       setLoading(false)
-    } else {
+    } else if (res?.success) {
+      // Login berhasil, navigasi ke dashboard
+      setLoading(false)
       router.push('/dashboard')
       router.refresh()
+    } else {
+      // Tidak ada error maupun success — server action tidak merespons normal
+      setError('Server tidak merespons. Coba lagi.')
+      setLoading(false)
     }
   }
 
