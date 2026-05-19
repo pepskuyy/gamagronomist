@@ -101,21 +101,36 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
       ]
     }
     
+    // Optimasi: Gunakan findMany dengan select spesifik untuk mengurangi beban DB (hindari N+1 query)
     const users = await prisma.user.findMany({
       where: Object.keys(userFilter).length ? userFilter : { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } },
       select: { id: true, name: true, role: true }
     })
 
-    for (const user of users) {
-      const ledgers = await prisma.ledger.groupBy({
-        by: ['productId'],
-        where: { userId: user.id },
+    const userIds = users.map(u => u.id)
+    
+    if (userIds.length > 0) {
+      // Dapatkan semua ledger summary sekaligus
+      const allLedgers = await prisma.ledger.groupBy({
+        by: ['userId', 'productId'],
+        where: { userId: { in: userIds } },
         _sum: { quantity: true }
       })
-      for (const l of ledgers) {
+
+      // Ambil produk yang relevan dalam 1 query
+      const productIds = Array.from(new Set(allLedgers.map(l => l.productId)))
+      const products = await prisma.product.findMany({
+        where: { id: { in: productIds } },
+        select: { id: true, name: true, unitGramasi: true, unit: true }
+      })
+      const productMap = new Map(products.map(p => [p.id, p]))
+      const userMap = new Map(users.map(u => [u.id, u]))
+
+      for (const l of allLedgers) {
         if ((l._sum.quantity || 0) !== 0) {
-          const product = await prisma.product.findUnique({ where: { id: l.productId } })
-          if (product) {
+          const product = productMap.get(l.productId)
+          const user = userMap.get(l.userId)
+          if (product && user) {
             stockSummary.push({
               userName: user.name,
               role: user.role,
@@ -126,6 +141,9 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
           }
         }
       }
+
+      // Urutkan berdasarkan userName
+      stockSummary.sort((a, b) => a.userName.localeCompare(b.userName))
     }
   }
 

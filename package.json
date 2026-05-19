@@ -11,6 +11,7 @@
     "postinstall": "prisma generate"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.8.0",
     "@prisma/client": "^6.6.0",
     "@types/leaflet": "^1.9.21",
     "@vercel/blob": "^2.3.3",
@@ -31,11 +32,12 @@
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
     "@types/node": "^22.0.0",
+    "@types/pg": "^8.20.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.3.0",
-    "pg": "^8.20.0",
+    "pg": "^8.21.0",
     "prisma": "^6.6.0",
     "sharp": "^0.34.5",
     "typescript": "^5.8.0"
