@@ -202,6 +202,12 @@ export default function BdStockRequestPage() {
               <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>📍 Tujuan Pengiriman</h3>
               <div className="form-group">
                 <label className="form-label">Pilih Pelanggan (Busdev) <span style={{ color: 'var(--danger)' }}>*</span></label>
+                {loadingCustomers ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.9rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                  <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid #7c3aed', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                  Memuat daftar pelanggan dari Accurate... (mungkin 5–15 detik)
+                </div>
+              ) : (
                 <SearchableSelect
                   options={customers.map(c => ({
                     value: c.id.toString(),
@@ -209,8 +215,9 @@ export default function BdStockRequestPage() {
                   }))}
                   value={destinationCustomer}
                   onChange={setDestinationCustomer}
-                  placeholder={loadingCustomers ? 'Memuat daftar pelanggan...' : customers.length === 0 ? 'Tidak ada pelanggan tersedia' : '-- Ketik nama pelanggan --'}
+                  placeholder={customers.length === 0 ? 'Tidak ada pelanggan tersedia' : '-- Ketik nama pelanggan --'}
                 />
+              )}
                 <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                   *Menampilkan pelanggan dengan default salesperson "Busdev" di Accurate.
                 </p>
@@ -223,17 +230,24 @@ export default function BdStockRequestPage() {
               <div className="picker-row">
                 <div style={{ flex: 2 }}>
                   <label className="form-label">Pilih Produk</label>
-                  <SearchableSelect
-                    options={sampleProducts.map(p => ({
-                      value: p.productId,
-                      label: p.gramasiPerUnit && p.unitGramasi
-                        ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • 🧪 ${p.balance} ${p.unit}`
-                        : `${p.productName} (${p.unit}) • 🧪 ${p.balance} ${p.unit}`,
-                    }))}
-                    value={currentProduct}
-                    onChange={setCurrentProduct}
-                    placeholder={loadingSample ? 'Memuat stok sampel...' : sampleProducts.length === 0 ? 'Tidak ada produk tersedia di gudang sampel' : '-- Ketik nama produk --'}
-                  />
+                  {loadingSample ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.9rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                      <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid #7c3aed', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                      Memuat stok produk...
+                    </div>
+                  ) : (
+                    <SearchableSelect
+                      options={sampleProducts.map(p => ({
+                        value: p.productId,
+                        label: p.gramasiPerUnit && p.unitGramasi
+                          ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • 🧪 ${p.balance} ${p.unit}`
+                          : `${p.productName} (${p.unit}) • 🧪 ${p.balance} ${p.unit}`,
+                      }))}
+                      value={currentProduct}
+                      onChange={setCurrentProduct}
+                      placeholder={sampleProducts.length === 0 ? 'Tidak ada produk tersedia di gudang sampel' : '-- Ketik nama produk --'}
+                    />
+                  )}
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className="form-label">

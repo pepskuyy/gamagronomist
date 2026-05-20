@@ -3,10 +3,18 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { fetchAccurateCustomers } from '@/lib/accurate'
 
+export const dynamic = 'force-dynamic'
+
+/**
+ * In-memory cache agar tidak perlu fetch ulang 2861 pelanggan setiap request.
+ * Cache berlaku selama 10 menit.
+ */
+let cachedCustomers: any[] | null = null
+let cacheExpiry = 0
+
 /**
  * GET /api/bd-customers
  * Mengambil daftar customer dari Accurate yang ditangani oleh "Busdev"
- * Jika tidak ada yang match, kembalikan semua customer sebagai fallback agar form tetap bisa dipakai
  */
 export async function GET() {
   try {
@@ -18,26 +26,23 @@ export async function GET() {
       return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 })
     }
 
-    const customers = await fetchAccurateCustomers()
-    
+    // Gunakan cache jika masih valid (10 menit)
+    const now = Date.now()
+    if (!cachedCustomers || now > cacheExpiry) {
+      const allCustomers = await fetchAccurateCustomers()
+      cachedCustomers = allCustomers
+      cacheExpiry = now + 10 * 60 * 1000
+    }
+
+    const customers = cachedCustomers
+
     // Filter by salesperson "Busdev" (case-insensitive)
-    const bdCustomers = customers.filter(c => {
+    const bdCustomers = customers.filter((c: any) => {
       const spName = c.defaultSalesman?.name?.toLowerCase() || ''
       return spName.includes('busdev')
     })
 
-    // Jika tidak ada yang match defaultSalesman (mungkin field tidak tersedia di Accurate config),
-    // kembalikan semua customer dan log peringatan
-    if (bdCustomers.length === 0 && customers.length > 0) {
-      console.warn('[bd-customers] Tidak ada pelanggan dengan defaultSalesman "Busdev". Total customer:', customers.length)
-      console.warn('[bd-customers] Sample defaultSalesman values:', 
-        customers.slice(0, 5).map(c => ({ name: c.name, salesman: c.defaultSalesman }))
-      )
-      // Kembalikan semua customer sebagai fallback sementara
-      return NextResponse.json({ customers, fallback: true, message: 'Filter Busdev tidak menghasilkan data — menampilkan semua pelanggan' })
-    }
-
-    return NextResponse.json({ customers: bdCustomers })
+    return NextResponse.json({ customers: bdCustomers, total: bdCustomers.length })
   } catch (err: any) {
     console.error('[bd-customers] error:', err)
     return NextResponse.json({ error: 'Gagal mengambil data customer BD: ' + (err.message ?? 'Unknown error') }, { status: 500 })
