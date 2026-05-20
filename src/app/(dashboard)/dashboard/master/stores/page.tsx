@@ -38,7 +38,8 @@ export default function StoresMasterPage() {
   const [isPending, start]      = useTransition()
   const [search, setSearch]     = useState('')
   const [selectedStores, setSelectedStores] = useState<Set<string>>(new Set())
-  const [syncing, setSyncing]   = useState(false)
+  const [syncing, setSyncing]     = useState(false)
+  const [syncProgress, setSyncProgress] = useState<{ page: number; totalPages: number; pct: number } | null>(null)
   const [syncResult, setSyncResult] = useState<{ ok: boolean; msg: string; detail?: string } | null>(null)
 
   const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
@@ -102,22 +103,52 @@ export default function StoresMasterPage() {
   }
 
   async function handleAccurateSync() {
-    if (!confirm('Sinkronisasi toko/pelanggan dari Accurate Online?\n\n• Toko baru dari Accurate akan ditambahkan\n• Nama, kode, dan koordinat GPS akan diperbarui\n• Data yang diisi manual tidak akan terhapus')) return
+    if (!confirm('Sinkronisasi toko/pelanggan dari Accurate Online?\n\n• Toko baru akan ditambahkan\n• Nama, kode, koordinat GPS, dan salesman akan diperbarui\n• Proses berjalan per halaman (±30 halaman) — jangan tutup tab ini')) return
     setSyncing(true)
     setSyncResult(null)
+    setSyncProgress(null)
+
+    let page = 1
+    let totalInserted = 0, totalUpdated = 0, totalSkipped = 0
+    let totalRows = 0
+
     try {
-      const res = await fetch('/api/accurate-sync-customers', { method: 'POST' })
-      const data = await res.json()
-      if (data.error) {
-        setSyncResult({ ok: false, msg: data.error })
-      } else {
-        setSyncResult({ ok: true, msg: data.message, detail: `Total dari Accurate: ${data.total} customer` })
-        fetchData()
+      while (true) {
+        const res = await fetch(`/api/accurate-sync-customers?page=${page}`, { method: 'POST' })
+        const data = await res.json()
+
+        if (data.error) {
+          setSyncResult({ ok: false, msg: data.error })
+          break
+        }
+
+        totalInserted += data.inserted ?? 0
+        totalUpdated  += data.updated  ?? 0
+        totalSkipped  += data.skipped  ?? 0
+        totalRows      = data.total    ?? totalRows
+
+        const pct = data.totalPages ? Math.round((page / data.totalPages) * 100) : 0
+        setSyncProgress({ page, totalPages: data.totalPages ?? page, pct })
+
+        if (data.done) {
+          fetchData()
+          setSyncResult({
+            ok: true,
+            msg: `Sinkronisasi selesai: ${totalInserted} toko baru, ${totalUpdated} diperbarui, ${totalSkipped} dilewati.`,
+            detail: `Total dari Accurate: ${totalRows} customer — ${data.totalPages} halaman diproses.`,
+          })
+          break
+        }
+
+        page++
+        // Jeda kecil agar tidak flood API Accurate
+        await new Promise(r => setTimeout(r, 300))
       }
     } catch {
       setSyncResult({ ok: false, msg: 'Gagal menghubungi server. Cek koneksi.' })
     } finally {
       setSyncing(false)
+      setSyncProgress(null)
     }
   }
 
@@ -213,10 +244,11 @@ export default function StoresMasterPage() {
             disabled={syncing}
             className="btn btn-outline"
             style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderColor: '#d97706', color: '#92400e', background: syncing ? '#fef3c7' : undefined }}
-            title="Sinkronisasi nama, kode, dan koordinat GPS dari Accurate Online"
+            title="Sinkronisasi nama, kode, koordinat GPS, dan salesman dari Accurate Online"
           >
             {syncing
-              ? <><span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #d97706', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Menyinkronkan...</>
+              ? <><span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #d97706', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                {syncProgress ? `Hal. ${syncProgress.page}/${syncProgress.totalPages} (${syncProgress.pct}%)` : 'Memulai sync...'}</>
               : '🔄 Sync Accurate'
             }
           </button>
@@ -224,6 +256,20 @@ export default function StoresMasterPage() {
           <button onClick={openAdd} className="btn btn-primary">➕ Tambah Toko</button>
         </div>
       </div>
+
+      {/* Progress Bar saat sync berjalan */}
+      {syncing && syncProgress && (
+        <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '0.5rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', fontWeight: 600, color: '#92400e', marginBottom: '0.4rem' }}>
+            <span>🔄 Menyinkronkan data dari Accurate...</span>
+            <span>Halaman {syncProgress.page} / {syncProgress.totalPages} ({syncProgress.pct}%)</span>
+          </div>
+          <div style={{ background: '#fef3c7', borderRadius: '9999px', height: '8px', overflow: 'hidden' }}>
+            <div style={{ height: '100%', borderRadius: '9999px', background: '#d97706', width: `${syncProgress.pct}%`, transition: 'width 0.3s ease' }} />
+          </div>
+          <p style={{ fontSize: '0.75rem', color: '#b45309', margin: '0.3rem 0 0' }}>Jangan tutup tab ini hingga sinkronisasi selesai.</p>
+        </div>
+      )}
 
       {/* Sync Result Banner */}
       {syncResult && (

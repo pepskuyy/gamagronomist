@@ -1,19 +1,24 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { fetchAccurateCustomers } from '@/lib/accurate'
+import { createHmac } from 'crypto'
 import prisma from '@/lib/prisma'
 
+export const dynamic = 'force-dynamic'
+// Tambah maxDuration untuk Vercel Pro (60s). Hobby tetap 10s tapi per-page sudah cukup.
+export const maxDuration = 60
+
 /**
- * POST /api/accurate-sync-customers
- * Sync customer list dari Accurate ke tabel Store.
- * Hanya ADMIN/SPV yang boleh memicu sync ini.
+ * POST /api/accurate-sync-customers?page=1
  * 
- * Field Accurate:
- *   charfield4 = latitude
- *   charfield3 = longitude
+ * Sync incremental: satu request = satu halaman (100 customer) dari Accurate.
+ * Frontend memanggil berulang sampai done=true.
+ * 
+ * Response:
+ *   { done: false, page, processedPage, total, inserted, updated, skipped }
+ *   { done: true,  page, processedPage, total, inserted, updated, skipped, message }
  */
-export async function POST() {
+export async function POST(request: Request) {
   try {
     const cookieStore = await cookies()
     const sessionToken = cookieStore.get('session')?.value
@@ -23,16 +28,44 @@ export async function POST() {
       return NextResponse.json({ error: 'Akses ditolak. Hanya ADMIN/SPV.' }, { status: 403 })
     }
 
-    const customers = await fetchAccurateCustomers()
+    // Ambil page dari query param (?page=1)
+    const url = new URL(request.url)
+    const page = Math.max(1, parseInt(url.searchParams.get('page') ?? '1', 10))
+    const pageSize = 100
 
-    if (customers.length === 0) {
-      return NextResponse.json({ success: true, message: 'Tidak ada customer ditemukan di Accurate.', total: 0, inserted: 0, updated: 0, skipped: 0 })
+    // ── Fetch SATU halaman saja dari Accurate ──────────────────────────
+    const token  = process.env.ACCURATE_API_TOKEN!
+    const secret = process.env.ACCURATE_SIGNATURE_SECRET!
+    const host   = (process.env.ACCURATE_HOST ?? 'https://public.accurate.id').replace(/\/$/, '')
+
+    const timestamp = new Date().toISOString()
+    const signature = createHmac('sha256', secret).update(timestamp).digest('hex')
+    const headers = {
+      'Authorization':   `Bearer ${token}`,
+      'X-Api-Timestamp': timestamp,
+      'X-Api-Signature': signature,
     }
 
-    let inserted = 0, updated = 0, skipped = 0
+    const accurateUrl = new URL(`${host}/accurate/api/customer/list.do`)
+    accurateUrl.searchParams.set('fields',      'id,customerNo,name,mobilePhone,billAddress,charField3,charField4,defaultSalesman')
+    accurateUrl.searchParams.set('sp.page',     String(page))
+    accurateUrl.searchParams.set('sp.pageSize', String(pageSize))
 
-    // Deduplicate customers from Accurate by accurateId
-    // (some databases may have duplicate customerNo)
+    const res = await fetch(accurateUrl.toString(), { headers, cache: 'no-store' })
+    if (!res.ok) {
+      const text = await res.text()
+      throw new Error(`Accurate API error (HTTP ${res.status}): ${text.slice(0, 200)}`)
+    }
+
+    const data = await res.json()
+    if (!data.s) throw new Error(`Accurate API: ${JSON.stringify(data).slice(0, 200)}`)
+
+    const customers: any[] = data.d ?? []
+    const totalRows: number = data.sp?.rowCount ?? customers.length
+    const totalPages = Math.ceil(totalRows / pageSize)
+
+    // ── Batch upsert ke DB ─────────────────────────────────────────────
+    let inserted = 0, updated = 0, skipped = 0
     const seen = new Set<string>()
 
     for (const c of customers) {
@@ -40,14 +73,10 @@ export async function POST() {
       const name       = String(c.name       ?? '').trim()
       if (!name) { skipped++; continue }
 
-      // Use customerNo if available, otherwise fall back to Accurate's internal id
       const accurateId = customerNo || String(c.id)
-
-      // Skip if already processed in this batch (duplicate customerNo in Accurate)
       if (seen.has(accurateId)) { skipped++; continue }
       seen.add(accurateId)
 
-      // Parse lat/lng from charField3/charField4 — stored as string in Accurate
       const latRaw = String(c.charField4 ?? '').trim()
       const lngRaw = String(c.charField3 ?? '').trim()
       const latitude  = latRaw && latRaw !== '0' ? parseFloat(latRaw)  : null
@@ -55,34 +84,43 @@ export async function POST() {
 
       const storeData = {
         name,
-        code:             customerNo || null,
-        address:          c.billAddress?.street || c.billAddress?.address || null,
-        phone:            c.mobilePhone || null,
-        latitude:         latitude  && !isNaN(latitude)  ? latitude  : null,
-        longitude:        longitude && !isNaN(longitude) ? longitude : null,
-        defaultSalesman:  c.defaultSalesman?.name || null,
+        code:            customerNo || null,
+        address:         c.billAddress?.street || c.billAddress?.address || null,
+        phone:           c.mobilePhone || null,
+        latitude:        latitude  && !isNaN(latitude)  ? latitude  : null,
+        longitude:       longitude && !isNaN(longitude) ? longitude : null,
+        defaultSalesman: c.defaultSalesman?.name || null,
       }
 
-      // Use upsert to safely handle both insert and update without race conditions
       const result = await prisma.store.upsert({
         where:  { accurateId },
         update: storeData,
         create: { ...storeData, accurateId },
       })
 
-      // Determine if it was a new record (createdAt ≈ updatedAt means just created)
       const isNew = Math.abs(result.createdAt.getTime() - result.updatedAt.getTime()) < 1000
       if (isNew) inserted++
       else updated++
     }
 
+    const done = page >= totalPages || customers.length < pageSize
+
     return NextResponse.json({
-      success: true,
-      message: `Sinkronisasi selesai: ${inserted} toko baru, ${updated} diperbarui, ${skipped} dilewati.`,
-      total: customers.length, inserted, updated, skipped,
+      done,
+      page,
+      totalPages,
+      processedPage: customers.length,
+      total: totalRows,
+      inserted,
+      updated,
+      skipped,
+      ...(done ? { message: `Halaman ${page}/${totalPages} — sinkronisasi selesai.` } : {}),
     })
+
   } catch (err: any) {
     console.error('[accurate-sync-customers] error:', err)
-    return NextResponse.json({ error: 'Gagal sinkronisasi customer dari Accurate: ' + (err.message ?? 'Unknown error') }, { status: 500 })
+    return NextResponse.json({
+      error: 'Gagal sinkronisasi: ' + (err.message ?? 'Unknown error'),
+    }, { status: 500 })
   }
 }
