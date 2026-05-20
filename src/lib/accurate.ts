@@ -260,6 +260,7 @@ export type AccurateCustomer = {
   } | null
   charField3?: string  // longitude
   charField4?: string  // latitude
+  defaultSalesman?: { name?: string } | null
 }
 
 export async function fetchAccurateCustomers(): Promise<AccurateCustomer[]> {
@@ -270,7 +271,7 @@ export async function fetchAccurateCustomers(): Promise<AccurateCustomer[]> {
 
   while (true) {
     const url = new URL(`${host}/accurate/api/customer/list.do`)
-    url.searchParams.set('fields', 'id,customerNo,name,mobilePhone,billAddress,charField3,charField4')
+    url.searchParams.set('fields', 'id,customerNo,name,mobilePhone,billAddress,charField3,charField4,defaultSalesman')
     url.searchParams.set('sp.page',     String(page))
     url.searchParams.set('sp.pageSize', String(pageSize))
 

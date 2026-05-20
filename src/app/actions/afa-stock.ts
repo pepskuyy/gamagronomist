@@ -22,8 +22,8 @@ export async function submitAfaStockRequest(formData: FormData) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (!['AFA', 'PLANTATION'].includes(session?.role as string)) {
-    return { error: 'Hanya AFA yang dapat mengajukan permintaan stok masuk.' }
+  if (!['AFA', 'PLANTATION', 'BD'].includes(session?.role as string)) {
+    return { error: 'Hanya AFA/BD/PLANTATION yang dapat mengajukan permintaan stok masuk.' }
   }
 
   const notes = (formData.get('notes') as string)?.trim() || '-'

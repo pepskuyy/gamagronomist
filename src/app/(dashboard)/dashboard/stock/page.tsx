@@ -82,10 +82,10 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   let afaStockRequests: any[] = []
   let hasMoreAfaReqs = false
 
-  if (['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM'].includes(session.role)) {
+  if (['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role)) {
     let afaStockWhere: any = { commodity: 'AFA_STOCK_IN' }
     
-    if (['AFA', 'PLANTATION'].includes(session.role)) {
+    if (['AFA', 'PLANTATION', 'BD'].includes(session.role)) {
       afaStockWhere.foId = session.userId
     } else if (session.role === 'SPV' && session.areaId) {
       afaStockWhere.fo = { areaId: session.areaId }
@@ -166,6 +166,11 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
               {['AFA', 'PLANTATION'].includes(session.role) && (
                 <Link href="/dashboard/stock/in">
                   <button className="btn btn-primary">➕ Pengajuan Stok</button>
+                </Link>
+              )}
+              {session.role === 'BD' && (
+                <Link href="/dashboard/stock/bd-request">
+                  <button className="btn btn-primary" style={{ background: '#7c3aed', borderColor: '#7c3aed' }}>➕ Pengajuan Stok Sampel</button>
                 </Link>
               )}
               {['FO', 'INTERN'].includes(session.role) && (
@@ -266,11 +271,11 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
         </div>
       )}
 
-      {/* 3. PENGAJUAN STOK AFA */}
-      {['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM'].includes(session.role) && (
+      {/* 3. PENGAJUAN STOK AFA / BD */}
+      {['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role) && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>📨 Pengajuan Stok {['AFA', 'PLANTATION'].includes(session.role) ? 'Saya' : session.role === 'SPV' ? 'dari AFA/PLANTATION' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>📨 Pengajuan Stok {['AFA', 'PLANTATION', 'BD'].includes(session.role) ? 'Saya' : session.role === 'SPV' ? 'dari Tim' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
           </div>
           <TableFilter prefix="a" showDateRange={true} />
 
