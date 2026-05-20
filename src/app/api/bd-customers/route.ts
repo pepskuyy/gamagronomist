@@ -1,20 +1,15 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { fetchAccurateCustomers } from '@/lib/accurate'
+import prisma from '@/lib/prisma'
 
 export const dynamic = 'force-dynamic'
 
 /**
- * In-memory cache agar tidak perlu fetch ulang 2861 pelanggan setiap request.
- * Cache berlaku selama 10 menit.
- */
-let cachedCustomers: any[] | null = null
-let cacheExpiry = 0
-
-/**
  * GET /api/bd-customers
- * Mengambil daftar customer dari Accurate yang ditangani oleh "Busdev"
+ * Mengambil daftar kios/pelanggan dari DB lokal (Store) yang memiliki defaultSalesman "Busdev".
+ * Jauh lebih cepat karena tidak perlu hit Accurate API.
+ * Data bersumber dari tabel Store yang di-sync dari Accurate via /api/accurate-sync-customers.
  */
 export async function GET() {
   try {
@@ -26,23 +21,33 @@ export async function GET() {
       return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 })
     }
 
-    // Gunakan cache jika masih valid (10 menit)
-    const now = Date.now()
-    if (!cachedCustomers || now > cacheExpiry) {
-      const allCustomers = await fetchAccurateCustomers()
-      cachedCustomers = allCustomers
-      cacheExpiry = now + 10 * 60 * 1000
-    }
-
-    const customers = cachedCustomers
-
-    // Filter by salesperson "Busdev" (case-insensitive)
-    const bdCustomers = customers.filter((c: any) => {
-      const spName = c.defaultSalesman?.name?.toLowerCase() || ''
-      return spName.includes('busdev')
+    // Ambil dari DB lokal — filter by defaultSalesman yang mengandung "busdev"
+    const stores = await prisma.store.findMany({
+      where: {
+        defaultSalesman: {
+          contains: 'busdev',
+          mode: 'insensitive',
+        }
+      },
+      select: {
+        id: true,
+        accurateId: true,
+        name: true,
+        code: true,
+        defaultSalesman: true,
+      },
+      orderBy: { name: 'asc' },
     })
 
-    return NextResponse.json({ customers: bdCustomers, total: bdCustomers.length })
+    // Map ke format yang sama dengan before agar frontend tidak perlu ubah
+    const customers = stores.map(s => ({
+      id: s.accurateId ?? s.id,  // pakai accurateId (= customerNo) sebagai value
+      customerNo: s.code,
+      name: s.name,
+      defaultSalesman: s.defaultSalesman ? { name: s.defaultSalesman } : null,
+    }))
+
+    return NextResponse.json({ customers, total: customers.length, source: 'local_db' })
   } catch (err: any) {
     console.error('[bd-customers] error:', err)
     return NextResponse.json({ error: 'Gagal mengambil data customer BD: ' + (err.message ?? 'Unknown error') }, { status: 500 })

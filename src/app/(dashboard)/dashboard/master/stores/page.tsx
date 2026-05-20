@@ -15,6 +15,7 @@ type Store = {
   longitude: number | null
   phone: string | null
   notes: string | null
+  defaultSalesman: string | null
 }
 
 const overlayStyle: React.CSSProperties = {
@@ -266,10 +267,11 @@ export default function StoresMasterPage() {
                   <input type="checkbox" checked={filteredStores.length > 0 && selectedStores.size === filteredStores.length} onChange={e => toggleAll(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
                 </th>
                 <th style={{ ...thStyle, width: '14%' }}>Kode</th>
-                <th style={{ ...thStyle, width: '28%' }}>Nama Toko</th>
-                <th style={{ ...thStyle, width: '25%' }}>Alamat</th>
-                <th style={{ ...thStyle, width: '16%' }}>GPS</th>
-                <th style={{ ...thStyle, width: '12%' }}>Telepon</th>
+                <th style={{ ...thStyle, width: '25%' }}>Nama Toko</th>
+                <th style={{ ...thStyle, width: '20%' }}>Alamat</th>
+                <th style={{ ...thStyle, width: '12%' }}>GPS</th>
+                <th style={{ ...thStyle, width: '12%' }}>Salesman</th>
+                <th style={{ ...thStyle, width: '10%' }}>Telepon</th>
                 <th style={{ ...thStyle, width: '10%', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
@@ -294,6 +296,13 @@ export default function StoresMasterPage() {
                       <span style={{ color: '#f59e0b', fontSize: '0.78rem' }}>⚠️ Belum ada</span>
                     )}
                   </td>
+                  <td style={{ ...tdStyle, fontSize: '0.8rem' }}>
+                    {s.defaultSalesman ? (
+                      <span style={{ padding: '0.15rem 0.5rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700, background: s.defaultSalesman.toLowerCase().includes('busdev') ? '#ede9fe' : '#f1f5f9', color: s.defaultSalesman.toLowerCase().includes('busdev') ? '#6d28d9' : '#475569' }}>
+                        {s.defaultSalesman}
+                      </span>
+                    ) : '—'}
+                  </td>
                   <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '0.82rem' }}>{s.phone || '—'}</td>
                   <td style={{ ...tdStyle, textAlign: 'center', whiteSpace: 'nowrap' }}>
                     <button onClick={() => openEdit(s)} className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', marginRight: '0.4rem' }}>✏️ Edit</button>
@@ -303,7 +312,7 @@ export default function StoresMasterPage() {
               ))}
               {filteredStores.length === 0 && (
                 <tr>
-                  <td colSpan={7} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                  <td colSpan={8} style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     Belum ada data toko atau tidak ditemukan.
                   </td>
                 </tr>
