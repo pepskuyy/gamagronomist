@@ -74,13 +74,13 @@ export default function DashboardShell({ session, children }: SidebarProps) {
 
   const navItems = [
     { href: '/dashboard',          label: 'Dashboard',          icon: Icons.dashboard, show: true },
-    { href: '/dashboard/master',   label: 'Master Data',        icon: Icons.master,    show: session?.role === 'ADMIN' || session?.role === 'SPV' },
-    { href: '/dashboard/stock/bd-request', label: 'Pengajuan Stok', icon: Icons.stock, show: session?.role === 'BD' },
-    { href: '/dashboard/stock',    label: ['FAM','WHM'].includes(session?.role) ? 'Approval Stok' : session?.role === 'BD' ? 'Riwayat Pengajuan' : 'Manajemen Stok', icon: Icons.stock, show: true },
-    { href: '/dashboard/reports',  label: 'Laporan Aktivitas',  icon: Icons.reports,   show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
-    { href: '/dashboard/opname',   label: 'Stock Opname',       icon: Icons.opname,    show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
-    { href: '/dashboard/so',       label: 'Tracking SO',        icon: Icons.so,        show: ['SPV', 'ADMIN', 'BD', 'PLANTATION'].includes(session?.role) },
-    { href: '/dashboard/settings', label: 'Pengaturan Akun',    icon: Icons.settings,  show: true },
+    { href: '/dashboard/master',        label: 'Master Data',     icon: Icons.master,   show: session?.role === 'ADMIN' || session?.role === 'SPV' },
+    { href: '/dashboard/stock/bd-request', label: 'Stok BD',      icon: Icons.stock,    show: session?.role === 'BD' },
+    { href: '/dashboard/stock',          label: ['FAM','WHM'].includes(session?.role) ? 'Approval Stok' : 'Manajemen Stok', icon: Icons.stock, show: !['BD'].includes(session?.role) },
+    { href: '/dashboard/reports',        label: 'Laporan Aktivitas', icon: Icons.reports, show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
+    { href: '/dashboard/opname',         label: 'Stock Opname',   icon: Icons.opname,   show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
+    { href: '/dashboard/so',             label: 'Tracking SO',    icon: Icons.so,       show: ['SPV', 'ADMIN', 'BD', 'PLANTATION'].includes(session?.role) },
+    { href: '/dashboard/settings',       label: 'Pengaturan Akun', icon: Icons.settings, show: true },
   ]
 
   const isActive = (href: string) =>

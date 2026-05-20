@@ -6,6 +6,7 @@ import { fetchAccurateCustomers } from '@/lib/accurate'
 /**
  * GET /api/bd-customers
  * Mengambil daftar customer dari Accurate yang ditangani oleh "Busdev"
+ * Jika tidak ada yang match, kembalikan semua customer sebagai fallback agar form tetap bisa dipakai
  */
 export async function GET() {
   try {
@@ -13,7 +14,7 @@ export async function GET() {
     const sessionToken = cookieStore.get('session')?.value
     const session = await decrypt(sessionToken as string)
 
-    if (session?.role !== 'BD' && session?.role !== 'ADMIN') {
+    if (!session?.role || !['BD', 'ADMIN', 'SPV'].includes(session.role as string)) {
       return NextResponse.json({ error: 'Akses ditolak.' }, { status: 403 })
     }
 
@@ -24,6 +25,17 @@ export async function GET() {
       const spName = c.defaultSalesman?.name?.toLowerCase() || ''
       return spName.includes('busdev')
     })
+
+    // Jika tidak ada yang match defaultSalesman (mungkin field tidak tersedia di Accurate config),
+    // kembalikan semua customer dan log peringatan
+    if (bdCustomers.length === 0 && customers.length > 0) {
+      console.warn('[bd-customers] Tidak ada pelanggan dengan defaultSalesman "Busdev". Total customer:', customers.length)
+      console.warn('[bd-customers] Sample defaultSalesman values:', 
+        customers.slice(0, 5).map(c => ({ name: c.name, salesman: c.defaultSalesman }))
+      )
+      // Kembalikan semua customer sebagai fallback sementara
+      return NextResponse.json({ customers, fallback: true, message: 'Filter Busdev tidak menghasilkan data — menampilkan semua pelanggan' })
+    }
 
     return NextResponse.json({ customers: bdCustomers })
   } catch (err: any) {

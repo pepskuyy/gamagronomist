@@ -15,19 +15,21 @@ export async function GET() {
   try {
     const cookieStore = await cookies()
     const session = await decrypt(cookieStore.get('session')?.value as string)
-    if (!session?.userId || !['AFA', 'PLANTATION', 'FO', 'INTERN'].includes(session.role as string)) {
+    if (!session?.userId || !['AFA', 'PLANTATION', 'FO', 'INTERN', 'BD'].includes(session.role as string)) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
-    // 1. Find the AFA's area
+    // 1. Find the user's area (for AFA/PLANTATION scoping)
     const afaUser = await prisma.user.findUnique({
       where: { id: session.userId },
       select: { areaId: true }
     })
 
-    // 2. Find SPV(s) in the same area (including global SPVs with areaId = null)
+    // 2. Find SPV(s):
+    //    - BD: semua SPV aktif (aggregasi dari semua gudang sampel)
+    //    - AFA/PLANTATION/FO/INTERN: hanya SPV di area yang sama
     const spvWhere: any = { role: 'SPV', isActive: true }
-    if (afaUser?.areaId) {
+    if (session.role !== 'BD' && afaUser?.areaId) {
       spvWhere.OR = [
         { areaId: afaUser.areaId },
         { areaId: null }
