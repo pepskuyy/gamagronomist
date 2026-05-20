@@ -72,13 +72,21 @@ export async function submitAfaStockRequest(formData: FormData) {
         ]
       }
       const spvs = await prisma.user.findMany({ where: spvWhere, select: { id: true } })
-      
+
+      const isBD = session.role === 'BD'
+      const notifTitle = isBD
+        ? '📩 Pengajuan Stok Baru (BD)'
+        : '📩 Pengajuan Stok Baru (AFA)'
+      const notifMsg = isBD
+        ? `${afaUser?.name || 'BD'} (Busdev) telah mengajukan permintaan sampel dari gudang SPV.`
+        : `${afaUser?.name || 'AFA'} telah mengajukan permintaan restock gudang AFA.`
+
       for (const spv of spvs) {
         await prisma.notification.create({
           data: {
             userId: spv.id,
-            title: '📩 Pengajuan Stok Baru (AFA)',
-            message: `${afaUser?.name || 'AFA'} telah mengajukan permintaan restock gudang AFA.`,
+            title: notifTitle,
+            message: notifMsg,
             link: `/dashboard/stock`
           }
         })
@@ -87,11 +95,12 @@ export async function submitAfaStockRequest(formData: FormData) {
       // Send WA to SPV numbers in SystemConfig
       const spvPhones = await getRolePhones('wa_spv')
       if (spvPhones.length > 0) {
-        const msg = await getMsgTemplate('msg_afa_submit', { nama_afa: afaUser?.name || 'AFA' })
+        const msgKey = isBD ? 'msg_afa_submit' : 'msg_afa_submit'
+        const msg = await getMsgTemplate(msgKey, { nama_afa: afaUser?.name || (isBD ? 'BD' : 'AFA') })
         await sendWhatsAppBulk(spvPhones, msg)
       }
 
-      console.log(`[AFA Stock] Notified ${spvs.length} SPV(s) for request ${req.id}`)
+      console.log(`[${isBD ? 'BD' : 'AFA'} Stock] Notified ${spvs.length} SPV(s) for request ${req.id}`)
     } catch (notifErr) {
       console.warn('[AFA Stock] Failed to send SPV notification:', notifErr)
     }
@@ -209,6 +218,9 @@ export async function approveAfaStockRequest(requestId: string) {
         // Deduct each product from sample ledger (use remapped productId for legacy requests)
         for (const detail of req.details) {
           const effectiveProductId = productIdRemap.get(detail.productId) ?? detail.productId
+          const requesterLabel = req.fo?.role === 'BD'
+            ? `BD ${req.fo?.name || ''}`
+            : `AFA ${req.fo?.name || ''}`
           await tx.sampleLedger.create({
             data: {
               userId: spvId,
@@ -216,11 +228,10 @@ export async function approveAfaStockRequest(requestId: string) {
               quantity: -detail.qtyRequested,
               transactionType: 'SAMPLE_OUT',
               referenceId: requestId,
-              notes: `Sampel ke AFA ${req.fo?.name || ''} (req ${requestId.slice(0, 8).toUpperCase()})`,
+              notes: `Sampel ke ${requesterLabel} (req ${requestId.slice(0, 8).toUpperCase()})`,
             }
           })
-          // Credit to AFA ledger in GRAMASI units (same as MAIN flow)
-          // AFA receives kemasan from SPV, but ledger tracks in gramasi for precise FO deduction
+          // Credit to requester ledger in GRAMASI units
           const prodInfo = productInfoMap.get(effectiveProductId)
           const qtyKemasan = detail.qtyApproved ?? detail.qtyRequested
           const qtyGramasi = prodInfo?.gramasiPerUnit && prodInfo.gramasiPerUnit > 0
@@ -231,7 +242,7 @@ export async function approveAfaStockRequest(requestId: string) {
               userId: req.foId,
               productId: effectiveProductId,
               transactionType: 'RECEIVE_FROM_AFA',
-              quantity: qtyGramasi,  // in gramasi (ml/gr)
+              quantity: qtyGramasi,
               referenceId: requestId,
               notes: `Terima sampel dari SPV (${qtyKemasan} ${prodInfo?.unit ?? ''}${prodInfo?.gramasiPerUnit ? ` = ${qtyGramasi}${prodInfo.unitGramasi ?? ''}` : ''})`,
             }
@@ -245,13 +256,18 @@ export async function approveAfaStockRequest(requestId: string) {
         })
       })
 
-      // Notify AFA — sampel siap
+      // Notify requester (BD or AFA)
+      const isBDReq = req.fo?.role === 'BD'
       await prisma.notification.create({
         data: {
           userId: req.foId,
-          title: '🧪 Sampel Disetujui SPV — Stok Masuk',
-          message: `Pengajuan sampel Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.`,
-          link: `/dashboard/stock`,
+          title: isBDReq
+            ? '📦 Pengajuan Stok BD Disetujui — Sampel Siap'
+            : '🧪 Sampel Disetujui SPV — Stok Masuk',
+          message: isBDReq
+            ? `Pengajuan sampel Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui SPV. Produk sampel siap untuk kegiatan Busdev Anda.`
+            : `Pengajuan sampel Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.`,
+          link: isBDReq ? `/dashboard/stock/bd-request` : `/dashboard/stock`,
         }
       })
 
