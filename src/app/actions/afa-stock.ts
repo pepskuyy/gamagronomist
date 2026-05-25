@@ -434,14 +434,20 @@ export async function approveWhmStockRequest(requestId: string) {
         .filter((x): x is string => !!x)
 
       if (itemCodes.length > 0) {
+        // ── Fetch harga CJ R2 per item sebelum buat invoice ────────────
+        // Accurate tidak otomatis apply priceLevelName via API — harga harus dikirim eksplisit
+        const priceMap = await fetchItemPrices(itemCodes, 'CJ R2')
+        console.log(`[WHM Approve] Price lookup CJ R2:`, Object.fromEntries(priceMap))
+
         const invoiceItems = req.details
           .map(d => {
             const prod = productMap.get(d.productId)
             if (!prod?.accurateId) return null
+            const unitPrice = priceMap.get(prod.accurateId) ?? 0
             return {
               itemNo:    prod.accurateId,
               quantity:  d.qtyApproved ?? d.qtyRequested,
-              // unitPrice is intentionally omitted to let Accurate use the category price
+              unitPrice: unitPrice > 0 ? unitPrice : undefined, // kirim eksplisit jika tersedia
             }
           })
           .filter((x): x is NonNullable<typeof x> => x !== null)
@@ -775,14 +781,18 @@ export async function regenerateInvoice(requestId: string) {
       return { error: 'Tidak ada produk dengan Accurate ID yang terhubung. Pastikan produk sudah dikonfigurasi di master data.' }
     }
 
+    // Fetch harga CJ R2 eksplisit untuk regenerate
+    const regenPriceMap = await fetchItemPrices(itemCodes, 'CJ R2')
+
     const invoiceItems = req.details
       .map(d => {
         const prod = productMap2.get(d.productId)
         if (!prod?.accurateId) return null
+        const unitPrice = regenPriceMap.get(prod.accurateId) ?? 0
         return {
-          itemNo: prod.accurateId,
-          quantity: d.qtyApproved ?? d.qtyRequested,
-          // unitPrice is intentionally omitted to let Accurate use the category price
+          itemNo:    prod.accurateId,
+          quantity:  d.qtyApproved ?? d.qtyRequested,
+          unitPrice: unitPrice > 0 ? unitPrice : undefined,
         }
       })
       .filter((x): x is NonNullable<typeof x> => x !== null)
