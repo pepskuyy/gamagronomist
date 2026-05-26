@@ -337,18 +337,23 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
                       <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.82rem' }}>
                         {req.details?.map((d: any) => {
-                          // requestUnit menyimpan satuan kemasan (PCS, Btl, dll)
-                          // Jika requestUnit lama salah (berisi ml/g), fallback ke product.unit
-                          const gramasiUnits = ['ml', 'g', 'kg', 'liter', 'cc', 'gr']
-                          const storedUnit = d.requestUnit || d.product?.unit || 'PCS'
-                          const unit = gramasiUnits.includes(storedUnit?.toLowerCase()) ? (d.product?.unit || storedUnit) : storedUnit
                           const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
-                          // Konversi ke gramasi jika ada
                           const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
-                          const gramasiTotal = hasGramasi ? (qty * d.product.gramasiPerUnit).toLocaleString('id-ID') + d.product.unitGramasi : null
-                          const label = `${d.product?.name}: ${qty} ${unit}${gramasiTotal ? ` (${gramasiTotal})` : ''}${
-                            d.qtyApproved != null ? ` [diminta: ${d.qtyRequested}]` : ''
-                          }`
+                          // FO→AFA: qty disimpan dalam gramasi (ml/gr), tampilkan langsung
+                          // Konversi balik ke kemasan hanya untuk info tambahan
+                          let label: string
+                          if (hasGramasi) {
+                            const unitGramasi = d.product.unitGramasi
+                            const kemasanQty = +(qty / d.product.gramasiPerUnit).toFixed(2)
+                            const kemasanStr = Number.isInteger(kemasanQty) ? kemasanQty.toString() : kemasanQty.toString()
+                            label = `${d.product?.name}: ${qty.toLocaleString('id-ID')} ${unitGramasi} (${kemasanStr} ${d.product?.unit})`
+                          } else {
+                            // Produk tanpa gramasi: qty = kemasan
+                            label = `${d.product?.name}: ${qty.toLocaleString('id-ID')} ${d.product?.unit || 'PCS'}`
+                          }
+                          if (d.qtyApproved != null && d.qtyApproved !== d.qtyRequested) {
+                            label += ` [diminta: ${d.qtyRequested}]`
+                          }
                           return label
                         }).join(', ')}
                       </td>
