@@ -151,13 +151,28 @@ export default function AfaStockRequestTable({
       doc.text(`Disetujui Oleh : ${req.afa?.name || 'SPV'}`, 14, 50)
       doc.text(`Keterangan    : ${req.plan || '-'}`, 14, 56)
 
-      const tableBody = req.details.map((d, index) => [
-        index + 1,
-        d.product.name,
-        d.qtyRequested,
-        d.qtyApproved || d.qtyRequested,
-        d.product.unitGramasi || d.product.unit
-      ])
+      // AFA→SPV: qtyRequested disimpan dalam satuan kemasan (Btl/PCS/Box)
+      // Tampilkan kemasan + gramasi dalam kurung untuk referensi
+      const tableBody = req.details.map((d, index) => {
+        const qtyReq = d.qtyRequested
+        const qtyApp = d.qtyApproved || d.qtyRequested
+        const unitKemasan = d.product.unit  // Btl, PCS, Box, dll
+        const hasGramasi = d.product.gramasiPerUnit && d.product.unitGramasi
+        // Tambahkan info gramasi dalam kurung jika tersedia
+        const qtyReqStr = hasGramasi
+          ? `${qtyReq} (${(qtyReq * d.product.gramasiPerUnit!).toLocaleString('id-ID')}${d.product.unitGramasi})`
+          : String(qtyReq)
+        const qtyAppStr = hasGramasi
+          ? `${qtyApp} (${(qtyApp * d.product.gramasiPerUnit!).toLocaleString('id-ID')}${d.product.unitGramasi})`
+          : String(qtyApp)
+        return [
+          index + 1,
+          d.product.name,
+          qtyReqStr,
+          qtyAppStr,
+          unitKemasan,
+        ]
+      })
 
       autoTable(doc, {
         startY: 65,
@@ -333,7 +348,13 @@ export default function AfaStockRequestTable({
                         </button>
                       )}
 
-                      {req.status === 'APPROVED' && (
+                      {/* Tombol Download PDF:
+                           - APPROVED (semua role): selalu tampil
+                           - APPROVED_WHM (gudang Utama): tampil agar WHM & AFA bisa cetak sebelum final
+                      */}
+                      {(req.status === 'APPROVED' ||
+                        (req.status === 'APPROVED_WHM' && req.warehouseSource !== 'SAMPLE')
+                      ) && (
                         <>
                           <button
                             onClick={() => handleDownloadPdf(req)}
