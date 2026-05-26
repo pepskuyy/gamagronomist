@@ -27,41 +27,53 @@ export async function submitStockOpname(formData: FormData) {
   if (counts.length === 0) return { error: 'Minimal 1 produk di-opname' }
 
   try {
+    // 1. Hitung saldo stok sistem saat ini (luar transaksi agar tidak timeout)
     const currentStocks = await getStockBalance(session.userId)
     
-    await prisma.$transaction(async (tx) => {
-      // 1. Create Stock Opname Header (Status SUBMITTED by default as per schema)
-      const opname = await tx.stockOpname.create({
-        data: {
-          userId: session.userId,
-          status: 'SUBMITTED'
-        }
-      })
+    // 2. Hitung selisih & validasi SEBELUM menulis ke DB
+    const details: {
+      productId: string
+      systemStock: number
+      physicalStock: number
+      variance: number
+      notes: string
+    }[] = []
 
-      // 2. Calculate Variance & Save Detail (TIDAK adjust Ledger dulu)
-      for (const count of counts) {
-        const systemStockObj = currentStocks.find(s => s.product.id === count.productId)
-        const systemStock = systemStockObj ? systemStockObj.quantity : 0
-        const physicalStock = Number(count.physicalQty)
-        const variance = physicalStock - systemStock
+    for (const count of counts) {
+      const systemStockObj = currentStocks.find(s => s.product.id === count.productId)
+      const systemStock    = systemStockObj ? systemStockObj.quantity : 0
+      const physicalStock  = Number(count.physicalQty)
+      const variance       = physicalStock - systemStock
 
-        // Jika selisih dan tidak ada notes, lemparkan error
-        if (variance !== 0 && (!count.notes || count.notes.trim() === '')) {
-            throw new Error(`Keterangan wajib diisi untuk selisih pada ID Produk ${count.productId}`)
-        }
-
-        // Simpan Record Detail
-        await tx.opnameDetail.create({
-          data: {
-            opnameId: opname.id,
-            productId: count.productId,
-            systemStock,
-            physicalStock,
-            variance,
-            notes: count.notes || (variance !== 0 ? 'Terdapat selisih' : 'Sesuai')
-          }
-        })
+      // Jika ada selisih tapi tidak ada keterangan, tolak sebelum masuk DB
+      if (variance !== 0 && (!count.notes || count.notes.trim() === '')) {
+        throw new Error(`Keterangan wajib diisi untuk selisih pada ID Produk ${count.productId}`)
       }
+
+      details.push({
+        productId:    count.productId,
+        systemStock,
+        physicalStock,
+        variance,
+        notes: count.notes?.trim() || (variance !== 0 ? 'Terdapat selisih' : 'Sesuai'),
+      })
+    }
+
+    // 3. Buat header opname + semua detail dalam satu batch (tidak pakai interactive tx)
+    const opname = await prisma.stockOpname.create({
+      data: { userId: session.userId, status: 'SUBMITTED' }
+    })
+
+    // createMany jauh lebih cepat dan tidak perlu interactive transaction
+    await prisma.opnameDetail.createMany({
+      data: details.map(d => ({
+        opnameId:     opname.id,
+        productId:    d.productId,
+        systemStock:  d.systemStock,
+        physicalStock: d.physicalStock,
+        variance:     d.variance,
+        notes:        d.notes,
+      })),
     })
 
     return { success: true }
