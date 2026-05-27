@@ -232,10 +232,19 @@ export async function approveAfaStockRequest(requestId: string) {
             }
           })
           // Credit to requester ledger in GRAMASI units
+          // prodInfo comes from sampleLedger (SMPL- product) — fallback to detail.product if not found
           const prodInfo = productInfoMap.get(effectiveProductId)
           const qtyKemasan = detail.qtyApproved ?? detail.qtyRequested
-          const qtyGramasi = prodInfo?.gramasiPerUnit && prodInfo.gramasiPerUnit > 0
-            ? qtyKemasan * prodInfo.gramasiPerUnit
+          // Prefer prodInfo.gramasiPerUnit (from SMPL- product), fallback to detail.product.gramasiPerUnit
+          const gramasiPerUnit = prodInfo?.gramasiPerUnit
+            ?? (detail as any).product?.gramasiPerUnit
+            ?? null
+          const unitGramasi = prodInfo?.unitGramasi
+            ?? (detail as any).product?.unitGramasi
+            ?? null
+          const unit = prodInfo?.unit ?? (detail as any).product?.unit ?? ''
+          const qtyGramasi = gramasiPerUnit && gramasiPerUnit > 0
+            ? qtyKemasan * gramasiPerUnit
             : qtyKemasan
           await tx.ledger.create({
             data: {
@@ -244,7 +253,7 @@ export async function approveAfaStockRequest(requestId: string) {
               transactionType: 'RECEIVE_FROM_AFA',
               quantity: qtyGramasi,
               referenceId: requestId,
-              notes: `Terima sampel dari SPV (${qtyKemasan} ${prodInfo?.unit ?? ''}${prodInfo?.gramasiPerUnit ? ` = ${qtyGramasi}${prodInfo.unitGramasi ?? ''}` : ''})`,
+              notes: `Terima sampel dari SPV (${qtyKemasan} ${unit}${gramasiPerUnit ? ` = ${qtyGramasi}${unitGramasi ?? ''}` : ''})`,
             }
           })
         }
@@ -574,7 +583,13 @@ export async function receiveSpvStockRequest(requestId: string) {
 
     const ledgerData = req.details.map(d => {
       const prod = productMap.get(d.productId)
-      const qtyGramasi = d.qtyApproved ?? d.qtyRequested
+      // qtyApproved/qtyRequested disimpan dalam satuan KEMASAN (PCS/Btl/Box)
+      // Harus dikonversi ke gramasi sebelum masuk Ledger AFA
+      const qtyKemasan = d.qtyApproved ?? d.qtyRequested
+      const qtyGramasi = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
+        ? qtyKemasan * prod.gramasiPerUnit
+        : qtyKemasan
+      console.log(`[SPV Receive] ${prod?.unit ?? 'unit'}: ${qtyKemasan} kemasan × ${prod?.gramasiPerUnit ?? 1} = ${qtyGramasi} ${prod?.unitGramasi ?? prod?.unit ?? ''}`)
       return {
         userId: req.foId,
         productId: d.productId,
@@ -582,7 +597,7 @@ export async function receiveSpvStockRequest(requestId: string) {
         quantity: qtyGramasi,
         referenceId: req.id,
         snapshotAreaId: afaUser?.areaId ?? null,
-        notes: `Penerimaan Stok oleh SPV (${qtyGramasi} ${prod?.unitGramasi || prod?.unit || ''}). Ref: ${req.plan}`,
+        notes: `Penerimaan Stok oleh SPV (${qtyKemasan} ${prod?.unit || ''} = ${qtyGramasi} ${prod?.unitGramasi || prod?.unit || ''}). Ref: ${req.plan}`,
       }
     })
 
