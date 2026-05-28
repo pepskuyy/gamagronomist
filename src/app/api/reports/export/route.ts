@@ -73,23 +73,73 @@ export async function GET(req: Request) {
         include: { user: { select: { name: true, role: true } } },
         orderBy: { createdAt: 'desc' }
       })
-      data = q.map(i => ({
-        'Tanggal': new Date(i.createdAt).toLocaleString('id-ID'),
-        'Pelapor': i.user.name,
-        'Role': i.user.role,
-        'Nama Petani': i.farmerName,
-        'Umur': i.age || '-',
-        'No. HP': i.phone || '-',
-        'Area/Kabupaten': i.district || '-',
-        'Alamat Lengkap': i.address || '-',
-        'Komoditas': i.commodity || '-',
-        'Kendala': i.constraints || '-',
-        'Jenis OPT': i.optTypes || '-',
-        'Detail OPT': i.optDetails || '-',
-        'Produk Biasa Dipakai': i.usedProducts || '-',
-        'Lokasi Beli': i.buyLocation || '-',
-        'Referensi': i.references || '-'
-      }))
+
+      // Helper: safely parse JSON array and return up to N elements
+      const parseArr = (raw: string | null | undefined, n: number): string[] => {
+        if (!raw) return Array(n).fill('-')
+        try {
+          const arr = JSON.parse(raw)
+          if (!Array.isArray(arr)) return Array(n).fill('-')
+          const result = arr.map((v: any) => String(v).trim()).filter(Boolean)
+          // Pad with '-' if fewer items than n
+          while (result.length < n) result.push('-')
+          return result.slice(0, n)
+        } catch {
+          // Fallback: treat as comma-separated plain text
+          const result = raw.split(',').map(s => s.trim()).filter(Boolean)
+          while (result.length < n) result.push('-')
+          return result.slice(0, n)
+        }
+      }
+
+      // Helper: parse Desa and Kecamatan from address string (format "Desa/Kel. X, Kec. Y, ...")
+      const parseDesa = (address: string | null | undefined): string => {
+        if (!address) return '-'
+        const m = address.match(/Desa\/Kel\.\s+([^,]+)/i)
+        return m ? m[1].trim() : '-'
+      }
+      const parseKec = (address: string | null | undefined): string => {
+        if (!address) return '-'
+        const m = address.match(/Kec\.\s+([^,]+)/i)
+        return m ? m[1].trim() : '-'
+      }
+
+      // Helper: convert luas lahan to Ha
+      const toLuasHa = (val: number | null | undefined, unit: string | null | undefined): string => {
+        if (val === null || val === undefined) return '-'
+        if (unit === 'm2') return (val / 10000).toFixed(4)
+        return String(val)
+      }
+
+      data = q.map(i => {
+        const kendala = parseArr(i.constraints, 2)
+        const opt     = parseArr(i.optDetails, 3)
+        const photos  = parseArr(i.photos, 3)
+
+        return {
+          'Tanggal':          new Date(i.createdAt).toLocaleString('id-ID'),
+          'Pelapor':          i.user.name,
+          'Nama Petani':      i.farmerName,
+          'Umur':             i.age || '-',
+          'Luas Lahan (Ha)':  toLuasHa(i.totalLandArea, i.totalLandAreaUnit),
+          'No. HP':           i.phone || '-',
+          'Desa':             parseDesa(i.address),
+          'Kecamatan':        parseKec(i.address),
+          'Area/Kabupaten':   i.district || '-',
+          'Komoditas':        i.commodity || '-',
+          'Kendala 1':        kendala[0],
+          'Kendala 2':        kendala[1],
+          'OPT 1':            opt[0],
+          'OPT 2':            opt[1],
+          'OPT 3':            opt[2],
+          'Produk Dipakai':   i.usedProducts || '-',
+          'Lokasi Beli':      i.buyLocation || '-',
+          'Referensi':        i.references || '-',
+          'Foto 1':           photos[0],
+          'Foto 2':           photos[1],
+          'Foto 3':           photos[2],
+        }
+      })
 
     } else if (type === 'demoplot') {
       let dpRequestFilter: any = { commodity: { not: '-' }, farmer: { isNot: null } }
