@@ -86,25 +86,53 @@ export async function GET(req: Request) {
       sheetName = 'Customer Behavior'
       const ws = workbook.addWorksheet(sheetName)
       ws.columns = [
-        { header: 'Tanggal',           key: 'tanggal',     width: 18 },
-        { header: 'Pelapor',           key: 'pelapor',     width: 18 },
-        { header: 'Role',              key: 'role',        width: 12 },
-        { header: 'Nama Petani',       key: 'petani',      width: 20 },
-        { header: 'Umur',              key: 'umur',        width: 10 },
-        { header: 'No. HP',            key: 'hp',          width: 14 },
-        { header: 'Area/Kabupaten',    key: 'kabupaten',   width: 20 },
-        { header: 'Alamat Lengkap',    key: 'alamat',      width: 25 },
-        { header: 'Komoditas',         key: 'komoditas',   width: 14 },
-        { header: 'Kendala',           key: 'kendala',     width: 18 },
-        { header: 'Jenis OPT',         key: 'opt_jenis',   width: 18 },
-        { header: 'Detail OPT',        key: 'opt_detail',  width: 18 },
-        { header: 'Produk Dipakai',    key: 'produk',      width: 18 },
-        { header: 'Lokasi Beli',       key: 'lokasi_beli', width: 18 },
-        { header: 'Referensi',         key: 'referensi',   width: 18 },
-        { header: 'Foto 1',            key: 'foto1',       width: 20 },
-        { header: 'Foto 2',            key: 'foto2',       width: 20 },
-        { header: 'Foto 3',            key: 'foto3',       width: 20 },
+        { header: 'Tanggal',         key: 'tanggal',      width: 20 },
+        { header: 'Pelapor',         key: 'pelapor',      width: 20 },
+        { header: 'Nama Petani',     key: 'petani',       width: 22 },
+        { header: 'Umur',            key: 'umur',         width: 8  },
+        { header: 'Luas Lahan (Ha)', key: 'luas',         width: 14 },
+        { header: 'No. HP',          key: 'hp',           width: 15 },
+        { header: 'Desa',            key: 'desa',         width: 18 },
+        { header: 'Kecamatan',       key: 'kecamatan',    width: 18 },
+        { header: 'Area/Kabupaten',  key: 'kabupaten',    width: 22 },
+        { header: 'Komoditas',       key: 'komoditas',    width: 14 },
+        { header: 'Kendala 1',       key: 'kendala1',     width: 20 },
+        { header: 'Kendala 2',       key: 'kendala2',     width: 20 },
+        { header: 'OPT 1',           key: 'opt1',         width: 20 },
+        { header: 'OPT 2',           key: 'opt2',         width: 20 },
+        { header: 'OPT 3',           key: 'opt3',         width: 20 },
+        { header: 'Produk Dipakai',  key: 'produk',       width: 22 },
+        { header: 'Lokasi Beli',     key: 'lokasi_beli',  width: 20 },
+        { header: 'Referensi',       key: 'referensi',    width: 18 },
+        { header: 'Foto 1',          key: 'foto1',        width: 22 },
+        { header: 'Foto 2',          key: 'foto2',        width: 22 },
+        { header: 'Foto 3',          key: 'foto3',        width: 22 },
       ]
+
+      // Helper: safely parse JSON array up to N items, pad with '-'
+      const parseArr = (raw: string | null | undefined, n: number): string[] => {
+        const result: string[] = []
+        if (raw) {
+          try {
+            const arr = JSON.parse(raw)
+            if (Array.isArray(arr)) result.push(...arr.map((v: any) => String(v).trim()).filter(Boolean))
+          } catch {
+            result.push(...raw.split(',').map(s => s.trim()).filter(Boolean))
+          }
+        }
+        while (result.length < n) result.push('-')
+        return result.slice(0, n)
+      }
+
+      // Parse Desa / Kecamatan from stored address ("Desa/Kel. X, Kec. Y, ...")
+      const parseDesa = (addr: string | null | undefined) => addr?.match(/Desa\/Kel\.\s+([^,]+)/i)?.[1]?.trim() ?? '-'
+      const parseKec  = (addr: string | null | undefined) => addr?.match(/Kec\.\s+([^,]+)/i)?.[1]?.trim() ?? '-'
+
+      // Luas lahan → Ha
+      const toLuasHa = (val: number | null | undefined, unit: string | null | undefined): string => {
+        if (val === null || val === undefined) return '-'
+        return unit === 'm2' ? (val / 10000).toFixed(4) : String(val)
+      }
 
       const q = await prisma.customerBehavior.findMany({
         where: {
@@ -113,7 +141,7 @@ export async function GET(req: Request) {
           ...(search ? {
             OR: [
               { farmerName: { contains: search } },
-              { district: { contains: search } }
+              { district:   { contains: search } }
             ]
           } : {})
         },
@@ -121,30 +149,40 @@ export async function GET(req: Request) {
         orderBy: { createdAt: 'desc' }
       })
 
+      // Foto kolom mulai di kolom ke-19 (1-indexed), yaitu key foto1 = kolom S
+      const FOTO_START_COL = 19
+
       let rowIndex = 2
       for (const i of q) {
+        const kendala = parseArr(i.constraints, 2)
+        const opt     = parseArr(i.optDetails, 3)
+
         const row = ws.addRow({
-          tanggal: new Date(i.createdAt).toLocaleString('id-ID'),
-          pelapor: i.user.name,
-          role: i.user.role,
-          petani: i.farmerName,
-          umur: i.age || '-',
-          hp: i.phone || '-',
-          kabupaten: i.district || '-',
-          alamat: i.address || '-',
-          komoditas: i.commodity || '-',
-          kendala: i.constraints || '-',
-          opt_jenis: i.optTypes || '-',
-          opt_detail: i.optDetails || '-',
-          produk: i.usedProducts || '-',
+          tanggal:     new Date(i.createdAt).toLocaleString('id-ID'),
+          pelapor:     i.user.name,
+          petani:      i.farmerName,
+          umur:        i.age || '-',
+          luas:        toLuasHa(i.totalLandArea, i.totalLandAreaUnit),
+          hp:          i.phone || '-',
+          desa:        parseDesa(i.address),
+          kecamatan:   parseKec(i.address),
+          kabupaten:   i.district || '-',
+          komoditas:   i.commodity || '-',
+          kendala1:    kendala[0],
+          kendala2:    kendala[1],
+          opt1:        opt[0],
+          opt2:        opt[1],
+          opt3:        opt[2],
+          produk:      i.usedProducts || '-',
           lokasi_beli: i.buyLocation || '-',
-          referensi: i.references || '-',
+          referensi:   i.references || '-',
           foto1: '', foto2: '', foto3: ''
         })
         row.alignment = { vertical: 'middle', wrapText: true }
+
         let allPhotoUrls: string[] = []
         if (i.photos) { try { allPhotoUrls = JSON.parse(i.photos) } catch {} }
-        await addPhotosToRow(ws, workbook, row, rowIndex, allPhotoUrls, 16)
+        await addPhotosToRow(ws, workbook, row, rowIndex, allPhotoUrls, FOTO_START_COL)
         rowIndex++
       }
 
