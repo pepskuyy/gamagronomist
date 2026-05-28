@@ -188,75 +188,137 @@ export async function GET(req: Request) {
 
     } else if (type === 'demoplot') {
       sheetName = 'Demo Plot'
-      let dpRequestFilter: any = { commodity: { not: '-' }, farmer: { isNot: null } }
+
+      // Query per DemoPlot session (bukan per Request) agar sesuai screenshot
+      let dpFilter: any = {}
       if (['ADMIN', 'SPV'].includes(session.role)) {
-        // empty
+        dpFilter = {}
       } else if (['AFA', 'PLANTATION'].includes(session.role)) {
         const fos = await prisma.user.findMany({ where: { afaId: session.userId }, select: { id: true } })
         const foIds = [session.userId, ...fos.map(u => u.id)]
-        dpRequestFilter = { ...dpRequestFilter, OR: [{ foId: { in: foIds } }, { afaId: session.userId }] }
+        dpFilter = {
+          request: { foId: { in: foIds } }
+        }
       } else {
-        dpRequestFilter = { ...dpRequestFilter, foId: session.userId }
+        dpFilter = { request: { foId: session.userId } }
       }
 
-      const q = await prisma.request.findMany({
+      const q = await prisma.demoPlot.findMany({
         where: {
-          ...dateFilter,
-          ...dpRequestFilter,
+          ...(startDate || endDate ? {
+            createdAt: {
+              ...(startDate ? { gte: startDate } : {}),
+              ...(endDate ? { lte: endDate } : {}),
+            }
+          } : {}),
+          ...dpFilter,
           ...(search ? {
             OR: [
               { farmer: { name: { contains: search } } },
-              { area: { contains: search } }
+              { area: { contains: search } },
             ]
-          } : {})
+          } : {}),
         },
-        include: { fo: { include: { area: true } }, farmer: true, demoPlots: true },
-        orderBy: { createdAt: 'desc' }
+        include: {
+          farmer: true,
+          request: {
+            include: {
+              fo: { include: { area: true } },
+              farmer: true,
+            }
+          },
+          details: {
+            include: { product: { select: { name: true, unit: true, unitGramasi: true } } }
+          },
+        },
+        orderBy: { createdAt: 'desc' },
       })
 
+      // Helper: parse Desa / Kecamatan / Kabupaten dari string area
+      // Format umum: "Desa/Kel. X, Kec. Y, Kab. Z" atau "X - Y - Z" atau free-text
+      const parseLocDesa = (area: string | null | undefined) => area?.match(/Desa\/Kel\.\s+([^,]+)/i)?.[1]?.trim() ?? (area?.split(',')[0]?.trim() ?? '-')
+      const parseLocKec  = (area: string | null | undefined) => area?.match(/Kec(?:amatan)?\.\s+([^,]+)/i)?.[1]?.trim() ?? (area?.split(',')[1]?.trim() ?? '-')
+      const parseLocKab  = (area: string | null | undefined) => {
+        const m = area?.match(/Kab(?:upaten)?\.\s+([^,]+)/i)?.[1] ?? area?.match(/KABUPATEN\s+(\w+)/i)?.[1]
+        return m?.trim() ?? (area?.split(',')[2]?.trim() ?? '-')
+      }
+
+      const MAX_PRODUK = 4
       const ws = workbook.addWorksheet(sheetName)
+
+      // Build columns: Produk 1 + Digunakan, Produk 2 + Digunakan, ... up to MAX_PRODUK
+      // Last product (Produk 4) has no "Digunakan" column - match screenshot exactly
+      const produkCols: Array<{ header: string; key: string; width: number }> = []
+      for (let p = 1; p <= MAX_PRODUK; p++) {
+        produkCols.push({ header: `Produk ${p}`, key: `produk${p}`, width: 18 })
+        if (p < MAX_PRODUK) {
+          produkCols.push({ header: 'Digunakan (ml/gram)', key: `digunakan${p}`, width: 16 })
+        }
+      }
+
       ws.columns = [
-        { header: 'Tanggal',           key: 'tanggal',     width: 18 },
-        { header: 'ID Tiket',          key: 'id',          width: 14 },
-        { header: 'Pelaksana',         key: 'pelaksana',   width: 18 },
-        { header: 'Nama Petani',       key: 'petani',      width: 20 },
-        { header: 'No. HP',            key: 'hp',          width: 14 },
-        { header: 'Kabupaten',         key: 'kabupaten',   width: 22 },
-        { header: 'Komoditas',         key: 'komoditas',   width: 14 },
-        { header: 'Status',            key: 'status',      width: 20 },
-        { header: 'Jumlah Sesi',       key: 'sesi',        width: 12 },
-        { header: 'Foto 1',            key: 'foto1',       width: 20 },
-        { header: 'Foto 2',            key: 'foto2',       width: 20 },
-        { header: 'Foto 3',            key: 'foto3',       width: 20 },
+        { header: 'Tanggal',              key: 'tanggal',     width: 20 },
+        { header: 'Pelaksana',            key: 'pelaksana',   width: 20 },
+        { header: 'Nama Petani',          key: 'petani',      width: 22 },
+        { header: 'No. HP',               key: 'hp',          width: 15 },
+        { header: 'Desa',                 key: 'desa',        width: 18 },
+        { header: 'Kecamatan',            key: 'kecamatan',   width: 18 },
+        { header: 'Kabupaten',            key: 'kabupaten',   width: 20 },
+        { header: 'Latitude',             key: 'lat',         width: 13 },
+        { header: 'Longitude',            key: 'lng',         width: 13 },
+        ...produkCols,
+        { header: 'Komoditas',            key: 'komoditas',   width: 14 },
+        { header: 'Status',               key: 'status',      width: 22 },
+        { header: 'Deskripsi Hasil Demplot', key: 'deskripsi', width: 30 },
+        { header: 'Foto 1',               key: 'foto1',       width: 22 },
+        { header: 'Foto 2',               key: 'foto2',       width: 22 },
+        { header: 'Foto 3',               key: 'foto3',       width: 22 },
       ]
 
+      // Foto start column (1-indexed): 9 info cols + produk cols (MAX_PRODUK + (MAX_PRODUK-1) pairs) + 3 meta = ?
+      // 9 + 7 (4 produk + 3 digunakan) + 3 = 19, foto start = 20
+      const FOTO_START_COL = 9 + (MAX_PRODUK + (MAX_PRODUK - 1)) + 3 + 1
+
       let rowIndex = 2
-      for (const i of q as any[]) {
-        const kabupaten = extractKabupaten(i.area, i.fo?.area?.name)
-        const allPhotoUrls: string[] = []
-        for (const dp of i.demoPlots) {
-          if (dp.photos) {
-            try {
-              const urls = JSON.parse(dp.photos)
-              if (Array.isArray(urls)) allPhotoUrls.push(...urls)
-            } catch {}
+      for (const i of q) {
+        const farmer  = i.farmer ?? i.request?.farmer
+        const fo      = i.request?.fo
+        const area    = i.area ?? i.request?.area ?? ''
+
+        // Produk details: max MAX_PRODUK
+        const details = i.details.slice(0, MAX_PRODUK)
+
+        const rowData: Record<string, any> = {
+          tanggal:   new Date(i.createdAt).toLocaleString('id-ID'),
+          pelaksana: fo?.name ?? '-',
+          petani:    farmer?.name ?? '-',
+          hp:        farmer?.phone ?? '-',
+          desa:      parseLocDesa(area),
+          kecamatan: parseLocKec(area),
+          kabupaten: parseLocKab(area),
+          lat:       i.latitude ?? '-',
+          lng:       i.longitude ?? '-',
+          komoditas: i.commodity ?? i.request?.commodity ?? '-',
+          status:    i.request?.status ?? '-',
+          deskripsi: i.resultNotes ?? '-',
+          foto1: '', foto2: '', foto3: '',
+        }
+
+        // Fill produk columns
+        for (let p = 1; p <= MAX_PRODUK; p++) {
+          const d = details[p - 1]
+          rowData[`produk${p}`]    = d ? d.product.name : '-'
+          if (p < MAX_PRODUK) {
+            rowData[`digunakan${p}`] = d ? d.actualUsage : '-'
           }
         }
 
-        const row = ws.addRow({
-          tanggal: new Date(i.createdAt).toLocaleString('id-ID'),
-          id: i.id,
-          pelaksana: i.fo?.name || '-',
-          petani: i.farmer?.name || '-',
-          hp: i.farmer?.phone || '-',
-          kabupaten,
-          komoditas: i.commodity || '-',
-          status: i.status,
-          sesi: i.demoPlots.length,
-          foto1: '', foto2: '', foto3: ''
-        })
+        const row = ws.addRow(rowData)
         row.alignment = { vertical: 'middle', wrapText: true }
-        await addPhotosToRow(ws, workbook, row, rowIndex, allPhotoUrls, 10)
+
+        let allPhotoUrls: string[] = []
+        if (i.photos) { try { allPhotoUrls = JSON.parse(i.photos) } catch {} }
+        await addPhotosToRow(ws, workbook, row, rowIndex, allPhotoUrls, FOTO_START_COL)
         rowIndex++
       }
 
