@@ -1,0 +1,931 @@
+"id","name","description","unit","createdAt","updatedAt","code","gramasiPerUnit","unitGramasi","accurateId","spvStock"
+"cmn6uxo35000sl404a28w5urn","Fastac 15 EC 100 ml","Fastac 15 EC 100 ml","Btl","2026-03-26 02:32:40.241","2026-05-18 00:12:12.888","BAS-IK-118",100,"ml","BAS-IK-118",93
+"cmn6uxo5h001dl404hwz19n03","Gasing 135 SL 1 L","Gasing 135 SL 1 L","Btl","2026-03-26 02:32:40.326","2026-05-18 00:12:13.001","BTS-HB-039",1000,"ml","BTS-HB-039",218
+"cmn6uxo61001il404vpmc2z1o","Glufo Pro 200 SL 1 L","Glufo Pro 200 SL 1 L","Btl","2026-03-26 02:32:40.346","2026-05-18 00:12:13.058","BTS-HB-105",1000,"ml","BTS-HB-105",33
+"cmn6uxo080002l404zt13thgd","Jagung Manis Madu - 59 F1 250 gr","Jagung Manis Madu - 59 F1 250 gr","PCS","2026-03-26 02:32:40.136","2026-05-18 00:12:13.181","ADV-BB-014",250,"gr","ADV-BB-014",23
+"cmn6uxo120009l404dhqqbrnm","Jagung Manis Renjana F1 250 gr","Jagung Manis Renjana F1 250 gr","PCS","2026-03-26 02:32:40.166","2026-05-18 00:12:13.185","ADV-BB-022",250,"gr","ADV-BB-022",106
+"cmn6uxo6j001nl404hvszvxd5","Joki 400 SL 200 ml","Joki 400 SL 200 ml","Btl","2026-03-26 02:32:40.364","2026-05-18 00:12:13.221","BTS-IK-166",200,"ml","BTS-IK-166",2400
+"cmn6uxo4r0017l404qliwtq5w","Kaos Ziflo","Kaos Ziflo","PCS","2026-03-26 02:32:40.299","2026-05-18 00:12:13.277","BN-004",,,"BN-004",0
+"cmn6uxo6y001rl404yk1bpgge","Nativo 75 WG 12.5 gr","Nativo 75 WG 12.5 gr","Bks","2026-03-26 02:32:40.378","2026-05-18 00:12:13.915","BYR-FG-047",12.5,"gr","BYR-FG-047",0
+"cmn6uxo5u001gl404j5l6y9bt","Nicofuron 80 OD 500 ml","Nicofuron 80 OD 500 ml","Btl","2026-03-26 02:32:40.338","2026-05-18 00:12:13.95","BTS-HB-082",500,"ml","BTS-HB-082",1511
+"cmn6uxo3d000ul404a98lwtfm","Oyong F1 Emerald @ 10 gr","Oyong F1 Emerald @ 10 gr","Bks","2026-03-26 02:32:40.25","2026-05-18 00:12:14.098","BB-001",10,"gr","BB-001",0
+"cmn6uxo0g0004l4040c2g84e1","Paria Hibrida Beijing 23 F1 10 gr","Paria Hibrida Beijing 23 F1 10 gr","PCS","2026-03-26 02:32:40.145","2026-05-18 00:12:14.11","ADV-BB-016",10,"gr","ADV-BB-016",1560
+"cmn6uxo6u001ql404yvqf8cjq","Previcur-N 722SL 500 ml","Previcur-N 722SL 500 ml","Bks","2026-03-26 02:32:40.375","2026-05-18 00:12:14.262","BYR-FG-031",500,"ml","BYR-FG-031",0
+"cmnh57wm9007mii04yuo77pw6","Rapid Zone 20 WG 20 gr",,"PCS","2026-04-02 07:18:15.778","2026-05-18 00:12:14.31","BTS-HB-052",20,"gr","BTS-HB-052",316
+"cmn6uxo4g0014l4042pvivfkt","Rovral 50 WP 100 gr","Rovral 50 WP 100 gr","Bks","2026-03-26 02:32:40.288","2026-05-18 00:12:14.411","BGK-FG-088",100,"gr","BGK-FG-088",0
+"cmn6uxo65001jl404sglinnlj","Serbu 400/60 SL 250 ml","Serbu 400/60 SL 250 ml","Btl","2026-03-26 02:32:40.349","2026-05-18 00:12:14.488","BTS-HB-112",250,"ml","BTS-HB-112",0
+"cmn6uxo1s000gl404ialahsei","Sevin 85 SP 100 gr","Sevin 85 SP 100 gr","Bks","2026-03-26 02:32:40.193","2026-05-18 00:12:14.5","AGR-IK-081",100,"gr","AGR-IK-081",54
+"cmn6uxo1w000hl4047vggm3c8","Spontan King 400 SL 1 L","Spontan King 400 SL 1 L","Btl","2026-03-26 02:32:40.197","2026-05-18 00:12:14.671","AGR-IK-129",1000,"ml","AGR-IK-129",93
+"cmn6uxo480012l404fz3orjm5","Sumo 50 EC 80 ml","Sumo 50 EC 80 ml","Btl","2026-03-26 02:32:40.281","2026-05-18 00:12:14.863","BEL-IK-120",80,"ml","BEL-IK-120",167
+"cmn6uxo6f001ml404it2aizn5","Talonil 350 EC 1 L","Talonil 350 EC 1 L","Btl","2026-03-26 02:32:40.36","2026-05-18 00:12:14.922","BTS-IK-130",1000,"ml","BTS-IK-130",5
+"cmn6uxo1a000bl404om3lynrz","Timun Lavanta F1","Timun Lavanta F1","PCS","2026-03-26 02:32:40.174","2026-05-18 00:12:14.998","ADV-BB-027",20,"gr","ADV-BB-027",479
+"cmn6uxo3l000wl404cm4qol2x","Tomat F1 DT Investor @ 10 gr","Tomat F1 DT Investor @ 10 gr","Bks","2026-03-26 02:32:40.257","2026-05-18 00:12:15.006","BB-004",10,"gr","BB-004",0
+"cmn6uxo0k0005l404gyk86um6","Tomat Hibrida Nona 23 F1 5 gr","Tomat Hibrida Nona 23 F1 5 gr","PCS","2026-03-26 02:32:40.149","2026-05-18 00:12:15.02","ADV-BB-017",5,"gr","ADV-BB-017",878
+"cmn6uxo4c0013l4049k093715","nn Srikandi 160/20 OD 50 ml","nn Srikandi 160/20 OD 50 ml","Btl","2026-03-26 02:32:40.285","2026-05-18 00:12:15.433","BEL-NN-147",50,"ml","BEL-NN-147",0
+"cmn6uxpbg00c9l404x9h4drqf","AP Boot 2017 Lemon Green 39","AP Boot 2017 Lemon Green 39","PCS","2026-03-26 02:32:41.836","2026-05-18 00:12:11.787","WGI-SPT-001",,,"WGI-SPT-001",2
+"cmn6uxo2d000ll404frmst64l","Agrimore-P 15+30+15 500 gr (Orange)","Agrimore-P 15+30+15 500 gr (Orange)","Bks","2026-03-26 02:32:40.213","2026-05-18 00:12:11.999","AGR-PK-060",500,"gr","AGR-PK-060",96
+"cmn6uxo6r001pl404do2p5r9m","Antracol 70 WP 250 gr","Antracol 70 WP 250 gr","Bks","2026-03-26 02:32:40.371","2026-05-18 00:12:12.094","BYR-FG-028",250,"gr","BYR-FG-028",557
+"cmn6uxo4j0015l4043pan3161","Arrivo 30 EC 500 ml","Arrivo 30 EC 500 ml","Btl","2026-03-26 02:32:40.292","2026-05-18 00:12:12.132","BGK-IK-116",500,"ml","BGK-IK-116",46
+"cmn6uxo2k000nl4049xmwqcgv","Basmirata 15 WP 50 gr","Basmirata 15 WP 50 gr","Bks","2026-03-26 02:32:40.221","2026-05-18 00:12:12.185","ALT-HB-077",50,"gr","ALT-HB-077",0
+"cmn6uxo1h000dl404d7h9c5en","Benefit 75 WP 500 gr","Benefit 75 WP 500 gr","Bks","2026-03-26 02:32:40.182","2026-05-18 00:12:12.218","AGR-FG-066",500,"gr","AGR-FG-066",592
+"cmn6uxo4n0016l404iw0wmhk8","Benih Jagung Bisi 2 1 Kg","Benih Jagung Bisi 2 1 Kg","PCS","2026-03-26 02:32:40.295","2026-05-18 00:12:12.231","BISI-BB-011",1000,"gr","BISI-BB-011",0
+"cmn6uxo3x000zl4042rb5sjex","Benih Semi F1 Bintang Asia","Benih Semi F1 Bintang Asia","PCS","2026-03-26 02:32:40.269","2026-05-18 00:12:12.251","BCA-BB-006",20,"gr","BCA-BB-006",0
+"cmn6uxo5x001hl404xbu77iza","Besfuron 20 WP 250 gr","Besfuron 20 WP 250 gr","Btl","2026-03-26 02:32:40.342","2026-05-18 00:12:12.263","BTS-HB-084",250,"gr","BTS-HB-084",232
+"cmn6uxo410010l404kpkmtpl9","Bibit Labana F1 Bintang Asia","Bibit Labana F1 Bintang Asia","PCS","2026-03-26 02:32:40.273","2026-05-18 00:12:12.297","BCA-BB-007",10,"gr","BCA-BB-007",0
+"cmn6uxo450011l404zr2b73an","Bibit Semangka F1","Bibit Semangka F1","Bks","2026-03-26 02:32:40.277","2026-05-18 00:12:12.301","BCA-BB-008",20,"gr","BCA-BB-008",0
+"cmn6uxo5q001fl4045v3xbcyq","Bilis 500 SC 1 L","Bilis 500 SC 1 L","Btl","2026-03-26 02:32:40.334","2026-05-18 00:12:12.314","BTS-HB-051",1000,"ml","BTS-HB-051",467
+"cmn6uxo55001al404c81dfevg","Biolon 670 EC 100 ml","Biolon 670 EC 100 ml","Btl","2026-03-26 02:32:40.313","2026-05-18 00:12:12.378","BTS-HB-001",100,"ml","BTS-HB-001",31
+"cmn6uxo5a001bl404gi3lz7xe","Bionasa 480 SL 1 L","Bionasa 480 SL 1 L","Btl","2026-03-26 02:32:40.318","2026-05-18 00:12:12.394","BTS-HB-002",1000,"ml","BTS-HB-002",433
+"cmn6uxo6n001ol404xfb5sx0v","Biophon 10 PA 500 ml","Biophon 10 PA 500 ml","Btl","2026-03-26 02:32:40.367","2026-05-18 00:12:12.431","BTS-PK-068",500,"ml","BTS-PK-068",23
+"cmn6uxo68001kl40463yw45cf","Biotomil 40 SP 100 gr","Biotomil 40 SP 100 gr","Bks","2026-03-26 02:32:40.353","2026-05-18 00:12:12.452","BTS-IK-114",100,"gr","BTS-IK-114",131
+"cmn6uxo510019l404db2jw3c6","Biozeb 80 WP 800 gr","Biozeb 80 WP 800 gr","Bks","2026-03-26 02:32:40.309","2026-05-18 00:12:12.468","BTS-FG-073",800,"gr","BTS-FG-073",1
+"cmn6uxo2w000ql404lyt71p8q","Cabrio 250 EC 100 ml","Cabrio 250 EC 100 ml","Btl","2026-03-26 02:32:40.233","2026-05-18 00:12:12.517","BAS-HB-081",100,"ml","BAS-HB-081",0
+"cmn6uxo1l000el4048uyl977z","Captive 200 SC 100 ml","Captive 200 SC 100 ml","Btl","2026-03-26 02:32:40.185","2026-05-18 00:12:12.553","AGR-FG-068",100,"ml","AGR-FG-068",149
+"cmn6uxo5d001cl404us02iynf","Desmos 200/60 SC 500 ml","Desmos 200/60 SC 500 ml","Btl","2026-03-26 02:32:40.322","2026-05-18 00:12:12.772","BTS-HB-024",500,"ml","BTS-HB-024",22
+"cmn6uxo0c0003l404mm0xgyfs","Mentimun Hibrida Gogor 22 F4 20 gr","Mentimun Hibrida Gogor 22 F4 20 gr","PCS","2026-03-26 02:32:40.14","2026-05-18 00:12:13.558","ADV-BB-015",20,"gr","ADV-BB-015",1842
+"cmn6uxocg0037l404o6ld96p2","Dithane M 45 80 WP 1 Kg","Dithane M 45 80 WP 1 Kg","Bks","2026-03-26 02:32:40.576","2026-05-18 00:12:12.795","DOW-FG-054",1000,"gr","DOW-FG-054",146
+"cmn6uxocj0038l404ewfwjbsp","Endure 120SC 100 ml","Endure 120SC 100 ml","Btl","2026-03-26 02:32:40.58","2026-05-18 00:12:12.852","DOW-IK-073",100,"ml","DOW-IK-073",294
+"cmn6uxo7z0021l404a8k1z1ro","Ethrel 480 SL 100 Ml","Ethrel 480 SL 100 Ml","Btl","2026-03-26 02:32:40.415","2026-05-18 00:12:12.861","BYR-PK-223",100,"ml","BYR-PK-223",200
+"cmn6uxo9z002kl4048rfkc7s7","Explore 250 EC 80 ml","Explore 250 EC 80 ml","Btl","2026-03-26 02:32:40.488","2026-05-18 00:12:12.869","DGW-FG-038",80,"ml","DGW-FG-038",134
+"cmn6uxoag002ol4040x8ys6gs","Explore Max 250 EC 80 Ml","Explore Max 250 EC 80 Ml","Btl","2026-03-26 02:32:40.504","2026-05-18 00:12:12.88","DGW-FG-097",80,"ml","DGW-FG-097",62
+"cmn6uxoao002ql4043viv8bfi","Gandewa 550 SC 500 ml","Gandewa 550 SC 500 ml","Btl","2026-03-26 02:32:40.512","2026-05-18 00:12:12.998","DGW-HB-069",500,"ml","DGW-HB-069",10
+"cmn6uxobu0031l404gy4frv4d","HX MKP DGW 1 Kg","HX MKP DGW 1 Kg","Bks","2026-03-26 02:32:40.554","2026-05-18 00:12:13.082","DGW-PK-018",1000,"gr","DGW-PK-018",0
+"cmn6uxob3002ul404fpm5c1yz","Klensect Extra 200 EC 100 Ml","Klensect Extra 200 EC 100 Ml","Btl","2026-03-26 02:32:40.528","2026-05-18 00:12:13.337","DGW-IK-209",100,"ml","DGW-IK-209",600
+"cmn6uxobx0032l404bxjf21nd","Leili 2000 1 L","Leili 2000 1 L","Btl","2026-03-26 02:32:40.558","2026-05-18 00:12:13.405","DGW-PK-026",1000,"ml","DGW-PK-026",0
+"cmn6uxo9f002fl40489su09w2","Novlect 120 EC 500 ml","Novlect 120 EC 500 ml","Btl","2026-03-26 02:32:40.468","2026-05-18 00:12:14.058","CTV-HB-056",500,"ml","CTV-HB-056",0
+"cmn6uxob7002vl4044bwziftc","Penalty 50 SC 50 Ml","Penalty 50 SC 50 Ml","Btl","2026-03-26 02:32:40.532","2026-05-18 00:12:14.13","DGW-IK-211",50,"ml","DGW-IK-211",144
+"cmn6uxo860023l404cjovf4cv","Phoscormite 18 EC 200 Ml","Phoscormite 18 EC 200 Ml","Btl","2026-03-26 02:32:40.422","2026-05-18 00:12:14.152","CAT-IK-175",200,"ml","CAT-IK-175",0
+"cmn6uxocr003al404uua0n5sw","Pronate 200 SL 1 L","Pronate 200 SL 1 L","Btl","2026-03-26 02:32:40.587","2026-05-18 00:12:14.27","EAS-HB-120",1000,"ml","EAS-HB-120",4595
+"cmn6uxo5m001el404el39ylsi","Rapid Zone 20 WG 250 gr","Rapid Zone 20 WG 250 gr","Btl","2026-03-26 02:32:40.331","2026-05-18 00:12:14.314","BTS-HB-050",250,"gr","BTS-HB-050",102
+"cmn6uxo8w002al404i8gpx8ji","Sprayer Ultra CBA Electric type 4","Sprayer Ultra CBA Electric type 4","PCS","2026-03-26 02:32:40.448","2026-05-18 00:12:14.811","CBA-SY-021",16000,"ml","CBA-SY-021",1172
+"cmn6uxoak002pl404xq75q9qt","Supremo Gold 490 SL 1 L","Supremo Gold 490 SL 1 L","Btl","2026-03-26 02:32:40.508","2026-05-18 00:12:14.867","DGW-HB-058",1000,"ml","DGW-HB-058",241
+"cmn6uxoas002rl404v1nazs9y","Supretox 276 SL 1 Lt","Supretox 276 SL 1 Lt","Btl","2026-03-26 02:32:40.516","2026-05-18 00:12:14.875","DGW-HB-110",1000,"ml","DGW-HB-110",5
+"cmn6uxocc0036l404gfnaak1f","Tabas 400 SC 100 ml","Tabas 400 SC 100 ml","Btl","2026-03-26 02:32:40.573","2026-05-18 00:12:14.896","DMS-HB-054",100,"ml","DMS-HB-054",698
+"cmn6uxo8p0028l40419nwl05f","Tiodor 30 WP","Tiodor 30 WP","Bks","2026-03-26 02:32:40.441","2026-05-18 00:12:15.002","CBA-IK-099",100,"gr","CBA-IK-099",0
+"cmn6uxo72001sl404e5pb3oh3","Trivia 73 WP 200 gr","Trivia 73 WP 200 gr","PCS","2026-03-26 02:32:40.382","2026-05-18 00:12:15.046","BYR-FG-094",200,"gr","BYR-FG-094",0
+"cmn6uxo9s002il40464d1p7la","Tugard 160/10 EC 100 ML","Tugard 160/10 EC 100 ML","Btl","2026-03-26 02:32:40.48","2026-05-18 00:12:15.054","DEL-IK-155",100,"ml","DEL-IK-155",182
+"cmn6uxo7h001wl404cxbd31r0","Vayego 200 SC 100 ml","Vayego 200 SC 100 ml","Btl","2026-03-26 02:32:40.397","2026-05-18 00:12:15.097","BYR-IK-075",100,"ml","BYR-IK-075",0
+"cmn6uxoc10033l404r2gjv6w5","ZA HX-AS Premium 50 Kg","ZA HX-AS Premium 50 Kg","Sak","2026-03-26 02:32:40.562","2026-05-18 00:12:15.172","DGW-PK-038",50000,"gr","DGW-PK-038",0
+"cmn6uxo890024l404ms3plqvo","Counter Plus 50/1.8 WG 100 Gr","Counter Plus 50/1.8 WG 100 Gr","Bks","2026-03-26 02:32:40.426","2026-05-18 00:12:12.627","CAT-IK-178",100,"gr","CAT-IK-178",0
+"cmn6uxoa4002ll404yav4216t","Cozeb 80 WP 1 kg","Cozeb 80 WP 1 kg","Bks","2026-03-26 02:32:40.492","2026-05-18 00:12:12.639","DGW-FG-092",1000,"gr","DGW-FG-092",59
+"cmn6uxobq0030l404k3fo37kc","nn Ventra 75 WP 500 gr","nn Ventra 75 WP 500 gr","Bks","2026-03-26 02:32:40.55","2026-05-18 00:12:15.468","DGW-NN-065",500,"gr","DGW-NN-065",0
+"cmn6uxobi002yl4048cyxzukp","Anilo 60 WP 50 gram","Anilo 60 WP 50 gram","Bks","2026-03-26 02:32:40.542","2026-05-18 00:12:12.086","DGW-MO-003",50,"gr","DGW-MO-003",4546
+"cmn6uxocn0039l404f2seoouo","Ares 100 SL 500 ml","Ares 100 SL 500 ml","Btl","2026-03-26 02:32:40.584","2026-05-18 00:12:12.123","DTG-IK-058",500,"ml","DTG-IK-058",129
+"cmn6uxo9n002hl4045ce9isaq","Avatar 400 SC 100 ml","Avatar 400 SC 100 ml","Btl","2026-03-26 02:32:40.476","2026-05-18 00:12:12.148","DEL-HB-098",100,"ml","DEL-HB-098",315
+"cmn6uxo7r001zl404fuizdjm3","Baycarb 500 EC 500 ml","Baycarb 500 EC 500 ml","Btl","2026-03-26 02:32:40.408","2026-05-18 00:12:12.197","BYR-IK-117",500,"ml","BYR-IK-117",0
+"cmn6uxobm002zl40487tmlxcr","Bestnoid 60 WP 50 gr","Bestnoid 60 WP 50 gr","Bks","2026-03-26 02:32:40.546","2026-05-18 00:12:12.28","DGW-MO-005",50,"gr","DGW-MO-005",6
+"cmn6uxo7d001vl40403elzno5","Besvidor 25 WP 100 gr","Besvidor 25 WP 100 gr","Bks","2026-03-26 02:32:40.393","2026-05-18 00:12:12.293","BYR-IK-056",100,"gr","BYR-IK-056",644
+"cmn6uxo98002dl404yktugl81","Broadplus 77 WP 40gr","Broadplus 77 WP 40gr","Bks","2026-03-26 02:32:40.46","2026-05-18 00:12:12.479","CTV-HB-040",40,"gr","CTV-HB-040",1376
+"cmn6uxo8l0027l404e7ta7ot1","CBA 6 865 SL 400 ml","CBA 6 865 SL 400 ml","Btl","2026-03-26 02:32:40.437","2026-05-18 00:12:12.494","CBA-HB-092",400,"ml","CBA-HB-092",0
+"cmn6uxobb002wl4047p24ju3b","Chlormite Plus 505 EC 100 Ml","Chlormite Plus 505 EC 100 Ml","Btl","2026-03-26 02:32:40.535","2026-05-18 00:12:12.577","DGW-IK-218",100,"ml","DGW-IK-218",231
+"cmn6uxo79001ul4044wqfit94","Council 300 SC 100 ml","Council 300 SC 100 ml","Btl","2026-03-26 02:32:40.39","2026-05-18 00:12:12.623","BYR-HB-101",100,"ml","BYR-HB-101",100
+"cmn6uxoc50034l404x2l6j760","ZA HX-AS Super 50 Kg","ZA HX-AS Super 50 Kg","Sak","2026-03-26 02:32:40.565","2026-05-18 00:12:15.176","DGW-PK-099",50000,"gr","DGW-PK-099",0
+"cmn6uxo8d0025l404dn7ms02j","Zeba 1 Kg","Zeba 1 Kg","Bks","2026-03-26 02:32:40.43","2026-05-18 00:12:15.208","CAT-PPC-002",1000,"gr","CAT-PPC-002",0
+"cmn6uxo9b002el404hrju04zm","DMA 6 825 SL 200 ml","DMA 6 825 SL 200 ml","Btl","2026-03-26 02:32:40.464","2026-05-18 00:12:12.672","CTV-HB-045",200,"ml","CTV-HB-045",0
+"cmn6uxoaw002sl404ganvt6qt","Dangke 40 WP 100 gr","Dangke 40 WP 100 gr","Bks","2026-03-26 02:32:40.52","2026-05-18 00:12:12.689","DGW-IK-059",100,"gr","DGW-IK-059",3477
+"cmn6uxobe002xl404bon74ems","Dangke Turbo 40 WP 100 Gr","Dangke Turbo 40 WP 100 Gr","Bks","2026-03-26 02:32:40.539","2026-05-18 00:12:12.697","DGW-IK-222",100,"gr","DGW-IK-222",380
+"cmn6uxo7k001xl404f3z14pp2","Decis 25 EC 100 ml","Decis 25 EC 100 ml","Btl","2026-03-26 02:32:40.4","2026-05-18 00:12:12.71","BYR-IK-088",100,"ml","BYR-IK-088",2344
+"cmn6uxob0002tl404mjpsf5hr","Demolish 18 EC 50 ml","Demolish 18 EC 50 ml","Btl","2026-03-26 02:32:40.524","2026-05-18 00:12:12.75","DGW-IK-066",50,"ml","DGW-IK-066",682
+"cmn6uxoa8002ml404y0erx00e","Dense 520 SC 200 Ml","Dense 520 SC 200 Ml","Btl","2026-03-26 02:32:40.496","2026-05-18 00:12:12.754","DGW-FG-095",200,"ml","DGW-FG-095",96
+"cmn6uxo9v002jl4048xmeqqah","Dimectin 18 EC 200 ML","Dimectin 18 EC 200 ML","Btl","2026-03-26 02:32:40.484","2026-05-18 00:12:12.786","DEL-IK-157",200,"ml","DEL-IK-157",184
+"cmn6uxofz003wl404jlva7vf4","Pita Tapetool Warna Merah","Pita Tapetool Warna Merah","PCS","2026-03-26 02:32:40.703","2026-05-18 00:12:14.178","FAR-SP-094",,,"FAR-SP-094",110
+"cmn6uxoi0004fl404rc3xrewg","Platoon 75 WP 500 gr","Platoon 75 WP 500 gr","Bks","2026-03-26 02:32:40.776","2026-05-18 00:12:14.181","FG-010",500,"gr","FG-010",419
+"cmn6uxoiw004ol404yvhhycj2","Prevathon 50 SC 100 ml","Prevathon 50 SC 100 ml","Btl","2026-03-26 02:32:40.809","2026-05-18 00:12:14.254","FMC-IK-057",100,"ml","FMC-IK-057",3569
+"cmn6uxoj7004rl4040w6b32rd","Preza 250ml","Preza 250ml","Btl","2026-03-26 02:32:40.82","2026-05-18 00:12:14.266","FMC-IK-113",250,"ml","FMC-IK-113",26
+"cmnh57wmi007nii040iw7pmn0","Rapid Zone 20 WG 5 gr",,"PCS","2026-04-02 07:18:15.786","2026-05-18 00:12:14.318","HB-008",5,"gr","HB-008",269
+"cmn6uxoi4004gl404riio28sf","Renzo 250 ml + Propus 250 ml","Renzo 250 ml + Propus 250 ml","Pack","2026-03-26 02:32:40.78","2026-05-18 00:12:14.364","FG-014",500,"ml","FG-014",0
+"cmn6uxofr003ul4042euhfkxh","Seal Hijau","Seal Hijau","PCS","2026-03-26 02:32:40.695","2026-05-18 00:12:14.466","FAR-SP-092",,,"FAR-SP-092",20
+"cmn6uxok30050l4047l8foxwq","Sistemik 240 SL 1 L","Sistemik 240 SL 1 L","Btl","2026-03-26 02:32:40.852","2026-05-18 00:12:14.579","HB-022",1000,"ml","HB-022",60
+"cmn6uxoe4003nl404r4cjcanh","Socket Charger + Wire 13.8 L & 16 L Elektrik & 2 in 1","Socket Charger + Wire 13.8 L & 16 L Elektrik & 2 in 1","PCS","2026-03-26 02:32:40.636","2026-05-18 00:12:14.608","FAR-SP-085",,,"FAR-SP-085",10
+"cmn6uxojs004xl404eoinwe8z","Solusi 865 SL 1 L","Solusi 865 SL 1 L","Btl","2026-03-26 02:32:40.841","2026-05-18 00:12:14.612","HB-009",1000,"ml","HB-009",1248
+"cmn6uxofc003sl4048q7kcdc1","Speeder 13.8 L & 16 L Elektrik 2 in 1","Speeder 13.8 L & 16 L Elektrik 2 in 1","PCS","2026-03-26 02:32:40.68","2026-05-18 00:12:14.649","FAR-SP-090",,,"FAR-SP-090",0
+"cmn6uxoh90048l404uodmpd74","Sprayer 7L Orange","Sprayer 7L Orange","PCS","2026-03-26 02:32:40.75","2026-05-18 00:12:14.7","FAR-SY-047",7000,"ml","FAR-SY-047",1
+"cmn6uxojl004vl404pb1me81a","Sprayer Elektrik Swan 16 L F-16","Sprayer Elektrik Swan 16 L F-16","PCS","2026-03-26 02:32:40.834","2026-05-18 00:12:14.729","GOL-SY-023",16000,"ml","GOL-SY-023",0
+"cmn6uxojp004wl404byo3122y","Sprayer Elektrik Tangguh SPE-16","Sprayer Elektrik Tangguh SPE-16","Box","2026-03-26 02:32:40.837","2026-05-18 00:12:14.733","GOL-SY-053",16000,"ml","GOL-SY-053",0
+"cmn6uxog2003xl404rp7yz5oa","Sprayer Farmjet 2 In 1","Sprayer Farmjet 2 In 1","Box","2026-03-26 02:32:40.707","2026-05-18 00:12:14.742","FAR-SY-024",16000,"ml","FAR-SY-024",10
+"cmn6uxog6003yl404gnlflnfq","Sprayer Farmjet Electric","Sprayer Farmjet Electric","Box","2026-03-26 02:32:40.711","2026-05-18 00:12:14.747","FAR-SY-025",16000,"ml","FAR-SY-025",0
+"cmn6uxoga003zl404f4swvcw1","Sprayer Farmjet PS 8 L","Sprayer Farmjet PS 8 L","Box","2026-03-26 02:32:40.715","2026-05-18 00:12:14.765","FAR-SY-027",8000,"ml","FAR-SY-027",4
+"cmn6uxogq0043l4043wogy07z","Sprayer Fertilizer","Sprayer Fertilizer","Box","2026-03-26 02:32:40.73","2026-05-18 00:12:14.769","FAR-SY-033",,,"FAR-SY-033",1
+"cmn6uxoge0040l404irpyca86","Sprayer Kocor 20 L","Sprayer Kocor 20 L","PCS","2026-03-26 02:32:40.719","2026-05-18 00:12:14.782","FAR-SY-029",20000,"ml","FAR-SY-029",0
+"cmn6uxojw004yl404s5fx1z5y","Sweeper 480 SL 1 L","Sweeper 480 SL 1 L","Btl","2026-03-26 02:32:40.844","2026-05-18 00:12:14.883","HB-013",1000,"ml","HB-013",438
+"cmn6uxojb004sl404bjjuwxrb","Talstar 25 EC 250 ml","Talstar 25 EC 250 ml","Btl","2026-03-26 02:32:40.823","2026-05-18 00:12:14.93","FMC-IK-185",250,"ml","FMC-IK-185",216
+"cmn6uxofv003vl404hu0ehvgv","Tape Tool","Tape Tool","PCS","2026-03-26 02:32:40.699","2026-05-18 00:12:14.962","FAR-SP-093",,,"FAR-SP-093",40
+"cmn6uxoib004il404oioqek5r","Thionic 76 WG 1 kg","Thionic 76 WG 1 kg","Bks","2026-03-26 02:32:40.787","2026-05-18 00:12:14.988","FG-020",1000,"gr","FG-020",0
+"cmn6uxoiq004ml404uvz613um","Ti-Gold 10WP 25 gr","Ti-Gold 10WP 25 gr","Bks","2026-03-26 02:32:40.802","2026-05-18 00:12:14.993","FMC-HB-044",25,"gr","FMC-HB-044",1444
+"cmn6uxodo003jl404e3xsxg24","Trigger 13,8L & 16 L Elektrik & 2in 1","Trigger 13,8L & 16 L Elektrik & 2in 1","PCS","2026-03-26 02:32:40.621","2026-05-18 00:12:15.041","FAR-SP-081",,,"FAR-SP-081",0
+"cmn6uxojz004zl404ieofic0p","Zenus 276 SL 1 L","Zenus 276 SL 1 L","Btl","2026-03-26 02:32:40.848","2026-05-18 00:12:15.212","HB-016",1000,"ml","HB-016",1904
+"cmn6uxoje004tl4040r7k1tpa","nn Admit 50 WP 50 gr","nn Admit 50 WP 50 gr","Bks","2026-03-26 02:32:40.827","2026-05-18 00:12:15.262","GLO-NN-064",50,"gr","GLO-NN-064",115
+"cmnh57xb6009wii04y9jxmuu7","nn Basmirata 15 WP 50 gr",,"PCS","2026-04-02 07:18:16.674","2026-05-18 00:12:15.266","ALT-NN-077",50,"gr","ALT-NN-077",0
+"cmn6uxofm003tl404cw1kyira","6 Holes Nozzle Blue Cap","6 Holes Nozzle Blue Cap","PCS","2026-03-26 02:32:40.69","2026-05-18 00:12:11.75","FAR-SP-091",,,"FAR-SP-091",0
+"cmn6uxogu0044l4048qhyolvd","Alat Kocor Pupuk Manual 20 L","Alat Kocor Pupuk Manual 20 L","Box","2026-03-26 02:32:40.734","2026-05-18 00:12:12.003","FAR-SY-043",20000,"ml","FAR-SY-043",8
+"cmn6uxoh50047l404ck8mqhel","Alat Tanam Jagung 8 Mata","Alat Tanam Jagung 8 Mata","PCS","2026-03-26 02:32:40.746","2026-05-18 00:12:12.011","FAR-SY-046",,,"FAR-SY-046",2
+"cmn6uxogy0045l4049oip71g1","Alat Tanam Single 1 Mata","Alat Tanam Single 1 Mata","PCS","2026-03-26 02:32:40.738","2026-05-18 00:12:12.015","FAR-SY-044",,,"FAR-SY-044",14
+"cmn6uxoit004nl404nawvd93d","Ally 20 WG 5 gr","Ally 20 WG 5 gr","Bks","2026-03-26 02:32:40.805","2026-05-18 00:12:12.032","FMC-HB-062",5,"gr","FMC-HB-062",140
+"cmn6uxokm0055l4048v5v4cpq","Aluminium Sulfate 17% 50 Kg","Aluminium Sulfate 17% 50 Kg","Sak","2026-03-26 02:32:40.871","2026-05-18 00:12:12.038","IAI-PK-070",50000,"gr","IAI-PK-070",0
+"cmn6uxokq0056l404iytjmhz1","Biothion 200 EC 1 L","Biothion 200 EC 1 L","Btl","2026-03-26 02:32:40.875","2026-05-18 00:12:12.439","IK-009",1000,"ml","IK-009",111
+"cmn6uxodw003ll4045mhcu44e","Double Nozzle Blue Cap","Double Nozzle Blue Cap","PCS","2026-03-26 02:32:40.628","2026-05-18 00:12:12.815","FAR-SP-083",,,"FAR-SP-083",0
+"cmn6uxoji004ul4044o18jvtd","Flash 100 ml","Flash 100 ml","Btl","2026-03-26 02:32:40.83","2026-05-18 00:12:12.932","GOL-PPC-007",100,"ml","GOL-PPC-007",0
+"cmn6uxoj0004pl404y4v1yahs","Furadan 3 GR 2 kg","Furadan 3 GR 2 kg","Bks","2026-03-26 02:32:40.812","2026-05-18 00:12:12.978","FMC-IK-074",2000,"gr","FMC-IK-074",520
+"cmn6uxok70051l40406ivopv3","Glufo 150 SL 1 Lt","Glufo 150 SL 1 Lt","Btl","2026-03-26 02:32:40.856","2026-05-18 00:12:13.043","HB-027",1000,"ml","HB-027",533
+"cmn6uxogi0041l404r51e578v","Hand Sprayer Farmjet 2 L","Hand Sprayer Farmjet 2 L","PCS","2026-03-26 02:32:40.723","2026-05-18 00:12:13.094","FAR-SY-030",2000,"ml","FAR-SY-030",1
+"cmn6uxohk004bl404zgb3yi8g","Hand Sprayer Tangguh 2 L","Hand Sprayer Tangguh 2 L","PCS","2026-03-26 02:32:40.761","2026-05-18 00:12:13.097","FAR-SY-052",2000,"ml","FAR-SY-052",439
+"cmn6uxoki0054l4041oaa625i","KNO3 Crystal DGW 1 Kg","KNO3 Crystal DGW 1 Kg","Bks","2026-03-26 02:32:40.867","2026-05-18 00:12:13.256","HEX-PK-036",1000,"gr","HEX-PK-036",0
+"cmn6uxohs004dl404a2kchhvx","Logic 70 WP 200 gr","Logic 70 WP 200 gr","Bks","2026-03-26 02:32:40.769","2026-05-18 00:12:13.461","FG-007",200,"gr","FG-007",233
+"cmn6uxokf0053l404cncnxcon","NPK DGW 16+16+16+TE 1 kg","NPK DGW 16+16+16+TE 1 kg","Bks","2026-03-26 02:32:40.863","2026-05-18 00:12:13.849","HEX-PK-035",1000,"gr","HEX-PK-035",0
+"cmn6uxoii004kl4046wpco8y9","Nargis 50 WP 10 gr","Nargis 50 WP 10 gr","Bks","2026-03-26 02:32:40.795","2026-05-18 00:12:13.9","FG-051",10,"gr","FG-051",1618
+"cmn6uxohw004el404yr648ktq","Nefos 45 WP 500 gr","Nefos 45 WP 500 gr","Bks","2026-03-26 02:32:40.772","2026-05-18 00:12:13.929","FG-009",500,"gr","FG-009",62
+"cmn6uxonb005vl4043ajwxyld","Metsulindo Plus 80 WP 40 gr","Metsulindo Plus 80 WP 40 gr","Bks","2026-03-26 02:32:40.967","2026-05-18 00:12:13.586","MKD-HB-038",40,"gr","MKD-HB-038",10200
+"cmn6uxolc005cl4040hbc6a9k","Meurtieur 30 EC 1 L","Meurtieur 30 EC 1 L","Btl","2026-03-26 02:32:40.897","2026-05-18 00:12:13.59","IK-027",1000,"ml","IK-027",2197
+"cmn6uxonm005yl404bc1gpky6","Mulsa Badak 50 cm 17 kg","Mulsa Badak 50 cm 17 kg","Rol","2026-03-26 02:32:40.979","2026-05-18 00:12:13.64","ML-004",17000,"gr","ML-004",0
+"cmn6uxoo60063l404tubqufm8","Mulsa Garpu 60 cm 8 Kg","Mulsa Garpu 60 cm 8 Kg","Rol","2026-03-26 02:32:40.999","2026-05-18 00:12:13.657","MMI-ML-073",8000,"gr","MMI-ML-073",0
+"cmn6uxonr005zl4042huzs3cs","Mulsa Koala 40 cm 17 kg","Mulsa Koala 40 cm 17 kg","Rol","2026-03-26 02:32:40.983","2026-05-18 00:12:13.661","ML-015",17000,"gr","ML-015",0
+"cmn6uxonz0061l404ztabb9ru","Mulsa MMI 50 cm @ 8 Kg","Mulsa MMI 50 cm @ 8 Kg","Rol","2026-03-26 02:32:40.991","2026-05-18 00:12:13.754","MMI-ML-055",8000,"gr","MMI-ML-055",0
+"cmn6uxonv0060l404b9kg813l","Mulsa Naga 50 cm 17 kg","Mulsa Naga 50 cm 17 kg","Rol","2026-03-26 02:32:40.987","2026-05-18 00:12:13.782","ML-029",17000,"gr","ML-029",0
+"cmn6uxood0065l404givm72zn","Mulsa Tangguh 50 cm 8 Kg","Mulsa Tangguh 50 cm 8 Kg","Rol","2026-03-26 02:32:41.006","2026-05-18 00:12:13.806","MMI-ML-077",8000,"gr","MMI-ML-077",0
+"cmn6uxon7005ul4040a6vme4j","NPK Mutiara Grower 1 kg","NPK Mutiara Grower 1 kg","Bks","2026-03-26 02:32:40.963","2026-05-18 00:12:13.876","MER-PK-049",1000,"gr","MER-PK-049",0
+"cmn6uxolg005dl4046qhb58fy","Niten 100 SL 1 L","Niten 100 SL 1 L","Btl","2026-03-26 02:32:40.9","2026-05-18 00:12:13.959","IK-031",1000,"ml","IK-031",1166
+"cmn6uxor8006vl4047qy2u0jv","Nugrass 69 EC 250 ml","Nugrass 69 EC 250 ml","Btl","2026-03-26 02:32:41.108","2026-05-18 00:12:14.081","NUF-HB-067",250,"ml","NUF-HB-067",110
+"cmn6uxop5006cl404prnxpevr","PAG 500 ml","PAG 500 ml","Btl","2026-03-26 02:32:41.034","2026-05-18 00:12:14.102","MSI-HB-059",500,"ml","MSI-HB-059",0
+"cmn6uxolk005el404pnq5i3mv","Polydor 25 EC 100 ml","Polydor 25 EC 100 ml","Btl","2026-03-26 02:32:40.904","2026-05-18 00:12:14.222","IK-035",100,"ml","IK-035",1881
+"cmn6uxomw005rl404qslyhifb","Pupuk ZnSO4","Pupuk ZnSO4","Sak","2026-03-26 02:32:40.952","2026-05-18 00:12:14.306","MAK-PK-066",25000,"gr","MAK-PK-066",0
+"cmn6uxor4006ul404rgix5yw7","Roundup 486 SL 200 ml","Roundup 486 SL 200 ml","Btl","2026-03-26 02:32:41.105","2026-05-18 00:12:14.407","NUF-HB-031",200,"ml","NUF-HB-031",2053
+"cmn6uxoln005fl404yrkasc47","Scud 50 EC 400 ml","Scud 50 EC 400 ml","Btl","2026-03-26 02:32:40.908","2026-05-18 00:12:14.462","IK-038",400,"ml","IK-038",30
+"cmn6uxom2005jl404yv63rwv7","Senator 200 EC 500 ml","Senator 200 EC 500 ml","Btl","2026-03-26 02:32:40.923","2026-05-18 00:12:14.483","IK-102",500,"ml","IK-102",36
+"cmn6uxorr006zl404pwm87nfu","Sidamin 865 SL 1 L","Sidamin 865 SL 1 L","Btl","2026-03-26 02:32:41.127","2026-05-18 00:12:14.52","PET-HB-087",1000,"ml","PET-HB-087",30
+"cmn6uxolr005gl404io4p83dz","Spectrone 250/200 EC 100 ml","Spectrone 250/200 EC 100 ml","Btl","2026-03-26 02:32:40.911","2026-05-18 00:12:14.638","IK-042",100,"ml","IK-042",0
+"cmn6uxolu005hl404jxgk0691","Stadium 18 EC 1 L","Stadium 18 EC 1 L","Btl","2026-03-26 02:32:40.915","2026-05-18 00:12:14.816","IK-045",1000,"ml","IK-045",948
+"cmn6uxoly005il404wdjxclm0","Starban 585 EC 1 L","Starban 585 EC 1 L","Btl","2026-03-26 02:32:40.918","2026-05-18 00:12:14.836","IK-049",1000,"ml","IK-049",10899
+"cmn6uxomg005nl4047t07wgqe","Ulate 250 ml","Ulate 250 ml","Btl","2026-03-26 02:32:40.937","2026-05-18 00:12:15.079","KAG-IK-225",250,"ml","KAG-IK-225",60
+"cmn6uxoot0069l4046mv127vc","Victory Biru 75 WP","Victory Biru 75 WP","PCS","2026-03-26 02:32:41.022","2026-05-18 00:12:15.106","MSI-FG-056",1000,"gr","MSI-FG-056",118
+"cmn6uxoox006al404c5451wwx","Victory Kuning 80 WP","Victory Kuning 80 WP","PCS","2026-03-26 02:32:41.026","2026-05-18 00:12:15.11","MSI-FG-057",1000,"gr","MSI-FG-057",350
+"cmn6uxooi0066l404s9x4ql2w","Wendry 75 WP 500 gram","Wendry 75 WP 500 gram","Bks","2026-03-26 02:32:41.01","2026-05-18 00:12:15.135","MMU-FG-099",500,"gr","MMU-FG-099",0
+"cmn6uxomz005sl404h8cc76xp","ZnSO4 Zinc Sulphate 22% 25 kg","ZnSO4 Zinc Sulphate 22% 25 kg","Sak","2026-03-26 02:32:40.956","2026-05-18 00:12:15.25","MAK-PK-069",25000,"gr","MAK-PK-069",0
+"cmn6uxorg006xl4043hldeaxy","nn Gibgro 10 SP 1 gr","nn Gibgro 10 SP 1 gr","PCS","2026-03-26 02:32:41.116","2026-05-18 00:12:15.358","NUF-NN-023",1,"gr","NUF-NN-023",7704
+"cmn6uxork006yl404kkoam9r1","nn ZPT Atonik 6.0L 250 ml","nn ZPT Atonik 6.0L 250 ml","Btl","2026-03-26 02:32:41.12","2026-05-18 00:12:15.476","OMA-NN-040",250,"ml","OMA-NN-040",0
+"cmn6uxop9006dl4048gr2eqz4","Benfuron 12/18 WP 25 gr","Benfuron 12/18 WP 25 gr","Bks","2026-03-26 02:32:41.038","2026-05-18 00:12:12.221","MSI-HB-061",25,"gr","MSI-HB-061",0
+"cmn6uxom6005kl404m5dg8hch","Biocis 25 EC 400 ml","Biocis 25 EC 400 ml","Btl","2026-03-26 02:32:40.926","2026-05-18 00:12:12.338","IK-104",400,"ml","IK-104",60
+"cmn6uxom9005ll4044rvna997","Biogent 50 SC 100 ml","Biogent 50 SC 100 ml","Btl","2026-03-26 02:32:40.93","2026-05-18 00:12:12.362","IK-143",100,"ml","IK-143",6933
+"cmn6uxoop0068l4045635o09z","Crowen 113 EC 5 L","Crowen 113 EC 5 L","Btl","2026-03-26 02:32:41.018","2026-05-18 00:12:12.643","MMU-IK-223",5000,"ml","MMU-IK-223",0
+"cmn6uxoky0058l404qk2ns4pw","Deltaking 565 EC 500 ml","Deltaking 565 EC 500 ml","Btl","2026-03-26 02:32:40.882","2026-05-18 00:12:12.727","IK-015",500,"ml","IK-015",0
+"cmn6uxopp006hl404bbu8lwy4","Fortune 1 Kg","Fortune 1 Kg","Bks","2026-03-26 02:32:41.053","2026-05-18 00:12:12.936","MTA-PK-091",1000,"gr","MTA-PK-091",278
+"cmn6uxomd005ml404497t4htv","Fujiwan 400 EC 500 ml","Fujiwan 400 EC 500 ml","Btl","2026-03-26 02:32:40.933","2026-05-18 00:12:12.97","IND-FG-041",500,"ml","IND-FG-041",57
+"cmn6uxomk005ol404wgf8vdg2","Gandasil B (Buah) 100 gr","Gandasil B (Buah) 100 gr","Bks","2026-03-26 02:32:40.941","2026-05-18 00:12:12.982","KAL-PK-014",100,"gr","KAL-PK-014",1801
+"cmn6uxomo005pl404yc4jefmd","Gandasil D (Daun) 100 gr","Gandasil D (Daun) 100 gr","Bks","2026-03-26 02:32:40.945","2026-05-18 00:12:12.99","KAL-PK-016",100,"gr","KAL-PK-016",1829
+"cmn6uxol5005al404ed02obs0","Hopper 500 EC 400 ml","Hopper 500 EC 400 ml","Btl","2026-03-26 02:32:40.889","2026-05-18 00:12:13.154","IK-020",400,"ml","IK-020",509
+"cmn6uxopl006gl40477chprbu","Hummer 1 Kg","Hummer 1 Kg","Bks","2026-03-26 02:32:41.05","2026-05-18 00:12:13.161","MTA-PK-090",1000,"gr","MTA-PK-090",586
+"cmn6uxope006el4042tfxjgry","King Cobra 500 ML","King Cobra 500 ML","Btl","2026-03-26 02:32:41.042","2026-05-18 00:12:13.316","MST-PPC-006",500,"ml","MST-PPC-006",566
+"cmn6uxonf005wl404vclhq9l0","Lannate 25 WP 15 gr","Lannate 25 WP 15 gr","Bks","2026-03-26 02:32:40.971","2026-05-18 00:12:13.391","MKD-IK-077",15,"gr","MKD-IK-077",2865
+"cmn6uxorc006wl404x5est7xt","Lindomin 865 SL 400 ml","Lindomin 865 SL 400 ml","Btl","2026-03-26 02:32:41.112","2026-05-18 00:12:13.452","NUF-HB-099",400,"ml","NUF-HB-099",315
+"cmn6uxon3005tl404m3ajvzjk","Liontin Stick 1 L","Liontin Stick 1 L","Btl","2026-03-26 02:32:40.959","2026-05-18 00:12:13.456","MAN-PPC-001",1000,"ml","MAN-PPC-001",0
+"cmn6uxoph006fl404urjneln0","Manohara 1 Kg","Manohara 1 Kg","Bks","2026-03-26 02:32:41.046","2026-05-18 00:12:13.502","MTA-PK-067",1000,"gr","MTA-PK-067",0
+"cmn6uxopw006jl404rjzsflm7","Matahara NPK Cair 1 L","Matahara NPK Cair 1 L","Btl","2026-03-26 02:32:41.061","2026-05-18 00:12:13.555","MTA-PK-093",1000,"ml","MTA-PK-093",52
+"cmn6uxonj005xl404gqwp99ml","Metindo 25 WP 500 gr","Metindo 25 WP 500 gr","PCS","2026-03-26 02:32:40.975","2026-05-18 00:12:13.57","MKD-IK-095",500,"gr","MKD-IK-095",0
+"cmn6uxoxx008nl404r14i7gbe","Magnesium Sulfate Pak Tani 1 Kg","Magnesium Sulfate Pak Tani 1 Kg","Bks","2026-03-26 02:32:41.349","2026-05-18 00:12:13.491","SAP-PK-052",1000,"gr","SAP-PK-052",0
+"cmn6uxox4008fl40494kh91ah","Marxone 300 SL 1 Liter","Marxone 300 SL 1 Liter","Btl","2026-03-26 02:32:41.32","2026-05-18 00:12:13.543","SAP-HB-072",1000,"ml","SAP-HB-072",160
+"cmn6uxouo007rl404mr904r9p","Mip Cinta 50 WP 100 Gr","Mip Cinta 50 WP 100 Gr","Bks","2026-03-26 02:32:41.232","2026-05-18 00:12:13.606","PTR-IK-221",100,"gr","PTR-IK-221",190
+"cmn6uxos90074l404uyq68g93","NPK Makrostar 1 kg","NPK Makrostar 1 kg","Rol","2026-03-26 02:32:41.146","2026-05-18 00:12:13.864","PK-006",1000,"gr","PK-006",6
+"cmn6uxou9007nl404sjw712e4","Naga 500 EC 400 ml","Naga 500 EC 400 ml","Btl","2026-03-26 02:32:41.218","2026-05-18 00:12:13.896","PTR-IK-082",400,"ml","PTR-IK-082",0
+"cmn6uxosg0076l404aagdui83","Nitrea 50 Kg","Nitrea 50 Kg","Rol","2026-03-26 02:32:41.153","2026-05-18 00:12:13.983","PKU-PK-022",50000,"gr","PKU-PK-022",0
+"cmn6uxoso0078l404pgqne8ku","Nitrea Prill 50 Kg","Nitrea Prill 50 Kg","Sak","2026-03-26 02:32:41.16","2026-05-18 00:12:13.991","PKU-PK-056",50000,"gr","PKU-PK-056",0
+"cmn6uxowk0089l4042f23zrjs","Otella 100 gr","Otella 100 gr","Bks","2026-03-26 02:32:41.3","2026-05-18 00:12:14.089","SAK-IK-199",100,"gr","SAK-IK-199",492
+"cmn6uxory0071l404k79297ih","Petrocas 50 Kg","Petrocas 50 Kg","Sak","2026-03-26 02:32:41.134","2026-05-18 00:12:14.137","PI-PK-062",50000,"gr","PI-PK-062",0
+"cmn6uxouv007tl4047fxifi1w","Petrokum 0,005 BB 100 gr","Petrokum 0,005 BB 100 gr","Bks","2026-03-26 02:32:41.239","2026-05-18 00:12:14.141","PTR-RD-001",100,"gr","PTR-RD-001",2017
+"cmn6uxox7008gl404ym9t2u97","Posat 480 SL 1 Liter","Posat 480 SL 1 Liter","Btl","2026-03-26 02:32:41.324","2026-05-18 00:12:14.241","SAP-HB-073",1000,"ml","SAP-HB-073",105
+"cmn6uxosd0075l404cv80kegg","Propus 250 ml","Propus 250 ml","Btl","2026-03-26 02:32:41.149","2026-05-18 00:12:14.286","PK-009",250,"ml","PK-009",283
+"cmn6uxov3007vl4049let9f1s","Pupuk","Pupuk","pcs","2026-03-26 02:32:41.247","2026-05-18 00:12:14.302","Pupuk",,,"Pupuk",0
+"cmn6uxox1008el404pg1c5jg2","Sankill 530/60 EC 100 Ml","Sankill 530/60 EC 100 Ml","Btl","2026-03-26 02:32:41.317","2026-05-18 00:12:14.415","SAN-IK-220",100,"ml","SAN-IK-220",45
+"cmn6uxoty007kl404nhsm8svf","Saturn-D 6 gr @ 2 kg","Saturn-D 6 gr @ 2 kg","Bks","2026-03-26 02:32:41.206","2026-05-18 00:12:14.435","PTR-HB-070",2000,"gr","PTR-HB-070",110
+"cmn6uxott007jl404hrzh6mfx","See Top 525 SL 1 L","See Top 525 SL 1 L","Btl","2026-03-26 02:32:41.202","2026-05-18 00:12:14.47","PTR-HB-058",1000,"ml","PTR-HB-058",1
+"cmn6uxou2007ll404p6nvd0z8","Sidafos 480 SL 1 L","Sidafos 480 SL 1 L","Btl","2026-03-26 02:32:41.21","2026-05-18 00:12:14.506","PTR-HB-071",1000,"ml","PTR-HB-071",10
+"cmn6uxot6007dl404nac1utvv","Sprayer 2 In 1 BA - 21 - 16 L","Sprayer 2 In 1 BA - 21 - 16 L","Box","2026-03-26 02:32:41.178","2026-05-18 00:12:14.683","POL-SY-035",16000,"ml","POL-SY-035",1
+"cmn6uxovh007zl404ynjyyk81","Sprayer 2 in 1 Taniku 16 - T2 - 16 L","Sprayer 2 in 1 Taniku 16 - T2 - 16 L","Box","2026-03-26 02:32:41.262","2026-05-18 00:12:14.696","RAJ-SY-042",16000,"ml","RAJ-SY-042",0
+"cmn6uxot9007el404squ9arid","Sprayer Elektrik BA - ELC - 16 L","Sprayer Elektrik BA - ELC - 16 L","Box","2026-03-26 02:32:41.182","2026-05-18 00:12:14.716","POL-SY-036",16000,"ml","POL-SY-036",9
+"cmn6uxov7007wl404tcr2414n","Sprayer Elektrik Nokaku 16 - N1 - 16 L","Sprayer Elektrik Nokaku 16 - N1 - 16 L","Box","2026-03-26 02:32:41.251","2026-05-18 00:12:14.72","RAJ-SY-039",16000,"ml","RAJ-SY-039",1
+"cmn6uxove007yl404tajipyef","Sprayer Elektrik Taniku 16 - T1 - 16 L","Sprayer Elektrik Taniku 16 - T1 - 16 L","Box","2026-03-26 02:32:41.258","2026-05-18 00:12:14.738","RAJ-SY-041",16000,"ml","RAJ-SY-041",0
+"cmn6uxouh007pl4040yqxnx9a","Teballo 250 SL 250 ml","Teballo 250 SL 250 ml","Btl","2026-03-26 02:32:41.225","2026-05-18 00:12:14.972","PTR-IK-109",250,"ml","PTR-IK-109",0
+"cmn6uxour007sl404naq5l9xq","Urea Petro 50 kg","Urea Petro 50 kg","Sak","2026-03-26 02:32:41.236","2026-05-18 00:12:15.092","PTR-PK-027",50000,"gr","PTR-PK-027",0
+"cmn6uxosz007bl4042p20cfk3","Z Rod Polar Sprayer Manual BA-ML-16L","Z Rod Polar Sprayer Manual BA-ML-16L","Box","2026-03-26 02:32:41.171","2026-05-18 00:12:15.168","POL-SP-096",,,"POL-SP-096",0
+"cmn6uxo7v0020l404gahnjlsv","Ambition 1 L","Ambition 1 L","Btl","2026-03-26 02:32:40.412","2026-05-18 00:12:12.043","BYR-PK-024",1000,"ml","BYR-PK-024",303
+"cmn6uxos20072l40488ybmoku","Belko 200 ml","Belko 200 ml","Btl","2026-03-26 02:32:41.138","2026-05-18 00:12:12.202","PK-001",200,"ml","PK-001",8886
+"cmn6uxotd007fl404c4mn8fzu","Benih Padi Hibrida F-1 Mapan P-05 1 Kg","Benih Padi Hibrida F-1 Mapan P-05 1 Kg","Bks","2026-03-26 02:32:41.186","2026-05-18 00:12:12.239","PRI-BB-024",1000,"gr","PRI-BB-024",0
+"cmn6uxos50073l404ktl7vy5f","Biomax 1 L","Biomax 1 L","Btl","2026-03-26 02:32:41.142","2026-05-18 00:12:12.382","PK-003",1000,"ml","PK-003",63
+"cmn6uxoy1008ol404n6klglv4","CN-G 1 Kg","CN-G 1 Kg","Bks","2026-03-26 02:32:41.353","2026-05-18 00:12:12.498","SAP-PK-096",1000,"gr","SAP-PK-096",159
+"cmn6uxowu008cl4040n93qus8","CY-Late 40 SP 15 gr","CY-Late 40 SP 15 gr","Bks","2026-03-26 02:32:41.31","2026-05-18 00:12:12.505","SAK-IK-206",15,"gr","SAK-IK-206",4450
+"cmn6uxown008al404qnq4ts59","Cash Flow 500 ml","Cash Flow 500 ml","Btl","2026-03-26 02:32:41.304","2026-05-18 00:12:12.569","SAK-IK-201",500,"ml","SAK-IK-201",100
+"cmn6uxoy4008pl404h0cgthq1","Conasol 50 SC 1 L","Conasol 50 SC 1 L","Btl","2026-03-26 02:32:41.357","2026-05-18 00:12:12.596","SAR-FG-082",1000,"ml","SAR-FG-082",9
+"cmn6uxow40085l404kzpf84fg","D'mectin 530 SL 250 ML","D'mectin 530 SL 250 ML","Btl","2026-03-26 02:32:41.285","2026-05-18 00:12:12.66","SAK-IK-161",250,"ml","SAK-IK-161",156
+"cmn6uxouk007ql4042x7382k5","Diazinon 10 Gr 1 Kg","Diazinon 10 Gr 1 Kg","Bks","2026-03-26 02:32:41.229","2026-05-18 00:12:12.777","PTR-IK-140",1000,"gr","PTR-IK-140",0
+"cmn6uxoxi008jl4046th6grcw","Fertiphos Hijau Pak Tani 50 kg.","Fertiphos Hijau Pak Tani 50 kg.","Bks","2026-03-26 02:32:41.334","2026-05-18 00:12:12.92","SAP-PK-041.",50000,"gr","SAP-PK-041.",0
+"cmn6uxoxq008ll404e2g95qb9","Fertiphos Kuning Pak Tani 50 kg.","Fertiphos Kuning Pak Tani 50 kg.","Bks","2026-03-26 02:32:41.342","2026-05-18 00:12:12.928","SAP-PK-042.",50000,"gr","SAP-PK-042.",0
+"cmn6uxowg0088l40447uwraw0","Fra Red 500 ml","Fra Red 500 ml","Btl","2026-03-26 02:32:41.296","2026-05-18 00:12:12.953","SAK-IK-196",500,"ml","SAK-IK-196",93
+"cmn6uxowq008bl4041mbni1u6","Free-Gel 250 ml","Free-Gel 250 ml","Btl","2026-03-26 02:32:41.307","2026-05-18 00:12:12.965","SAK-IK-204",250,"ml","SAK-IK-204",102
+"cmn6uxotl007hl404476rnwqy","Gempur 480 SL 1 L","Gempur 480 SL 1 L","Btl","2026-03-26 02:32:41.193","2026-05-18 00:12:13.018","PTR-HB-033",1000,"ml","PTR-HB-033",101
+"cmn6uxp5500all404wm1azyfh","Gesper Tali","Gesper Tali","PCS","2026-03-26 02:32:41.609","2026-05-18 00:12:13.035","SP-071",,,"SP-071",0
+"cmn6uxovp0081l404pqkhjy18","Hand Sprayer Taniku TK 1000 - 1 L","Hand Sprayer Taniku TK 1000 - 1 L","PCS","2026-03-26 02:32:41.269","2026-05-18 00:12:13.101","RAJ-SY-051",1000,"ml","RAJ-SY-051",0
+"cmn6uxovl0080l404z7m1brx3","Hand Sprayer Taniku TK 2 CD - 2 L","Hand Sprayer Taniku TK 2 CD - 2 L","PCS","2026-03-26 02:32:41.265","2026-05-18 00:12:13.105","RAJ-SY-050",2000,"ml","RAJ-SY-050",0
+"cmn6uxotp007il404titn4o98","Kayabas 555 SC 500 ml","Kayabas 555 SC 500 ml","Btl","2026-03-26 02:32:41.198","2026-05-18 00:12:13.299","PTR-HB-047",500,"ml","PTR-HB-047",5
+"cmn6uxoxb008hl404eacrymtn","Kozima 50 SC 80 Ml","Kozima 50 SC 80 Ml","Btl","2026-03-26 02:32:41.327","2026-05-18 00:12:13.375","SAP-IK-213",80,"ml","SAP-IK-213",55
+"cmn6uxp4u00ail404k7lytljl","Klem Pipa Semprot Manual","Klem Pipa Semprot Manual","PCS","2026-03-26 02:32:41.598","2026-05-18 00:12:13.333","SP-065",,,"SP-065",25
+"cmn6uxp2w009zl4047cyk2wdy","Klip Plastik","Klip Plastik","PCS","2026-03-26 02:32:41.528","2026-05-18 00:12:13.358","SP-033",,,"SP-033",13
+"cmn6uxp10009hl404abtbexw1","Knop Kontrol Tekanan","Knop Kontrol Tekanan","PCS","2026-03-26 02:32:41.46","2026-05-18 00:12:13.362","SP-007",,,"SP-007",133
+"cmn6uxp14009il404jtod4zwq","Knop Power","Knop Power","PCS","2026-03-26 02:32:41.464","2026-05-18 00:12:13.366","SP-008",,,"SP-008",5
+"cmn6uxp4q00ahl404os9afjce","Mur Pengunci Silinder","Mur Pengunci Silinder","PCS","2026-03-26 02:32:41.595","2026-05-18 00:12:13.817","SP-064",,,"SP-064",25
+"cmn6uxp0k009dl404wy355pr4","Nosel Herbisida","Nosel Herbisida","PCS","2026-03-26 02:32:41.444","2026-05-18 00:12:14.014","SP-002",,,"SP-002",72
+"cmn6uxp2i009vl404az1jv330","Nosel N-04","Nosel N-04","PCS","2026-03-26 02:32:41.514","2026-05-18 00:12:14.024","SP-027",,,"SP-027",45
+"cmn6uxp2l009wl4040decd4vw","Nosel N-06","Nosel N-06","PCS","2026-03-26 02:32:41.518","2026-05-18 00:12:14.029","SP-029",,,"SP-029",114
+"cmn6uxp2a009tl404teh4l465","Nosel N-16","Nosel N-16","PCS","2026-03-26 02:32:41.506","2026-05-18 00:12:14.033","SP-020",,,"SP-020",93
+"cmn6uxp0g009cl4047smozn7j","Nosel Semprot Tunggal MP-16","Nosel Semprot Tunggal MP-16","PCS","2026-03-26 02:32:41.44","2026-05-18 00:12:14.041","SP-001",,,"SP-001",66
+"cmn6uxp3t00a8l404d2xivw5z","Nozel N88 (Mesin)","Nozel N88 (Mesin)","PCS","2026-03-26 02:32:41.562","2026-05-18 00:12:14.077","SP-049",,,"SP-049",18
+"cmn6uxp4c00adl404e2205rmp","Pelor Kaca","Pelor Kaca","PCS","2026-03-26 02:32:41.58","2026-05-18 00:12:14.114","SP-059",,,"SP-059",71
+"cmn6uxp26009sl404yrfur3za","Pengisi Daya","Pengisi Daya","PCS","2026-03-26 02:32:41.503","2026-05-18 00:12:14.133","SP-019",,,"SP-019",20
+"cmn6uxp3f00a4l4047anvaeyk","Pipa Semprot E16-A","Pipa Semprot E16-A","PCS","2026-03-26 02:32:41.547","2026-05-18 00:12:14.166","SP-045",,,"SP-045",0
+"cmn6uxp2e009ul404n2gbu7bg","Pipa Semprot Elektrik","Pipa Semprot Elektrik","PCS","2026-03-26 02:32:41.51","2026-05-18 00:12:14.17","SP-026",,,"SP-026",0
+"cmn6uxp4000aal404eevxc41l","Pipa Semprot Manual","Pipa Semprot Manual","PCS","2026-03-26 02:32:41.569","2026-05-18 00:12:14.174","SP-056",,,"SP-056",0
+"cmn6uxp3c00a3l404to1gyqru","Pompa Mini 2 in 1","Pompa Mini 2 in 1","PCS","2026-03-26 02:32:41.544","2026-05-18 00:12:14.233","SP-044",,,"SP-044",37
+"cmn6uxp1r009ol404w7vbvd92","Pompa mini elektrik","Pompa mini elektrik","PCS","2026-03-26 02:32:41.487","2026-05-18 00:12:14.237","SP-015",,,"SP-015",30
+"cmn6uxow10084l404jgu43pn7","Red Bell 300 SC 100 ml","Red Bell 300 SC 100 ml","Btl","2026-03-26 02:32:41.281","2026-05-18 00:12:14.321","SAK-FG-075",100,"ml","SAK-FG-075",441
+"cmn6uxp4n00agl404w3nv44j7","Ring Fiber","Ring Fiber","PCS","2026-03-26 02:32:41.591","2026-05-18 00:12:14.38","SP-062",,,"SP-062",170
+"cmn6uxp3800a2l4041adptru1","Saringan kecil dalam tangki","Saringan kecil dalam tangki","PCS","2026-03-26 02:32:41.54","2026-05-18 00:12:14.427","SP-043",,,"SP-043",413
+"cmn6uxp4j00afl404tvn91w6z","Silinder","Silinder","PCS","2026-03-26 02:32:41.588","2026-05-18 00:12:14.524","SP-061",,,"SP-061",112
+"cmn6uxoyt008wl404oytebqa8","Sinabintop 400 SC 100 ml","Sinabintop 400 SC 100 ml","Btl","2026-03-26 02:32:41.381","2026-05-18 00:12:14.529","SIN-FG-086",100,"ml","SIN-FG-086",1295
+"cmn6uxozp0095l404pxw9joku","Sinagrowth 20 TB 5 gr","Sinagrowth 20 TB 5 gr","PCS","2026-03-26 02:32:41.413","2026-05-18 00:12:14.539","SIN-PK-025",5,"gr","SIN-PK-025",4885
+"cmn6uxoza0091l404q2kic93u","Sinakill 18/32 EC 250 ml","Sinakill 18/32 EC 250 ml","Btl","2026-03-26 02:32:41.398","2026-05-18 00:12:14.547","SIN-IK-136",250,"ml","SIN-IK-136",196
+"cmn6uxozw0097l404aspvjqm1","Sinamore 100 ml","Sinamore 100 ml","Btl","2026-03-26 02:32:41.421","2026-05-18 00:12:14.551","SIN-PK-064",100,"ml","SIN-PK-064",1833
+"cmn6uxoyi008tl404qhxdtcna","Sinasen 300 SC 250 ml","Sinasen 300 SC 250 ml","Btl","2026-03-26 02:32:41.371","2026-05-18 00:12:14.56","SIN-FG-079",250,"ml","SIN-FG-079",907
+"cmn6uxozs0096l404o5xwyxvy","Sinazol 100 gr","Sinazol 100 gr","Bks","2026-03-26 02:32:41.417","2026-05-18 00:12:14.566","SIN-PK-063",100,"gr","SIN-PK-063",772
+"cmn6uxp1u009pl404bnbcxikc","Slot Baterai","Slot Baterai","PCS","2026-03-26 02:32:41.491","2026-05-18 00:12:14.599","SP-016",,,"SP-016",125
+"cmn6uxp4400abl404b2ktdq7j","Tabung Penghisap","Tabung Penghisap","PCS","2026-03-26 02:32:41.572","2026-05-18 00:12:14.91","SP-057",,,"SP-057",50
+"cmn6uxp5100akl404ya0r11j6","Tali Tangki / tali punggung","Tali Tangki / tali punggung","PCS","2026-03-26 02:32:41.606","2026-05-18 00:12:14.914","SP-070",,,"SP-070",61
+"cmn6uxp3400a1l404niaztaob","Tali punggung","Tali punggung","PCS","2026-03-26 02:32:41.536","2026-05-18 00:12:14.918","SP-035",,,"SP-035",15
+"cmn6uxp1m009nl40420090ki4","Tangki","Tangki","PCS","2026-03-26 02:32:41.483","2026-05-18 00:12:14.958","SP-014",,,"SP-014",10
+"cmn6uxp3x00a9l4040wsowwle","Tuas Mesin","Tuas Mesin","PCS","2026-03-26 02:32:41.565","2026-05-18 00:12:15.05","SP-050",,,"SP-050",46
+"cmn6uxp1f009ll404f2dk4az0","Tutup Tangki","Tutup Tangki","PCS","2026-03-26 02:32:41.475","2026-05-18 00:12:15.07","SP-012",,,"SP-012",31
+"cmn6uxp0v009gl4044h0i3faf","Voltmeter ( 3 )","Voltmeter ( 3 )","PCS","2026-03-26 02:32:41.456","2026-05-18 00:12:15.13","SP-006",,,"SP-006",165
+"cmn6uxoz3008zl404ik1ppx6a","Yamida 25 WP 100gr","Yamida 25 WP 100gr","PCS","2026-03-26 02:32:41.391","2026-05-18 00:12:15.151","SIN-IK-096",100,"gr","SIN-IK-096",4763
+"cmn6uxozl0094l404oib2x5a0","Yamitap 2/78 WP 250 gram","Yamitap 2/78 WP 250 gram","Bks","2026-03-26 02:32:41.409","2026-05-18 00:12:15.155","SIN-IK-188",250,"gr","SIN-IK-188",65
+"cmn6uxp17009jl404yw1mv17b","Accu Elektrik (Baterai)","Accu Elektrik (Baterai)","PCS","2026-03-26 02:32:41.468","2026-05-18 00:12:11.967","SP-009",,,"SP-009",0
+"cmn6uxp3q00a7l4047xuwitwe","Accu Kayaba","Accu Kayaba","PCS","2026-03-26 02:32:41.558","2026-05-18 00:12:11.976","SP-048",,,"SP-048",0
+"cmn6uxp0r009fl404xu7lbey9","Bantalan Punggung","Bantalan Punggung","PCS","2026-03-26 02:32:41.452","2026-05-18 00:12:12.176","SP-004",,,"SP-004",5
+"cmn6uxp3m00a6l404jz3mzdmg","Big Nozzle B-Z001 (Black)","Big Nozzle B-Z001 (Black)","PCS","2026-03-26 02:32:41.555","2026-05-18 00:12:12.31","SP-047",,,"SP-047",197
+"cmn6uxoyf008sl404ssy8kniv","Cabzim 500 SC 1 L","Cabzim 500 SC 1 L","Btl","2026-03-26 02:32:41.367","2026-05-18 00:12:12.529","SIN-FG-070",1000,"ml","SIN-FG-070",916
+"cmn6uxozh0093l4045l4cady5","Dobindox 40/120 SC 100 ml","Dobindox 40/120 SC 100 ml","Btl","2026-03-26 02:32:41.406","2026-05-18 00:12:12.807","SIN-IK-186",100,"ml","SIN-IK-186",100
+"cmn6uxp030099l404lv4dg0iu","EM4 Pertanian 1 L","EM4 Pertanian 1 L","Btl","2026-03-26 02:32:41.428","2026-05-18 00:12:12.828","SLP-PK-020",1000,"ml","SLP-PK-020",87
+"cmn6uxp08009al4043tlpedf0","EM4 Peternakan 1 L","EM4 Peternakan 1 L","Btl","2026-03-26 02:32:41.432","2026-05-18 00:12:12.832","SLP-PK-054",1000,"ml","SLP-PK-054",87
+"cmn6uxoyz008yl4040uo0j2ib","Golder 865 SL 400 ml","Golder 865 SL","Btl","2026-03-26 02:32:41.388","2026-05-18 00:12:13.066","SIN-HB-114",200,"ml","SIN-HB-114",220
+"cmn6uxp2p009xl404dsihipjf","Handle","Handle","PCS","2026-03-26 02:32:41.521","2026-05-18 00:12:13.109","SP-030",,,"SP-030",296
+"cmn6uxoyb008rl4040wkdi4ho","Heko 50 SC 250 ml","Heko 50 SC 250 ml","Btl","2026-03-26 02:32:41.364","2026-05-18 00:12:13.142","SIN-FG-049",250,"ml","SIN-FG-049",0
+"cmn6uxp3000a0l404ilxuhlr6","Kait Plastik","Kait Plastik","PCS","2026-03-26 02:32:41.532","2026-05-18 00:12:13.267","SP-034",,,"SP-034",15
+"cmn6uxp1b009kl40492j57x6n","Klem Pipa Semprot Elektrik","Klem Pipa Semprot Elektrik","PCS","2026-03-26 02:32:41.471","2026-05-18 00:12:13.329","SP-011",,,"SP-011",15
+"cmn6uxp8b00bfl404qa05zrh9","NK 007 Andalan Benih Jagung Hibrida 1 Kg","NK 007 Andalan Benih Jagung Hibrida 1 Kg","Bks","2026-03-26 02:32:41.724","2026-05-18 00:12:13.82","SYN-BB-010",1000,"gr","SYN-BB-010",0
+"cmn6uxp8f00bgl404mnex108n","NK 7202 Juara Benih Jagung Hibrida 1 Kg","NK 7202 Juara Benih Jagung Hibrida 1 Kg","Bks","2026-03-26 02:32:41.727","2026-05-18 00:12:13.828","SYN-BB-012",1000,"gr","SYN-BB-012",0
+"cmn6uxpb200c5l404ivsvn2eu","Neoroot 100 Gr","Neoroot 100 Gr","Bks","2026-03-26 02:32:41.822","2026-05-18 00:12:13.938","UPL-PK-073",100,"gr","UPL-PK-073",0
+"cmn6uxpa800bxl4048ip17bs9","Nordox 56 WP 100 gr","Nordox 56 WP 100 gr","Bks","2026-03-26 02:32:41.793","2026-05-18 00:12:14.005","TRW-FG-059",100,"gr","TRW-FG-059",0
+"cmn6uxp5c00anl404ijm38mid","Nosel N-02","Nosel N-02","PCS","2026-03-26 02:32:41.616","2026-05-18 00:12:14.019","SP-074",,,"SP-074",90
+"cmn6uxp9200bml404m3ckwd81","Plenum 50 WG 25 gr","Plenum 50 WG 25 gr","Bks","2026-03-26 02:32:41.75","2026-05-18 00:12:14.189","SYN-IK-060",25,"gr","SYN-IK-060",141
+"cmn6uxp8400bdl404dsu090dk","Polar Electric EL-16 (Biru)","Polar Electric EL-16 (Biru)","PCS","2026-03-26 02:32:41.716","2026-05-18 00:12:14.195","SY-019",16000,"ml","SY-019",0
+"cmn6uxp6m00azl404j66kndin","Polar Manual Sprayer 3WBS-16V-2","Polar Manual Sprayer 3WBS-16V-2","PCS","2026-03-26 02:32:41.663","2026-05-18 00:12:14.199","SY-001",16000,"ml","SY-001",0
+"cmn6uxp7t00bal4049ic86vj7","Polar Manual Sprayer MP - 16 SNI","Polar Manual Sprayer MP - 16 SNI","PCS","2026-03-26 02:32:41.705","2026-05-18 00:12:14.203","SY-016",16000,"ml","SY-016",0
+"cmn6uxp8000bcl404fn6q0jhx","Polar Manual Sprayer MP- 16","Polar Manual Sprayer MP- 16","PCS","2026-03-26 02:32:41.713","2026-05-18 00:12:14.207","SY-018",16000,"ml","SY-018",0
+"cmn6uxp7w00bbl404roc9zcvl","Polar Sprayer Electric L-16 SNI","Polar Sprayer Electric L-16 SNI","PCS","2026-03-26 02:32:41.709","2026-05-18 00:12:14.215","SY-017",16000,"ml","SY-017",0
+"cmn6uxp6200aul404afc6837p","Posban 200 EC 500 ml","Posban 200 EC 500 ml","Btl","2026-03-26 02:32:41.642","2026-05-18 00:12:14.25","SU-IK-191",500,"ml","SU-IK-191",0
+"cmnh57wmq007oii04r02hg3xm","Red Bell 300 SC 250 ml",,"PCS","2026-04-02 07:18:15.795","2026-05-18 00:12:14.325","SAK-FG-076",250,"ml","SAK-FG-076",236
+"cmnh57wmz007pii045tr3frna","Regent 50 SC RED 100 ml",,"PCS","2026-04-02 07:18:15.803","2026-05-18 00:12:14.335","BAS-IK-089",100,"ml","BAS-IK-089",136
+"cmn6uxp5g00aol4046cuseiaf","Ring Karet Handpolar","Ring Karet Handpolar","PCS","2026-03-26 02:32:41.62","2026-05-18 00:12:14.391","SP-075",,,"SP-075",20
+"cmn6uxpan00c1l404aeummfxl","Sati-gold 10 WP 25 gr","Sati-gold 10 WP 25 gr","PCS","2026-03-26 02:32:41.808","2026-05-18 00:12:14.431","UPL-HB-048",25,"gr","UPL-HB-048",1915
+"cmn6uxp8n00bil404efrin3cp","Score 250 EC 250 ml","Score 250 EC 250 ml","Btl","2026-03-26 02:32:41.735","2026-05-18 00:12:14.438","SYN-FG-033",250,"ml","SYN-FG-033",800
+"cmn6uxp9k00brl404849szd98","Sparepart","Sparepart","pcs","2026-03-26 02:32:41.769","2026-05-18 00:12:14.633","Sparepart",,,"Sparepart",0
+"cmn6uxp9o00bsl404327vbmih","Sprayer","Sprayer","pcs","2026-03-26 02:32:41.773","2026-05-18 00:12:14.679","Sprayer",,,"Sprayer",0
+"cmn6uxp6y00b2l404152aot8h","Sprayer 2 in 1","Sprayer 2 in 1","PCS","2026-03-26 02:32:41.675","2026-05-18 00:12:14.687","SY-006",,,"SY-006",0
+"cmn6uxp7900b5l4046yyaco54","Sprayer Elektrik 16 L CF-16C-TA","Sprayer Elektrik 16 L CF-16C-TA","PCS","2026-03-26 02:32:41.686","2026-05-18 00:12:14.708","SY-011",16000,"ml","SY-011",0
+"cmn6uxp7600b4l404l2rc5v9b","Sprayer Elektrik 16 L E-16A","Sprayer Elektrik 16 L E-16A","PCS","2026-03-26 02:32:41.682","2026-05-18 00:12:14.712","SY-008",16000,"ml","SY-008",0
+"cmn6uxp6u00b1l404189e4mnb","Sprayer Mesin 20 L","Sprayer Mesin 20 L","PCS","2026-03-26 02:32:41.671","2026-05-18 00:12:14.791","SY-005",20000,"ml","SY-005",0
+"cmn6uxp7200b3l404ywpaki0i","Sprayer Mesin 4 tak","Sprayer Mesin 4 tak","PCS","2026-03-26 02:32:41.678","2026-05-18 00:12:14.799","SY-007",,,"SY-007",0
+"cmn6uxpav00c3l404mm0rm9ip","Tecam 80 WG 1,6 gr","Tecam 80 WG 1,6 gr","Bks","2026-03-26 02:32:41.815","2026-05-18 00:12:14.977","UPL-IK-184",1.6,"gr","UPL-IK-184",1450
+"cmn6uxpac00byl404wp9a0x0u","Toxiput 5 GR 250 gr","Toxiput 5 GR 250 gr","PCS","2026-03-26 02:32:41.797","2026-05-18 00:12:15.037","UAC-MO-001",250,"gr","UAC-MO-001",0
+"cmn6uxp6600avl404hq90bedu","Ultradap 1 Kg","Ultradap 1 Kg","Bks","2026-03-26 02:32:41.646","2026-05-18 00:12:15.083","SU-PK-013",1000,"gr","SU-PK-013",313
+"cmn6uxp9500bnl404vhcvxtsr","Virtako 300SC 100 ml","Virtako 300SC 100 ml","Btl","2026-03-26 02:32:41.754","2026-05-18 00:12:15.126","SYN-IK-085",100,"ml","SYN-IK-085",497
+"cmn6uxpb900c7l404avbnusmm","nn Sepatu Boot Fuso Hijau Mix 40","nn Sepatu Boot Fuso Hijau Mix 40","PCS","2026-03-26 02:32:41.829","2026-05-18 00:12:15.398","WGI-NN-005a",,,"WGI-NN-005a",6
+"cmn6uxpbc00c8l404px9m5mbi","nn Sepatu Boot Fuso Mix 41","nn Sepatu Boot Fuso Mix 41","PCS","2026-03-26 02:32:41.833","2026-05-18 00:12:15.406","WGI-NN-007a",,,"WGI-NN-007a",6
+"cmn6uxpay00c4l40445xkx6sb","nn Tridium 1 Kg","nn Tridium 1 Kg","Bks","2026-03-26 02:32:41.819","2026-05-18 00:12:15.457","UPL-NN-010a",1000,"gr","UPL-NN-010a",5
+"cmn6uxp5n00aql404jtlhqca7","Accu Farmjet","Accu Farmjet","PCS","2026-03-26 02:32:41.627","2026-05-18 00:12:11.971","SP-077",,,"SP-077",88
+"cmn6uxp8q00bjl404hktl3g12","Amistar Top 325 SC 250 ml","Amistar Top 325 SC 250 ml","Btl","2026-03-26 02:32:41.738","2026-05-18 00:12:12.069","SYN-FG-040",250,"ml","SYN-FG-040",183
+"cmn6uxpar00c2l4044d93hgyo","Avalon 500/50 EC 100 Ml","Avalon 500/50 EC 100 Ml","Btl","2026-03-26 02:32:41.812","2026-05-18 00:12:12.136","UPL-IK-172",100,"ml","UPL-IK-172",0
+"cmn6uxp5q00arl404fjs7d42a","Avidor 25 WP 100 gr","Avidor 25 WP 100 gr","Bks","2026-03-26 02:32:41.631","2026-05-18 00:12:12.164","SPR-IK-055",100,"gr","SPR-IK-055",400
+"cmn6uxp9s00btl404d9gyzdhs","Benih Jagung Bisi 18 1 Kg","Benih Jagung Bisi 18 1 Kg","Pack","2026-03-26 02:32:41.776","2026-05-18 00:12:12.227","TAN-BB-009",1000,"gr","TAN-BB-009",0
+"cmn6uxpa400bwl404phiv9o2z","Benih Padi Segreng 5 Kg","Benih Padi Segreng 5 Kg","Sak","2026-03-26 02:32:41.789","2026-05-18 00:12:12.247","TRS-BB-026",5000,"gr","TRS-BB-026",0
+"cmn6uxpa100bvl4048f4x1uiw","Bentan 60 WP 100 gr","Bentan 60 WP 100 gr","Bks","2026-03-26 02:32:41.785","2026-05-18 00:12:12.255","TKS-IK-081",100,"gr","TKS-IK-081",1095
+"cmn6uxp7p00b9l404f6okyv5e","Corn Seeder 7 Mouth T-7 Single Box","Corn Seeder 7 Mouth T-7 Single Box","PCS","2026-03-26 02:32:41.702","2026-05-18 00:12:12.613","SY-015",,,"SY-015",1
+"cmn6uxp7l00b8l404yq8pemfh","Corn Seeder 7 Mouth TD-7POL","Corn Seeder 7 Mouth TD-7POL","PCS","2026-03-26 02:32:41.698","2026-05-18 00:12:12.618","SY-014",,,"SY-014",1
+"cmn6uxp9900bol404z0bwjsdv","Curacron 500 EC 100 ml","Curacron 500 EC 100 ml","Btl","2026-03-26 02:32:41.758","2026-05-18 00:12:12.647","SYN-IK-098",100,"ml","SYN-IK-098",75
+"cmn6uxp5y00atl404tb9yli9l","De Besttan 60 WP 100 gr","De Besttan 60 WP 100 gr","PCS","2026-03-26 02:32:41.638","2026-05-18 00:12:12.701","SU-IK-093",100,"gr","SU-IK-093",389
+"cmn6uxp5j00apl404fp5c4yya","Duplet Handpolar","Duplet Handpolar","PCS","2026-03-26 02:32:41.624","2026-05-18 00:12:12.819","SP-076",,,"SP-076",600
+"cmn6uxp8y00bll404vt50r5ky","Gramoxone 276 SL 1 L","Gramoxone 276 SL 1 L","Btl","2026-03-26 02:32:41.746","2026-05-18 00:12:13.07","SYN-HB-030",1000,"ml","SYN-HB-030",2126
+"cmn6uxp6q00b0l4042vf671au","Hand Sprayer 2 L","Hand Sprayer 2 L","PCS","2026-03-26 02:32:41.666","2026-05-18 00:12:13.086","SY-002",2000,"ml","SY-002",42
+"cmn6uxp6i00ayl404rj2dpzve","KNO Pak Tani Putih","KNO Pak Tani Putih","PCS","2026-03-26 02:32:41.658","2026-05-18 00:12:13.252","SU-PK-031",2000,"gr","SU-PK-031",652
+"cmn6uxp6a00awl4042b09lza8","MKP Pak Tani 1 Kg","MKP Pak Tani 1 Kg","Bks","2026-03-26 02:32:41.65","2026-05-18 00:12:13.485","SU-PK-019",1000,"gr","SU-PK-019",609
+"cmn6uxoho004cl404shdz6ehi","Cadilac 80 WP 1 kg","Cadilac 80 WP 1 kg","Bks","2026-03-26 02:32:40.765","2026-05-18 00:12:12.544","FG-004",1000,"gr","FG-004",4902
+"cmn6uxo2s000pl404gcsx32sz","Convey Complete 310 SC 500 ml","Convey Complete 310 SC 500 ml","Btl","2026-03-26 02:32:40.229","2026-05-18 00:12:12.605","BAS-HB-063",500,"ml","BAS-HB-063",0
+"cmn6uxp7h00b7l404t75swttr","Corn Seeder 10 Mouth T-10","Corn Seeder 10 Mouth T-10","PCS","2026-03-26 02:32:41.694","2026-05-18 00:12:12.61","SY-013",,,"SY-013",1
+"cmn6uxocz003cl4040raxd8qt","Emacel 30 EC 100 ml","Emacel 30 EC 100 ml","Btl","2026-03-26 02:32:40.595","2026-05-18 00:12:12.836","EMI-IK-069",100,"ml","EMI-IK-069",1008
+"cmn6uxoq3006ll404bxq2668x","Extra Green NPK Cair 1 L","Extra Green NPK Cair 1 L","Btl","2026-03-26 02:32:41.068","2026-05-18 00:12:12.884","MTA-PK-095",1000,"ml","MTA-PK-095",25
+"cmnxv8g2r0000ib04qdzxj0kv","Fenite 100 ml",,"PCS","2026-04-14 00:10:49.828","2026-05-18 00:12:12.907","PET-HB-229",,,"PET-HB-229",95
+"cmn6uxohh004al404ltle8can","Hand Sprayer 2 L Transparan","Hand Sprayer 2 L Transparan","PCS","2026-03-26 02:32:40.757","2026-05-18 00:12:13.09","FAR-SY-049",2000,"ml","FAR-SY-049",1
+"cmn6uxp3j00a5l40450fufu1c","Handle E16-A","Handle E16-A","PCS","2026-03-26 02:32:41.551","2026-05-18 00:12:13.114","SP-046",,,"SP-046",23
+"cmn6uxo3p000xl404j0muld8t","Jagung Hibrida NK 212 @1 Kg","Jagung Hibrida NK 212 @1 Kg","Bks","2026-03-26 02:32:40.261","2026-05-18 00:12:13.173","BB-005",1000,"gr","BB-005",20
+"cmn6uxod9003fl404erftb42y","Joker 75 SP 1 kg","Joker 75 SP 1 kg","Bks","2026-03-26 02:32:40.606","2026-05-18 00:12:13.204","EXC-IK-075",1000,"gr","EXC-IK-075",0
+"cmn6uxp6e00axl404u583dvpz","KNO Pak Tani Merah","KNO Pak Tani Merah","PCS","2026-03-26 02:32:41.654","2026-05-18 00:12:13.247","SU-PK-030",2000,"gr","SU-PK-030",326
+"cmn6uxosv007al404wsknsb4p","L Rod Long Polar Sprayer Manual BA-ML-16L","L Rod Long Polar Sprayer Manual BA-ML-16L","Box","2026-03-26 02:32:41.167","2026-05-18 00:12:13.379","POL-SP-095",,,"POL-SP-095",0
+"cmn6uxp4800acl404gx7vmebh","Mangkok Penghisap","Mangkok Penghisap","PCS","2026-03-26 02:32:41.577","2026-05-18 00:12:13.496","SP-058",,,"SP-058",71
+"cmn6uxol9005bl404wqby9sr2","Manuver 400 SL 1 L","Manuver 400 SL 1 L","Btl","2026-03-26 02:32:40.893","2026-05-18 00:12:13.507","IK-022",1000,"ml","IK-022",148
+"cmn6uxooa0064l404vugmhvd8","Mulsa Biotis 60 cm @ 8 Kg","Mulsa Biotis 60 cm @ 8 Kg","Rol","2026-03-26 02:32:41.002","2026-05-18 00:12:13.649","MMI-ML-075",8000,"gr","MMI-ML-075",0
+"cmn6uxoql006pl4047epn9xzt","NPK Hantu Jagotani 1000 ml","NPK Hantu Jagotani 1000 ml","Btl","2026-03-26 02:32:41.086","2026-05-18 00:12:13.853","MUT-PK-079",1000,"ml","MUT-PK-079",1699
+"cmn6uxpcp00cll4047kznkiif","NPK Yaramila Faster 25-07-07 50 Kg","NPK Yaramila Faster 25-07-07 50 Kg","Sak","2026-03-26 02:32:41.882","2026-05-18 00:12:13.884","YRA-PK-029",50000,"gr","YRA-PK-029",0
+"cmn6uxpch00cjl4047seymkto","NPK Yaramila Unik 50 Kg","NPK Yaramila Unik 50 Kg","Rol","2026-03-26 02:32:41.873","2026-05-18 00:12:13.888","YRA-PK-021",50000,"gr","YRA-PK-021",0
+"cmn6uxpcl00ckl40493wqapva","NPK Yaramila Winner 50 Kg","NPK Yaramila Winner 50 Kg","Sak","2026-03-26 02:32:41.877","2026-05-18 00:12:13.893","YRA-PK-028",50000,"gr","YRA-PK-028",0
+"cmn6uxosk0077l404cfzsl7p8","Nitrea 50 Kg.","Nitrea 50 Kg.","Rol","2026-03-26 02:32:41.156","2026-05-18 00:12:13.987","PKU-PK-022.",50000,"gr","PKU-PK-022.",0
+"cmn6uxoie004jl404oem0uygb","Notora 60/6 WG 200 Gr","Notora 60/6 WG 200 Gr","Bks","2026-03-26 02:32:40.791","2026-05-18 00:12:14.045","FG-026",200,"gr","FG-026",1016
+"cmn6uxoqt006rl404jinyinda","POC Hantu Ijo Royo Royo 1000 ml","POC Hantu Ijo Royo Royo 1000 ml","Btl","2026-03-26 02:32:41.094","2026-05-18 00:12:14.106","MUT-PK-085",1000,"ml","MUT-PK-085",95
+"cmn6uxo9k002gl4043kilh890","Pexalon 106 SC 100 ml","Pexalon 106 SC 100 ml","Btl","2026-03-26 02:32:40.472","2026-05-18 00:12:14.145","CTV-IK-139",100,"ml","CTV-IK-139",109
+"cmn6uxp2s009yl404j322tykq","Pipa Karet","Pipa Karet","PCS","2026-03-26 02:32:41.525","2026-05-18 00:12:14.162","SP-032",,,"SP-032",0
+"cmnh57wn2007qii042vmfahom","Regent 50 SC RED 250 ml",,"PCS","2026-04-02 07:18:15.807","2026-05-18 00:12:14.34","BAS-IK-090",250,"ml","BAS-IK-090",27
+"cmn6uxpby00cel40433sv3dc4","AP Bola 963 White 39","AP Bola 963 White 39","PCS","2026-03-26 02:32:41.854","2026-05-18 00:12:11.754","WGI-SPT-021",,,"WGI-SPT-021",3
+"cmn6uxpc100cfl40458c9t2no","AP Bola 969 White 39","AP Bola 969 White 39","PCS","2026-03-26 02:32:41.858","2026-05-18 00:12:11.772","WGI-SPT-025",,,"WGI-SPT-025",2
+"cmn6uxpcd00cil404j601d5e9","AP Boot AP2003 Green Size 37","AP Boot AP2003 Green Size 37","PCS","2026-03-26 02:32:41.869","2026-05-18 00:12:11.806","WGI-SPT-035",,,"WGI-SPT-035",8
+"cmn6uxpc500cgl404friwvncg","AP Boot Terra 1 Army Size 40","AP Boot Terra 1 Army Size 40","PCS","2026-03-26 02:32:41.862","2026-05-18 00:12:11.834","WGI-SPT-029",,,"WGI-SPT-029",18
+"cmn6uxpc900chl404n9wfih28","AP Boot Terra 5 Green Size 39","AP Boot Terra 5 Green Size 39","PCS","2026-03-26 02:32:41.865","2026-05-18 00:12:11.85","WGI-SPT-032",,,"WGI-SPT-032",0
+"cmn6uxpbu00cdl404nlts3fgh","AP Boot Terra Eco 3 Green 39","AP Boot Terra Eco 3 Green 39","PCS","2026-03-26 02:32:41.851","2026-05-18 00:12:11.879","WGI-SPT-017",,,"WGI-SPT-017",52
+"cmn6uxpbq00ccl404lunpkus0","AP Boot Terra Eco 3 Yellow 39","AP Boot Terra Eco 3 Yellow 39","PCS","2026-03-26 02:32:41.847","2026-05-18 00:12:11.913","WGI-SPT-013",,,"WGI-SPT-013",6
+"cmn6uxocv003bl4048jgsf9u8","Abacel 18 EC 100 ml","Abacel 18 EC 100 ml","Btl","2026-03-26 02:32:40.591","2026-05-18 00:12:11.936","EMI-IK-064",100,"ml","EMI-IK-064",1340
+"cmn6uxoz60090l404oz6l3u83","Absina 36 EC 100 ml","Absina 36 EC 100 ml","Btl","2026-03-26 02:32:41.395","2026-05-18 00:12:11.954","SIN-IK-097",100,"ml","SIN-IK-097",160
+"cmn6uxosr0079l404ysw8pdxp","Cofoli K300 250 ml","Cofoli K300 250 ml","Btl","2026-03-26 02:32:41.164","2026-05-18 00:12:12.586","POL-PK-045",250,"ml","POL-PK-045",0
+"cmn6uxoqc006nl404t2zlp86z","Allmax 500 ml","Allmax 500 ml","Btl","2026-03-26 02:32:41.076","2026-05-18 00:12:12.028","MTA-PPC-008",500,"ml","MTA-PPC-008",21
+"cmn6uxodl003il404tcmyn9f5","Ammeter with Wire 13.8L&16L Elektrik&2 in 1","Ammeter with Wire 13.8L&16L Elektrik&2 in 1","PCS","2026-03-26 02:32:40.617","2026-05-18 00:12:12.078","FAR-SP-080",,,"FAR-SP-080",10
+"cmn6uxpaj00c0l404ardkoyu6","Aviate 75 WG 300 Gr","Aviate 75 WG 300 Gr","Bks","2026-03-26 02:32:41.804","2026-05-18 00:12:12.156","UPL-FG-077",300,"gr","UPL-FG-077",0
+"cmn6uxool0067l404tbfxz9si","Barrier Gold 6 GR 1 kg","Barrier Gold 6 GR 1 kg","Bks","2026-03-26 02:32:41.014","2026-05-18 00:12:12.18","MMU-IK-190",1000,"gr","MMU-IK-190",0
+"cmn6uxo3t000yl404jet3zpc0","Bibit Semi Mentimun F1 Global @ 20 gr","Bibit Semi Mentimun F1 Global @ 20 gr","Bks","2026-03-26 02:32:40.266","2026-05-18 00:12:12.306","BCA-BB-002",20,"gr","BCA-BB-002",0
+"cmn6uxow80086l404lqwz2997","Bimicia 25 WP 100 gr","Bimicia 25 WP 100 gr","Bks","2026-03-26 02:32:41.288","2026-05-18 00:12:12.326","SAK-IK-170",100,"gr","SAK-IK-170",661
+"cmn6uxo6c001ll404cud1fces","Biocron 500 EC 1 L","Biocron 500 EC 1 L","Btl","2026-03-26 02:32:40.356","2026-05-18 00:12:12.342","BTS-IK-123",1000,"ml","BTS-IK-123",94
+"cmn6uxo1d000cl404btvp2xn2","Blast 200 SC 500 ml","Blast 200 SC 500 ml","Btl","2026-03-26 02:32:40.178","2026-05-18 00:12:12.471","AGR-FG-042",500,"ml","AGR-FG-042",0
+"cmn6uxo0y0008l404kh9rwjt7","Cabai Hibrida Agni 22 F1 10 gr","Cabai Hibrida Agni 22 F1 10 gr","PCS","2026-03-26 02:32:40.162","2026-05-18 00:12:12.509","ADV-BB-020",10,"gr","ADV-BB-020",0
+"cmn6uxoud007ol404jr3gs4rm","Alika 247 ZC 100 ml","Alika 247 ZC 100 ml","Btl","2026-03-26 02:32:41.221","2026-05-18 00:12:12.019","PTR-IK-097",100,"ml","PTR-IK-097",204
+"cmnh57utc000dii04770hzbof","AP Boot AP2003 Green Size 41",,"PCS","2026-04-02 07:18:13.44","2026-05-18 00:12:11.822","WGI-SPT-039",,,"WGI-SPT-039",50
+"cmnh57utg000eii048wy5ukpv","AP Boot AP2003 Green Size 42",,"PCS","2026-04-02 07:18:13.444","2026-05-18 00:12:11.826","WGI-SPT-040",,,"WGI-SPT-040",0
+"cmnh57utj000fii0401yxjm6l","AP Boot AP2003 Green Size 43",,"PCS","2026-04-02 07:18:13.448","2026-05-18 00:12:11.829","WGI-SPT-041",,,"WGI-SPT-041",0
+"cmnh57uts000gii04ufhkyzag","AP Boot Terra 1 Army Size 41",,"PCS","2026-04-02 07:18:13.457","2026-05-18 00:12:11.838","WGI-SPT-030",,,"WGI-SPT-030",0
+"cmnh57utx000hii048qvlubnt","AP Boot Terra 1 Army Size 42",,"PCS","2026-04-02 07:18:13.461","2026-05-18 00:12:11.845","WGI-SPT-031",,,"WGI-SPT-031",0
+"cmnh57uu6000iii04ohk6rotb","AP Boot Terra 5 Green Size 40",,"PCS","2026-04-02 07:18:13.471","2026-05-18 00:12:11.854","WGI-SPT-033",,,"WGI-SPT-033",0
+"cmnh57uua000jii04g0s33s37","AP Boot Terra 5 Green Size 41",,"PCS","2026-04-02 07:18:13.475","2026-05-18 00:12:11.858","WGI-SPT-034",,,"WGI-SPT-034",0
+"cmn6uxpbj00cal404o66ztwo5","AP Boot Terra Eco 3 Black 39","AP Boot Terra Eco 3 Black 39","PCS","2026-03-26 02:32:41.84","2026-05-18 00:12:11.863","WGI-SPT-003",,,"WGI-SPT-003",0
+"cmnh57uuk000kii04kishy50v","AP Boot Terra Eco 3 Black 40",,"PCS","2026-04-02 07:18:13.484","2026-05-18 00:12:11.867","WGI-SPT-004",,,"WGI-SPT-004",0
+"cmnh57uuo000lii044udvsiib","AP Boot Terra Eco 3 Black 41",,"PCS","2026-04-02 07:18:13.489","2026-05-18 00:12:11.871","WGI-SPT-007",,,"WGI-SPT-007",4
+"cmnh57uus000mii04y6tyjbja","AP Boot Terra Eco 3 Black 42",,"PCS","2026-04-02 07:18:13.493","2026-05-18 00:12:11.875","WGI-SPT-008",,,"WGI-SPT-008",0
+"cmnh57uv1000nii04977gxzrh","AP Boot Terra Eco 3 Green 40",,"PCS","2026-04-02 07:18:13.501","2026-05-18 00:12:11.883","WGI-SPT-018",,,"WGI-SPT-018",2
+"cmnh57uv5000oii041hmq359t","AP Boot Terra Eco 3 Green 41",,"PCS","2026-04-02 07:18:13.505","2026-05-18 00:12:11.887","WGI-SPT-019",,,"WGI-SPT-019",0
+"cmnh57uv8000pii04kxsqkuzw","AP Boot Terra Eco 3 Green 42",,"PCS","2026-04-02 07:18:13.509","2026-05-18 00:12:11.891","WGI-SPT-020",,,"WGI-SPT-020",0
+"cmnh57uvi000qii04jrgk4myb","AP Boot Terra Eco 3 Orange 40",,"PCS","2026-04-02 07:18:13.518","2026-05-18 00:12:11.9","WGI-SPT-010",,,"WGI-SPT-010",8
+"cmnh57uvm000rii04qsbh7ltc","AP Boot Terra Eco 3 Orange 41",,"PCS","2026-04-02 07:18:13.522","2026-05-18 00:12:11.905","WGI-SPT-011",,,"WGI-SPT-011",5
+"cmnh57uvq000sii04mfaj6tkc","AP Boot Terra Eco 3 Orange 42",,"PCS","2026-04-02 07:18:13.526","2026-05-18 00:12:11.909","WGI-SPT-012",,,"WGI-SPT-012",0
+"cmnh57uvz000tii04s33l2z3u","AP Boot Terra Eco 3 Yellow 40",,"PCS","2026-04-02 07:18:13.535","2026-05-18 00:12:11.919","WGI-SPT-014",,,"WGI-SPT-014",2
+"cmnh57uw7000vii04o3phdlio","AP Boot Terra Eco 3 Yellow 42",,"PCS","2026-04-02 07:18:13.544","2026-05-18 00:12:11.927","WGI-SPT-016",,,"WGI-SPT-016",0
+"cmnh57uwb000wii04482aj931","Abacel 18 EC 1 L",,"PCS","2026-04-02 07:18:13.548","2026-05-18 00:12:11.931","EMI-IK-067",1000,"ml","EMI-IK-067",14
+"cmnh57uwk000xii04lt83xlgw","Abacel 18 EC 250 ml",,"PCS","2026-04-02 07:18:13.556","2026-05-18 00:12:11.94","EMI-IK-066",250,"ml","EMI-IK-066",612
+"cmnh57uwo000yii04trw7k25d","Abacel 18 EC 500 ml",,"PCS","2026-04-02 07:18:13.56","2026-05-18 00:12:11.944","EMI-IK-065",500,"ml","EMI-IK-065",28
+"cmnh57uwr000zii04jxdbomov","Absina 36 EC 1 L",,"PCS","2026-04-02 07:18:13.564","2026-05-18 00:12:11.949","SIN-IK-100",1000,"ml","SIN-IK-100",786
+"cmnh57ux00010ii04ryzlp8c2","Absina 36 EC 200 ml",,"PCS","2026-04-02 07:18:13.573","2026-05-18 00:12:11.959","SIN-IK-098",200,"ml","SIN-IK-098",1043
+"cmnh57ux40011ii04wyhrud9s","Absina 36 EC 500 ml",,"PCS","2026-04-02 07:18:13.577","2026-05-18 00:12:11.963","SIN-IK-099",500,"ml","SIN-IK-099",372
+"cmn6uxoi7004hl4046jdp64sl","Renzo 250 EC 100 ml","Renzo 250 EC 100 ml","Btl","2026-03-26 02:32:40.784","2026-05-18 00:12:14.356","FG-015",100,"ml","FG-015",248
+"cmn6uxp1i009ml404u7ponaup","Saringan Tangki Elektrik","Saringan Tangki Elektrik","PCS","2026-03-26 02:32:41.479","2026-05-18 00:12:14.419","SP-013",,,"SP-013",152
+"cmn6uxoyp008vl404x806exkb","Sinanil 80 WP 500 gr","Sinanil 80 WP 500 gr","Bks","2026-03-26 02:32:41.377","2026-05-18 00:12:14.556","SIN-FG-081",500,"gr","SIN-FG-081",45
+"cmn6uxoe8003ol4042e5imkiz","Small Filter 13.8 L & 16 L Elektrik 2 in 1","Small Filter 13.8 L & 16 L Elektrik 2 in 1","PCS","2026-03-26 02:32:40.641","2026-05-18 00:12:14.604","FAR-SP-086",,,"FAR-SP-086",10
+"cmn6uxp5u00asl404h83f1awo","Sprayer Dragon Star 16 L Baterai (Hijau)","Sprayer Dragon Star 16 L Baterai (Hijau)","Box","2026-03-26 02:32:41.635","2026-05-18 00:12:14.704","STR-SY-022",16000,"ml","STR-SY-022",0
+"cmn6uxoq7006ml404ailjlgqi","Tals Stick 1 L","Tals Stick 1 L","Btl","2026-03-26 02:32:41.072","2026-05-18 00:12:14.926","MTA-PPC-005",1000,"ml","MTA-PPC-005",388
+"cmn6uxo4v0018l404akhp7zae","Tandem 325 SC 500 ml","Tandem 325 SC 500 ml","Btl","2026-03-26 02:32:40.304","2026-05-18 00:12:14.953","BTS-FG-062",500,"ml","BTS-FG-062",548
+"cmn6uxokb0052l404x1pip9cv","Torero 80 WP 200 gr","Torero 80 WP 200 gr","Bks","2026-03-26 02:32:40.859","2026-05-18 00:12:15.028","HB-035",200,"gr","HB-035",66
+"cmn6uxp22009rl4042p9jdygd","Tutup Tangki Dasar","Tutup Tangki Dasar","PCS","2026-03-26 02:32:41.498","2026-05-18 00:12:15.075","SP-018",,,"SP-018",49
+"cmn6uxo8h0026l404jkzb010c","Wet n Shine 100 ml","Wet n Shine 100 ml","Btl","2026-03-26 02:32:40.434","2026-05-18 00:12:15.139","CAT-PPC-003",100,"ml","CAT-PPC-003",0
+"cmn6uxoqp006ql404h2mfcrga","ZPT Hantu Ratu Biogen 1000 ml","ZPT Hantu Ratu Biogen 1000 ml","Btl","2026-03-26 02:32:41.09","2026-05-18 00:12:15.195","MUT-PK-082",1000,"ml","MUT-PK-082",414
+"cmn6uxo8s0029l404lsjllt9n","nn Sprayer Ultra CBA Electric type 3","nn Sprayer Ultra CBA Electric type 3","PCS","2026-03-26 02:32:40.445","2026-05-18 00:12:15.429","CBA-NN-022",16000,"ml","CBA-NN-022",0
+"cmnh57ur70000ii04evjiehw7","AP Bola 963 White 40",,"PCS","2026-04-02 07:18:13.363","2026-05-18 00:12:11.76","WGI-SPT-022",,,"WGI-SPT-022",0
+"cmnh57ure0001ii04tjnnpfj9","AP Bola 963 White 41",,"PCS","2026-04-02 07:18:13.37","2026-05-18 00:12:11.764","WGI-SPT-023",,,"WGI-SPT-023",0
+"cmnh57uri0002ii04cth2umw8","AP Bola 963 White 42",,"PCS","2026-04-02 07:18:13.375","2026-05-18 00:12:11.768","WGI-SPT-024",,,"WGI-SPT-024",0
+"cmnh57urr0003ii043c375pe3","AP Bola 969 White 40",,"PCS","2026-04-02 07:18:13.384","2026-05-18 00:12:11.776","WGI-SPT-026",,,"WGI-SPT-026",2
+"cmnh57urv0004ii043d0ziubi","AP Bola 969 White 41",,"PCS","2026-04-02 07:18:13.387","2026-05-18 00:12:11.779","WGI-SPT-027",,,"WGI-SPT-027",2
+"cmnh57us20005ii048ce78mhc","AP Bola 969 White 42",,"PCS","2026-04-02 07:18:13.395","2026-05-18 00:12:11.783","WGI-SPT-028",,,"WGI-SPT-028",4
+"cmnh57usb0006ii045udr554m","AP Boot 2017 Lemon Green 40",,"PCS","2026-04-02 07:18:13.404","2026-05-18 00:12:11.791","WGI-SPT-002",,,"WGI-SPT-002",4
+"cmnh57usf0007ii04qv8xdpn2","AP Boot 2017 Lemon Green 41",,"PCS","2026-04-02 07:18:13.408","2026-05-18 00:12:11.795","WGI-SPT-005",,,"WGI-SPT-005",2
+"cmnh57usl0008ii04ys6gyo2n","AP Boot 2017 Lemon Green 42",,"PCS","2026-04-02 07:18:13.414","2026-05-18 00:12:11.799","WGI-SPT-006",,,"WGI-SPT-006",0
+"cmnh57usq0009ii04kihr0xpr","AP Boot 2017 Lemon Green 43",,"PCS","2026-04-02 07:18:13.418","2026-05-18 00:12:11.803","WGI-SPT-042",,,"WGI-SPT-042",0
+"cmnh57usz000aii04z6q911tr","AP Boot AP2003 Green Size 38",,"PCS","2026-04-02 07:18:13.427","2026-05-18 00:12:11.81","WGI-SPT-036",,,"WGI-SPT-036",3
+"cmnh57ut4000bii04i2yh1j4s","AP Boot AP2003 Green Size 39",,"PCS","2026-04-02 07:18:13.432","2026-05-18 00:12:11.814","WGI-SPT-037",,,"WGI-SPT-037",30
+"cmnh57ut8000cii04p7uocica","AP Boot AP2003 Green Size 40",,"PCS","2026-04-02 07:18:13.436","2026-05-18 00:12:11.818","WGI-SPT-038",,,"WGI-SPT-038",0
+"cmnh57v1d001fii04mb7hmdhx","Arrivo 30 EC 250 ml",,"PCS","2026-04-02 07:18:13.73","2026-05-18 00:12:12.128","BGK-IK-121",250,"ml","BGK-IK-121",96
+"cmnh57v1p001gii040o1fgyhv","Avalon 500/50 EC 400 Ml",,"PCS","2026-04-02 07:18:13.741","2026-05-18 00:12:12.14","UPL-IK-173",400,"ml","UPL-IK-173",0
+"cmnh57v1t001hii04cmp9xkrf","Avalon 500/50 EC 900 Ml",,"PCS","2026-04-02 07:18:13.745","2026-05-18 00:12:12.144","UPL-IK-174",900,"ml","UPL-IK-174",0
+"cmnh57v21001iii047numhyhw","Avatar 400 SC 200 Ml",,"PCS","2026-04-02 07:18:13.754","2026-05-18 00:12:12.152","DGW-HB-109",200,"ml","DGW-HB-109",8
+"cmnh57v2a001jii04jca4ndsj","Aviate 75 WG 600 Gr",,"PCS","2026-04-02 07:18:13.762","2026-05-18 00:12:12.16","UPL-FG-078",600,"gr","UPL-FG-078",0
+"cmnh57v2m001kii0474ly8utf","Bablass 490 SL 5 L",,"PCS","2026-04-02 07:18:13.774","2026-05-18 00:12:12.172","KRE-HB-085",5000,"ml","KRE-HB-085",0
+"cmnh57v34001mii0442rhxpo8","Baycarb 500 EC 100 ml",,"PCS","2026-04-02 07:18:13.793","2026-05-18 00:12:12.194","BYR-IK-159",100,"ml","BYR-IK-159",7
+"cmnh57v3f001nii04jiigv6ie","Belko 500 ml",,"PCS","2026-04-02 07:18:13.804","2026-05-18 00:12:12.206","PK-012",500,"ml","PK-012",2534
+"cmnh57v3j001oii04vbg1tnf9","Belko 60 ml",,"PCS","2026-04-02 07:18:13.807","2026-05-18 00:12:12.21","PK-055",60,"ml","PK-055",4923
+"cmnh57v3m001pii04mgru1k28","Benefit 75 WP 1 Kg",,"PCS","2026-04-02 07:18:13.811","2026-05-18 00:12:12.214","AGR-FG-067",1000,"gr","AGR-FG-067",197
+"cmnh57v4x001qii04y4k9iyce","Bentan 60 WP 50 gr",,"PCS","2026-04-02 07:18:13.858","2026-05-18 00:12:12.259","TKS-IK-082",50,"gr","TKS-IK-082",369
+"cmnh57v55001rii042enarsrv","Besfuron 20 WP 5 gr",,"PCS","2026-04-02 07:18:13.866","2026-05-18 00:12:12.268","BTS-HB-096",5,"gr","BTS-HB-096",2276
+"cmnh57v5e001sii049hq8ri5k","Bestnoid 60 WP 100 gr",,"PCS","2026-04-02 07:18:13.874","2026-05-18 00:12:12.276","DGW-MO-006",100,"gr","DGW-MO-006",0
+"cmnh57v5l001tii04p3vkkf9m","Bestzine 20/60 WG 100 Gram",,"PCS","2026-04-02 07:18:13.882","2026-05-18 00:12:12.285","SIN-IK-154",100,"gr","SIN-IK-154",210
+"cmnh57v6j001uii04u3noimt1","Bilis 500 SC 20 L",,"PCS","2026-04-02 07:18:13.915","2026-05-18 00:12:12.318","BTS-HB-080",20000,"ml","BTS-HB-080",31
+"cmnh57v6t001vii04bbq6sue2","Bilis 500 SC 4 L",,"PCS","2026-04-02 07:18:13.925","2026-05-18 00:12:12.322","BTS-HB-076",4000,"ml","BTS-HB-076",77
+"cmnh57v71001wii04yz05hk8h","Bimicia 25 WP 250 gr",,"PCS","2026-04-02 07:18:13.933","2026-05-18 00:12:12.33","SAK-IK-171",250,"gr","SAK-IK-171",308
+"cmnh57v75001xii04sjvur9am","Biocis 25 EC 1 L",,"PCS","2026-04-02 07:18:13.938","2026-05-18 00:12:12.334","IK-142",1000,"ml","IK-142",12
+"cmnh57v7h001yii04e3lhai1x","Biocron 500 EC 100 ml",,"PCS","2026-04-02 07:18:13.95","2026-05-18 00:12:12.346","IK-006",100,"ml","IK-006",429
+"cmnh57v7l001zii04qwsyglpt","Biocron 500 EC 200 ml",,"PCS","2026-04-02 07:18:13.953","2026-05-18 00:12:12.35","IK-007",200,"ml","IK-007",211
+"cmnh57v7p0020ii04zqg6d80s","Biocron 500 EC 500 ml",,"PCS","2026-04-02 07:18:13.957","2026-05-18 00:12:12.354","IK-008",500,"ml","IK-008",88
+"cmnh57v7z0021ii04v1ygmw8m","Biogent 50 SC 1 L",,"PCS","2026-04-02 07:18:13.967","2026-05-18 00:12:12.358","IK-150",1000,"ml","IK-150",385
+"cmnh57v890022ii041zh0i3kc","Biogent 50 SC 250 ml",,"PCS","2026-04-02 07:18:13.977","2026-05-18 00:12:12.366","IK-144",250,"ml","IK-144",4175
+"cmnh57v8d0023ii043k1ttzni","Biogent 50 SC 500 ml",,"PCS","2026-04-02 07:18:13.981","2026-05-18 00:12:12.37","IK-149",500,"ml","IK-149",5
+"cmnh57v8h0024ii04jsswkmm5","Biolon 670 EC 1 L",,"PCS","2026-04-02 07:18:13.986","2026-05-18 00:12:12.374","BTS-HB-057",1000,"ml","BTS-HB-057",57
+"cmnh57v8u0025ii04kqi9j2j9","Biomax 200 ml",,"PCS","2026-04-02 07:18:13.999","2026-05-18 00:12:12.386","PK-004",200,"ml","PK-004",412
+"cmnh57v8y0026ii048fopjkfd","Biomax 500 ml",,"PCS","2026-04-02 07:18:14.002","2026-05-18 00:12:12.39","PK-005",500,"ml","PK-005",23
+"cmnh57v9a0028ii04hzk50iv6","Bionasa 480 SL 20 L",,"PCS","2026-04-02 07:18:14.014","2026-05-18 00:12:12.402","BTS-HB-045",20000,"ml","BTS-HB-045",21
+"cmnh57v9d0029ii04fg0vf91n","Bionasa 480 SL 200 ml",,"PCS","2026-04-02 07:18:14.018","2026-05-18 00:12:12.406","BTS-HB-008",200,"ml","BTS-HB-008",59
+"cmnh57v9h002aii04bry559oy","Bionasa 480 SL 4 L",,"PCS","2026-04-02 07:18:14.022","2026-05-18 00:12:12.41","BTS-HB-006",4000,"ml","BTS-HB-006",8
+"cmnh57v9l002bii04qqbjeu11","Bionasa 480 SL 5 L",,"PCS","2026-04-02 07:18:14.025","2026-05-18 00:12:12.414","BTS-HB-093",5000,"ml","BTS-HB-093",19
+"cmnh57v9p002cii04lc135r9y","Bionasa 480 SL 500 ml",,"PCS","2026-04-02 07:18:14.029","2026-05-18 00:12:12.419","BTS-HB-007",500,"ml","BTS-HB-007",234
+"cmnh57v9t002dii04lgcp0cz3","Bionasa 75 WSG 500 GR",,"PCS","2026-04-02 07:18:14.033","2026-05-18 00:12:12.423","BTS-HB-029",500,"gr","BTS-HB-029",42
+"cmnh57v9x002eii047m2o5ygs","Biophon 10 PA 250 ml",,"PCS","2026-04-02 07:18:14.037","2026-05-18 00:12:12.427","BTS-PK-089",250,"ml","BTS-PK-089",29
+"cmnh57vad002fii0406iayunc","Biothion 200 EC 100 ml",,"PCS","2026-04-02 07:18:14.053","2026-05-18 00:12:12.443","IK-053",100,"ml","IK-053",661
+"cmnh57vap002hii04okc70bl5","Biotomil 40 SP 15 gr",,"PCS","2026-04-02 07:18:14.065","2026-05-18 00:12:12.456","IK-111",15,"gr","IK-111",1400
+"cmn6uxoh10046l404wimuyv5h","Alat Penyemprot Disinfektan Tanaman","Alat Penyemprot Disinfektan Tanaman","PCS","2026-03-26 02:32:40.742","2026-05-18 00:12:12.007","FAR-SY-045",,,"FAR-SY-045",78
+"cmnh57uyn0012ii04fqv26eor","Alika 247 ZC 50 ml",,"PCS","2026-04-02 07:18:13.631","2026-05-18 00:12:12.024","PTR-IK-224",50,"ml","PTR-IK-224",392
+"cmnh57uz80013ii04ndixblbn","Ambition 500 ml",,"PCS","2026-04-02 07:18:13.652","2026-05-18 00:12:12.048","BYR-PK-032",500,"ml","BYR-PK-032",312
+"cmn6uxoyw008xl404k5tyil5v","Amesuper 500 SC 1 L","Amesuper 500 SC 1 L","Btl","2026-03-26 02:32:41.384","2026-05-18 00:12:12.052","SIN-HB-104",1000,"ml","SIN-HB-104",1428
+"cmnh57uzg0014ii04ynk9xvw2","Amesuper 500 SC 20 L",,"PCS","2026-04-02 07:18:13.66","2026-05-18 00:12:12.056","SIN-HB-116",20000,"ml","SIN-HB-116",30
+"cmnh57uzk0015ii04ryb5x3e6","Amesuper 500 SC 5 L",,"PCS","2026-04-02 07:18:13.664","2026-05-18 00:12:12.06","SIN-HB-115",5000,"ml","SIN-HB-115",0
+"cmnh57uzn0016ii041tr4ag59","Amistar Top 325 SC 100 ml",,"PCS","2026-04-02 07:18:13.668","2026-05-18 00:12:12.065","SYN-FG-058",100,"ml","SYN-FG-058",657
+"cmnh57uzw0017ii04uooc0p8t","Amistar Top 325 SC 50 ml",,"PCS","2026-04-02 07:18:13.677","2026-05-18 00:12:12.074","SYN-FG-100",50,"ml","SYN-FG-100",649
+"cmnh57v050018ii049gr9d33b","Anilo 60 WP 100 gram",,"PCS","2026-04-02 07:18:13.685","2026-05-18 00:12:12.082","DGW-MO-004",100,"gr","DGW-MO-004",515
+"cmnh57v0d0019ii04cvr1kk1l","Antracol 70 WP 1 Kg",,"PCS","2026-04-02 07:18:13.693","2026-05-18 00:12:12.09","BYR-FG-029",1000,"gr","BYR-FG-029",291
+"cmnh57v0l001aii04wftharis","Antracol 70 WP 500 gr",,"PCS","2026-04-02 07:18:13.701","2026-05-18 00:12:12.099","BYR-FG-048",500,"gr","BYR-FG-048",226
+"cmnh57v0t001bii049vhf9wxq","Aragon 100 ml",,"PCS","2026-04-02 07:18:13.71","2026-05-18 00:12:12.107","SAK-IK-195",100,"ml","SAK-IK-195",250
+"cmnh57v0y001cii04wpy9307c","Aragon 200 ml",,"PCS","2026-04-02 07:18:13.714","2026-05-18 00:12:12.111","SAK-IK-194",200,"ml","SAK-IK-194",105
+"cmnh57v16001eii04jxjx5x80","Ares 100 SL 300 ml",,"PCS","2026-04-02 07:18:13.722","2026-05-18 00:12:12.119","DTG-IK-091",300,"ml","DTG-IK-091",4
+"cmnh57vfe002yii04thpqwh0k","Counter Plus 50/1.8 WG 500 Gr",,"PCS","2026-04-02 07:18:14.235","2026-05-18 00:12:12.635","CAT-IK-180",500,"gr","CAT-IK-180",0
+"cmnh57vfu002zii04dlhech3d","Curacron 500 EC 500 ml",,"PCS","2026-04-02 07:18:14.25","2026-05-18 00:12:12.651","SYN-IK-099",500,"ml","SYN-IK-099",115
+"cmnh57vfx0030ii04pq8nnbid","D'mectin 530 SL 1 L",,"PCS","2026-04-02 07:18:14.254","2026-05-18 00:12:12.656","SAK-IK-163",1000,"ml","SAK-IK-163",127
+"cmnh57vg50031ii04b1euys0x","D'mectin 530 SL 500 ML",,"PCS","2026-04-02 07:18:14.262","2026-05-18 00:12:12.664","SAK-IK-162",500,"ml","SAK-IK-162",40
+"cmnh57vgk0033ii04qzxhr3qq","Dagger 200 SL 200 ml",,"PCS","2026-04-02 07:18:14.277","2026-05-18 00:12:12.68","IK-014",200,"ml","IK-014",614
+"cmn6uxoku0057l40450buqo7t","Dagger 200 SL 60 ml","Dagger 200 SL 60 ml","Btl","2026-03-26 02:32:40.878","2026-05-18 00:12:12.684","IK-013",60,"ml","IK-013",71
+"cmnh57vgw0034ii04uazbq9n4","Dangke 40 WP 250 gr",,"PCS","2026-04-02 07:18:14.289","2026-05-18 00:12:12.693","DGW-IK-059A",250,"gr","DGW-IK-059A",1559
+"cmnh57vh80035ii040denx99f","De Besttan 60 WP 15 gr",,"PCS","2026-04-02 07:18:14.301","2026-05-18 00:12:12.705","SU-IK-108",15,"gr","SU-IK-108",79
+"cmnh57vhg0036ii04t9a62tj6","Decis 25 EC 250 ml",,"PCS","2026-04-02 07:18:14.308","2026-05-18 00:12:12.714","BYR-IK-132",250,"ml","BYR-IK-132",228
+"cmnh57vhk0037ii04ietq5lpl","Decis 25 EC 50 ml",,"PCS","2026-04-02 07:18:14.312","2026-05-18 00:12:12.719","BYR-IK-122",50,"ml","BYR-IK-122",1517
+"cmnh57vhv0039ii049shua2lt","Deltaking 565 EC 80 ml",,"PCS","2026-04-02 07:18:14.324","2026-05-18 00:12:12.731","IK-016",80,"ml","IK-016",0
+"cmnh57vhz003aii046saxte9x","Demolish 18 EC 100 ml",,"PCS","2026-04-02 07:18:14.328","2026-05-18 00:12:12.738","DGW-IK-067",100,"ml","DGW-IK-067",76
+"cmnh57vi3003bii04hp17h80c","Demolish 18 EC 200 ml",,"PCS","2026-04-02 07:18:14.332","2026-05-18 00:12:12.745","DGW-IK-068",200,"ml","DGW-IK-068",960
+"cmn6uxoac002nl404lxfsk2hi","Dense Pro 520 SC 400 Ml","Dense Pro 520 SC 400 Ml","Btl","2026-03-26 02:32:40.501","2026-05-18 00:12:12.759","DGW-FG-096",400,"ml","DGW-FG-096",6
+"cmnh57vij003cii043w9h7urb","Desmos 200/60 SC 1 Lt",,"PCS","2026-04-02 07:18:14.348","2026-05-18 00:12:12.763","BTS-HB-025",1000,"ml","BTS-HB-025",0
+"cmnh57vio003dii04rw42vv9n","Desmos 200/60 SC 200 ml",,"PCS","2026-04-02 07:18:14.352","2026-05-18 00:12:12.767","BTS-HB-026",200,"ml","BTS-HB-026",376
+"cmnh57vj0003eii0435mw8zbk","Diazinon 600 EC 500 ml",,"PCS","2026-04-02 07:18:14.364","2026-05-18 00:12:12.781","PTR-IK-182",500,"ml","PTR-IK-182",50
+"cmnh57vj7003fii0417eiv0d5","Dimectin 18 EC 400 ML",,"PCS","2026-04-02 07:18:14.372","2026-05-18 00:12:12.79","DEL-IK-158",400,"ml","DEL-IK-158",83
+"cmnh57vjf003gii04hw41ih55","Dithane M 45 80 WP 200 Gr",,"PCS","2026-04-02 07:18:14.379","2026-05-18 00:12:12.799","UPL-FG-089",200,"gr","UPL-FG-089",216
+"cmnh57vjq003iii044n4o7uzq","Dobindox 40/120 SC 250 ml",,"PCS","2026-04-02 07:18:14.39","2026-05-18 00:12:12.811","SIN-IK-187",250,"ml","SIN-IK-187",40
+"cmnh57vkg003jii045cgwb3r0","Emacel 30 EC 1L",,"PCS","2026-04-02 07:18:14.416","2026-05-18 00:12:12.84","EMI-IK-072",1000,"ml","EMI-IK-072",50
+"cmnh57vko003lii04a0cf9w10","Emacel 30 EC 500 ml",,"PCS","2026-04-02 07:18:14.425","2026-05-18 00:12:12.848","EMI-IK-071",500,"ml","EMI-IK-071",116
+"cmnh57vkw003mii04bipq6s6n","Endure 120SC 200 ml",,"PCS","2026-04-02 07:18:14.432","2026-05-18 00:12:12.857","DOW-IK-074",200,"ml","DOW-IK-074",0
+"cmnh57vl3003nii04i14409ad","Explore 250 EC 250 ml",,"PCS","2026-04-02 07:18:14.44","2026-05-18 00:12:12.865","DGW-FG-039",250,"ml","DGW-FG-039",194
+"cmnh57vlq003pii04wst8q9op","Fastac 15 EC 250 ml",,"PCS","2026-04-02 07:18:14.463","2026-05-18 00:12:12.891","BASF-IK-112",250,"ml","BASF-IK-112",127
+"cmnh57vlu003qii0485rfkx9k","Fastac 15 EC 500 ml",,"PCS","2026-04-02 07:18:14.466","2026-05-18 00:12:12.895","BAS-IK-119",500,"ml","BAS-IK-119",169
+"cmn6uxol10059l404yru66sso","Fatal 250 EC 100 ml","Fatal 250 EC 100 ml","Btl","2026-03-26 02:32:40.886","2026-05-18 00:12:12.899","IK-017",100,"ml","IK-017",113
+"cmnh57vm1003rii046cdob0lo","Fatal 250 EC 500 ml",,"PCS","2026-04-02 07:18:14.474","2026-05-18 00:12:12.903","IK-018",500,"ml","IK-018",59
+"cmn6uxp000098l404jy2zuwi1","Fostin 610 EC 400 ml","Fostin 610 EC 400 ml","Btl","2026-03-26 02:32:41.424","2026-05-18 00:12:12.945","SKK-IK-083",400,"ml","SKK-IK-083",4
+"cmnh57vn1003tii045b7w387d","Fra Red 250 ml",,"PCS","2026-04-02 07:18:14.509","2026-05-18 00:12:12.949","SAK-IK-197",250,"ml","SAK-IK-197",120
+"cmnh57vn8003uii04eqckvdha","Fra Red 80 ml",,"PCS","2026-04-02 07:18:14.517","2026-05-18 00:12:12.957","SAK-IK-198",80,"ml","SAK-IK-198",129
+"cmnh57vnc003vii04w40scnc0","Free-Gel 100 ml",,"PCS","2026-04-02 07:18:14.521","2026-05-18 00:12:12.961","SAK-IK-205",100,"ml","SAK-IK-205",153
+"cmnh57vnn003wii043goon2h0","Furadan 3 GR 1 kg",,"PCS","2026-04-02 07:18:14.532","2026-05-18 00:12:12.974","FMC-IK-137",1000,"gr","FMC-IK-137",261
+"cmnh57vnz003xii04tswjyl5u","Gandasil B (Buah) 500 gr",,"PCS","2026-04-02 07:18:14.544","2026-05-18 00:12:12.986","KAL-PK-015",500,"gr","KAL-PK-015",45
+"cmnh57vo6003yii04q0m84o7q","Gandasil D (Daun) 500 gr",,"PCS","2026-04-02 07:18:14.551","2026-05-18 00:12:12.994","KAL-PK-017",500,"gr","KAL-PK-017",250
+"cmnh57voh003zii04wx3mm8sq","Gasing 135 SL 20 L",,"PCS","2026-04-02 07:18:14.561","2026-05-18 00:12:13.005","BTS-HB-053",20000,"ml","BTS-HB-053",0
+"cmnh57vax002jii0417lyweva","Biotomil 40 SP 400 gr",,"PCS","2026-04-02 07:18:14.073","2026-05-18 00:12:12.463","BTS-IK-126",400,"gr","BTS-IK-126",22
+"cmnh57vb9002kii04iommde46","Bonus",,"PCS","2026-04-02 07:18:14.086","2026-05-18 00:12:12.475","Bonus",,,"Bonus",0
+"cmnh57vbp002lii0494bo8h13","Buldok 25 EC 500 ml",,"PCS","2026-04-02 07:18:14.102","2026-05-18 00:12:12.49","BYR-IK-105",500,"ml","BYR-IK-105",48
+"cmnh57vcl002nii04kao7phhx","Cabrio Top 60 WG 250 GR",,"PCS","2026-04-02 07:18:14.133","2026-05-18 00:12:12.521","BASF-FG-091",250,"gr","BASF-FG-091",100
+"cmnh57vcx002oii04xowknvgl","Cabzim 500 SC 250 ml",,"PCS","2026-04-02 07:18:14.146","2026-05-18 00:12:12.533","SIN-FG-083",250,"ml","SIN-FG-083",218
+"cmnh57vd1002pii04abpm3em2","Cabzim 500 SC 500 ml",,"PCS","2026-04-02 07:18:14.15","2026-05-18 00:12:12.538","SIN-FG-071",500,"ml","SIN-FG-071",103
+"cmnh57vda002qii042o9xwrda","Cadilac 80 WP 800 gr",,"PCS","2026-04-02 07:18:14.158","2026-05-18 00:12:12.549","FG-006",800,"gr","FG-006",117
+"cmnh57vdi002rii04752a096c","Captive 200 SC 500 ml",,"PCS","2026-04-02 07:18:14.166","2026-05-18 00:12:12.557","AGR-FG-069",500,"ml","AGR-FG-069",0
+"cmnh57vdl002sii043jn3qn8k","Cash Flow 100 ml",,"PCS","2026-04-02 07:18:14.17","2026-05-18 00:12:12.561","SAK-IK-203",100,"ml","SAK-IK-203",231
+"cmnh57vdp002tii04qb62mi9m","Cash Flow 250 ml",,"PCS","2026-04-02 07:18:14.174","2026-05-18 00:12:12.565","SAK-IK-202",250,"ml","SAK-IK-202",119
+"cmn6uxodh003hl404tvs4ob3r","Charger 1,5A Farmjet Hitam","Charger 1,5A Farmjet Hitam","PCS","2026-03-26 02:32:40.613","2026-05-18 00:12:12.573","FAR-SP-079",,,"FAR-SP-079",75
+"cmnh57ve4002uii04ndx8sj81","Chlormite Plus 505 EC 200 Ml",,"PCS","2026-04-02 07:18:14.189","2026-05-18 00:12:12.582","DGW-IK-219",200,"ml","DGW-IK-219",77
+"cmnh57vec002vii04suqkhujf","Cofoli K300 500 ml",,"PCS","2026-04-02 07:18:14.196","2026-05-18 00:12:12.592","POL-PK-046",500,"ml","POL-PK-046",0
+"cmnh57vfa002xii04lfdmqo70","Counter Plus 50/1.8 WG 250 Gr",,"PCS","2026-04-02 07:18:14.231","2026-05-18 00:12:12.631","CAT-IK-179",250,"gr","CAT-IK-179",0
+"cmnh57vs7004fii042f8l67d0","Hopper 500 EC 1 L",,"PCS","2026-04-02 07:18:14.696","2026-05-18 00:12:13.15","IK-021",1000,"ml","IK-021",1082
+"cmnh57vtj004gii04wusqayku","Joker 75 SP 100 gr",,"PCS","2026-04-02 07:18:14.743","2026-05-18 00:12:13.209","EXC-IK-146",100,"gr","EXC-IK-146",644
+"cmnh57vtm004hii04uzybkxza","Joker 75 SP 400 gr",,"PCS","2026-04-02 07:18:14.747","2026-05-18 00:12:13.213","EXC-IK-076",400,"gr","EXC-IK-076",102
+"cmnh57vtq004iii047vhl4tfv","Joki 400 SL 1 L",,"PCS","2026-04-02 07:18:14.75","2026-05-18 00:12:13.217","BTS-IK-168",1000,"ml","BTS-IK-168",1913
+"cmnh57vty004jii04434pwegq","Joki 400 SL 500 ml",,"PCS","2026-04-02 07:18:14.758","2026-05-18 00:12:13.234","BTS-IK-167",500,"ml","BTS-IK-167",2143
+"cmnh57vu5004kii04saqkcmcj","KCL Mahkota 50 Kg Reguler",,"PCS","2026-04-02 07:18:14.766","2026-05-18 00:12:13.243","WCI-PK-048",50000,"gr","WCI-PK-048",0
+"cmnh57vuk004lii04fj2vl7ys","KNO3 Crystal DGW 2 Kg",,"PCS","2026-04-02 07:18:14.781","2026-05-18 00:12:13.262","HEX-PK-037",2000,"gr","HEX-PK-037",0
+"cmn6uxoq0006kl404mp8r061f","Kalizer Kalsium Cair 1 L","Kalizer Kalsium Cair 1 L","Btl","2026-03-26 02:32:41.064","2026-05-18 00:12:13.272","MTA-PK-094",1000,"ml","MTA-PK-094",150
+"cmnh57vv2004mii04blaluf5z","Kayabas 555 SC 1 L",,"PCS","2026-04-02 07:18:14.798","2026-05-18 00:12:13.288","PTR-HB-111",1000,"ml","PTR-HB-111",57
+"cmnh57vv5004nii04mgdxrrtt","Kayabas 555 SC 250 ml",,"PCS","2026-04-02 07:18:14.802","2026-05-18 00:12:13.295","PTR-HB-065",250,"ml","PTR-HB-065",128
+"cmnh57vvk004oii046xdgpx43","Ketave 100 SL 250 ml",,"PCS","2026-04-02 07:18:14.817","2026-05-18 00:12:13.311","EMI-IK-086",250,"ml","EMI-IK-086",0
+"cmnh57vw3004pii04y6gwpy3g","Klensect Extra 200 EC 400 Ml",,"PCS","2026-04-02 07:18:14.835","2026-05-18 00:12:13.35","DGW-IK-210",400,"ml","DGW-IK-210",36
+"cmnh57vwk004qii04fhsfsp48","Kozima 50 SC 200 Ml",,"PCS","2026-04-02 07:18:14.852","2026-05-18 00:12:13.371","SAP-IK-214",200,"ml","SAP-IK-214",40
+"cmnh57vx0004rii04bae8xng5","Lannate 25 WP 100 gr",,"PCS","2026-04-02 07:18:14.869","2026-05-18 00:12:13.387","MKD-IK-115",100,"gr","MKD-IK-115",821
+"cmnh57vx8004sii044xwd052r","Lannate 40 SP 100 gr",,"PCS","2026-04-02 07:18:14.876","2026-05-18 00:12:13.396","MKD-IK-078",100,"gr","MKD-IK-078",291
+"cmnh57vxj004uii04xjrge111","Leili 2000 1 L (new)",,"PCS","2026-04-02 07:18:14.887","2026-05-18 00:12:13.41","DGW-PK-047",1000,"ml","DGW-PK-047",0
+"cmnh57vxw004vii04w4or5np8","Leili 2000 100 ml",,"PCS","2026-04-02 07:18:14.901","2026-05-18 00:12:13.415","DGW-PK-034",100,"ml","DGW-PK-034",49
+"cmnh57vy0004wii04tx3gp4vq","Leili 2000 250 ml",,"PCS","2026-04-02 07:18:14.905","2026-05-18 00:12:13.419","DGW-PK-033",250,"ml","DGW-PK-033",48
+"cmnh57vy4004xii048r6u3s4a","Leili 2000 500 Ml",,"PCS","2026-04-02 07:18:14.908","2026-05-18 00:12:13.423","DGW-PK-097",500,"ml","DGW-PK-097",21
+"cmnh57vy8004yii04kwskxaei","Leili 2000 900 Ml",,"PCS","2026-04-02 07:18:14.912","2026-05-18 00:12:13.439","DGW-PK-098",900,"ml","DGW-PK-098",16
+"cmnh57vyc004zii04heboisrd","Lindomin 865 SL 200 ml",,"PCS","2026-04-02 07:18:14.916","2026-05-18 00:12:13.447","NUF-HB-100",200,"ml","NUF-HB-100",159
+"cmnh57vyx0050ii04a4jpkysp","Logic 70 WP 800 gr",,"PCS","2026-04-02 07:18:14.937","2026-05-18 00:12:13.465","FG-008",800,"gr","FG-008",222
+"cmnh57vzm0051ii04gst7o7d9","Manuver 400 SL 2 L",,"PCS","2026-04-02 07:18:14.963","2026-05-18 00:12:13.511","IK-023",2000,"ml","IK-023",302
+"cmnh57vzq0052ii0426ki3jgm","Manuver 400 SL 200 ml",,"PCS","2026-04-02 07:18:14.967","2026-05-18 00:12:13.515","IK-024",200,"ml","IK-024",1500
+"cmnh57vzz0054ii0499pn8re6","Manuver 400 SL 500 ml",,"PCS","2026-04-02 07:18:14.976","2026-05-18 00:12:13.523","IK-026",500,"ml","IK-026",637
+"cmnh57w040055ii040n4ybayp","Marshal 200 EC 100 ml",,"PCS","2026-04-02 07:18:14.98","2026-05-18 00:12:13.528","FMC-IK-107",100,"ml","FMC-IK-107",511
+"cmnh57w0b0056ii04bwvfg6i2","Marshal 25 DS 100 gr",,"PCS","2026-04-02 07:18:14.988","2026-05-18 00:12:13.535","FMC-IK-148",100,"gr","FMC-IK-148",152
+"cmnh57w0g0057ii04qcqi7pkf","Marshal 25 DS 25 gr",,"PCS","2026-04-02 07:18:14.992","2026-05-18 00:12:13.539","FMC-IK-124",25,"gr","FMC-IK-124",0
+"cmnh57w0o0058ii049az00yer","Marxone 300 SL 5 L",,"PCS","2026-04-02 07:18:15","2026-05-18 00:12:13.547","SAP-HB-088",5000,"ml","SAP-HB-088",0
+"cmnh57w140059ii046vzu8yg7","Metindo 25 WP 100 Gr",,"PCS","2026-04-02 07:18:15.017","2026-05-18 00:12:13.562","MKD-IK-215",100,"gr","MKD-IK-215",190
+"cmnh57w18005aii04vlame230","Metindo 25 WP 250 Gr",,"PCS","2026-04-02 07:18:15.02","2026-05-18 00:12:13.567","MKD-IK-216",250,"gr","MKD-IK-216",80
+"cmnh57w1f005bii04d5xl9o7f","Metindo 40 SP 100 Gr",,"PCS","2026-04-02 07:18:15.027","2026-05-18 00:12:13.574","MKD-IK-217",100,"gr","MKD-IK-217",70
+"cmnh57w1n005dii0481qgb596","Metindo 40 SP 400 gr",,"PCS","2026-04-02 07:18:15.035","2026-05-18 00:12:13.582","MKD-IK-100",400,"gr","MKD-IK-100",0
+"cmnh57w1z005eii044jyrsqts","Meurtieur 30 EC 100 ml",,"PCS","2026-04-02 07:18:15.047","2026-05-18 00:12:13.594","IK-028",100,"ml","IK-028",24623
+"cmnh57w22005fii04vhmuml3k","Meurtieur 30 EC 250 ml",,"PCS","2026-04-02 07:18:15.051","2026-05-18 00:12:13.598","IK-029",250,"ml","IK-029",7836
+"cmnh57w26005gii044tf7g7ak","Meurtieur 30 EC 500 ml",,"PCS","2026-04-02 07:18:15.054","2026-05-18 00:12:13.602","IK-030",500,"ml","IK-030",3657
+"cmnh57von0041ii044aa82m6y","Gasing 135 SL 5 L",,"PCS","2026-04-02 07:18:14.568","2026-05-18 00:12:13.013","BTS-HB-095",5000,"ml","BTS-HB-095",33
+"cmn6uxowx008dl404brb3phsl","Gen-V HI_Speed 250 ml","Gen-V HI_Speed 250 ml","Btl","2026-03-26 02:32:41.314","2026-05-18 00:12:13.027","SAK-PPC-009",250,"ml","SAK-PPC-009",184
+"cmnh57voy0042ii04id8yxkyz","Gen-V HI_Speed 500 ml",,"PCS","2026-04-02 07:18:14.579","2026-05-18 00:12:13.031","SAK-PPC-010",500,"ml","SAK-PPC-010",100
+"cmnh57vp60043ii045ys8h4h5","Gibgro 10 SP 1 gr",,"PCS","2026-04-02 07:18:14.587","2026-05-18 00:12:13.039","NUF-PK-023",1,"gr","NUF-PK-023",7167
+"cmnh57vpe0044ii04axaqizhe","Glufo 150 SL 20 Lt",,"PCS","2026-04-02 07:18:14.594","2026-05-18 00:12:13.047","HB-028",20000,"ml","HB-028",0
+"cmnh57vph0045ii04bic88yr9","Glufo 150 SL 4 Lt",,"PCS","2026-04-02 07:18:14.598","2026-05-18 00:12:13.05","HB-090",4000,"ml","HB-090",9
+"cmnh57vpl0046ii04rq76fp6p","Glufo 150 SL 500 ml",,"PCS","2026-04-02 07:18:14.602","2026-05-18 00:12:13.054","HB-079",500,"ml","HB-079",0
+"cmnh57vpv0047ii04c9t1atvh","Glufo Pro 200 SL 4 L",,"PCS","2026-04-02 07:18:14.611","2026-05-18 00:12:13.062","BTS-HB-106",4000,"ml","BTS-HB-106",0
+"cmnh57vqd0049ii04zt86fst4","Gramoxone 276 SL 500 ml",,"PCS","2026-04-02 07:18:14.63","2026-05-18 00:12:13.078","SYN-HB-042",500,"ml","SYN-HB-042",363
+"cmnh57vrj004aii044rtz706s","Hantu Multiguna Exclusive 250 ml",,"PCS","2026-04-02 07:18:14.671","2026-05-18 00:12:13.122","MUT-PK-078",250,"ml","MUT-PK-078",157
+"cmnh57vrm004bii04o34uibqa","Hantu Multiguna Exclusive 500 ml",,"PCS","2026-04-02 07:18:14.675","2026-05-18 00:12:13.126","MUT-PK-077",500,"ml","MUT-PK-077",750
+"cmnh57vrt004cii04i5lgypu1","Hantu Trichoderma Booster 500 ml",,"PCS","2026-04-02 07:18:14.682","2026-05-18 00:12:13.134","MUT-PK-087",500,"ml","MUT-PK-087",5
+"cmnh57vrx004dii04daohjrik","Heko 50 SC 1 L",,"PCS","2026-04-02 07:18:14.685","2026-05-18 00:12:13.138","SIN-FG-050",1000,"ml","SIN-FG-050",24
+"cmnh57vs4004eii040hxc490q","Heko 50 SC 500 ml",,"PCS","2026-04-02 07:18:14.693","2026-05-18 00:12:13.146","SIN-FG-053",500,"ml","SIN-FG-053",179
+"cmnh57w5b005xii041mbxsltf","Mulsa Koala 60 cm 17 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.168","2026-05-18 00:12:13.703","ML-047",17000,"gr","ML-047",0
+"cmnh57w5g005yii04w1et2mw8","Mulsa Koala 60 cm 18 kg",,"PCS","2026-04-02 07:18:15.173","2026-05-18 00:12:13.707","ML-023",18000,"gr","ML-023",0
+"cmnh57w5k005zii04b5udzhat","Mulsa Koala 60 cm 4 kg",,"PCS","2026-04-02 07:18:15.177","2026-05-18 00:12:13.711","ML-021",4000,"gr","ML-021",0
+"cmnh57w5o0060ii04l9l2c6eb","Mulsa Koala 60 cm 8 kg",,"PCS","2026-04-02 07:18:15.181","2026-05-18 00:12:13.72","ML-022",8000,"gr","ML-022",0
+"cmnh57w5x0062ii04sn7mrtyr","Mulsa MMI 40 cm @ 17 Kg",,"PCS","2026-04-02 07:18:15.189","2026-05-18 00:12:13.729","MMI-ML-060",17000,"gr","MMI-ML-060",0
+"cmnh57w650064ii04e3wb7emi","Mulsa MMI 40 cm @ 8 Kg",,"PCS","2026-04-02 07:18:15.197","2026-05-18 00:12:13.737","MMI-ML-059",8000,"gr","MMI-ML-059",0
+"cmnh57w690065ii045w2xp929","Mulsa MMI 40 cm @ 8 Kg (R 01)",,"PCS","2026-04-02 07:18:15.201","2026-05-18 00:12:13.741","MMI-ML-068",8000,"gr","MMI-ML-068",0
+"cmnh57w6d0066ii04b9dd766m","Mulsa MMI 50 cm @ 17 Kg",,"PCS","2026-04-02 07:18:15.206","2026-05-18 00:12:13.746","MMI-ML-056",17000,"gr","MMI-ML-056",0
+"cmnh57w6h0067ii04s3hwr8a5","Mulsa MMI 50 cm @ 17 Kg (R 01)",,"PCS","2026-04-02 07:18:15.21","2026-05-18 00:12:13.75","MMI-ML-069",17000,"gr","MMI-ML-069",0
+"cmnh57w6p0068ii04jukdb5ob","Mulsa MMI 50 cm @ 8 Kg (R 01)",,"PCS","2026-04-02 07:18:15.218","2026-05-18 00:12:13.758","MMI-ML-070",8000,"gr","MMI-ML-070",0
+"cmnh57w6t0069ii04d0bmj7qz","Mulsa MMI 60 cm @ 17 Kg",,"PCS","2026-04-02 07:18:15.221","2026-05-18 00:12:13.762","MMI-ML-058",17000,"gr","MMI-ML-058",0
+"cmnh57w70006bii04zg2iqb42","Mulsa MMI 60 cm @ 8 Kg",,"PCS","2026-04-02 07:18:15.229","2026-05-18 00:12:13.77","MMI-ML-057",8000,"gr","MMI-ML-057",0
+"cmnh57w74006cii0461kamllt","Mulsa MMI 60 cm @ 8 Kg (R 01)",,"PCS","2026-04-02 07:18:15.232","2026-05-18 00:12:13.774","MMI-ML-072",8000,"gr","MMI-ML-072",0
+"cmnh57w77006dii04imyua91l","Mulsa Naga 40 cm 17 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.236","2026-05-18 00:12:13.778","ML-049",17000,"gr","ML-049",0
+"cmnh57w7i006fii049y6a5mse","Mulsa Naga 60 cm 17 kg",,"PCS","2026-04-02 07:18:15.247","2026-05-18 00:12:13.79","ML-031",17000,"gr","ML-031",0
+"cmnh57w7m006gii049k4nq0q9","Mulsa Naga 60 cm 17 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.25","2026-05-18 00:12:13.794","ML-050",17000,"gr","ML-050",0
+"cmnh57w7p006hii04fam7y5my","Mulsa Tangguh 40 cm 8 Kg",,"PCS","2026-04-02 07:18:15.253","2026-05-18 00:12:13.798","MMI-ML-081",8000,"gr","MMI-ML-081",0
+"cmnh57w7t006iii04x6jzwx6u","Mulsa Tangguh 50 cm 17 Kg",,"PCS","2026-04-02 07:18:15.257","2026-05-18 00:12:13.802","MMI-ML-078",17000,"gr","MMI-ML-078",0
+"cmnh57w85006kii04fscixvob","Mulsa Tangguh 60 cm 8 Kg",,"PCS","2026-04-02 07:18:15.269","2026-05-18 00:12:13.813","MMI-ML-080",8000,"gr","MMI-ML-080",0
+"cmn6uxoxt008ml404b9hiu2y9","NPK 16.16.16 Pak Tani 1 Kg","NPK 16.16.16 Pak Tani 1 Kg","Bks","2026-03-26 02:32:41.346","2026-05-18 00:12:13.833","SAP-PK-043",1000,"gr","SAP-PK-043",0
+"cmnh57w9k006oii04b863kvlt","NPK Hantu Jagotani 250 ml",,"PCS","2026-04-02 07:18:15.321","2026-05-18 00:12:13.856","MUT-PK-081",250,"ml","MUT-PK-081",125
+"cmnh57w9o006pii0474jnkf1i","NPK Hantu Jagotani 500 ml",,"PCS","2026-04-02 07:18:15.325","2026-05-18 00:12:13.86","MUT-PK-080",500,"ml","MUT-PK-080",650
+"cmnh57w9w006qii04ptai490s","NPK Makrostar 20 kg",,"PCS","2026-04-02 07:18:15.332","2026-05-18 00:12:13.868","PK-007",20000,"gr","PK-007",0
+"cmnh57w9z006rii04wu6gtqn7","NPK Makrostar 50 kg",,"PCS","2026-04-02 07:18:15.336","2026-05-18 00:12:13.872","PK-008",50000,"gr","PK-008",200
+"cmnh57wa7006sii04yz4vsjzy","NPK Mutiara Grower 50 Kg",,"PCS","2026-04-02 07:18:15.343","2026-05-18 00:12:13.88","MER-PK-050",50000,"gr","MER-PK-050",0
+"cmnh57was006tii04hxq52eez","Nargis 50 WP 40 gr",,"PCS","2026-04-02 07:18:15.365","2026-05-18 00:12:13.909","FG-052",40,"gr","FG-052",8232
+"cmnh57wb1006uii043zl6ickb","Nativo 75 WG 50 gr",,"PCS","2026-04-02 07:18:15.373","2026-05-18 00:12:13.92","BYR-FG-072",50,"gr","BYR-FG-072",0
+"cmnh57wb4006vii04aubhmgap","Nefos 45 WP 200 gr",,"PCS","2026-04-02 07:18:15.377","2026-05-18 00:12:13.924","FG-025",200,"gr","FG-025",427
+"cmnh57wbp006wii04jssxi7ug","Neoroot 250 Gr",,"PCS","2026-04-02 07:18:15.398","2026-05-18 00:12:13.942","UPL-PK-074",250,"gr","UPL-PK-074",0
+"cmnh57wbu006xii04pq0vou5c","Nicofuron 80 OD 1 L",,"PCS","2026-04-02 07:18:15.402","2026-05-18 00:12:13.946","BTS-HB-083",1000,"ml","BTS-HB-083",1236
+"cmnh57wcl006yii04o29gf6un","Niten 100 SL 100 ml",,"PCS","2026-04-02 07:18:15.429","2026-05-18 00:12:13.962","IK-076",100,"ml","IK-076",63
+"cmnh57wco006zii0473r7wigq","Niten 100 SL 200 ml",,"PCS","2026-04-02 07:18:15.433","2026-05-18 00:12:13.967","IK-032",200,"ml","IK-032",330
+"cmnh57wcs0070ii04aq1rdlrr","Niten 100 SL 400 ml",,"PCS","2026-04-02 07:18:15.437","2026-05-18 00:12:13.971","IK-033",400,"ml","IK-033",12
+"cmnh57w2x005jii046naufgze","Mulsa Alexa 50 cm @ 8 Kg",,"PCS","2026-04-02 07:18:15.081","2026-05-18 00:12:13.623","MMI-ML-063",8000,"gr","MMI-ML-063",0
+"cmnh57w30005kii049zl5hwx5","Mulsa Alexa 60 cm @ 17 Kg",,"PCS","2026-04-02 07:18:15.085","2026-05-18 00:12:13.627","MMI-ML-066",17000,"gr","MMI-ML-066",0
+"cmnh57w34005lii04377d3125","Mulsa Alexa 60 cm @ 8 Kg",,"PCS","2026-04-02 07:18:15.089","2026-05-18 00:12:13.636","MMI-ML-065",8000,"gr","MMI-ML-065",0
+"cmnh57w3d005mii0422zop1e2","Mulsa Biotis 60 cm @ 17 Kg",,"PCS","2026-04-02 07:18:15.097","2026-05-18 00:12:13.644","MMI-ML-076",17000,"gr","MMI-ML-076",0
+"cmnh57w3l005nii04jjk7igym","Mulsa Garpu 60 cm 17 Kg",,"PCS","2026-04-02 07:18:15.105","2026-05-18 00:12:13.653","MMI-ML-074",17000,"gr","MMI-ML-074",0
+"cmnh57w3y005oii04nvogf46v","Mulsa Koala 40 cm 17 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.118","2026-05-18 00:12:13.665","ML-054",17000,"gr","ML-054",0
+"cmnh57w42005pii0409rwj1y4","Mulsa Koala 40 cm 8 kg",,"PCS","2026-04-02 07:18:15.122","2026-05-18 00:12:13.669","ML-016",8000,"gr","ML-016",0
+"cmnh57w4b005qii04kfnidc9v","Mulsa Koala 40 cm 8 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.132","2026-05-18 00:12:13.673","ML-053",8000,"gr","ML-053",0
+"cmnh57w4j005rii040m19c7xn","Mulsa Koala 50 cm 17 kg",,"PCS","2026-04-02 07:18:15.139","2026-05-18 00:12:13.677","ML-017",17000,"gr","ML-017",0
+"cmnh57w4r005tii04m93cpyda","Mulsa Koala 50 cm 4 kg",,"PCS","2026-04-02 07:18:15.148","2026-05-18 00:12:13.686","ML-018",4000,"gr","ML-018",0
+"cmnh57w4w005uii047wd2bqh9","Mulsa Koala 50 cm 8 kg",,"PCS","2026-04-02 07:18:15.152","2026-05-18 00:12:13.69","ML-019",8000,"gr","ML-019",0
+"cmnh57w50005vii04p9ie1rv9","Mulsa Koala 50 cm 8 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.156","2026-05-18 00:12:13.694","ML-051",8000,"gr","ML-051",0
+"cmnh57w54005wii04k6jngj07","Mulsa Koala 60 cm 17 kg",,"PCS","2026-04-02 07:18:15.161","2026-05-18 00:12:13.698","ML-020",17000,"gr","ML-020",0
+"cmnh57wk1007fii04fg9z6c0w","Polydor 25 EC 500 ml",,"PCS","2026-04-02 07:18:15.697","2026-05-18 00:12:14.23","IK-037",500,"ml","IK-037",755
+"cmnh57wkg007gii04k196e8en","Posat 480 SL 5 L",,"PCS","2026-04-02 07:18:15.713","2026-05-18 00:12:14.246","SAP-HB-086",5000,"ml","SAP-HB-086",0
+"cmnh57wks007hii04qv1dnvsa","Prevathon 50 SC 250 ml",,"PCS","2026-04-02 07:18:15.724","2026-05-18 00:12:14.258","FMC-IK-057A",250,"ml","FMC-IK-057A",2526
+"cmnh57wlc007jii04dnimanyo","Pronate 200 SL 5 L",,"PCS","2026-04-02 07:18:15.744","2026-05-18 00:12:14.278","EAS-HB-121",5000,"ml","EAS-HB-121",197
+"cmnh57wlf007kii04mc4sbl3h","Propus 100 ml",,"PCS","2026-04-02 07:18:15.748","2026-05-18 00:12:14.282","PK-011",100,"ml","PK-011",153
+"cmnh57wln007lii04i9v5xst4","Propus 500 ml",,"PCS","2026-04-02 07:18:15.756","2026-05-18 00:12:14.29","PK-010",500,"ml","PK-010",166
+"cmn6uxodd003gl404ds938zsx","Pump 3.1LPM Socket-Valve Farmjet","Pump 3.1LPM Socket-Valve Farmjet","PCS","2026-03-26 02:32:40.609","2026-05-18 00:12:14.298","FAR-SP-078",,,"FAR-SP-078",10
+"cmnh57wn6007rii04juvjg1wc","Regent 50 SC RED 50 ml",,"PCS","2026-04-02 07:18:15.811","2026-05-18 00:12:14.344","BAS-IK-133",50,"ml","BAS-IK-133",129
+"cmn6uxp1y009ql404cofwmtj2","Regulator","Regulator","PCS","2026-03-26 02:32:41.495","2026-05-18 00:12:14.348","SP-017",,,"SP-017",133
+"cmn6uxovx0083l4045be1y3xa","Remazole P 490 EC 250 ml","Remazole P 490 EC 250 ml","Btl","2026-03-26 02:32:41.277","2026-05-18 00:12:14.352","RYL-FG-037",250,"ml","RYL-FG-037",0
+"cmnh57wnm007sii04s7lrnfo8","Renzo 250 EC 250 ml",,"PCS","2026-04-02 07:18:15.826","2026-05-18 00:12:14.36","FG-016",250,"ml","FG-016",135
+"cmnh57wny007tii04cbbt4f0f","Ricestar Xtra 89 OD 250 ml",,"PCS","2026-04-02 07:18:15.838","2026-05-18 00:12:14.372","BYR-HB-071",250,"ml","BYR-HB-071",0
+"cmn6uxp5800aml404n92p6wxx","Ring Karet 14 mm","Ring Karet 14 mm","PCS","2026-03-26 02:32:41.612","2026-05-18 00:12:14.384","SP-072",,,"SP-072",450
+"cmnh57wod007uii04zalmhxpl","Ring Karet 18 mm",,"PCS","2026-04-02 07:18:15.854","2026-05-18 00:12:14.388","SP-073",,,"SP-073",581
+"cmn6uxpag00bzl404sbttyygx","Rizotin 100 EC 500 ml","Rizotin 100 EC 500 ml","Btl","2026-03-26 02:32:41.8","2026-05-18 00:12:14.395","UNI-IK-092",500,"ml","UNI-IK-092",149
+"cmnh57wor007vii04tjrnl2un","Roundup 486 SL 1 L",,"PCS","2026-04-02 07:18:15.867","2026-05-18 00:12:14.399","NUF-HB-032",1000,"ml","NUF-HB-032",4171
+"cmnh57wow007wii04q5y5b4pq","Roundup 486 SL 20 L",,"PCS","2026-04-02 07:18:15.872","2026-05-18 00:12:14.403","NUF-HB-117",20000,"ml","NUF-HB-117",0
+"cmn6uxp4y00ajl404my8xerlk","Saringan Tangki Manual","Saringan Tangki Manual","PCS","2026-03-26 02:32:41.602","2026-05-18 00:12:14.423","SP-069",,,"SP-069",0
+"cmnh57wq2007xii04bomyhsj5","Score 250 EC 80 ml",,"PCS","2026-04-02 07:18:15.914","2026-05-18 00:12:14.442","SYN-FG-048",80,"ml","SYN-FG-048",1066
+"cmnh57wq5007yii0444bi7moo","Scud 100 EW 4 L",,"PCS","2026-04-02 07:18:15.918","2026-05-18 00:12:14.446","IK-134",4000,"ml","IK-134",15
+"cmnh57wqd0080ii04qwjh7fzf","Scud 50 EC 1 L",,"PCS","2026-04-02 07:18:15.926","2026-05-18 00:12:14.454","IK-183",1000,"ml","IK-183",1
+"cmnh57wqh0081ii04zdxip273","Scud 50 EC 100 ml",,"PCS","2026-04-02 07:18:15.93","2026-05-18 00:12:14.458","IK-039",100,"ml","IK-039",327
+"cmnh57wr20083ii049rbmq85h","Senator 200 EC 1 L",,"PCS","2026-04-02 07:18:15.95","2026-05-18 00:12:14.479","IK-103",1000,"ml","IK-103",0
+"cmnh57wrd0084ii04f37p2np5","Serbu 400/60 SL 500 ml",,"PCS","2026-04-02 07:18:15.962","2026-05-18 00:12:14.492","BTS-HB-113",500,"ml","BTS-HB-113",40
+"cmn6uxor1006tl404mfa4gbdd","Serendy 28 WP 25 gr","Serendy 28 WP 25 gr","Bks","2026-03-26 02:32:41.101","2026-05-18 00:12:14.496","NU-HB-043",25,"gr","NU-HB-043",615
+"cmnh57wru0085ii04obeeoj11","Sidamethrin 50 EC 100 ml",,"PCS","2026-04-02 07:18:15.978","2026-05-18 00:12:14.51","PTR-IK-079",100,"ml","PTR-IK-079",913
+"cmnh57wsd0086ii04pdcsriba","Sinabintop 400 SC 250 ml",,"PCS","2026-04-02 07:18:15.998","2026-05-18 00:12:14.535","SIN-FG-087",250,"ml","SIN-FG-087",515
+"cmnh57wsl0087ii04oib9algv","Sinakill 18/32 EC 100 ml",,"PCS","2026-04-02 07:18:16.005","2026-05-18 00:12:14.543","SIN-IK-181",100,"ml","SIN-IK-181",413
+"cmnh57wtl0088ii04vl18udls","Sistemik 240 SL 2 L",,"PCS","2026-04-02 07:18:16.042","2026-05-18 00:12:14.583","HB-089",2000,"ml","HB-089",15
+"cmnh57wtq0089ii04p31la6mk","Sistemik 240 SL 20 L",,"PCS","2026-04-02 07:18:16.046","2026-05-18 00:12:14.587","HB-023",20000,"ml","HB-023",0
+"cmnh57wtv008aii0430xrsg0c","Sistemik 240 SL 4 L",,"PCS","2026-04-02 07:18:16.052","2026-05-18 00:12:14.591","HB-078",4000,"ml","HB-078",0
+"cmnh57wtz008bii04y4kz4c6o","Sistemik 240 SL 500 ml",,"PCS","2026-04-02 07:18:16.056","2026-05-18 00:12:14.595","HB-049",500,"ml","HB-049",28
+"cmnh57wum008cii0446zquv2u","Solusi 865 SL 20 L",,"PCS","2026-04-02 07:18:16.078","2026-05-18 00:12:14.616","HB-047",20000,"ml","HB-047",25
+"cmnh57wur008dii04bemg3hhi","Solusi 865 SL 200 ml",,"PCS","2026-04-02 07:18:16.084","2026-05-18 00:12:14.62","HB-011",200,"ml","HB-011",6
+"cmnh57wuv008eii04lftdbs0m","Solusi 865 SL 4 L",,"PCS","2026-04-02 07:18:16.088","2026-05-18 00:12:14.624","HB-074",4000,"ml","HB-074",49
+"cmnh57wv0008fii04zqu4abqw","Solusi 865 SL 400 ml",,"PCS","2026-04-02 07:18:16.092","2026-05-18 00:12:14.628","HB-012",400,"ml","HB-012",5894
+"cmnh57wvd008gii04nz0580fq","Spectrone 250/200 EC 200 ml",,"PCS","2026-04-02 07:18:16.105","2026-05-18 00:12:14.641","IK-043",200,"ml","IK-043",0
+"cmnh57wd10072ii0425djgbap","Nitrea 5 Kg (new)",,"PCS","2026-04-02 07:18:15.445","2026-05-18 00:12:13.979","PKU-PK-071",5000,"gr","PKU-PK-071",431
+"cmnh57wdy0073ii04xgbvt82d","Nordox 56 WP 500 gr",,"PCS","2026-04-02 07:18:15.478","2026-05-18 00:12:14.01","TRW-FG-074",500,"gr","TRW-FG-074",0
+"cmnh57wf30074ii04no40fld7","Notora 60/6 WG 400 Gr",,"PCS","2026-04-02 07:18:15.52","2026-05-18 00:12:14.049","FG-027",400,"gr","FG-027",1008
+"cmnh57wf70075ii04e8kel3qk","Novlect 120 EC 250 ml",,"PCS","2026-04-02 07:18:15.524","2026-05-18 00:12:14.054","CTV-HB-097",250,"ml","CTV-HB-097",219
+"cmnh57wfk0076ii045k1lo847","Noxone 276 SL 250 ml",,"PCS","2026-04-02 07:18:15.536","2026-05-18 00:12:14.069","MSI-HB-118",250,"ml","MSI-HB-118",0
+"cmnh57wfp0077ii04bj8f523l","Noxone 276 SL 500 ml",,"PCS","2026-04-02 07:18:15.541","2026-05-18 00:12:14.073","MSI-HB-119",500,"ml","MSI-HB-119",48
+"cmnh57wg90078ii04kos3d023","Otella 50 gr",,"PCS","2026-04-02 07:18:15.562","2026-05-18 00:12:14.094","SAK-IK-200",50,"gr","SAK-IK-200",500
+"cmnh57wgz0079ii04uhjkwbsj","Pembelian Aset",,"PCS","2026-04-02 07:18:15.587","2026-05-18 00:12:14.118","100013",,,"100013",0
+"cmnh57wht007bii04tqlgnvwy","Phoscormite 18 EC 1 L",,"PCS","2026-04-02 07:18:15.618","2026-05-18 00:12:14.149","CAT-IK-177",1000,"ml","CAT-IK-177",0
+"cmnh57wi1007cii04lr2g5zut","Phoscormite 18 EC 400 Ml",,"PCS","2026-04-02 07:18:15.625","2026-05-18 00:12:14.158","CAT-IK-176",400,"ml","CAT-IK-176",0
+"cmnh57wiu007dii04ts57vxr7","Plenum 50 WG 100 gr",,"PCS","2026-04-02 07:18:15.655","2026-05-18 00:12:14.186","SYN-IK-061",100,"gr","SYN-IK-061",20
+"cmn6uxp7d00b6l404mx8hylh1","Polar Power Sprayer PS-888 20 L","Polar Power Sprayer PS-888 20 L","PCS","2026-03-26 02:32:41.69","2026-05-18 00:12:14.211","SY-012",20000,"ml","SY-012",0
+"cmnh57wjx007eii04s8pm1vf2","Polydor 25 EC 200 ml",,"PCS","2026-04-02 07:18:15.693","2026-05-18 00:12:14.226","IK-036",200,"ml","IK-036",246
+"cmnh57x05008tii04ny10hrw8","Stadium 18 EC 500 ml",,"PCS","2026-04-02 07:18:16.277","2026-05-18 00:12:14.828","IK-048",500,"ml","IK-048",217
+"cmnh57x0c008uii0477y7dinw","Starban 585 EC 100 ml",,"PCS","2026-04-02 07:18:16.285","2026-05-18 00:12:14.841","IK-050",100,"ml","IK-050",720
+"cmnh57x0k008wii04425k5vpb","Starban 585 EC 500 ml",,"PCS","2026-04-02 07:18:16.293","2026-05-18 00:12:14.85","IK-052",500,"ml","IK-052",2486
+"cmnh57x0o008xii04rxwc9yw2","Sumo 50 EC 250 ml",,"PCS","2026-04-02 07:18:16.296","2026-05-18 00:12:14.854","BEL-IK-145",250,"ml","BEL-IK-145",35
+"cmnh57x0s008yii04tt2jkn0o","Sumo 50 EC 500 ml",,"PCS","2026-04-02 07:18:16.301","2026-05-18 00:12:14.858","BEL-IK-164",500,"ml","BEL-IK-164",57
+"cmnh57x14008zii04bchyglhj","Supremo Gold 490 SL 500 ml",,"PCS","2026-04-02 07:18:16.312","2026-05-18 00:12:14.871","DGW-HB-066",500,"ml","DGW-HB-066",14
+"cmnh57x1b0090ii04v31udkjg","Swallow",,"PCS","2026-04-02 07:18:16.32","2026-05-18 00:12:14.879","100014",,,"100014",0
+"cmnh57x1j0091ii04wii7g695","Sweeper 480 SL 20 L",,"PCS","2026-04-02 07:18:16.328","2026-05-18 00:12:14.888","HB-015",20000,"ml","HB-015",0
+"cmnh57x1v0093ii04rrvswl5o","Tabas 400 SC 200 ml",,"PCS","2026-04-02 07:18:16.339","2026-05-18 00:12:14.901","DMS-HB-070",200,"ml","DMS-HB-070",0
+"cmnh57x1z0094ii04cpklrhl7","Tabas 400 SC 50 ml",,"PCS","2026-04-02 07:18:16.343","2026-05-18 00:12:14.906","DTG-HB-060",50,"ml","DTG-HB-060",3010
+"cmnh57x340095ii04jftvq7tk","Tandem 325 SC 100 ml",,"PCS","2026-04-02 07:18:16.385","2026-05-18 00:12:14.936","FG-017",100,"ml","FG-017",1576
+"cmnh57x390096ii04wvu9eff7","Tandem 325 SC 250 ml",,"PCS","2026-04-02 07:18:16.39","2026-05-18 00:12:14.94","FG-018",250,"ml","FG-018",6285
+"cmnh57x3e0097ii04jh3augm6","Tandem 325 SC 50 ml",,"PCS","2026-04-02 07:18:16.394","2026-05-18 00:12:14.949","FG-019",50,"ml","FG-019",166
+"cmnh57x3w0098ii04074rnv6c","Teballo 250 SL 100 ml",,"PCS","2026-04-02 07:18:16.413","2026-05-18 00:12:14.968","PTR-IK-110",100,"ml","PTR-IK-110",0
+"cmnh57x58009aii04atdq2zfe","Torero 80 WP 1 Kg",,"PCS","2026-04-02 07:18:16.46","2026-05-18 00:12:15.024","HB-091",1000,"gr","HB-091",163
+"cmnh57x5f009bii04cmsxuo4t","Torero 80 WP 500 gr",,"PCS","2026-04-02 07:18:16.467","2026-05-18 00:12:15.033","HB-036",500,"gr","HB-036",104
+"cmnh57x62009cii04ivnujgjz","Tugard 160/10 EC 500 ML",,"PCS","2026-04-02 07:18:16.49","2026-05-18 00:12:15.058","DEL-IK-156",500,"ml","DEL-IK-156",84
+"cmnh57x6p009dii04yerdj1pk","Urea Petro 5 kg",,"PCS","2026-04-02 07:18:16.513","2026-05-18 00:12:15.088","PTR-PK-053",5000,"gr","PTR-PK-053",0
+"cmnh57x72009eii046k974o55","Vayego 200 SC 100 ml (50 x 100 ml)",,"PCS","2026-04-02 07:18:16.527","2026-05-18 00:12:15.101","BYR-IK-138",100,"ml","BYR-IK-138",0
+"cmnh57x7e009fii04295ffwvw","Virtako 300 SC 10 ml",,"PCS","2026-04-02 07:18:16.539","2026-05-18 00:12:15.115","SYN-IK-086",10,"ml","SYN-IK-086",980
+"cmnh57x7i009gii048mypdque","Virtako 300 SC 50 ml",,"PCS","2026-04-02 07:18:16.543","2026-05-18 00:12:15.119","SYN-IK-208",50,"ml","SYN-IK-208",651
+"cmnh57x81009hii04s7ib7zj1","Wet n Shine 200 ml",,"PCS","2026-04-02 07:18:16.562","2026-05-18 00:12:15.143","CAT-PPC-004",200,"ml","CAT-PPC-004",0
+"cmnh57x8e009iii04gtj79t2q","Yasithrin 30 EC 100 ML",,"PCS","2026-04-02 07:18:16.575","2026-05-18 00:12:15.16","PTS-IK-189",100,"ml","PTS-IK-189",390
+"cmn6uxouz007ul404gx69ot84","Yasithrin 30 EC 400 ml","Yasithrin 30 EC 400 ml","Btl","2026-03-26 02:32:41.243","2026-05-18 00:12:15.164","PTS-IK-125",400,"ml","PTS-IK-125",138
+"cmnh57x8z009jii04k3hkik4z","ZPT Atonik 6.0L 100 ml",,"PCS","2026-04-02 07:18:16.596","2026-05-18 00:12:15.18","OMA-PK-039",100,"ml","OMA-PK-039",235
+"cmnh57x94009kii04quzq131l","ZPT Atonik 6.0L 250 ml",,"PCS","2026-04-02 07:18:16.6","2026-05-18 00:12:15.186","OMA-PK-040",250,"ml","OMA-PK-040",255
+"cmnh57x98009lii04tv71gumh","ZPT Atonik 6.0L 500 ml",,"PCS","2026-04-02 07:18:16.604","2026-05-18 00:12:15.191","OMA-PK-065",500,"ml","OMA-PK-065",1436
+"cmnh57x9g009mii04hvshof0d","ZPT Hantu Ratu Biogen 250 ml",,"PCS","2026-04-02 07:18:16.612","2026-05-18 00:12:15.199","MUT-PK-084",250,"ml","MUT-PK-084",108
+"cmnh57x9w009oii04xmwoobb4","Zenus 276 SL 20 L",,"PCS","2026-04-02 07:18:16.628","2026-05-18 00:12:15.217","HB-018",20000,"ml","HB-018",25
+"cmnh57x9z009pii04h80v54ep","Zenus 276 SL 4 L",,"PCS","2026-04-02 07:18:16.632","2026-05-18 00:12:15.221","HB-020",4000,"ml","HB-020",289
+"cmnh57xa3009qii04v7yhhde9","Zenus 276 SL 5 L",,"PCS","2026-04-02 07:18:16.635","2026-05-18 00:12:15.226","HB-094",5000,"ml","HB-094",2
+"cmnh57xa6009rii04bqom4dvi","Zenus 276 SL 500 ml",,"PCS","2026-04-02 07:18:16.639","2026-05-18 00:12:15.23","HB-021",500,"ml","HB-021",378
+"cmnh57xae009sii04n7ume162","Ziflo 76 WG 200 gr",,"PCS","2026-04-02 07:18:16.647","2026-05-18 00:12:15.238","FG-023",200,"gr","FG-023",1
+"cmnh57xam009uii04kms3op12","Ziflo 76 WG 800 gr",,"PCS","2026-04-02 07:18:16.654","2026-05-18 00:12:15.246","FG-024",800,"gr","FG-024",182
+"cmn6uxo94002cl404a4fgzshy","Zorvec Encantia 330 SE 150 ml","Zorvec Encantia 330 SE 150 ml","Btl","2026-03-26 02:32:40.456","2026-05-18 00:12:15.254","COR-HB-102",150,"ml","COR-HB-102",50
+"cmnh57xay009vii04fmq72ecu","nn Abacel 18 EC 500 ml",,"PCS","2026-04-02 07:18:16.667","2026-05-18 00:12:15.258","EMI-NN-065",500,"ml","EMI-NN-065",0
+"cmnh57wvq008iii04maewshwe","Spontan 400 SL 1 L",,"PCS","2026-04-02 07:18:16.119","2026-05-18 00:12:14.654","AGR-IK-064",1000,"ml","AGR-IK-064",3919
+"cmnh57wvv008jii040c1pk1rk","Spontan 400 SL 100 ml",,"PCS","2026-04-02 07:18:16.123","2026-05-18 00:12:14.658","AGR-IK-095",100,"ml","AGR-IK-095",0
+"cmn6uxo1o000fl404mk2b44dt","Spontan 400 SL 200 ml","Spontan 400 SL 200 ml","Btl","2026-03-26 02:32:40.189","2026-05-18 00:12:14.663","AGR-IK-062",200,"ml","AGR-IK-062",809
+"cmnh57ww2008kii0444vbr86h","Spontan 400 SL 500 ml",,"PCS","2026-04-02 07:18:16.131","2026-05-18 00:12:14.667","AGR-IK-063",500,"ml","AGR-IK-063",484
+"cmnh57wwb008lii04kr9qfbl6","Spontan King 400 SL 500 ml",,"PCS","2026-04-02 07:18:16.139","2026-05-18 00:12:14.675","AGR-IK-169",500,"ml","AGR-IK-169",400
+"cmnh57wye008mii042x9g79dl","Sprayer Farmjet Electric 16 L",,"PCS","2026-04-02 07:18:16.215","2026-05-18 00:12:14.755","FAR-SY-031",16000,"ml","FAR-SY-031",6
+"cmnh57wyi008nii040rt6qjwu","Sprayer Farmjet PS 5 L",,"PCS","2026-04-02 07:18:16.218","2026-05-18 00:12:14.76","FAR-SY-028",5000,"ml","FAR-SY-028",0
+"cmnh57wyu008oii04368ihf4e","Sprayer Fertilizer (Polos)",,"PCS","2026-04-02 07:18:16.23","2026-05-18 00:12:14.773","FAR-SY-038",,,"FAR-SY-038",20
+"cmn6uxohd0049l404tnxq62vi","Sprayer Manual Fagota 16 L","Sprayer Manual Fagota 16 L","Box","2026-03-26 02:32:40.753","2026-05-18 00:12:14.786","FAR-SY-048",16000,"ml","FAR-SY-048",56
+"cmnh57wza008pii04v0mlzuvt","Sprayer Mesin 20 L (PS-825)",,"PCS","2026-04-02 07:18:16.246","2026-05-18 00:12:14.795","SY-010",20000,"ml","SY-010",0
+"cmn6uxp8800bel404tlskr08y","Sprayer Polar 2 in 1 EM-16 SNI","Sprayer Polar 2 in 1 EM-16 SNI","PCS","2026-03-26 02:32:41.72","2026-05-18 00:12:14.803","SY-020",16000,"ml","SY-020",0
+"cmnh57wzl008qii049ge8e5co","Sprayer Ultra CBA Electric type 3",,"PCS","2026-04-02 07:18:16.258","2026-05-18 00:12:14.807","CBA-SY-022",16000,"ml","CBA-SY-022",2
+"cmnh57wzx008rii045ig4zcrn","Stadium 18 EC 100 ml",,"PCS","2026-04-02 07:18:16.269","2026-05-18 00:12:14.82","IK-046",100,"ml","IK-046",690
+"cmnh57x01008sii04x3i2sxej","Stadium 18 EC 200 ml",,"PCS","2026-04-02 07:18:16.273","2026-05-18 00:12:14.824","IK-047",200,"ml","IK-047",454
+"cmnh57xdi00afii04sb4n5ber","nn Noxone 276 SL 1 L",,"PCS","2026-04-02 07:18:16.759","2026-05-18 00:12:15.378","MSI-NN-055",1000,"ml","MSI-NN-055",0
+"cmnh57xdn00agii04jz5ml4y3","nn Prevathon 50 SC 250 ml",,"PCS","2026-04-02 07:18:16.764","2026-05-18 00:12:15.382","FMC-NN-057A",250,"ml","FMC-NN-057A",0
+"cmnh57xdv00ahii045nmwt6ha","nn Rizotin 100 EC 100 ml",,"PCS","2026-04-02 07:18:16.771","2026-05-18 00:12:15.386","UNI-NN-004a",100,"ml","UNI-NN-004a",0
+"cmnh57xdz00aiii04fome8l5v","nn Roundup 486 SL 1 L",,"PCS","2026-04-02 07:18:16.776","2026-05-18 00:12:15.39","NUF-NN-032",1000,"ml","NUF-NN-032",0
+"cmnh57xe300ajii047g2e06ub","nn See Top 525 SL 1 L",,"PCS","2026-04-02 07:18:16.78","2026-05-18 00:12:15.394","PTR-NN-058",1000,"ml","PTR-NN-058",1
+"cmnh57xen00amii04ywgc979m","nn Sepatu Boot Fuso Mix 43",,"PCS","2026-04-02 07:18:16.8","2026-05-18 00:12:15.413","WGI-NN-009a",,,"WGI-NN-009a",5
+"cmnh57xer00anii04y8u0i8xy","nn Spontan 400 SL 1 L",,"PCS","2026-04-02 07:18:16.804","2026-05-18 00:12:15.417","AGR-NN-064",1000,"ml","AGR-NN-064",33
+"cmnh57xey00apii04n1280e19","nn Spontan 400 SL 500 ml",,"PCS","2026-04-02 07:18:16.811","2026-05-18 00:12:15.425","AGR-NN-063",500,"ml","AGR-NN-063",120
+"cmnh57xf900aqii04j89r81bj","nn Starban 585 EC 100 ml",,"PCS","2026-04-02 07:18:16.822","2026-05-18 00:12:15.437","NN-050",100,"ml","NN-050",502
+"cmnh57xfd00arii04x4qmym8h","nn Starban 585 EC 400 ml",,"PCS","2026-04-02 07:18:16.825","2026-05-18 00:12:15.441","NN-051",400,"ml","NN-051",225
+"cmnh57xfg00asii040ero8ky4","nn Tabas 400 SC 100 ml",,"PCS","2026-04-02 07:18:16.829","2026-05-18 00:12:15.445","DMS-NN-054",100,"ml","DMS-NN-054",0
+"cmnh57xfk00atii0498bwuhi7","nn Tabas 400 SC 50 ml",,"PCS","2026-04-02 07:18:16.832","2026-05-18 00:12:15.449","DTG-NN-060",50,"ml","DTG-NN-060",0
+"cmnh57xfn00auii04ajo5q5gt","nn Teballo 250 SL 250 ml",,"PCS","2026-04-02 07:18:16.836","2026-05-18 00:12:15.453","PTR-NN-109",250,"ml","PTR-NN-109",0
+"cmnh57xfv00avii047aop9gw2","nn Tridium 500 gr",,"PCS","2026-04-02 07:18:16.843","2026-05-18 00:12:15.463","UPL-NN-011a",500,"gr","UPL-NN-011a",0
+"cmnh57xg300awii044a1nchmx","nn Yamida 25 WP 100gr",,"PCS","2026-04-02 07:18:16.851","2026-05-18 00:12:15.472","SIN-NN-096",100,"gr","SIN-NN-096",5
+"cmnh57xge00ayii041bk7zvj7","paket coba",,"PCS","2026-04-02 07:18:16.863","2026-05-18 00:12:15.484","100018",,,"100018",0
+"cmn6uxowc0087l404tbr2s73x","Aragon 1 L","Aragon 1 L","Btl","2026-03-26 02:32:41.292","2026-05-18 00:12:12.103","SAK-IK-192",1000,"ml","SAK-IK-192",45
+"cmn6uxoms005ql404cujxp1hx","Bablass 490 SL 1 L","Bablass 490 SL 1 L","Btl","2026-03-26 02:32:40.948","2026-05-18 00:12:12.168","KRE-HB-075",1000,"ml","KRE-HB-075",225
+"cmnh57vat002iii04tmhled2o","Biotomil 40 SP 200 gr",,"PCS","2026-04-02 07:18:14.069","2026-05-18 00:12:12.46","BTS-IK-131",200,"gr","BTS-IK-131",28
+"cmn6uxp0c009bl404zt4njqbm","EM4 (Effective Microorganisme 4) Toilet 1 Lt","EM4 (Effective Microorganisme 4) Toilet 1 Lt","Btl","2026-03-26 02:32:41.436","2026-05-18 00:12:12.823","SLP-PK-224",1000,"ml","SLP-PK-224",15
+"cmnh57vlb003oii04debwy5ek","Explore Max 250 EC 250 Ml",,"PCS","2026-04-02 07:18:14.447","2026-05-18 00:12:12.876","DGW-FG-098",250,"ml","DGW-FG-098",72
+"cmnh57vok0040ii04pjgdi6x8","Gasing 135 SL 4 Lt",,"PCS","2026-04-02 07:18:14.564","2026-05-18 00:12:13.009","BTS-HB-069",4000,"ml","BTS-HB-069",312
+"cmn6uxoec003pl404h443pnyd","Hose Pipa Gray Two Cap 13.8 L & 16 L 2 in 1","Hose Pipa Gray Two Cap 13.8 L & 16 L 2 in 1","PCS","2026-03-26 02:32:40.644","2026-05-18 00:12:13.157","FAR-SP-087",,,"FAR-SP-087",0
+"cmn6uxoe0003ml404rtmzythi","Lance Gray 13.8L & 16 L Elektrik 2 in 1","Lance Gray 13.8L & 16 L Elektrik 2 in 1","PCS","2026-03-26 02:32:40.632","2026-05-18 00:12:13.383","FAR-SP-084",,,"FAR-SP-084",0
+"cmnh57w2f005hii04xhwabs7i","Mulsa Alexa 40 cm @ 17 Kg",,"PCS","2026-04-02 07:18:15.063","2026-05-18 00:12:13.61","MMI-ML-062",17000,"gr","MMI-ML-062",0
+"cmnh57w6x006aii04us3yo1hw","Mulsa MMI 60 cm @ 17 Kg (R 01)",,"PCS","2026-04-02 07:18:15.225","2026-05-18 00:12:13.766","MMI-ML-071",17000,"gr","MMI-ML-071",0
+"cmnh57wcw0071ii04bm2xka7o","Nitrea 5 Kg",,"PCS","2026-04-02 07:18:15.441","2026-05-18 00:12:13.975","PKU-PK-051",5000,"gr","PKU-PK-051",0
+"cmn6uxoru0070l404wof21rxg","Nominee 103 OF 100 Ml","Nominee 103 OF 100 Ml","Btl","2026-03-26 02:32:41.131","2026-05-18 00:12:13.996","PET-HB-107",100,"ml","PET-HB-107",102
+"cmn6uxo31000rl404rsqo563e","Regent 0.3 GR 1 Kg","Regent 0.3 GR 1 Kg","Bks","2026-03-26 02:32:40.237","2026-05-18 00:12:14.329","BAS-IK-075",1000,"gr","BAS-IK-075",4
+"cmnh57wqy0082ii04ugeg0chk","See Top 525 SL 1 L (new)",,"PCS","2026-04-02 07:18:15.946","2026-05-18 00:12:14.475","PTR-HB-103",1000,"ml","PTR-HB-103",23
+"cmnh57wvg008hii04bwfvn1mr","Spectrone 250/200 EC 400 ml",,"PCS","2026-04-02 07:18:16.109","2026-05-18 00:12:14.646","IK-128",400,"ml","IK-128",0
+"cmn6uxova007xl404jl8lwai6","Sprayer 2 in 1 Nokaku 16 - N2 - 16 L","Sprayer 2 in 1 Nokaku 16 - N2 - 16 L","Box","2026-03-26 02:32:41.255","2026-05-18 00:12:14.691","RAJ-SY-040",16000,"ml","RAJ-SY-040",0
+"cmn6uxopt006il404v8oyag7j","Zeo Green NPK Cair 1 L","Zeo Green NPK Cair 1 L","Btl","2026-03-26 02:32:41.057","2026-05-18 00:12:15.234","MTA-PK-092",1000,"ml","MTA-PK-092",25
+"cmnh57xba009xii04mul484gt","nn Benfuron 12/18 WP 25 gr",,"PCS","2026-04-02 07:18:16.678","2026-05-18 00:12:15.27","MSI-NN-061",25,"gr","MSI-NN-061",140
+"cmnh57xbd009yii04fkqlo4rx","nn Benih Jagung Bisi 18 1 Kg",,"PCS","2026-04-02 07:18:16.682","2026-05-18 00:12:15.274","TAN-NN-009",1000,"gr","TAN-NN-009",195
+"cmnh57xbh009zii04nobx8mhr","nn Bentan 45 WP 100 gr",,"PCS","2026-04-02 07:18:16.685","2026-05-18 00:12:15.278","TKS-NN-002",100,"gr","TKS-NN-002",0
+"cmnh57xbk00a0ii04vuds1m82","nn Buldok 25 EC 100 ml",,"PCS","2026-04-02 07:18:16.689","2026-05-18 00:12:15.282","BYR-NN-094",100,"ml","BYR-NN-094",744
+"cmnh57xbr00a2ii04os62xsrd","nn Buldok 25 EC 500 ml",,"PCS","2026-04-02 07:18:16.696","2026-05-18 00:12:15.29","BYR-NN-105",500,"ml","BYR-NN-105",0
+"cmnh57xbz00a4ii04qyyyd4m2","nn Cabzim 500 SC 500 ml",,"PCS","2026-04-02 07:18:16.703","2026-05-18 00:12:15.298","SIN-NN-071",500,"ml","SIN-NN-071",20
+"cmnh57xc200a5ii04hqw0ndt3","nn Cadilac 80 WP 800 gr",,"PCS","2026-04-02 07:18:16.706","2026-05-18 00:12:15.302","FG-NN-006",800,"gr","FG-NN-006",0
+"cmnh57xc500a6ii048ks4ehn6","nn Dagger 200 SL 60 ml",,"PCS","2026-04-02 07:18:16.71","2026-05-18 00:12:15.326","NN-013",60,"ml","NN-013",41
+"cmnh57xc900a7ii0437wa9jm6","nn Dangke 40 WP 100 gr",,"PCS","2026-04-02 07:18:16.713","2026-05-18 00:12:15.342","DGW-NN-059",100,"gr","DGW-NN-059",0
+"cmnh57xcg00a8ii04l90ovej7","nn Decis 25 EC 50 ml",,"PCS","2026-04-02 07:18:16.72","2026-05-18 00:12:15.346","BYR-NN-122",50,"ml","BYR-NN-122",0
+"cmnh57xck00a9ii046fh725rn","nn Fatal 250 EC 100 ml",,"PCS","2026-04-02 07:18:16.725","2026-05-18 00:12:15.35","NN-017",100,"ml","NN-017",0
+"cmnh57xco00aaii04kh9vkk85","nn Gempur 480 SL 1 L",,"PCS","2026-04-02 07:18:16.728","2026-05-18 00:12:15.354","PTR-NN-033",1000,"ml","PTR-NN-033",0
+"cmnh57xcx00abii04w70qi559","nn Marshal 25 DS 25 gr",,"PCS","2026-04-02 07:18:16.737","2026-05-18 00:12:15.362","FMC-NN-124",25,"gr","FMC-NN-124",0
+"cmnh57xd400adii04yjltd5sl","nn Niten 100 SL 200 ml",,"PCS","2026-04-02 07:18:16.745","2026-05-18 00:12:15.37","NN-032",200,"ml","NN-032",40
+"cmnh57xde00aeii045y8f0unc","nn Niten 100 SL 400 ml",,"PCS","2026-04-02 07:18:16.754","2026-05-18 00:12:15.373","NN-033",400,"ml","NN-033",20
+"cmn6uxoxe008il404p2d7sc1c","Fertiphos Hijau Pak Tani 50 kg","Fertiphos Hijau Pak Tani 50 kg","Sak","2026-03-26 02:32:41.331","2026-05-18 00:12:12.916","SAP-PK-041",50000,"gr","SAP-PK-041",0
+"cmn6uxogm0042l404k5wq9wzo","Jet Cleaner Farmjet Alumunium","Jet Cleaner Farmjet Alumunium","Box","2026-03-26 02:32:40.726","2026-05-18 00:12:13.192","FAR-SY-032",,,"FAR-SY-032",3
+"cmn6uxpb500c6l404yq0o97tk","KCL Mahkota 50 Kg","KCL Mahkota 50 Kg","Sak","2026-03-26 02:32:41.826","2026-05-18 00:12:13.239","WCI-PK-044",50000,"gr","WCI-PK-044",0
+"cmn6uxod6003el404x0h22sjm","Kelonil 75WP 500 gr","Kelonil 75WP 500 gr","Bks","2026-03-26 02:32:40.602","2026-05-18 00:12:13.303","EXC-FG-055",500,"gr","EXC-FG-055",0
+"cmn6uxoo30062l4049t1k8ai0","Mulsa Alexa 40 cm @ 8 Kg","Mulsa Alexa 40 cm @ 8 Kg","Rol","2026-03-26 02:32:40.995","2026-05-18 00:12:13.614","MMI-ML-061",8000,"gr","MMI-ML-061",0
+"cmnh57w81006jii04x5c1bilr","Mulsa Tangguh 60 cm 17 Kg",,"PCS","2026-04-02 07:18:15.265","2026-05-18 00:12:13.809","MMI-ML-079",17000,"gr","MMI-ML-079",0
+"cmn6uxoim004ll404old4kyvf","Propus Plus 250 SC 250 ml","Propus Plus 250 SC 250 ml","Btl","2026-03-26 02:32:40.798","2026-05-18 00:12:14.294","FG-061",250,"ml","FG-061",2201
+"cmn6uxo76001tl404f78ruvuj","Ricestar Xtra 89 OD 100 ml","Ricestar Xtra 89 OD 100 ml","Btl","2026-03-26 02:32:40.386","2026-05-18 00:12:14.368","BYR-HB-068",100,"ml","BYR-HB-068",62
+"cmn6uxoth007gl4047m25x65d","Siodan 20 WP 500 gr","Siodan 20 WP 500 gr","Bks","2026-03-26 02:32:41.189","2026-05-18 00:12:14.575","PTR-FG-035",500,"gr","PTR-FG-035",0
+"cmnh57x0g008vii043mgt2cbv","Starban 585 EC 400 ml",,"PCS","2026-04-02 07:18:16.288","2026-05-18 00:12:14.846","IK-051",400,"ml","IK-051",26619
+"cmn6uxp4g00ael404r5i9aw3r","Tutup Penghisap","Tutup Penghisap","PCS","2026-03-26 02:32:41.584","2026-05-18 00:12:15.062","SP-060",,,"SP-060",71
+"cmnh57xbv00a3ii04y6apqrx2","nn Cabzim 500 SC 1 L",,"PCS","2026-04-02 07:18:16.7","2026-05-18 00:12:15.294","SIN-NN-070",1000,"ml","SIN-NN-070",0
+"cmnh57xek00alii04nv5ke2ni","nn Sepatu Boot Fuso Mix 42",,"PCS","2026-04-02 07:18:16.796","2026-05-18 00:12:15.409","WGI-NN-008a",,,"WGI-NN-008a",5
+"cmn6uxo2g000ml404yn0p6kpj","Agrimore-Even 18+18+18 500 gr (Biru)","Agrimore-Even 18+18+18 500 gr (Biru)","Bks","2026-03-26 02:32:40.217","2026-05-18 00:12:11.98","AGR-PK-061",500,"gr","AGR-PK-061",135
+"cmn6uxo90002bl404zeq8fiff","Benih Jagung Pioneer P27 Lumigen 1 Kg","Benih Jagung Pioneer P27 Lumigen 1 Kg","Bks","2026-03-26 02:32:40.453","2026-05-18 00:12:12.235","COR-BB-029",1000,"gr","COR-BB-029",0
+"cmn6uxp9x00bul4040qbej7av","Besromil 35 WP 100 gram","Besromil 35 WP 100 gram","Bks","2026-03-26 02:32:41.782","2026-05-18 00:12:12.272","TIA-FG-085",100,"gr","TIA-FG-085",0
+"cmn6uxnzv0000l4042hx7at9b","Brofreya 53 SC 100 ml","Brofreya 53 SC 100 ml","Btl","2026-03-26 02:32:40.124","2026-05-18 00:12:12.483","ACI-IK-127",100,"ml","ACI-IK-127",199
+"cmnh57vgh0032ii0475abd4t9","DMA 6 825 SL 400 ml",,"PCS","2026-04-02 07:18:14.273","2026-05-18 00:12:12.676","CTV-HB-046",400,"ml","CTV-HB-046",0
+"cmn6uxoqx006sl404e0kc0c6r","Hantu Trichoderma Booster 1000 ml","Hantu Trichoderma Booster 1000 ml","Btl","2026-03-26 02:32:41.097","2026-05-18 00:12:13.13","MUT-PK-086",1000,"ml","MUT-PK-086",58
+"cmn6uxp9d00bpl404vobsa42i","Incipio 200 SC 100 ml","Incipio 200 SC 100 ml","Btl","2026-03-26 02:32:41.762","2026-05-18 00:12:13.165","SYN-IK-135",100,"ml","SYN-IK-135",190
+"cmn6uxo16000al404nnckxne1","Jagung Manis Anara - 81 F1 250 gr","Jagung Manis Anara - 81 F1 250 gr","PCS","2026-03-26 02:32:40.17","2026-05-18 00:12:13.177","ADV-BB-023",250,"gr","ADV-BB-023",744
+"cmn6uxod2003dl404hj033osk","Ketave 100 SL 1 L","Ketave 100 SL 1 L","Btl","2026-03-26 02:32:40.599","2026-05-18 00:12:13.307","EMI-IK-085",1000,"ml","EMI-IK-085",0
+"cmn6uxp9h00bql404qa3odise","Matador 25 EC 250 ml","Matador 25 EC 250 ml","Btl","2026-03-26 02:32:41.765","2026-05-18 00:12:13.551","SYN-IK-152",250,"ml","SYN-IK-152",0
+"cmn6uxo20000il4046fdb6vdz","Nissozin 20 SP 200 gr","Nissozin 20 SP 200 gr","Bks","2026-03-26 02:32:40.201","2026-05-18 00:12:13.955","AGR-IK-165",200,"gr","AGR-IK-165",10
+"cmn6uxoym008ul4043xgunc21","Norbt 75 WP 50 gr","Norbt 75 WP 50 gr","Bks","2026-03-26 02:32:41.374","2026-05-18 00:12:14","SIN-FG-080",50,"gr","SIN-FG-080",700
+"cmn6uxop1006bl4045ap0qx08","Noxone 276 SL 1 L","Noxone 276 SL 1 L","Btl","2026-03-26 02:32:41.03","2026-05-18 00:12:14.065","MSI-HB-055",1000,"ml","MSI-HB-055",60
+"cmn6uxou5007ml40444ocbhxw","Sidamethrin 50 EC 400 ml","Sidamethrin 50 EC 400 ml","Btl","2026-03-26 02:32:41.214","2026-05-18 00:12:14.515","PTR-IK-078",400,"ml","PTR-IK-078",282
+"cmn6uxo3h000vl4044alw5fnu","Terong Hijau F1 Ekspansi @ 5 gr","Terong Hijau F1 Ekspansi @ 5 gr","Bks","2026-03-26 02:32:40.254","2026-05-18 00:12:14.983","BB-003",5,"gr","BB-003",0
+"cmnh57x4w0099ii04re20bcls","Tomat Hibrida Deby 23 F1 10 gr",,"PCS","2026-04-02 07:18:16.448","2026-05-18 00:12:15.011","ADV-BB-028",10,"gr","ADV-BB-028",986
+"cmnh57xai009tii049pyqtz1a","Ziflo 76 WG 200 gr (New)",,"PCS","2026-04-02 07:18:16.65","2026-05-18 00:12:15.242","FG-063",200,"gr","FG-063",2197
+"cmnh57xeb00akii045g32j77z","nn Sepatu Boot Fuso Hijau Mix 41",,"PCS","2026-04-02 07:18:16.788","2026-05-18 00:12:15.402","WGI-NN-006a",,,"WGI-NN-006a",6
+"cmn6uxoeg003ql404htklg6j8","114 White Filter 13,8 L & 16 L Elektrik 2 in 1","114 White Filter 13,8 L & 16 L Elektrik 2 in 1","PCS","2026-03-26 02:32:40.648","2026-05-18 00:12:11.745","FAR-SP-088",,,"FAR-SP-088",5
+"cmn6uxpbn00cbl4046e49d405","AP Boot Terra Eco 3 Orange 39","AP Boot Terra Eco 3 Orange 39","PCS","2026-03-26 02:32:41.843","2026-05-18 00:12:11.896","WGI-SPT-009",,,"WGI-SPT-009",2
+"cmnh57uw3000uii043k22fmsp","AP Boot Terra Eco 3 Yellow 41",,"PCS","2026-04-02 07:18:13.539","2026-05-18 00:12:11.923","WGI-SPT-015",,,"WGI-SPT-015",2
+"cmn6uxo28000kl404tp3hjad4","Agrimore-N 29+10+10+TE 500 gr (Hijau)","Agrimore-N 29+10+10+TE 500 gr (Hijau)","Bks","2026-03-26 02:32:40.209","2026-05-18 00:12:11.994","AGR-PK-059",500,"gr","AGR-PK-059",684
+"cmn6uxo2o000ol404ycxv1zzh","Benih Padi Hibrida F-1 Suppadi 56 1 Kg","Benih Padi Hibrida F-1 Suppadi 56 1 Kg","Bks","2026-03-26 02:32:40.225","2026-05-18 00:12:12.243","ASD-BB-025",1000,"gr","ASD-BB-025",0
+"cmn6uxovs0082l4048c5k4gcb","Biopronik Asam Amino Plus 1000 ml","Biopronik Asam Amino Plus 1000 ml","Btl","2026-03-26 02:32:41.273","2026-05-18 00:12:12.435","RIA-PK-088",1000,"ml","RIA-PK-088",150
+"cmn6uxo7o001yl40404dum6xi","Buldok 25 EC 100 ml","Buldok 25 EC 100 ml","Btl","2026-03-26 02:32:40.404","2026-05-18 00:12:12.487","BYR-IK-094",100,"ml","BYR-IK-094",438
+"cmnh57vc1002mii045n8f3v2m","CY-Late 40 SP 100 gr",,"PCS","2026-04-02 07:18:14.114","2026-05-18 00:12:12.501","SAK-IK-207",100,"gr","SAK-IK-207",1480
+"cmn6uxo040001l404hw0o108g","Cabe Rawit Shima 10 gr","Cabe Rawit Shima 10 gr","PCS","2026-03-26 02:32:40.132","2026-05-18 00:12:12.513","ADV-BB-013",10,"gr","ADV-BB-013",997
+"cmn6uxo39000tl404jb4rv0i0","Cabrio Top 60 WG 500 GR","Cabrio Top 60 WG 500 GR","Bks","2026-03-26 02:32:40.246","2026-05-18 00:12:12.525","BASF-FG-084",500,"gr","BASF-FG-084",177
+"cmnh57vkk003kii04tbeqz32w","Emacel 30 EC 250 ml",,"PCS","2026-04-02 07:18:14.421","2026-05-18 00:12:12.844","EMI-IK-070",250,"ml","EMI-IK-070",1059
+"cmn6uxoqg006ol404n1qa0mu1","Hantu Multiguna Exclusive 1000 ml","Hantu Multiguna Exclusive 1000 ml","Btl","2026-03-26 02:32:41.08","2026-05-18 00:12:13.118","MUT-PK-076",1000,"ml","MUT-PK-076",1799
+"cmn6uxoj4004ql404vtqyxo94","Marshal 200 EC 500 ml","Marshal 200 EC 500 ml","Btl","2026-03-26 02:32:40.816","2026-05-18 00:12:13.532","FMC-IK-106",500,"ml","FMC-IK-106",0
+"cmnh57w5t0061ii04ftuam7i3","Mulsa Koala 60 cm 8 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.185","2026-05-18 00:12:13.725","ML-048",8000,"gr","ML-048",0
+"cmnh57x9j009nii04nd1dg6bc","ZPT Hantu Ratu Biogen 500 ml",,"PCS","2026-04-02 07:18:16.616","2026-05-18 00:12:15.204","MUT-PK-083",500,"ml","MUT-PK-083",85
+"cmnh57v11001dii04etta0nsy","Aragon 500 ml",,"PCS","2026-04-02 07:18:13.718","2026-05-18 00:12:12.115","SAK-IK-193",500,"ml","SAK-IK-193",87
+"cmnh57vjj003hii04iqne4loj","Dithane M 45 80 WP 500 Gr",,"PCS","2026-04-02 07:18:14.383","2026-05-18 00:12:12.803","UPL-FG-090",500,"gr","UPL-FG-090",84
+"cmnh57w4n005sii04ppwmtc4f","Mulsa Koala 50 cm 17 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.144","2026-05-18 00:12:13.682","ML-044",17000,"gr","ML-044",0
+"cmn6uxot2007cl404jtbonxjf","Polar Sprayer Manual BA - ML - 16 L","Polar Sprayer Manual BA - ML - 16 L","Box","2026-03-26 02:32:41.175","2026-05-18 00:12:14.218","POL-SY-034",16000,"ml","POL-SY-034",513
+"cmnh57vag002gii040iw07ds6","Biothion 200 EC 400 ml",,"PCS","2026-04-02 07:18:14.057","2026-05-18 00:12:12.448","IK-054",400,"ml","IK-054",79
+"cmnpc4itj0000jv04dwlgspz0","Explore Max 250 EC 200 Ml",,"PCS","2026-04-08 00:53:44.647","2026-05-18 00:12:12.873","DGW-FG-101",,,"DGW-FG-101",31
+"cmnh57vxb004tii04q4v8e8tl","Lannate 40 SP 250 gr",,"PCS","2026-04-02 07:18:14.88","2026-05-18 00:12:13.401","MKD-IK-080",250,"gr","MKD-IK-080",100
+"cmnh57vzu0053ii04zraiplf6","Manuver 400 SL 4 L",,"PCS","2026-04-02 07:18:14.971","2026-05-18 00:12:13.52","IK-141",4000,"ml","IK-141",0
+"cmnh57w1j005cii044p65ukxo","Metindo 40 SP 200 gr",,"PCS","2026-04-02 07:18:15.032","2026-05-18 00:12:13.578","MKD-IK-101",200,"gr","MKD-IK-101",40
+"cmnh57w2n005iii0406ujjtqu","Mulsa Alexa 50 cm @ 17 Kg",,"PCS","2026-04-02 07:18:15.071","2026-05-18 00:12:13.618","MMI-ML-064",17000,"gr","MMI-ML-064",0
+"cmnh57w610063ii04q4y450co","Mulsa MMI 40 cm @ 17 Kg (R 01)",,"PCS","2026-04-02 07:18:15.193","2026-05-18 00:12:13.733","MMI-ML-067",17000,"gr","MMI-ML-067",0
+"cmn6uxp0n009el404htqm8mj9","Nosel Semprot Tunggal Bengkok","Nosel Semprot Tunggal Bengkok","PCS","2026-03-26 02:32:41.448","2026-05-18 00:12:14.037","SP-003",,,"SP-003",65
+"cmn6uxoek003rl404vibncptw","On/ Off Switch Wire 13,8L & 16 L Elektrik 2 in 1","On/ Off Switch Wire 13,8L & 16 L Elektrik 2 in 1","PCS","2026-03-26 02:32:40.652","2026-05-18 00:12:14.085","FAR-SP-089",,,"FAR-SP-089",0
+"cmnh57wh3007aii04vpt59qu3","Penalty 50 SC 100 Ml",,"PCS","2026-04-02 07:18:15.592","2026-05-18 00:12:14.122","DGW-IK-212",100,"ml","DGW-IK-212",139
+"cmnh57wl8007iii041ir74kwe","Pronate 200 SL 20 L",,"PCS","2026-04-02 07:18:15.741","2026-05-18 00:12:14.274","EAS-HB-122",20000,"ml","EAS-HB-122",48
+"cmn6uxp8u00bkl4044ta1t2q2","Ridomil Gold MZ 4/64 WG 100 gr","Ridomil Gold MZ 4/64 WG 100 gr","Bks","2026-03-26 02:32:41.742","2026-05-18 00:12:14.376","SYN-FG-060",100,"gr","SYN-FG-060",0
+"cmn6uxods003kl404rnz4gix6","Single Nozzle Blue Cap","Single Nozzle Blue Cap","PCS","2026-03-26 02:32:40.625","2026-05-18 00:12:14.571","FAR-SP-082",,,"FAR-SP-082",0
+"cmn6uxoy8008ql404hgdegmrm","Sprayer Elektrik Powara Tipe Eco.06","Sprayer Elektrik Powara Tipe Eco.06","Box","2026-03-26 02:32:41.36","2026-05-18 00:12:14.725","SAS-SY-037",,,"SAS-SY-037",6
+"cmnh57x1n0092ii04jzsj0smg","Sweeper 480 SL 4 L",,"PCS","2026-04-02 07:18:16.331","2026-05-18 00:12:14.892","HB-014",4000,"ml","HB-014",0
+"cmnh57xbo00a1ii04i6o84uzh","nn Buldok 25 EC 250 ml",,"PCS","2026-04-02 07:18:16.692","2026-05-18 00:12:15.286","BYR-NN-002a",250,"ml","BYR-NN-002a",278
+"cmnh57xd000acii0438l3btq3","nn Nefos 45 WP 500 gr",,"PCS","2026-04-02 07:18:16.741","2026-05-18 00:12:15.366","NN-009",500,"gr","NN-009",10
+"cmnh57xgb00axii04oj5omyzv","nn ZPT Atonik 6.0L 500 ml",,"PCS","2026-04-02 07:18:16.859","2026-05-18 00:12:15.48","OMA-NN-072",500,"ml","OMA-NN-072",75
+"cmnh57v31001lii040iqb068g","Basmirata 15 WP 50 gr (new)",,"PCS","2026-04-02 07:18:13.789","2026-05-18 00:12:12.19","ALT-HB-108",50,"gr","ALT-HB-108",60
+"cmn6uxozd0092l404i2qcx352","Bestzine 20/60 WG 50 Gram","Bestzine 20/60 WG 50 Gram","Bks","2026-03-26 02:32:41.402","2026-05-18 00:12:12.289","SIN-IK-153",50,"gr","SIN-IK-153",593
+"cmnh57v960027ii04lhgfa4bp","Bionasa 480 SL 2 L",,"PCS","2026-04-02 07:18:14.01","2026-05-18 00:12:12.398","BTS-HB-003",2000,"ml","BTS-HB-003",23
+"cmnh57vej002wii04kmwoo3uk","Convey Complete 310 SC 1 L",,"PCS","2026-04-02 07:18:14.204","2026-05-18 00:12:12.6","BAS-HB-064",1000,"ml","BAS-HB-064",0
+"cmn6uxoc80035l404nxh2bddb","DGW Sprayer Gendong Elektrik 16 L Kelas A","DGW Sprayer Gendong Elektrik 16 L Kelas A","Box","2026-03-26 02:32:40.569","2026-05-18 00:12:12.668","DGW-SY-026",16000,"ml","DGW-SY-026",0
+"cmnh57vmu003sii04sao2b6fk","Fostin 610 EC 100 ml",,"PCS","2026-04-02 07:18:14.502","2026-05-18 00:12:12.94","SKK-IK-084",100,"ml","SKK-IK-084",45
+"cmnrnmrf10000l204yb9yew04","Gempur 480 SL 500 ml",,"PCS","2026-04-09 15:51:23.725","2026-05-18 00:12:13.023","PTR-HB-123",,,"PTR-HB-123",160
+"cmnh57vq90048ii04p54hn75v","Gramoxone 276 SL 250 ml",,"PCS","2026-04-02 07:18:14.626","2026-05-18 00:12:13.074","SYN-HB-041",250,"ml","SYN-HB-041",695
+"cmn6uxo0t0007l4049gjsdbps","Jagung Hibrida Lilac 22 F1 250 gr","Jagung Hibrida Lilac 22 F1 250 gr","PCS","2026-03-26 02:32:40.158","2026-05-18 00:12:13.169","ADV-BB-019",250,"gr","ADV-BB-019",8
+"cmnpc4j3r0001jv047hji282d","Klensect Extra 200 EC 200 Ml",,"PCS","2026-04-08 00:53:45.016","2026-05-18 00:12:13.346","DGW-IK-226",,,"DGW-IK-226",182
+"cmnrnmrkw0001l204gxem5f2n","Klensect Extra 200 EC 900 Ml",,"PCS","2026-04-09 15:51:23.936","2026-05-18 00:12:13.354","DGW-IK-228",,,"DGW-IK-228",60
+"cmnh57w7f006eii04z22slv7c","Mulsa Naga 50 cm 17 kg 0,4 MIC",,"PCS","2026-04-02 07:18:15.243","2026-05-18 00:12:13.786","ML-052",17000,"gr","ML-052",0
+"cmn6uxo0p0006l404zgrb2dyd","Tomat Hibrida Deby 23 F1 5 gr","Tomat Hibrida Deby 23 F1 5 gr","PCS","2026-03-26 02:32:40.153","2026-05-18 00:12:15.015","ADV-BB-018",5,"gr","ADV-BB-018",237
+"cmn6uxo24000jl404eq4vytom","Agrimore-K 15+10+30+TE 500 gr (Merah)","Agrimore-K 15+10+30+TE 500 gr (Merah)","Bks","2026-03-26 02:32:40.204","2026-05-18 00:12:11.99","AGR-PK-058",500,"gr","AGR-PK-058",212
+"cmn6uxp8j00bhl40434ozta17","NK 6172 Perkasa Benih Jagung Hibrida 1 Kg","NK 6172 Perkasa Benih Jagung Hibrida 1 Kg","Bks","2026-03-26 02:32:41.732","2026-05-18 00:12:13.824","SYN-BB-021",1000,"gr","SYN-BB-021",90
+"cmnh57xev00aoii04j68rd0dl","nn Spontan 400 SL 200 ml",,"PCS","2026-04-02 07:18:16.807","2026-05-18 00:12:15.421","AGR-NN-062",200,"ml","AGR-NN-062",455
+"cmnh57vhn0038ii04pb8dyj3x","Decis 25 EC 500 ml",,"PCS","2026-04-02 07:18:14.316","2026-05-18 00:12:12.723","BYR-IK-151",500,"ml","BYR-IK-151",145
+"cmnpc4jky0002jv04azaxsu3u","Penalty 50 SC 200 Ml",,"PCS","2026-04-08 00:53:45.635","2026-05-18 00:12:14.126","DGW-IK-227",,,"DGW-IK-227",72
+"cmnh57wqa007zii04z6w7xrr3","Scud 100 EW 500 ml",,"PCS","2026-04-02 07:18:15.922","2026-05-18 00:12:14.45","IK-087",500,"ml","IK-087",390
+"cmogga28b0002l804futsmgym","(Paket 1 Box) Spontan 400SL + Manuver 400SL 1L",,"PCS","2026-04-27 00:19:48.3","2026-05-18 00:12:11.731","PKT-0526-DIME1",,,"PKT-0526-DIME1",0
+"cmof1iwrn0001ib04rhcnqgma","(Paket 4 Box) Absina 36 EC 1L + 1 Free Elektrik Sprayer",,"PCS","2026-04-26 00:39:00.707","2026-05-18 00:12:11.735","PKT-0526-ABS-SPRY",,,"PKT-0526-ABS-SPRY",0
+"cmogga2980003l804izr32aee","(Paket Sales Area) Fast moving + Free Belko 60ml",,"PCS","2026-04-27 00:19:48.332","2026-05-18 00:12:11.741","PKT-0526-SA-FS",,,"PKT-0526-SA-FS",0
+"cmnxv8g330001ib04mq30w3cs","Fenite 200 ml",,"PCS","2026-04-14 00:10:49.839","2026-05-18 00:12:12.911","PET-HB-230",,,"PET-HB-230",35
+"cmn6uxoxl008kl404kbtwaqob","Fertiphos Kuning Pak Tani 50 kg","Fertiphos Kuning Pak Tani 50 kg","Sak","2026-03-26 02:32:41.337","2026-05-18 00:12:12.924","SAP-PK-042",50000,"gr","SAP-PK-042",184
+"cmouxc5zv000yk104gxb8slec","Silika 17",,"PCS","2026-05-07 03:26:06.425","2026-05-11 01:50:06.453","SMPL-MOUXC5ZS-K5ML",1000,"ml",,
+"cmnh57w8u006lii0499ttemk9","NPK 16.16.16 Pak Tani 1 Kg (Merah)",,"PCS","2026-04-02 07:18:15.294","2026-05-18 00:12:13.837","SAP-PK-075",1000,"gr","SAP-PK-075",47
+"cmnh57w8y006mii04i0tc7bfa","NPK 16.16.16 Pak Tani 20 Kg",,"PCS","2026-04-02 07:18:15.298","2026-05-18 00:12:13.841","SAP-PK-057",20000,"gr","SAP-PK-057",0
+"cmnh57w92006nii04idsa1fev","NPK 16.16.16 Pak Tani 50 Kg",,"PCS","2026-04-02 07:18:15.302","2026-05-18 00:12:13.845","SAP-PK-044",50000,"gr","SAP-PK-044",0
+"cmouwdfhh0002jo0508kgb4cy","Polydor 25 EC",,"PCS","2026-05-07 02:59:05.765","2026-05-07 02:59:05.765","SMPL-MOUWDFGD-2KDR",1000,"ml",,
+"cmouwfsrh0000kz04u079so94","Scud 100 EW",,"PCS","2026-05-07 03:00:56.285","2026-05-07 03:00:56.285","SMPL-MOUWFSQ6-GV3P",50,"ml",,
+"cmouwgtv10003kz04yccdaufs","Dagger 200 SL",,"PCS","2026-05-07 03:01:44.363","2026-05-07 03:01:44.363","SMPL-MOUWGTUY-2S50",200,"ml",,
+"cmouwhj710006kz04va4b3kx5","Renzo 250 EC",,"PCS","2026-05-07 03:02:17.196","2026-05-07 03:02:17.196","SMPL-MOUWHJ6Y-RNOZ",250,"ml",,
+"cmouwip7i0000ih048law0rvl","Biophon 10 PA",,"PCS","2026-05-07 03:03:11.646","2026-05-07 03:03:11.646","SMPL-MOUWIP6D-9FWR",250,"ml",,
+"cmouwj6wi0000jp04x629ehhw","Biophon 10 PA",,"PCS","2026-05-07 03:03:34.579","2026-05-07 03:03:34.579","SMPL-MOUWJ6VC-IQS4",500,"ml",,
+"cmouwjqjv0000i9048329vsnm","Tandem 325 SC",,"PCS","2026-05-07 03:04:00.043","2026-05-07 03:04:00.043","SMPL-MOUWJQIL-6M4T",250,"ml",,
+"cmouwka2g0003i904if7kxgev","Scud 100 EW",,"PCS","2026-05-07 03:04:25.331","2026-05-07 03:04:25.331","SMPL-MOUWKA2A-6YGU",500,"ml",,
+"cmouwlvxl0009kz04y8l0evzr","Red-Bell 300 SC",,"PCS","2026-05-07 03:05:40.327","2026-05-07 03:05:40.327","SMPL-MOUWLVXI-IVEM",500,"ml",,
+"cmouwmhel000ajr048rsb19au","Red-Bell 300 SC",,"PCS","2026-05-07 03:06:08.158","2026-05-07 03:06:08.158","SMPL-MOUWMHDH-SH0D",100,"ml",,
+"cmouxan66000vk104ik8lnnm3","Linon Pro 600 EC",,"PCS","2026-05-07 03:24:55.373","2026-05-07 03:24:55.373","SMPL-MOUXAN64-61RQ",100,"ml",,
+"cmof1iwr80000ib04v7zxe2n2","(Paket 1 Box) Spontan 400SL + Manuver 400SL 1L",,"PCS","2026-04-26 00:39:00.693","2026-04-26 00:39:00.693","PKT-0526-DIME",,,"PKT-0526-DIME",0
+"cmouwn7qg000djr04oxs8tq15","D'Mectin 530 SL",,"PCS","2026-05-07 03:06:42.279","2026-05-07 03:06:42.279","SMPL-MOUWN7QE-47DR",250,"ml",,
+"cmouwo0ow000gjr04q78cbo53","Bimicia 25 WP",,"PCS","2026-05-07 03:07:19.807","2026-05-07 03:07:19.807","SMPL-MOUWO0OU-HOSG",100,"gr",,
+"cmouwucj50000jx04wk5obt30","Fortune",,"PCS","2026-05-07 03:12:15.082","2026-05-07 03:12:15.082","SMPL-MOUWUCIW-L5P7",1000,"ml",,
+"cmouwv7800006jx04g3jttypx","Hummer",,"PCS","2026-05-07 03:12:54.863","2026-05-07 03:12:54.863","SMPL-MOUWV77Y-N54R",250,"gr",,
+"cmogkdo4q0000lb04qmncq2sp","Furadan",,"Btl","2026-04-27 02:14:35.114","2026-04-27 02:14:35.114","SMPL-MOGKDO3H-DAGE",500,"ml",,
+"cmouxd80i0011k1047dth6tav","Silika 20",,"PCS","2026-05-07 03:26:55.697","2026-05-07 03:26:55.697","SMPL-MOUXD80G-6SXW",13000,"ml",,
+"cmouxe4oi0014k104dfsopre3","Renzo 250 EC",,"PCS","2026-05-07 03:27:38.033","2026-05-07 03:27:38.033","SMPL-MOUXE4OG-ODA8",50,"ml",,
+"cmouxek320017k104nt25byuu","Biolon 670 EC",,"PCS","2026-05-07 03:27:57.997","2026-05-07 03:27:57.997","SMPL-MOUXEK30-RTSU",50,"ml",,
+"cmouxfg3v000xkz04ecrkiyxh","Meurtieur 30 EC",,"PCS","2026-05-07 03:28:39.472","2026-05-07 03:28:39.472","SMPL-MOUXFG34-EAVG",50,"ml",,
+"cmouxgt250010kz042nl39aai","Dagger 200 SL",,"PCS","2026-05-07 03:29:42.938","2026-05-07 03:29:42.938","SMPL-MOUXGT21-DDZY",50,"ml",,
+"cmoux0q0s000ckz049hyg8sta","Pupuk NPK Cair Zeo Green",,"PCS","2026-05-07 03:17:12.482","2026-05-07 03:17:12.482","SMPL-MOUX0Q01-KO58",250,"ml",,
+"cmoux57eo000fkz04h4cjwbob","Pupuk NPK Cair Matahara",,"PCS","2026-05-07 03:20:41.663","2026-05-07 03:20:41.663","SMPL-MOUX57EM-HQE9",250,"ml",,
+"cmoux5nv1000ikz04j85cudrn","Pupuk NPK Cair Extra Green",,"PCS","2026-05-07 03:21:02.988","2026-05-07 03:21:02.988","SMPL-MOUX5NUZ-PB6S",250,"ml",,
+"cmoux7ab5000lkz04d4kqdkmu","Pupuk Kalium Cair Kalizer",,"PCS","2026-05-07 03:22:18.711","2026-05-07 03:22:18.711","SMPL-MOUX7AAE-9KTP",250,"ml",,
+"cmouxhdra000eih04izo31oqc","Desmos 200/600 SC",,"PCS","2026-05-07 03:30:09.736","2026-05-07 03:30:09.736","SMPL-MOUXHDQF-E5JZ",50,"ml",,
+"cmouxhtt3000hih04rnnvfil3","Bionasa 480 SL",,"PCS","2026-05-07 03:30:30.566","2026-05-07 03:30:30.566","SMPL-MOUXHTT1-DO33",100,"ml",,
+"cmogga2880001l8049th9ust3","(Paket 1 Box) Belko 500ml + Free 1 Btl Tandem 325 EC 250ml",,"PCS","2026-04-27 00:19:48.296","2026-05-18 00:12:11.726","PKT-0525-BL500-TDM",,,"PKT-0525-BL500-TDM",0
+"cmoux7mqo000okz04v6f3331k","Jagamax",,"PCS","2026-05-07 03:22:34.846","2026-05-07 03:22:34.846","SMPL-MOUX7MQL-DLH7",1000,"ml",,
+"cmoux89mv000rkz04t8ognbk3","Talstick",,"PCS","2026-05-07 03:23:04.517","2026-05-07 03:23:04.517","SMPL-MOUX89MS-XBBD",250,"ml",,
+"cmoux8s4h000ukz049qwr3dwt","Mulsa Koala 60cm 40 micron 4 kg",,"PCS","2026-05-07 03:23:28.479","2026-05-07 03:23:28.479","SMPL-MOUX8S4E-YQRK",4000,"gr",,
+"cmoux95xh0000k104pkykuwt4","Mulsa Koala 50cm 35 micron 4 kg",,"PCS","2026-05-07 03:23:46.348","2026-05-07 03:23:46.348","SMPL-MOUX95WR-9OWR",4000,"gr",,
+"cmoux9tbr000pk104xc1s4ful","Amiboost",,"PCS","2026-05-07 03:24:16.694","2026-05-07 03:24:16.694","SMPL-MOUX9TBP-94HX",250,"ml",,
+"cmouxa8pr000sk104a33ol3jm","Latrin 25 EC",,"PCS","2026-05-07 03:24:36.638","2026-05-07 03:24:36.638","SMPL-MOUXA8PP-X849",100,"ml",,
+"cmouxim1k000kih04a107w3s0","Hopper 500 EC",,"PCS","2026-05-07 03:31:07.159","2026-05-07 03:31:07.159","SMPL-MOUXIM1I-T81R",50,"ml",,
+"cmouxji4j000nih049bfkh472","Biothion 200 EC",,"PCS","2026-05-07 03:31:48.738","2026-05-07 03:31:48.738","SMPL-MOUXJI4H-UU1A",50,"ml",,
+"cmouxk1if000qih04li5q6p61","Bilis 500 SC",,"PCS","2026-05-07 03:32:13.861","2026-05-07 03:32:13.861","SMPL-MOUXK1ID-5GMZ",50,"ml",,
+"cmouxkowc000tih04l2i679xf","Biocis 25 EC",,"PCS","2026-05-07 03:32:44.171","2026-05-07 03:32:44.171","SMPL-MOUXKOWA-ILFU",50,"ml",,
+"cmouxlies000wih04geri9aq5","Propus Plus 250 SC",,"PCS","2026-05-07 03:33:22.419","2026-05-07 03:33:22.419","SMPL-MOUXLIEQ-EBUR",50,"ml",,
+"cmouxm5lc000zih046u0vi4xf","Talonil 350 EC",,"PCS","2026-05-07 03:33:52.463","2026-05-07 03:33:52.463","SMPL-MOUXM5LA-M5HQ",50,"ml",,
+"cmouxmh0o0012ih041x1r8euo","Belko",,"PCS","2026-05-07 03:34:07.273","2026-05-07 03:34:07.273","SMPL-MOUXMH0O-9MVP",50,"ml",,
+"cmouxmuqq0000jm04or8tp0qt","Biomax",,"PCS","2026-05-07 03:34:25.055","2026-05-07 03:34:25.055","SMPL-MOUXMULN-VQEG",50,"ml",,
+"cmotityp80000ky04882ssilc","Karate Plus Boroni 25 kg",,"PCS","2026-05-06 03:52:16.364","2026-05-18 00:12:13.282","MER-PK-100",,,"MER-PK-100",2
+"cmouxnmt00003jm04hmq6cp0t","Zenus 276 SL",,"PCS","2026-05-07 03:35:01.426","2026-05-07 03:35:01.426","SMPL-MOUXNMSX-W7WH",100,"ml",,
+"cmouxofpn0000jp0418mveodb","Nefos 45 WP",,"PCS","2026-05-07 03:35:38.892","2026-05-07 03:35:38.892","SMPL-MOUXOFOC-25O6",200,"gr",,
+"cmouxq0t20006jp04ps7eyggq","Amino Acid 30",,"PCS","2026-05-07 03:36:52.884","2026-05-07 03:36:52.884","SMPL-MOUXQ0SZ-WF8P",1000,"ml",,
+"cmouxqh270009jp048j2oawik","Asam Amino Mandraguna",,"PCS","2026-05-07 03:37:13.95","2026-05-07 03:37:13.95","SMPL-MOUXQH25-ZHIT",500,"ml",,
+"cmouxqurb0000l5048i5gcxdg","Naturfos",,"PCS","2026-05-07 03:37:31.7","2026-05-07 03:37:31.7","SMPL-MOUXQUL4-BXLS",500,"ml",,
+"cmouxowd50000jp04wweobxis","Manuver 400 SL",,"PCS","2026-05-07 03:36:00.474","2026-05-07 03:36:00.474","SMPL-MOUXOWC2-SSQN",50,"ml",,
+"cmouxpkdc0003jp04dhb5y4p5","Fatal 250 EC",,"PCS","2026-05-07 03:36:31.582","2026-05-07 03:36:31.582","SMPL-MOUXPKD9-OK2T",50,"ml",,
+"cmouxr6360000js04u25qnpee","NPK 16.16.16 Granul",,"PCS","2026-05-07 03:37:46.383","2026-05-07 03:37:46.383","SMPL-MOUXR5YB-H48T",,"gr",,
+"cmouxrkif0003js04oknw4d0b","Phonska Premium Granul",,"PCS","2026-05-07 03:38:05.078","2026-05-07 03:38:05.078","SMPL-MOUXRKID-73LU",,"gr",,
+"cmouxrv9m0006js04c16r2d1v","SP 36 Granul",,"PCS","2026-05-07 03:38:19.018","2026-05-07 03:38:19.018","SMPL-MOUXRV9M-8YZI",,"gr",,
+"cmouxs6fn0009js042nospmyx","Neoroot",,"PCS","2026-05-07 03:38:33.489","2026-05-07 03:38:33.489","SMPL-MOUXS6FL-X361",250,"gr",,
+"cmouxtgji000cjs04nlvxlkdp","Staras 155 EC",,"PCS","2026-05-07 03:39:33.244","2026-05-07 03:39:33.244","SMPL-MOUXTGJF-5EX0",250,"ml",,
+"cmouxu18e000fjs04zeuxl691","King Cobra",,"PCS","2026-05-07 03:40:00.061","2026-05-07 03:40:00.061","SMPL-MOUXU18C-0QE1",1000,"ml",,
+"cmouwusvv0003jx042mhr0i3o","Fortune (Bubuk)",,"PCS","2026-05-07 03:12:36.282","2026-05-07 03:40:34.164","SMPL-MOUWUSVT-ISH6",,,,
+"cmov3d3fq0000l8041hv475va","Torero 80 WP",,"PCS","2026-05-07 06:14:47.458","2026-05-07 06:14:47.458","SMPL-MOV3D3AW-B641",200,"gr",,
+"cmov3tafv0002l804k00ak8w1","D'Mectin 530 SL",,"PCS","2026-05-07 06:27:23.033","2026-05-07 06:27:23.033","SMPL-MOV3TAFT-Y5X2",250,"ml",,
+"cmov3tqx80005l804oov6u50n","D'Mectin 530 SL",,"PCS","2026-05-07 06:27:44.395","2026-05-07 06:27:44.395","SMPL-MOV3TQX6-DU8P",500,"ml",,
+"cmov3ufpc0000lb046wgtn428","Fra-Red 250 EC",,"PCS","2026-05-07 06:28:16.513","2026-05-07 06:28:16.513","SMPL-MOV3UFMW-9HQ5",250,"ml",,
+"cmowpl0le0000l7043ie1dkgf","Silika 17",,"PCS","2026-05-08 09:24:34.73","2026-05-08 09:24:34.73","SMPL-MOWPL0JG-5SKO",1000,"ml",,
+"cmp3k7xe00000le045z2wdn7c","Sinakill 18/32",,"PCS","2026-05-13 04:28:49.224","2026-05-13 04:28:49.224","SMPL-MP3K7XC4-P4X7",100,"ml",,
+"cmp3k92860003le04vfwbyzq1","Sinamore 0.02/3.98 SL",,"PCS","2026-05-13 04:29:42.148","2026-05-13 04:29:42.148","SMPL-MP3K9283-GMQ4",100,"ml",,
+"cmp3kbnq00006le04ot4wtp27","Absina 36 EC",,"PCS","2026-05-13 04:31:43.318","2026-05-13 04:31:43.318","SMPL-MP3KBNPX-0RHO",200,"ml",,
+"cmp3kcuos0000l704z0pulmsj","Sinasen 300 EC",,"PCS","2026-05-13 04:32:39","2026-05-13 04:32:39","SMPL-MP3KCUJM-8CJE",250,"ml",,
+"cmp3kf8lf0003l704n3xokqi8","Bestzine 20/60 WG",,"PCS","2026-05-13 04:34:30.336","2026-05-13 04:34:30.336","SMPL-MP3KF8LB-7UXD",50,"gr",,
+"cmp3kg3bn0006l704lnz1tiq3","Norbt 75 WP",,"PCS","2026-05-13 04:35:10.16","2026-05-13 04:35:10.16","SMPL-MP3KG3BJ-XE7O",50,"gr",,
+"cmp3kh0xe0009l704dp8siedm","Cooler 1.5/4.5 GR",,"PCS","2026-05-13 04:35:53.712","2026-05-13 04:35:53.712","SMPL-MP3KH0XB-XDD7",200,"gr",,
+"cmogga27n0000l804vx9trfo8","(Paket 1 Box) Belko 200ml + Free 1 Btl Tandem 325 EC 250ml",,"PCS","2026-04-27 00:19:48.275","2026-05-18 00:12:11.713","PKT-0525-BL200-TDM",,,"PKT-0525-BL200-TDM",0

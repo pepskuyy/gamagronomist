@@ -1,0 +1,4 @@
+#Sat Apr 25 23:46:52 WIB 2026
+base.0=C\:\\Users\\febri\\Downloads\\Gamagronomist\\app\\build\\intermediates\\dex\\release\\minifyReleaseWithR8\\classes.dex
+renamed.0=classes.dex
+path.0=classes.dex

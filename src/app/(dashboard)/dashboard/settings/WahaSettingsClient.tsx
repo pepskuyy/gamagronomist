@@ -12,18 +12,30 @@ interface ConfigEntry {
 }
 
 const PLACEHOLDERS: Record<string, { label: string; desc: string }[]> = {
-  msg_afa_submit:  [{ label: '{nama_afa}', desc: 'Nama AFA yang mengajukan' }],
-  msg_spv_approve: [{ label: '{nama_afa}', desc: 'Nama AFA yang mengajukan' }],
-  msg_fam_approve: [{ label: '{nama_afa}', desc: 'Nama AFA yang mengajukan' }],
-  msg_whm_approve: [{ label: '{nama_afa}', desc: 'Nama AFA yang mengajukan' }],
+  msg_afa_submit:  [
+    { label: '{nama_afa}',    desc: 'Nama AFA yang mengajukan' },
+    { label: '{catatan_afa}', desc: 'Catatan/keterangan yang diinput AFA saat pengajuan' },
+  ],
+  msg_spv_approve: [
+    { label: '{nama_afa}',    desc: 'Nama AFA yang mengajukan' },
+    { label: '{catatan_afa}', desc: 'Catatan/keterangan yang diinput AFA saat pengajuan' },
+  ],
+  msg_fam_approve: [
+    { label: '{nama_afa}',    desc: 'Nama AFA yang mengajukan' },
+    { label: '{catatan_afa}', desc: 'Catatan/keterangan yang diinput AFA saat pengajuan' },
+  ],
+  msg_whm_approve: [
+    { label: '{nama_afa}',    desc: 'Nama AFA yang mengajukan' },
+    { label: '{catatan_afa}', desc: 'Catatan/keterangan yang diinput AFA saat pengajuan' },
+  ],
   msg_spv_receive: [
-    { label: '{nama_afa}', desc: 'Nama AFA' },
+    { label: '{nama_afa}',    desc: 'Nama AFA' },
     { label: '{id_pengajuan}', desc: 'ID singkat pengajuan' },
-    { label: '{invoice}', desc: 'Info nomor invoice Accurate (otomatis, bisa kosong)' },
+    { label: '{invoice}',     desc: 'Info nomor invoice Accurate (otomatis, bisa kosong)' },
   ],
   msg_rejection: [
-    { label: '{nama_afa}', desc: 'Nama AFA' },
-    { label: '{id_pengajuan}', desc: 'ID singkat pengajuan' },
+    { label: '{nama_afa}',      desc: 'Nama AFA' },
+    { label: '{id_pengajuan}',   desc: 'ID singkat pengajuan' },
     { label: '{peran_penolak}', desc: 'Nama role yang menolak (SPV / FA Manager / WH Manager)' },
   ],
 }

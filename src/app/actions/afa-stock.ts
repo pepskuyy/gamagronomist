@@ -96,7 +96,7 @@ export async function submitAfaStockRequest(formData: FormData) {
       const spvPhones = await getRolePhones('wa_spv')
       if (spvPhones.length > 0) {
         const msgKey = isBD ? 'msg_afa_submit' : 'msg_afa_submit'
-        const msg = await getMsgTemplate(msgKey, { nama_afa: afaUser?.name || (isBD ? 'BD' : 'AFA') })
+        const msg = await getMsgTemplate(msgKey, { nama_afa: afaUser?.name || (isBD ? 'BD' : 'AFA'), catatan_afa: notes })
         await sendWhatsAppBulk(spvPhones, msg)
       }
 
@@ -320,7 +320,7 @@ export async function approveAfaStockRequest(requestId: string) {
     // WA: notify FAM role numbers
     const famPhones = await getRolePhones('wa_fam')
     if (famPhones.length > 0) {
-      const msg = await getMsgTemplate('msg_spv_approve', { nama_afa: req.fo?.name || 'AFA' })
+      const msg = await getMsgTemplate('msg_spv_approve', { nama_afa: req.fo?.name || 'AFA', catatan_afa: req.plan ?? '' })
       await sendWhatsAppBulk(famPhones, msg)
     }
 
@@ -422,7 +422,7 @@ export async function approveFamStockRequest(requestId: string) {
     // WA: notify WHM role numbers
     const whmPhones = await getRolePhones('wa_whm')
     if (whmPhones.length > 0) {
-      const msg = await getMsgTemplate('msg_fam_approve', { nama_afa: req.fo?.name || 'AFA' })
+      const msg = await getMsgTemplate('msg_fam_approve', { nama_afa: req.fo?.name || 'AFA', catatan_afa: req.plan ?? '' })
       await sendWhatsAppBulk(whmPhones, msg)
     }
 
@@ -440,7 +440,10 @@ export async function approveFamStockRequest(requestId: string) {
 }
 
 // ─── STEP 3: WH Manager approves → APPROVED_WHM + INVOICE ──────────
-export async function approveWhmStockRequest(requestId: string) {
+export async function approveWhmStockRequest(
+  requestId: string,
+  qtyApprovedMap?: Record<string, number>   // detailId → qtyApproved (WHM input)
+) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
@@ -460,6 +463,25 @@ export async function approveWhmStockRequest(requestId: string) {
     }
     if (req.status !== 'APPROVED_FAM') {
       return { error: 'Pengajuan ini tidak dalam status menunggu WH Manager.' }
+    }
+
+    // ── Simpan qtyApproved per detail jika WHM memberikan qty ──────────────
+    if (qtyApprovedMap && Object.keys(qtyApprovedMap).length > 0) {
+      await Promise.all(
+        req.details.map(d => {
+          const approved = qtyApprovedMap[d.id]
+          if (approved !== undefined && approved >= 0) {
+            return prisma.requestDetail.update({
+              where: { id: d.id },
+              data: { qtyApproved: approved },
+            })
+          }
+          return Promise.resolve()
+        })
+      )
+      // Re-fetch dengan qtyApproved terbaru
+      const updated = await prisma.requestDetail.findMany({ where: { requestId } })
+      req.details.splice(0, req.details.length, ...updated)
     }
 
     // Update to APPROVED_WHM
@@ -493,11 +515,13 @@ export async function approveWhmStockRequest(requestId: string) {
           .map(d => {
             const prod = productMap.get(d.productId)
             if (!prod?.accurateId) return null
+            const qtyFinal = d.qtyApproved ?? d.qtyRequested
+            if (qtyFinal <= 0) return null   // skip produk yang qty-nya 0
             const unitPrice = priceMap.get(prod.accurateId) ?? 0
             return {
               itemNo:    prod.accurateId,
-              quantity:  d.qtyApproved ?? d.qtyRequested,
-              unitPrice: unitPrice > 0 ? unitPrice : undefined, // kirim eksplisit jika tersedia
+              quantity:  qtyFinal,
+              unitPrice: unitPrice > 0 ? unitPrice : undefined,
             }
           })
           .filter((x): x is NonNullable<typeof x> => x !== null)
@@ -559,13 +583,26 @@ export async function approveWhmStockRequest(requestId: string) {
       })
     }
 
-    // Notify AFA about progress
+    // Notify AFA with approved quantities detail
     const invoiceInfo = savedInvoiceNo ? ` Invoice Accurate: ${savedInvoiceNo}.` : ''
+    const productDetails = await prisma.product.findMany({
+      where: { id: { in: req.details.map(d => d.productId) } },
+      select: { id: true, name: true, unit: true }
+    })
+    const prodNameMap = new Map(productDetails.map(p => [p.id, p]))
+    const qtyDetailMsg = req.details
+      .map(d => {
+        const p = prodNameMap.get(d.productId)
+        const qtyFinal = d.qtyApproved ?? d.qtyRequested
+        const isDiff = d.qtyApproved !== null && d.qtyApproved !== d.qtyRequested
+        return `• ${p?.name ?? d.productId}: ${qtyFinal} ${p?.unit ?? ''}${isDiff ? ` (diminta: ${d.qtyRequested})` : ''}`
+      })
+      .join('\n')
     await prisma.notification.create({
       data: {
         userId: req.foId,
         title: '✅ Disetujui WH Manager — Menunggu Penerimaan SPV',
-        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.${invoiceInfo}`,
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) disetujui WHM.\n\nKuantitas final:\n${qtyDetailMsg}${invoiceInfo}`,
         link: `/dashboard/stock`
       }
     })
@@ -573,7 +610,7 @@ export async function approveWhmStockRequest(requestId: string) {
     // WA: notify SPV numbers (to confirm receive)
     const spvPhonesWhm = await getRolePhones('wa_spv')
     if (spvPhonesWhm.length > 0) {
-      const msg = await getMsgTemplate('msg_whm_approve', { nama_afa: req.fo?.name || 'AFA' })
+      const msg = await getMsgTemplate('msg_whm_approve', { nama_afa: req.fo?.name || 'AFA', catatan_afa: req.plan ?? '' })
       await sendWhatsAppBulk(spvPhonesWhm, msg)
     }
 

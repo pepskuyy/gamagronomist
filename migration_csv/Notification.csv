@@ -1,0 +1,779 @@
+"id","userId","title","message","link","isRead","createdAt"
+"cmogld7bm0004la0480l1n7ov","cmmu0cmt50002zfy00lo3kqqw","👤 Permintaan Akun Baru","Ujang Yayat Abdurahman (AFA) mengajukan pembuatan akun dengan username ""ujangya"".","/dashboard/master/requests","f","2026-04-27 02:42:12.946"
+"cmogld7bd0002la04ilf3z1qm","cmmu0cn8x0004zfy0rje4s1oa","👤 Permintaan Akun Baru","Ujang Yayat Abdurahman (AFA) mengajukan pembuatan akun dengan username ""ujangya"".","/dashboard/master/requests","t","2026-04-27 02:42:12.937"
+"cmoglnp860004lb04af30vtja","cmmu0cmt50002zfy00lo3kqqw","👤 Permintaan Akun Baru","farras raffael (INTERN) mengajukan pembuatan akun dengan username ""farras raffael"".","/dashboard/master/requests","f","2026-04-27 02:50:22.71"
+"cmoglnp7z0002lb04rxwt63uj","cmmu0cn8x0004zfy0rje4s1oa","👤 Permintaan Akun Baru","farras raffael (INTERN) mengajukan pembuatan akun dengan username ""farras raffael"".","/dashboard/master/requests","t","2026-04-27 02:50:22.703"
+"cmogmakyr0007lb04hcw9l7pa","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-27 03:08:10.275"
+"cmogm9d0f0006ju04xstbgggi","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-27 03:07:13.311"
+"cmojblfow000fla04ave76kyy","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Khamim.","/dashboard/demoplot/detail/cmojblfni0002la04jge6j76i","f","2026-04-29 00:31:59.408"
+"cmogmd1pi0009lb04if5gum2s","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-04-27 03:10:05.286"
+"cmogmpiy60001ky04qr39edsr","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","t","2026-04-27 03:19:47.502"
+"cmogmpzg70001jy0488ib977g","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Dhika Prasetya) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-04-27 03:20:08.888"
+"cmogmxhto0005l204p9fffdma","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Bagas Abidin Budiono mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogmxht30001l204708snp18","t","2026-04-27 03:25:59.292"
+"cmogn8mfn000bjy04jqb544z3","cmn2ut49c000jjy04w4uedgc1","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGMXHT) telah disetujui oleh AFA.
+Catatan: tes","/dashboard/demoplot/detail/cmogmxht30001l204708snp18","f","2026-04-27 03:34:38.483"
+"cmogofx5i0005jv04u628onyv","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-27 04:08:18.582"
+"cmogohxhe0001jj045nkvp76i","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","f","2026-04-27 04:09:52.323"
+"cmogohxhj0003jj04r41b1g75","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOGOFX4) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","f","2026-04-27 04:09:52.327"
+"cmojdstjy000bl7041o00nkdo","cmn2ut490000djy043kfw99u4","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOJDRWF) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmojdrwfx0001l7045ssb0bsu","t","2026-04-29 01:33:43.198"
+"cmogoirsi0005jt04nz7oxqpv","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-27 04:10:31.602"
+"cmogt41ie0003kw044bp90auc","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar +1 Bks.
+Keterangan: pendataan
+","/dashboard/stock/history","f","2026-04-27 06:19:02.438"
+"cmogt5u3p0003ii05vcmwuqdj","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar -1 Bks.
+Keterangan: tes","/dashboard/stock/history","f","2026-04-27 06:20:26.149"
+"cmogt7x3k0007kw04nxm4dr7m","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar +500 Bks.
+Keterangan: tes","/dashboard/stock/history","f","2026-04-27 06:22:03.345"
+"cmojdrwij0005l7048je6lsz8","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmojdrwfx0001l7045ssb0bsu","t","2026-04-29 01:33:00.379"
+"cmogt9hoj000fkw041osjw0rj","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +840 PCS.
+Keterangan: tes","/dashboard/stock/history","f","2026-04-27 06:23:16.675"
+"cmojdypw1000jl204xk5cnanx","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Masroni.","/dashboard/demoplot/detail/cmojdypsp0002l204q7bay79u","t","2026-04-29 01:38:18.385"
+"cmojscoq40001kw04c7qfy6df","cmmu0cnp40006zfy02oc00oz1","❌ Permintaan Stok Ditolak","Permintaan stok Anda (ID: CMOJMC1R) telah ditolak oleh AFA.
+Alasan: salah tulis gramasi","/dashboard/demoplot/detail/cmojmc1r40001jx04cbttb9uo","t","2026-04-29 08:21:04.684"
+"cmogtju690003kw047eyss0k5","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar -1 Bks.
+Keterangan: q","/dashboard/stock/history","f","2026-04-27 06:31:19.426"
+"cmogtk65j0007kw046uyggzu4","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar +1 Bks.
+Keterangan: a","/dashboard/stock/history","f","2026-04-27 06:31:34.951"
+"cmokogjpi0005js04zjyhn88s","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Maulidya Hilda Prameswari mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmokogjod0001js04slo7b7ai","f","2026-04-29 23:19:52.519"
+"cmokor9z50005l204x848fnqt","cmnptxdfx0003ih04aeoz98ii","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOKOGJO) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmokogjod0001js04slo7b7ai","f","2026-04-29 23:28:13.121"
+"cmokryn2d000qjr046w9atk90","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Seno.","/dashboard/demoplot/detail/cmokrymyf0005jr04hgied1oz","t","2026-04-30 00:57:55.526"
+"cmokx1x0h000jjr04ihva03jx","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Rasimin.","/dashboard/demoplot/detail/cmokx1wyd0002jr04ys32i483","t","2026-04-30 03:20:26.465"
+"cmoi4x44f0015jr0425xfhydj","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Amin.","/dashboard/demoplot/detail/cmoi4x437000sjr04bhl45g3r","t","2026-04-28 04:37:20.8"
+"cmojmc1ry0007jx04t60ifg64","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-29 05:32:37.247"
+"cmoia6ued0006l504tvx1776y","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-28 07:04:52.837"
+"cmojmie7w0006l804bocwvzsv","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmojmie7h0001l804lnxnfw15","t","2026-04-29 05:37:33.308"
+"cmojffnts000mjo04zt23uz6o","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Nardi.","/dashboard/demoplot/detail/cmojffns40005jo04ipg2hgnu","t","2026-04-29 02:19:28.48"
+"cmojfi8rb000iih04ktsy4msf","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Yono.","/dashboard/demoplot/detail/cmojfi8px0001ih04acq87ydc","t","2026-04-29 02:21:28.919"
+"cmojsfwht000hi804swebskk4","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-29 08:23:34.722"
+"cmokveksf002il404mwjm1w0n","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pandu.","/dashboard/demoplot/detail/cmokvekrf0025l404xvkz5suz","t","2026-04-30 02:34:17.919"
+"cmoksaksv001djr04ydr746oo","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Yanto.","/dashboard/demoplot/detail/cmoksakr9000sjr04glzfr5h9","t","2026-04-30 01:07:12.463"
+"cmogtybg70003l204j76ukc3z","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar +1000 Bks.
+Keterangan: penyesuaian stok","/dashboard/stock/history","f","2026-04-27 06:42:34.999"
+"cmoqka597000tju04t7qjvrt9","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pak Mansur.","/dashboard/demoplot/detail/cmoqka57t0008ju044epe5up6","t","2026-05-04 02:09:32.443"
+"cmoqky2an001hju04qkd7jf4l","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pak Giyo Solehudin.","/dashboard/demoplot/detail/cmoqky29e0010ju04c12mdn2i","t","2026-05-04 02:28:08.352"
+"cmoqti7id0003k104ff22ct7e","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +1000 PCS.
+Keterangan: Penyesuaian stok karena baru tercatat","/dashboard/stock/history","t","2026-05-04 06:27:45.157"
+"cmoqzu6mi0001jg04xrvx9noo","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOQS04D) telah ditolak oleh SPV.
+Alasan: Stok kurang","/dashboard/stock","f","2026-05-04 09:25:01.578"
+"cmoqzv4e70005jt04xsg5thgq","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 09:25:45.343"
+"cmor00m0n000fl204lnnzz9mw","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 09:30:01.464"
+"cmogu948b001vjs042qe776a2","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Nargis 50 WP 40 gr disesuaikan sebesar +120 PCS.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.86"
+"cmogu948j001zjs04952xe1y6","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Biomax 1 L disesuaikan sebesar +1750 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.867"
+"cmogu948q0023js04p4y6lpj9","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Biotomil 40 SP 200 gr disesuaikan sebesar +360 PCS.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.874"
+"cmogu948w0027js04lsuemhqf","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Glufo 150 SL 1 Lt disesuaikan sebesar +1150 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.88"
+"cmogu9491002bjs04oo6fnzta","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Nicofuron 80 OD 1 L disesuaikan sebesar +1150 PCS.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.886"
+"cmogu9497002fjs041lxmlhcy","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Pronate 200 SL 1 L disesuaikan sebesar +1100 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.892"
+"cmogu949d002jjs04o9aaed0r","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Solusi 865 SL 1 L disesuaikan sebesar +1800 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.897"
+"cmogu949j002njs045h6fpgm4","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Bionasa 480 SL 1 L disesuaikan sebesar +300 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.903"
+"cmogu949o002rjs04ujq8oouu","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Bilis 500 SC 1 L disesuaikan sebesar +6000 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.909"
+"cmogu949t002vjs04zm5d20o9","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Torero 80 WP 1 Kg disesuaikan sebesar +2800 PCS.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.914"
+"cmogu949z002zjs04g4u3ywxe","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Tals Stick 1 L disesuaikan sebesar +500 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.919"
+"cmor01ojv000bjt04xc9f5slj","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOR00LZ) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","f","2026-05-04 09:30:51.403"
+"cmompbrqd0007la046tlfkeku","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-01 09:19:41.606"
+"cmorus7rz000el804rvub7t68","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Ralim Muhammad Aziz.","/dashboard/demoplot/detail/cmorus7pm0001l804247oo4n1","t","2026-05-04 23:51:17.856"
+"cmor01ojr0009jt047f7x8m0n","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-05-04 09:30:51.399"
+"cmos3tefp000ajm04eyoi256s","cmmvjyntc0001l704r738ouwy","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOQFVLT) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 04:04:09.686"
+"cmos3tefm0008jm04gt03u2gu","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Dhika Prasetya) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 04:04:09.682"
+"cmos3ufgb0001ib04hzm0mthx","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Dhika Prasetya) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 04:04:57.659"
+"cmoryqwp40009jl04rmih0gs7","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Putri Ayuning Sekar telah menyimpan sesi lanjutan demo plot untuk petani Huda.","/dashboard/demoplot/detail/cmojfs2te000qjr04qmjbbuyp","t","2026-05-05 01:42:15.305"
+"cmogu94a40033js04vwgfu47e","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Rapid Zone 20 WG 20 gr disesuaikan sebesar +200 PCS.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.925"
+"cmogu94aa0037js04d2910fc5","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Sinamore 100 ml disesuaikan sebesar +200 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.93"
+"cmogu94af003bjs04izw203rc","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok King Cobra 500 ML disesuaikan sebesar +1050 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.936"
+"cmogu94al003fjs04qejpd8n9","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Sinakill 18/32 EC 250 ml disesuaikan sebesar +200 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.941"
+"cmogu94aq003jjs04v4y95fab","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Belko 500 ml disesuaikan sebesar +850 PCS.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.946"
+"cmogu94av003njs04p1wohvzx","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Allmax 500 ml disesuaikan sebesar +390 Btl.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.952"
+"cmogu94b1003rjs049kkyamyj","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar +1700 PCS.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.957"
+"cmogu94b7003vjs04livzfvda","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Notora 60/6 WG 200 Gr disesuaikan sebesar +400 Bks.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.963"
+"cmogu94bd003zjs044yzwv111","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Nefos 45 WP 500 gr disesuaikan sebesar +500 Bks.
+Keterangan: New Penyesuaian","/dashboard/stock/history","f","2026-04-27 06:50:58.969"
+"cmogugfk8000fl404ctp8q6w1","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Yanwar Setyabudi AP mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogugfjf0001l404689uorlx","t","2026-04-27 06:56:40.136"
+"cmoguxr1n002hl204x85qf5rv","cmn2ut48r0009jy04hylrc57r","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGUJWO) telah disetujui oleh AFA.
+Catatan: Cadillac 3000 gr bukan 3 gr ya","/dashboard/demoplot/detail/cmogujwol0049js04g3gmdun2","f","2026-04-27 07:10:08.171"
+"cmoguyqyk000iky04z8y9efgi","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Asthiana Hikmatia mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoguyqy40001ky04rtxoisi7","t","2026-04-27 07:10:54.717"
+"cmogv19ph001ljv04j0hvq277","cmn2ut49f000ljy04iv28asey","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGUYQY) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoguyqy40001ky04rtxoisi7","f","2026-04-27 07:12:52.325"
+"cmojfw5n6001djr04ekl8jagj","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Maulidya Hilda Prameswari mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmojfw5mp0019jr04wv0a8lqd","f","2026-04-29 02:32:18.066"
+"cmojge3eo000nl10469s8kdk0","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Suparjan.","/dashboard/demoplot/detail/cmojge3d70002l104qf6fb37b","f","2026-04-29 02:46:14.976"
+"cmojfkqbp0011ih04rfuk72i8","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Pardi.","/dashboard/demoplot/detail/cmojfkqap000kih04tswv2zg4","t","2026-04-29 02:23:24.997"
+"cmojfs2uh0017jr04l0imrmk0","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Huda.","/dashboard/demoplot/detail/cmojfs2te000qjr04qmjbbuyp","t","2026-04-29 02:29:07.817"
+"cmojvstud0012ld04ragf032o","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Sutrisno.","/dashboard/demoplot/detail/cmojvstt4000hld04nink2ned","f","2026-04-29 09:57:36.662"
+"cmoguujd7001djp04u1ajtx9f","cmn2ut48v000bjy04dn3fav4n","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGUGFJ) telah disetujui oleh AFA.
+Catatan: sesuai","/dashboard/demoplot/detail/cmogugfjf0001l404689uorlx","t","2026-04-27 07:07:38.251"
+"cmogujwpd004ojs044o63r471","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Diajeng Nurwahidah Laila Umar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogujwol0049js04g3gmdun2","t","2026-04-27 06:59:22.321"
+"cmogufk7c0003jp042731ng69","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Nicofuron 80 OD 1 L disesuaikan sebesar +1000 PCS.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 06:55:59.496"
+"cmogugmjn0043js04jsv0kq1d","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Nicofuron 80 OD 1 L disesuaikan sebesar -999.99 PCS.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 06:56:49.188"
+"cmogv9fbr0003l704tc4pi7kn","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Absina 36 EC 1 L disesuaikan sebesar +4476 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.855"
+"cmogv9fby0007l7043jxt0vrn","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Allmax 500 ml disesuaikan sebesar +1821 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.862"
+"cmogv9fc3000bl704pekskyyn","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Belko 500 ml disesuaikan sebesar +3570 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.867"
+"cmojsczni0009i804nt7cvalf","cmn2ut490000djy043kfw99u4","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOJMIE7) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmojmie7h0001l804lnxnfw15","t","2026-04-29 08:21:18.847"
+"cmom5hwq8000hkt04usgdpp22","cmoglrsdk0003jp045dbe5d9l","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOL8DQP) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmol8dqp80001la04035gmc66","f","2026-05-01 00:04:35.697"
+"cmolilrp90006l404jt6dxf4u","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Asthiana Hikmatia mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmolilrma0001l40447rrxtm5","t","2026-04-30 13:23:44.638"
+"cmoktj2yg000tkz04w69unia6","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Sri murni.","/dashboard/demoplot/detail/cmoktj2xa0008kz04qaij277a","t","2026-04-30 01:41:48.856"
+"cmoia7y880005l604n5on1arb","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-28 07:05:44.457"
+"cmojiawdp0005i504a7k4dxn2","cmnptxdfx0003ih04aeoz98ii","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOJFW5M) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmojfw5mp0019jr04wv0a8lqd","f","2026-04-29 03:39:45.133"
+"cmojvw6pj000pi604qaf7coeo","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Pak Sukiman.","/dashboard/demoplot/detail/cmojvw6nt0004i6040iz7ov72","f","2026-04-29 10:00:13.303"
+"cmojw2xw0000ikw04oyo802of","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Sumadi.","/dashboard/demoplot/detail/cmojw2xuv0003kw04vw8mt9qb","f","2026-04-29 10:05:28.464"
+"cmokuhfbh0020l40470voywbi","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOGOIRR) telah ditolak oleh SPV.
+Alasan: Ajukan kemasan terkecil lebih dulu utk next bisa dijadikan botol refill","/dashboard/stock","f","2026-04-30 02:08:31.182"
+"cmokvq53g000fju04umtmcuoc","cmn2ut49q000rjy04a4s6lixm","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOKUXJ1) telah disetujui oleh AFA.
+Catatan: Untuk kebun bu silvi","/dashboard/demoplot/detail/cmokuxj1c0001l704ifcj07bx","f","2026-04-30 02:43:17.452"
+"cmokw4ngt000hjo04kjr74aam","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Darusman.","/dashboard/demoplot/detail/cmokw4nfm0002jo04e6ew9cy2","f","2026-04-30 02:54:34.446"
+"cmom5iavx000nkt040h7mcpdn","cmn2ut490000djy043kfw99u4","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOLDQC2) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoldqc2n0001jm0467wcfuun","t","2026-05-01 00:04:54.045"
+"cmompfb5o0001l404etr40m0n","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","f","2026-05-01 09:22:26.748"
+"cmompfb5v0003l404ym6zq6qy","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOMPBRP) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-01 09:22:26.755"
+"cmoqo7bsz0014i90420v9f3jr","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-04 03:59:19.427"
+"cmoqo7bt50016i9042v6ck4im","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOMPBRP) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-05-04 03:59:19.434"
+"cmoqtlod70003l804ay16p959","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Biozeb 80 WP 800 gr disesuaikan sebesar +2400 Bks.
+Keterangan: Stok awal belum terinput","/dashboard/stock/history","f","2026-05-04 06:30:26.972"
+"cmoqtlodd0007l8040ycyterq","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Absina 36 EC 1 L disesuaikan sebesar +180 PCS.
+Keterangan: Stok awal belum terinput","/dashboard/stock/history","f","2026-05-04 06:30:26.978"
+"cmoqtlodi000bl804m7kpw1ce","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Stadium 18 EC 1 L disesuaikan sebesar +140 Btl.
+Keterangan: Stok awal belum terinput","/dashboard/stock/history","f","2026-05-04 06:30:26.982"
+"cmogvro6e002jky041a8qjbhm","cmnptx8wa0001ih049zvdbkfp","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVMJP) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvmjp2000cjv04q8vy6y3m","t","2026-04-27 07:33:24.135"
+"cmor02wka000jjt04a3hmqq10","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 09:31:48.442"
+"cmoibbl950007js04dp32uywp","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-04-28 07:36:33.882"
+"cmoqzw4br0005ii04e9dj75q9","cmmvjyntc0001l704r738ouwy","🧪 Sampel Disetujui SPV — Stok Masuk","Pengajuan sampel Anda (ID: CMOQRWRM) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.","/dashboard/stock","t","2026-05-04 09:26:31.911"
+"cmorzfiw0000mld04k173dnaj","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Suwarno.","/dashboard/demoplot/detail/cmorzfiun0001ld042nrykvoc","t","2026-05-05 02:01:23.809"
+"cmogvkdmb000gjt046p0db0w1","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Maulidya Hilda Prameswari mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvkdlr0001jt04m0id1q70","f","2026-04-27 07:27:43.86"
+"cmogvmjpe000sjv047y04sfav","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Giffari Putra Sudarisman mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvmjp2000cjv04q8vy6y3m","f","2026-04-27 07:29:25.058"
+"cmos3uzo70007ib0413ty0se2","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOR00LZ) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.","/dashboard/stock","f","2026-05-05 04:05:23.863"
+"cmos3ufgf0003ib04wk9phl3q","cmmvjyntc0001l704r738ouwy","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOQRSLJ) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 04:04:57.664"
+"cmogvsw2r002yjt041qtrteak","cmn2ut49w000vjy0426qvfk1j","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVP2M) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvp2my001tjv04mvyxt8up","f","2026-04-27 07:34:21.028"
+"cmos4r13x0003l8045oaj9kmt","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOS3R8R) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","f","2026-05-05 04:30:18.717"
+"cmos4r13r0001l804qu1w3w5g","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-05-05 04:30:18.711"
+"cmos91zd00003l504t2m9ikmc","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOS54TJ) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","f","2026-05-05 06:30:48.133"
+"cmos91zcw0001l50474p8n3g9","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-05-05 06:30:48.128"
+"cmos9pnae0004la044qdnngha","cmmvjyntc0001l704r738ouwy","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMOS9GK0) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06275.","/dashboard/stock","t","2026-05-05 06:49:12.23"
+"cmosb2o510002lb04b75ssi2o","cmn2ut4aa0013jy04kr1572fk","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMOS54TJ) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06278.","/dashboard/stock","f","2026-05-05 07:27:19.478"
+"cmorwuquq001il204egk7xstj","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Anggun Susilawati mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmorwuqud001dl204soxmi8k2","t","2026-05-05 00:49:15.122"
+"cmotigedy000iib04xqnj54mh","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Wiyanto.","/dashboard/demoplot/detail/cmotigec30001ib04d4b7dfzo","f","2026-05-06 03:41:43.51"
+"cmogvt2zq0034jt04jnabhz62","cmn2ut49j000njy041wql3gda","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVMIN) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvminy001njv04p93spo00","f","2026-04-27 07:34:29.99"
+"cmogvtrgb001yjv04bqb8srn4","cmn2ut49q000rjy04a4s6lixm","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVFPW) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvfpw3000kky04qf4astd9","t","2026-04-27 07:35:01.691"
+"cmogvtim60055l704dftl3ioh","cmn2ut49m000pjy04tvucyl37","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVI4P) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvi4pg000sky042t2j3zfd","t","2026-04-27 07:34:50.238"
+"cmogw5isj002pjm047r6mp9gz","cmn2ut48g0005jy040hwfi0jk","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGW1WX) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogw1wxl006kjv04nsexlzz3","t","2026-04-27 07:44:10.339"
+"cmogw7fna002qjv0472w0647r","cmn2ut49t000tjy04sn5nl6nl","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGW48U) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogw48ue0020jv04ns1eo5gg","t","2026-04-27 07:45:39.574"
+"cmogwc3nr0005i904689yn5ml","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Kiftirul Aziz mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogwc3n60001i904dz36s0e0","t","2026-04-27 07:49:17.32"
+"cmogvtxqy003wjv04cc2mw975","cmnptxdfx0003ih04aeoz98ii","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVKDL) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvkdlr0001jt04m0id1q70","t","2026-04-27 07:35:09.85"
+"cmoicmi7q0001jr04cmnr0bcs","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOGOFX4) telah ditolak oleh FA Manager.
+Alasan: tes","/dashboard/stock","f","2026-04-28 08:13:02.774"
+"cmom6n0hn000ml1042jlzj6xl","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Lukman.","/dashboard/demoplot/detail/cmom6n0dw0003l104onfhwx30","f","2026-05-01 00:36:33.467"
+"cmolbz7gy0007jm043g02ba2u","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Yanwar Setyabudi AP mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmolbz7ft0001jm04q2ksxeoi","t","2026-04-30 10:18:14.29"
+"cmom8ev3w001tl104bact10k7","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Suratman.","/dashboard/demoplot/detail/cmom8ev1i001cl104pilghytc","f","2026-05-01 01:26:12.477"
+"cmom8gnu9002dl104lil2mg1v","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Zaenuri.","/dashboard/demoplot/detail/cmom8gntb001wl10477yn9w65","f","2026-05-01 01:27:36.369"
+"cmom8iegm000nl204h4geih7k","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Maryono (KOL).","/dashboard/demoplot/detail/cmom8ief80006l20452hg5vyx","f","2026-05-01 01:28:57.526"
+"cmokuxj1o0006l704khcow1ts","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Raffli Yoga Prasetyo mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmokuxj1c0001l704ifcj07bx","t","2026-04-30 02:21:02.509"
+"cmombchky0005js04j6n8db8l","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","farras raffael mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmombchjv0001js04y466akf1","t","2026-05-01 02:48:20.482"
+"cmoqo7f760003l104f6dxgag2","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-04 03:59:23.826"
+"cmoqo7f7b0005l104ivrl1nr2","cmmvjyntc0001l704r738ouwy","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOQFVLT) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-05-04 03:59:23.832"
+"cmomqnyig0005k004jtrb5nwu","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Danu Bagus Setiawan mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmomqnyhz0001k004itd28mhz","t","2026-05-01 09:57:09.88"
+"cmoquvfbk0007l704mhi1485w","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Giffari Putra Sudarisman mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoquvfb00001l704thocg1k1","f","2026-05-04 07:06:01.425"
+"cmoi514q9001gjr04kdwvuhep","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Muhtarom.","/dashboard/demoplot/detail/cmoi514pd0017jr04r19g841i","t","2026-04-28 04:40:28.209"
+"cmohzg06d000vlj05pm6pi6lp","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Sukardi.","/dashboard/demoplot/detail/cmohzg05g000ilj05a0j7h1hz","t","2026-04-28 02:04:04.453"
+"cmohzjavi001alj05hzmqzyab","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Sukamto.","/dashboard/demoplot/detail/cmohzjau0000xlj05v9u47k41","t","2026-04-28 02:06:38.286"
+"cmohzqxzt000fl404ett3lcw4","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Aris.","/dashboard/demoplot/detail/cmohzqxxn0002l4046tban602","t","2026-04-28 02:12:34.841"
+"cmohzwp2z000jju04so6zgoer","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Asman.","/dashboard/demoplot/detail/cmohzwp190006ju04ifh11h2w","t","2026-04-28 02:17:03.227"
+"cmoi005im000vl4049oxa0svg","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Mudiono.","/dashboard/demoplot/detail/cmoi005gz000il404ywtt1z1b","t","2026-04-28 02:19:44.494"
+"cmoi030hf0011ju047hycu98q","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Pujiono.","/dashboard/demoplot/detail/cmoi030g9000oju041it6nt74","t","2026-04-28 02:21:57.939"
+"cmoqzwaym0005l204mv6pnxm8","cmn2ut4aa0013jy04kr1572fk","🧪 Sampel Disetujui SPV — Stok Masuk","Pengajuan sampel Anda (ID: CMOQZV4D) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.","/dashboard/stock","f","2026-05-04 09:26:40.511"
+"cmom7py5l000hie048zvq1yw5","cmn2ut48v000bjy04dn3fav4n","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOLBZ7F) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmolbz7ft0001jm04q2ksxeoi","t","2026-05-01 01:06:50.025"
+"cmorx3rj4000bjo04l8ddpgco","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Lukman.","/dashboard/demoplot/detail/cmom6n0dw0003l104onfhwx30","f","2026-05-05 00:56:15.905"
+"cmorx5gfb0009l704ke5x4u60","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Putri Ayuning Sekar telah menyimpan sesi lanjutan demo plot untuk petani Masroni.","/dashboard/demoplot/detail/cmojdypsp0002l204q7bay79u","t","2026-05-05 00:57:34.823"
+"cmorzvlfi000jl804s8euwxxg","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Rukiman.","/dashboard/demoplot/detail/cmorzvleb0002l804zkiwct9u","t","2026-05-05 02:13:53.598"
+"cmogvt9fb003ujt04utugmwql","cmn2ut49j000njy041wql3gda","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVJZ3) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvjz3y0001jv04z5ke1ur6","f","2026-04-27 07:34:38.328"
+"cmogvx9k3006ijv04w6ymd9wk","cmn2ut48j0007jy040a1gsnei","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVPFC) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvpfco000ujv04a74x11p9","t","2026-04-27 07:37:45.123"
+"cmokvlhh9000cl704d0jqtwmi","cmn2ut49q000rjy04a4s6lixm","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOKVG4D) telah disetujui oleh AFA.
+Catatan: Untuk lahan bu silvi dan pak harjo","/dashboard/demoplot/detail/cmokvg4dw0001ju04sfr0tb0d","f","2026-04-30 02:39:40.221"
+"cmogwiblg003cjv04q3p5kp68","cmoglrsdk0003jp045dbe5d9l","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGWG76) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogwg76k0001ju04wgh7pfoo","f","2026-04-27 07:54:07.541"
+"cmogmd1pl000blb04pua5ortv","cmmvjyntc0001l704r738ouwy","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOGM9CZ) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-04-27 03:10:05.289"
+"cmogmdtn90008ju04ksmgr6jh","cmmvjyntc0001l704r738ouwy","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOGMAKX) telah ditolak oleh SPV.
+Alasan: tes","/dashboard/stock","t","2026-04-27 03:10:41.493"
+"cmogmlner000cju04yhmtclpi","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Ambition 500 ml disesuaikan sebesar +50 PCS.
+Keterangan: tes","/dashboard/stock/history","t","2026-04-27 03:16:46.659"
+"cmogmpiyb0003ky04d9t2wj3h","cmmvjyntc0001l704r738ouwy","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOGM9CZ) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-04-27 03:19:47.507"
+"cmogmpzgd0003jy04t6r72847","cmmvjyntc0001l704r738ouwy","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOGM9CZ) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.","/dashboard/stock","t","2026-04-27 03:20:08.893"
+"cmogo9twm0005jr04lyzdkuok","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Asthiana Hikmatia mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogo9tun0001jr046knpzedm","t","2026-04-27 04:03:34.438"
+"cmogog2du000bjr04ihgnb7sy","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Diajeng Nurwahidah Laila Umar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogog2dg0007jr04rh3qmipa","t","2026-04-27 04:08:25.363"
+"cmogoja3v000bjt0485s7ocl2","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Yanwar Setyabudi AP mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogoja300007jt04x71mjal5","t","2026-04-27 04:10:55.339"
+"cmogt8vtc000bkw046im6qrof","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +2420 PCS.
+Keterangan: update stock awal (pemutihan)","/dashboard/stock/history","t","2026-04-27 06:22:48.336"
+"cmogtapgp000jkw04z011zcas","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Belko 500 ml disesuaikan sebesar +3050 PCS.
+Keterangan: update stock awal (pemutihan)","/dashboard/stock/history","t","2026-04-27 06:24:13.418"
+"cmogtcjvo000nkw04cx7ktrxq","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar +2000 Bks.
+Keterangan: update stock pemutihan","/dashboard/stock/history","t","2026-04-27 06:25:39.492"
+"cmogtei5y0003l104xjm65x4d","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Cadilac 80 WP 1 kg disesuaikan sebesar +4000 Bks.
+Keterangan: update stock pemutihan","/dashboard/stock/history","t","2026-04-27 06:27:10.583"
+"cmogtgahh0003jl04yvzbqr2n","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biocis 25 EC 1 L disesuaikan sebesar +1500 PCS.
+Keterangan: update stock awal","/dashboard/stock/history","t","2026-04-27 06:28:33.942"
+"cmogttr3g0003js04pfi2gz46","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Torero 80 WP 1 Kg disesuaikan sebesar +2500 PCS.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:01.996"
+"cmogttr3p0007js04pzr9pooi","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Rapid Zone 20 WG 250 gr disesuaikan sebesar +550 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.005"
+"cmogttr3v000bjs040wotoa7m","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biolon 670 EC 100 ml disesuaikan sebesar +100 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.012"
+"cmogttr42000fjs04izwsmrs7","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Bilis 500 SC 1 L disesuaikan sebesar +1000 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.019"
+"cmogttr4h000jjs04jcdqqs0i","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Solusi 865 SL 1 L disesuaikan sebesar +1000 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.033"
+"cmogttr4n000njs04fp863crx","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Zenus 276 SL 1 L disesuaikan sebesar +1680 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.039"
+"cmogttr4s000rjs04e41w3u03","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Sistemik 240 SL 1 L disesuaikan sebesar +1000 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.045"
+"cmogttr4y000vjs04rcn02w1r","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Bionasa 75 WSG 500 GR disesuaikan sebesar +500 PCS.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.051"
+"cmogttr54000zjs04wa8c2yls","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Nefos 45 WP 500 gr disesuaikan sebesar +4320 Bks.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.056"
+"cmogttr5a0013js04pnidsa8x","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biozeb 80 WP 800 gr disesuaikan sebesar +2400 Bks.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.062"
+"cmogttr5f0017js04hn874wiv","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Stadium 18 EC 1 L disesuaikan sebesar +1060 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.068"
+"cmogttr5l001bjs04a1r9fdqq","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biomax 1 L disesuaikan sebesar +2410 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.073"
+"cmogttr5q001fjs04imchxzof","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biocron 500 EC 500 ml disesuaikan sebesar +500 PCS.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.079"
+"cmogttr5y001jjs0405dfy6df","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Absina 36 EC 1 L disesuaikan sebesar +1340 PCS.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.086"
+"cmogvtd61004mjt04qj9b8415","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvtd5j003wjt04a1beobbk","t","2026-04-27 07:34:43.177"
+"cmom7q62a000rie0466km999o","cmn2ut49f000ljy04iv28asey","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOLILRM) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmolilrma0001l40447rrxtm5","f","2026-05-01 01:07:00.274"
+"cmom7y3ga0019l104ztn11sbj","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Anam.","/dashboard/demoplot/detail/cmom7y3ej000sl104d1ag4xud","t","2026-05-01 01:13:10.138"
+"cmogvyr0o0055ky04qcrgpwyj","cmn2ut490000djy043kfw99u4","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGVTD5) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogvtd5j003wjt04a1beobbk","t","2026-04-27 07:38:54.408"
+"cmogwd57b002vjm04pwdz3a9z","cmn2ut48g0005jy040hwfi0jk","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGWC3N) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogwc3n60001i904dz36s0e0","t","2026-04-27 07:50:05.975"
+"cmogwcynn000bi9042wy7gowe","cmn2ut49t000tjy04sn5nl6nl","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGWAX0) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmogwax07007ijv04131ee8bw","t","2026-04-27 07:49:57.492"
+"cmomc4wbv000jif04lpkpheuq","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Ragil.","/dashboard/demoplot/detail/cmomc4wah0002if04j587b2t2","t","2026-05-01 03:10:25.963"
+"cmoqjhg9h000ulb04b2k3xh4e","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","farras raffael mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoqjhg93000qlb04z0i51lz0","t","2026-05-04 01:47:13.685"
+"cmoqvh4st0005js04c5ervh11","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Giffari Putra Sudarisman mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoqvh4sg0001js04nwqlglh1","f","2026-05-04 07:22:54.221"
+"cmoqzxrp70007l204khyd2ii1","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOQRV1A) telah ditolak oleh SPV.
+Alasan: Pisahkan sample Sinamyang & Sakasaki","/dashboard/stock","f","2026-05-04 09:27:48.859"
+"cmor04guf0003jo047cwq8b24","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOR02WJ) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","f","2026-05-04 09:33:01.383"
+"cmoqrslk50007l5041gah2d5q","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 05:39:50.693"
+"cmoqs04ds000tl004skb8g57k","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 05:45:41.68"
+"cmor04gu80001jo04qja26a06","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-05-04 09:33:01.377"
+"cmos3w25p0003jh04k2bqoo41","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOR02WJ) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.","/dashboard/stock","f","2026-05-05 04:06:13.742"
+"cmos9kqsa0001jx04x2q8k5j3","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-05-05 06:45:23.482"
+"cmosa5c5v0004ld04zegkjyyf","cmn2ut4aa0013jy04kr1572fk","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMOR00LZ) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06277.","/dashboard/stock","f","2026-05-05 07:01:24.308"
+"cmosahznj0001l8047armodt1","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-05 07:11:14.623"
+"cmosahznn0003l804l1a7jayl","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOS54TJ) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","f","2026-05-05 07:11:14.627"
+"cmosawtls000djj04lqwig12n","cmn2ut49f000ljy04iv28asey","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOSAUU4) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmosauu400001l204g0z1wgab","f","2026-05-05 07:22:46.625"
+"cmos3uzo40005ib04y7yvae8t","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 04:05:23.86"
+"cmos3w25k0001jh04e6a2wahw","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 04:06:13.737"
+"cmos9gk700007l504h7m814aa","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-05 06:42:08.317"
+"cmos02k5l000xkw0403hn1kgy","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Giono.","/dashboard/demoplot/detail/cmos02k4c000kkw049907rgvb","t","2026-05-05 02:19:18.537"
+"cmos09577000fl404rt4n14ny","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak yamto.","/dashboard/demoplot/detail/cmos095680002l40474yx87q0","t","2026-05-05 02:24:25.747"
+"cmos9kqsg0003jx04ygkwhlu3","cmmvjyntc0001l704r738ouwy","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOS9GK0) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-05 06:45:23.489"
+"cmotij1g5000ljr0405jakjit","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Sapari.","/dashboard/demoplot/detail/cmotij1en0004jr04md0pj15i","f","2026-05-06 03:43:46.708"
+"cmotiks55000ll404whbie4ri","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Kasmuri.","/dashboard/demoplot/detail/cmotiks3a0004l404b6widuu4","f","2026-05-06 03:45:07.961"
+"cmouret780007l504avakpubg","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Khamim.","/dashboard/demoplot/detail/cmojblfni0002la04jge6j76i","f","2026-05-07 00:40:12.116"
+"cmourbafm0006la04tgrbmmg1","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Asthiana Hikmatia mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmourbab00001la04lwlohr2x","t","2026-05-07 00:37:27.827"
+"cmourneon000jif04bx0c19zc","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Kasput.","/dashboard/demoplot/detail/cmournen30002if04rz7u82s2","f","2026-05-07 00:46:53.207"
+"cmouuz5ww000dl204cy9nd3a5","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Muhidin.","/dashboard/demoplot/detail/cmop6lltw0002kz04e7uenfqi","f","2026-05-07 02:20:00.561"
+"cmov2g7jy0009l704qvt1vzbs","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-07 05:49:13.15"
+"cmogw1wy1007cjv04501ux0az","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Kiftirul Aziz mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogw1wxl006kjv04nsexlzz3","t","2026-04-27 07:41:22.057"
+"cmogwg77a0009ju04clnab9gv","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","farras raffael mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogwg76k0001ju04wgh7pfoo","t","2026-04-27 07:52:28.534"
+"cmommodnq0005jr04rb81blf4","cmoglrsdk0003jp045dbe5d9l","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOMBCHJ) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmombchjv0001js04y466akf1","f","2026-05-01 08:05:31.046"
+"cmoms0qwq0005l704d1j57of3","cmn2ut49t000tjy04sn5nl6nl","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOMQNYH) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmomqnyhz0001k004itd28mhz","t","2026-05-01 10:35:06.17"
+"cmop3090o0007jx04cfokeyfr","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Khamim.","/dashboard/demoplot/detail/cmojblfni0002la04jge6j76i","f","2026-05-03 01:18:11.112"
+"cmop6llx4000lkz04ff28lrbp","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Muhidin.","/dashboard/demoplot/detail/cmop6lltw0002kz04e7uenfqi","f","2026-05-03 02:58:46.457"
+"cmoqfvluk0007l504w3rue1dl","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 00:06:15.645"
+"cmonmb25e000fl104jqq9jh1u","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Sudaryono.","/dashboard/demoplot/detail/cmonmb2350002l104aqs9xj33","t","2026-05-02 00:42:55.778"
+"cmoqihysl000nle04tkpodluq","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Sunarto.","/dashboard/demoplot/detail/cmoqihyok0002le04awfsbgqd","t","2026-05-04 01:19:38.085"
+"cmoqj9xdg000olb04fcn92sf6","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Nardi.","/dashboard/demoplot/detail/cmoqj9xbm0003lb04p6zp4dki","t","2026-05-04 01:41:22.612"
+"cmoqvi6e60005l804gctr67y4","cmnptx8wa0001ih049zvdbkfp","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOQVH4S) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoqvh4sg0001js04nwqlglh1","t","2026-05-04 07:23:42.943"
+"cmoqvi0pc000djr04epebvren","cmnptx8wa0001ih049zvdbkfp","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOQUVFB) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoquvfb00001l704thocg1k1","t","2026-05-04 07:23:35.569"
+"cmoqvuk1f0007l104j96k0u7g","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Asthiana Hikmatia mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoqvuk0z0003l10433fkl82k","t","2026-05-04 07:33:20.5"
+"cmoqvwjen000bl804orq9nncv","cmn2ut49f000ljy04iv28asey","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOQVUK0) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoqvuk0z0003l10433fkl82k","f","2026-05-04 07:34:52.991"
+"cmoqs28qw000dl504y80sax54","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 05:47:20.649"
+"cmoqrv1b6000bl004a0g5rkwf","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 05:41:44.418"
+"cmos1ltrz0001la043gox660q","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-05 03:02:17.088"
+"cmos1lts50003la04mvbbqr3z","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOR00LZ) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","f","2026-05-05 03:02:17.093"
+"cmos1lxut0005la04285choxw","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-05 03:02:22.374"
+"cmos1lxux0007la04mcfnie3k","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOR02WJ) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","f","2026-05-05 03:02:22.378"
+"cmos1mk2r0003jj04u74p19cl","cmmvjyntc0001l704r738ouwy","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOQRSLJ) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-05-05 03:02:51.172"
+"cmos1mk2o0001jj04kzmbc5sr","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","t","2026-05-05 03:02:51.168"
+"cmos5653u0001l504lvhnbq3i","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOS3R8R) telah ditolak oleh FA Manager.
+Alasan: msh ada stok sample","/dashboard/stock","f","2026-05-05 04:42:03.738"
+"cmos9nuzr0001jo04h8ldn4rp","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-05 06:47:48.904"
+"cmosauu4u0007l204vh67qee3","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Asthiana Hikmatia mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmosauu400001l204g0z1wgab","t","2026-05-05 07:21:13.999"
+"cmos53xdg0005la04j9c7u4xo","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-05 04:40:20.405"
+"cmos54tjm000bla04q8dngub0","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-05 04:41:02.098"
+"cmoson41i0006jr04iyiifai6","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Diajeng Nurwahidah Laila Umar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoson3z70001jr04fpxb5ys3","t","2026-05-05 13:47:08.187"
+"cmos9nuzw0003jo04dz4vau06","cmmvjyntc0001l704r738ouwy","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOS9GK0) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-05-05 06:47:48.909"
+"cmoteno1r000fjx04gdqrj2at","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Maulidya Hilda Prameswari mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoteno100003jx0418r1qqo9","f","2026-05-06 01:55:24.16"
+"cmotiuxwg000cl404x5uup1cg","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Dakhum.","/dashboard/demoplot/detail/cmotiuxvg0001l404gx1tl2sf","f","2026-05-06 03:53:01.984"
+"cmogttr63001njs04a79wp388","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Sinamore 100 ml disesuaikan sebesar +100 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.092"
+"cmogttr69001rjs04glgezaal","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biophon 10 PA 500 ml disesuaikan sebesar +1000 Btl.
+Keterangan: update stock baru","/dashboard/stock/history","t","2026-04-27 06:39:02.097"
+"cmogu1okv0007l204ndn7ne45","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Nargis 50 WP 40 gr disesuaikan sebesar +340 PCS.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:11.983"
+"cmogu1ol1000bl204mehemxkq","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Notora 60/6 WG 400 Gr disesuaikan sebesar +1200 PCS.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:11.99"
+"cmogu1ol8000fl204gp91wz09","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar +2200 PCS.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:11.997"
+"cmogu1olf000jl20443xmz5eh","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Allmax 500 ml disesuaikan sebesar +1152 Btl.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:12.003"
+"cmogu1oll000nl204hbyiumh0","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok King Cobra 500 ML disesuaikan sebesar +700 Btl.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:12.009"
+"cmogu1ols000rl204qrgoptwf","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biotomil 40 SP 100 gr disesuaikan sebesar +1829.99 Bks.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:12.016"
+"cmogu1om0000vl204b0pk70l3","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Joki 400 SL 1 L disesuaikan sebesar +120 PCS.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:12.024"
+"cmogu1om6000zl2046pjwo5j9","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Pronate 200 SL 1 L disesuaikan sebesar +1775 Btl.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:12.03"
+"cmogu1omd0013l204wvu5e484","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Nicofuron 80 OD 1 L disesuaikan sebesar +999.99 PCS.
+Keterangan: update stock","/dashboard/stock/history","t","2026-04-27 06:45:12.037"
+"cmoguj0db0047js044jrnc917","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biotomil 40 SP 100 gr disesuaikan sebesar +0.01 Bks.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 06:58:40.415"
+"cmogwxs3v000rkz04wybliy6y","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Pak Rokhim.","/dashboard/demoplot/detail/cmogwxs36000gkz04gzby32bd","f","2026-04-27 08:06:08.78"
+"cmogwysbh001gkz04l18dnep4","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Erik.","/dashboard/demoplot/detail/cmogwys9y0013kz04c169rfjx","f","2026-04-27 08:06:55.71"
+"cmogwy2iz000hl404bwstq0jj","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani SUTEJO.","/dashboard/demoplot/detail/cmogwy2ho0006l4049t6pu5es","t","2026-04-27 08:06:22.283"
+"cmogwyiva000dkt04qaglxcsi","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pak Nurrohim.","/dashboard/demoplot/detail/cmogwyiuc0002kt046cgde5d2","t","2026-04-27 08:06:43.462"
+"cmogwys9z0018kz04ddb0lwvu","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Bagas Abidin Budiono telah menyimpan realisasi demo plot untuk petani SUTEJO.","/dashboard/demoplot/detail/cmogwys8y000tkz04o8n93nir","t","2026-04-27 08:06:55.655"
+"cmogxeaj2001tkt04glql1xdl","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Maulidya Hilda Prameswari telah menyimpan sesi lanjutan demo plot untuk petani Pak Rokhim.","/dashboard/demoplot/detail/cmogwxs36000gkz04gzby32bd","f","2026-04-27 08:18:59.151"
+"cmogxeg8y000jji04mv8yh16y","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Erik.","/dashboard/demoplot/detail/cmogwys9y0013kz04c169rfjx","f","2026-04-27 08:19:06.562"
+"cmomon06y0001js04blhbayiq","cmmu0cnp40006zfy02oc00oz1","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOJSFWG) telah ditolak oleh SPV.
+Alasan: Ajukan kemasan sedang","/dashboard/stock","t","2026-05-01 09:00:26.171"
+"cmogxe1ej0014jo0407idz4fd","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan sesi lanjutan demo plot untuk petani Pak Nurrohim.","/dashboard/demoplot/detail/cmogwyiuc0002kt046cgde5d2","t","2026-04-27 08:18:47.324"
+"cmogxe54x000fji046zl2zxr5","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Yanwar Setyabudi AP telah menyimpan sesi lanjutan demo plot untuk petani SUTEJO.","/dashboard/demoplot/detail/cmogwy2ho0006l4049t6pu5es","t","2026-04-27 08:18:52.161"
+"cmogy08gg0016l4040rxpu1z0","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Glufo 150 SL 1 Lt disesuaikan sebesar +750 Btl.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 08:36:02.896"
+"cmogy23k1001al404bd8od9hj","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Bionasa 480 SL 1 L disesuaikan sebesar +250 Btl.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 08:37:29.857"
+"cmogy3zzt0009l704j967ax4f","cmn2ut48r0009jy04hylrc57r","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOGY3FL) telah disetujui oleh AFA.
+Catatan: ok","/dashboard/demoplot/detail/cmogy3fl10001l104pv0pp60h","f","2026-04-27 08:38:58.553"
+"cmogy3flu0006l1043a1vozdv","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Diajeng Nurwahidah Laila Umar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogy3fl10001l104pv0pp60h","t","2026-04-27 08:38:32.13"
+"cmoqjgelb0001l404rrjy0bx8","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","f","2026-05-04 01:46:24.863"
+"cmogwyuyh0010kt04766bki0h","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Bu Sekar.","/dashboard/demoplot/detail/cmogwyuxu000pkt045jymi2lq","t","2026-04-27 08:06:59.13"
+"cmogx070i000cjo04e6hlvrpx","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Edi.","/dashboard/demoplot/detail/cmogx06zi0001jo0452v0dry3","t","2026-04-27 08:08:01.41"
+"cmogx1yfp000qjo04nb3opkyn","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Aziz.","/dashboard/demoplot/detail/cmogx1ydj000fjo04ced8i7t0","t","2026-04-27 08:09:23.605"
+"cmoqjgelg0003l404z5dhysp4","cmmvjyntc0001l704r738ouwy","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOQFVLT) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-04 01:46:24.868"
+"cmoqrvxr6000hl0045gy4buca","cmoglrsdk0003jp045dbe5d9l","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOQJHG9) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoqjhg93000qlb04z0i51lz0","f","2026-05-04 05:42:26.466"
+"cmomon9ls0001jr04mdzdqaw7","cmmvjyntc0001l704r738ouwy","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOIBBL8) telah ditolak oleh SPV.
+Alasan: Ajukan kemasan sedang","/dashboard/stock","t","2026-05-01 09:00:38.369"
+"cmogyrciw001dl504gc9fcu17","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Fatal 250 EC 100 ml disesuaikan sebesar +900 Btl.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 08:57:07.88"
+"cmogysfek002ll504pyo856e4","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Joki 400 SL 1 L disesuaikan sebesar +900 PCS.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 08:57:58.269"
+"cmogyt6h4002bjm04dk7re2fq","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +1000 PCS.
+Keterangan: update","/dashboard/stock/history","t","2026-04-27 08:58:33.352"
+"cmomonho10003jr040sc7mfkp","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOIA7Y7) telah ditolak oleh SPV.
+Alasan: Ajukan kemasan sedang","/dashboard/stock","f","2026-05-01 09:00:48.817"
+"cmoi27q440018il04hojfhjhp","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Ruwadi.","/dashboard/demoplot/detail/cmoi27q2v000nil042cq5iifk","f","2026-04-28 03:21:37.013"
+"cmokttfw6000pl404408a1i3p","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Harno.","/dashboard/demoplot/detail/cmokttfug0004l404tdiexjik","t","2026-04-30 01:49:52.182"
+"cmol8dqs80008la044prmwgzg","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","farras raffael mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmol8dqp80001la04035gmc66","t","2026-04-30 08:37:34.041"
+"cmoldqc3g0005jm04bdzheema","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoldqc2n0001jm0467wcfuun","t","2026-04-30 11:07:19.612"
+"cmokvg4e90005ju049ph067pb","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Raffli Yoga Prasetyo mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmokvg4dw0001ju04sfr0tb0d","t","2026-04-30 02:35:29.985"
+"cmohzaevt000flj05ziu1jcgp","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Gono.","/dashboard/demoplot/detail/cmohzaetq0002lj05487fx4h6","t","2026-04-28 01:59:43.577"
+"cmogv9fc8000fl7042ljisolz","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Besfuron 20 WP 250 gr disesuaikan sebesar +500 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.873"
+"cmogv9fce000jl704za2zfts6","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Bilis 500 SC 1 L disesuaikan sebesar +1810 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.878"
+"cmogv9fcl000nl7041twbka6p","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biocis 25 EC 1 L disesuaikan sebesar +1000 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.886"
+"cmogv9fcr000rl704ti18i8xq","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biocron 500 EC 1 L disesuaikan sebesar +2780 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.891"
+"cmogv9fcw000vl7044oi454zq","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +6330 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.897"
+"cmogv9fd1000zl704fkumvu4k","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biomax 1 L disesuaikan sebesar +6990 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.902"
+"cmogv9fda0013l704ifqt5bvx","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Bionasa 480 SL 1 L disesuaikan sebesar +2160 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.91"
+"cmogv9fde0017l704dg2o5qyo","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biothion 200 EC 1 L disesuaikan sebesar +1700 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.915"
+"cmogv9fdo001bl704moikckhp","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biotomil 40 SP 400 gr disesuaikan sebesar +1200 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.924"
+"cmogv9fdy001fl704fky3c74m","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Cadilac 80 WP 1 kg disesuaikan sebesar +2040 Bks.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.934"
+"cmogv9fe4001jl704sdgaba6c","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok D'mectin 530 SL 1 L disesuaikan sebesar +4410 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.941"
+"cmogv9fe9001nl704r4p3rbtg","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Desmos 200/60 SC 1 Lt disesuaikan sebesar +25 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.946"
+"cmogv9fee001rl70464eoqlbw","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Fatal 250 EC 500 ml disesuaikan sebesar +950 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.951"
+"cmogv9fek001vl704wukojaph","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Gasing 135 SL 1 L disesuaikan sebesar +6300 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.956"
+"cmogv9fep001zl7044gijy92b","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Glufo 150 SL 1 Lt disesuaikan sebesar +800 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.961"
+"cmogv9feu0023l704r2mg0b26","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Joki 400 SL 1 L disesuaikan sebesar +5720 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.966"
+"cmogv9fez0027l7042nipdbhq","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok King Cobra 500 ML disesuaikan sebesar +765 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.971"
+"cmogv9ff4002bl704wdwxzkrw","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Manuver 400 SL 1 L disesuaikan sebesar +2230 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.976"
+"cmogv9ffa002fl7047kmndlwa","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Nargis 50 WP 40 gr disesuaikan sebesar +200 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.982"
+"cmogv9ffg002jl704u1cnexjs","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Nefos 45 WP 500 gr disesuaikan sebesar +5745 Bks.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.989"
+"cmogv9ffm002nl704dgxzn831","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Nicofuron 80 OD 1 L disesuaikan sebesar +800 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.994"
+"cmogv9ffr002rl7046x5gqj71","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Niten 100 SL 1 L disesuaikan sebesar +800 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:12.999"
+"cmogv9ffw002vl704xjolepak","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Notora 60/6 WG 400 Gr disesuaikan sebesar +800 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.004"
+"cmogv9fg1002zl704ccrtohd7","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Platoon 75 WP 500 gr disesuaikan sebesar +1400 Bks.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.009"
+"cmogv9fg50033l704c2lp7gkv","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Pronate 200 SL 1 L disesuaikan sebesar +2165 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.014"
+"cmogv9fgf0037l704yq5z5prx","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Propus 500 ml disesuaikan sebesar +2680 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.024"
+"cmogv9fgl003bl70405k923mc","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Propus Plus 250 SC 250 ml disesuaikan sebesar +3260 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.03"
+"cmogv9fgr003fl704n4487g62","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Rapid Zone 20 WG 250 gr disesuaikan sebesar +1190 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.035"
+"cmogv9fgv003jl704e2bcl47d","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Sinakill 18/32 EC 250 ml disesuaikan sebesar +1570 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.04"
+"cmogv9fh0003nl704vdfcx9u5","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Sinamore 100 ml disesuaikan sebesar +1470 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.045"
+"cmogv9fh7003rl704pmeivjiy","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Solusi 865 SL 1 L disesuaikan sebesar +5160 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.051"
+"cmogv9fhd003vl704hl6a80ww","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Stadium 18 EC 1 L disesuaikan sebesar +5620 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.057"
+"cmogv9fhk003zl704744publg","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Sweeper 480 SL 1 L disesuaikan sebesar +2000 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.064"
+"cmogv9fhp0043l704p6tjsy2j","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Tandem 325 SC 250 ml disesuaikan sebesar +370 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.07"
+"cmogv9fhu0047l704nmikntze","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Torero 80 WP 1 Kg disesuaikan sebesar +2600 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.074"
+"cmogv9fi4004bl704aerltt88","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Zenus 276 SL 1 L disesuaikan sebesar +4460 Btl.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.085"
+"cmogv9fia004fl704w9kbcsr0","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar +4245 PCS.
+Keterangan: Stok awal TGH 1 & 2","/dashboard/stock/history","t","2026-04-27 07:19:13.09"
+"cmogvfpwi000qky043m4mt1vm","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Raffli Yoga Prasetyo mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvfpw3000kky04qf4astd9","t","2026-04-27 07:24:06.499"
+"cmogvi4ps0011ky04o3oyxpu8","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Muhammad Nor Faizin mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvi4pg000sky042t2j3zfd","t","2026-04-27 07:25:59.008"
+"cmogvjz4e000ajv04lqlo3qyw","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Anuf Arfin Yulianto mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvjz3y0001jv04z5ke1ur6","t","2026-04-27 07:27:25.07"
+"cmogvmioe001rjv043cpy2c4g","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Anuf Arfin Yulianto mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvminy001njv04p93spo00","t","2026-04-27 07:29:23.726"
+"cmogvp2ni002ijv04pfhvmanb","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Aisyah Febry Tri Astuti mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvp2my001tjv04mvyxt8up","t","2026-04-27 07:31:22.926"
+"cmogvpfd1001kjv04ssgy0stb","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Anggun Susilawati mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogvpfco000ujv04a74x11p9","t","2026-04-27 07:31:39.398"
+"cmogw48vk0028jv04zttgrsgg","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Danu Bagus Setiawan mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogw48ue0020jv04ns1eo5gg","t","2026-04-27 07:43:10.833"
+"cmogw8jak007gjv043qf1f3fw","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok King Cobra 500 ML disesuaikan sebesar +500 Btl.
+Keterangan: stok awal aziz","/dashboard/stock/history","t","2026-04-27 07:46:30.957"
+"cmogwax0k007mjv04zhjfepp3","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Danu Bagus Setiawan mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmogwax07007ijv04131ee8bw","t","2026-04-27 07:48:22.053"
+"cmogxeave001xkt04xlu5lgzu","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Putri Ayuning Sekar telah menyimpan sesi lanjutan demo plot untuk petani Bu Sekar.","/dashboard/demoplot/detail/cmogwyuxu000pkt045jymi2lq","t","2026-04-27 08:18:59.594"
+"cmogxedqk000rl404b33m7633","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Edi.","/dashboard/demoplot/detail/cmogx06zi0001jo0452v0dry3","t","2026-04-27 08:19:03.308"
+"cmogxexii001ukz04ttb5yoks","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Aziz.","/dashboard/demoplot/detail/cmogx1ydj000fjo04ced8i7t0","t","2026-04-27 08:19:28.939"
+"cmoi1kijx000nju04b04grjhm","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Sugeng Raharjo.","/dashboard/demoplot/detail/cmoi1kiid0002ju04lzpi7jjv","t","2026-04-28 03:03:34.126"
+"cmoi2itry0003ju04awh3gjpf","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biomax 1 L disesuaikan sebesar +3500 Btl.
+Keterangan: Pengambilan sampel milik BD","/dashboard/stock/history","t","2026-04-28 03:30:14.975"
+"cmoi2itss0007ju04q8wj5rp9","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Pronate 200 SL 1 L disesuaikan sebesar +1000 Btl.
+Keterangan: Pengambilan sampel milik BD","/dashboard/stock/history","t","2026-04-28 03:30:15.004"
+"cmoi2itsx000bju04683ii94r","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok King Cobra 500 ML disesuaikan sebesar +1100 Btl.
+Keterangan: Pengambilan sampel milik BD","/dashboard/stock/history","t","2026-04-28 03:30:15.01"
+"cmoi2itt2000fju04zkcgg3nw","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Allmax 500 ml disesuaikan sebesar +1100 Btl.
+Keterangan: Pengambilan sampel milik BD","/dashboard/stock/history","t","2026-04-28 03:30:15.015"
+"cmoi2itt8000jju04uhtu4y30","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biolon 670 EC 1 L disesuaikan sebesar +300 PCS.
+Keterangan: Pengambilan sampel milik BD","/dashboard/stock/history","t","2026-04-28 03:30:15.02"
+"cmoi2itte000nju042gn9ijms","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Nicofuron 80 OD 1 L disesuaikan sebesar +500 PCS.
+Keterangan: Pengambilan sampel milik BD","/dashboard/stock/history","t","2026-04-28 03:30:15.026"
+"cmomonnwj0005jr0463h97ohp","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOIA6UD) telah ditolak oleh SPV.
+Alasan: Ajukan kemasan sedang","/dashboard/stock","f","2026-05-01 09:00:56.9"
+"cmoqkc26s000pju0495dgcr12","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Slamat Dawung.","/dashboard/demoplot/detail/cmoqkc2590004ju04bbey9ads","t","2026-05-04 02:11:01.781"
+"cmoqkl82m000fl4044z7uo1oa","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Dimo.","/dashboard/demoplot/detail/cmoqkl81o0004l404mg05d7gz","t","2026-05-04 02:18:09.31"
+"cmoqzmbtr0001l4045jetqbvn","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","f","2026-05-04 09:18:55.072"
+"cmoqzmbtx0003l404in2fl3cc","cmmvjyntc0001l704r738ouwy","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOQRSLJ) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-04 09:18:55.077"
+"cmoqzryfu0005l404vl9xtxcs","cmn2ut4aa0013jy04kr1572fk","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOQS28Q) telah ditolak oleh SPV.
+Alasan: Joki diperuntukkan hanya untuk MST","/dashboard/stock","f","2026-05-04 09:23:17.658"
+"cmoqrwrmm000nl0042i7m0yiy","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-04 05:43:05.182"
+"cmos91suh0005i504e7nfob3l","cmn2ut4aa0013jy04kr1572fk","🧪 Sampel Disetujui SPV — Stok Masuk","Pengajuan sampel Anda (ID: CMOS53XC) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.","/dashboard/stock","f","2026-05-05 06:30:39.689"
+"cmosa38fa0009la04zbj48q9j","cmn2ut4aa0013jy04kr1572fk","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMOR02WJ) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06276.","/dashboard/stock","f","2026-05-05 06:59:46.15"
+"cmosb1ssh000bl204tbo03g6r","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOS54TJ) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.","/dashboard/stock","f","2026-05-05 07:26:38.849"
+"cmos3r8st0006jm04aormhvma","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-05 04:02:29.069"
+"cmos9ojnu0001ju04uysfpa1u","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Dhika Prasetya) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 06:48:20.874"
+"cmosb1ssc0009l2042p6dai64","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 07:26:38.845"
+"cmosoz6bd0009jq0436vzeqv6","cmn2ut48r0009jy04hylrc57r","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOSON3Z) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoson3z70001jr04fpxb5ys3","f","2026-05-05 13:56:31.033"
+"cmos9ojo00003ju04hy8sze13","cmmvjyntc0001l704r738ouwy","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOS9GK0) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan.","/dashboard/stock","t","2026-05-05 06:48:20.88"
+"cmotf7lri0011l2047bowfn2e","cmnptxdfx0003ih04aeoz98ii","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOTENO1) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoteno100003jx0418r1qqo9","f","2026-05-06 02:10:54.318"
+"cmotgkkjs000jl504lq4sk4p2","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Izul.","/dashboard/demoplot/detail/cmotgkke40002l504kwgomgmu","f","2026-05-06 02:48:58.888"
+"cmourfdth000hl504qkznx1em","cmn2ut49f000ljy04iv28asey","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOURBAB) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmourbab00001la04lwlohr2x","f","2026-05-07 00:40:38.837"
+"cmout0az9000ol704sp6camvh","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Sarmin.","/dashboard/demoplot/detail/cmout0axp0003l704msgbz6nf","t","2026-05-07 01:24:54.549"
+"cmoutn6ad0009lh04hkrlroag","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Pak Sukimin.","/dashboard/demoplot/detail/cmoutko6a0001kz04ihi85r9f","t","2026-05-07 01:42:41.557"
+"cmouvog86000zlf04ps12p1el","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Ratno.","/dashboard/demoplot/detail/cmouvog78000ilf041c4z9z48","t","2026-05-07 02:39:40.327"
+"cmov2krf90009jx04hwwn6qhs","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-07 05:52:45.525"
+"cmotd5n98000mla04x5b1tnz4","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Samidi.","/dashboard/demoplot/detail/cmotd5n3r0001la04i71bccua","t","2026-05-06 01:13:23.709"
+"cmotw55y0000gla04aw35y2ad","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Ahmadi.","/dashboard/demoplot/detail/cmotw55sh0003la04id39oyw2","t","2026-05-06 10:04:53.977"
+"cmotx9rpz000fjl04bkw9fq66","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Roni.","/dashboard/demoplot/detail/cmotx9rkk0002jl04jgtfiizs","t","2026-05-06 10:36:28.439"
+"cmousvkhx000jl404c9d37aa1","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Sri Widodo.","/dashboard/demoplot/detail/cmousvkgm0002l404084jyzuy","t","2026-05-07 01:21:13.605"
+"cmoutko6m0005kz04os31ch8s","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Pak Sukimin.","/dashboard/demoplot/detail/cmoutko6a0001kz04ihi85r9f","t","2026-05-07 01:40:44.783"
+"cmoutso4o000ulh04m5ztu1e9","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Parno.","/dashboard/demoplot/detail/cmoutso3a000dlh046b0c33gi","t","2026-05-07 01:46:57.96"
+"cmouv74q5000kl40457vexjsf","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Agung.","/dashboard/demoplot/detail/cmouv74on0003l404fcgudfnd","t","2026-05-07 02:26:12.269"
+"cmouw4ok8000gky047scm5fbt","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Ratno.","/dashboard/demoplot/detail/cmouw4oiw0003ky04ci664kdj","t","2026-05-07 02:52:17.624"
+"cmov3xmfb001mjp044832gomc","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Yanwar Setyabudi AP mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmov3xmet001hjp04ntnv53z4","t","2026-05-07 06:30:45.191"
+"cmov5yx530009la04jqfqi5g9","cmn2ut48v000bjy04dn3fav4n","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOV3XME) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmov3xmet001hjp04ntnv53z4","t","2026-05-07 07:27:44.968"
+"cmow8f7vr000il204v8d1816q","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Sukamto.","/dashboard/demoplot/detail/cmow8f7tu0001l204albcga8d","f","2026-05-08 01:24:10.792"
+"cmow9picl000llg04djwmh0ut","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Tukijan.","/dashboard/demoplot/detail/cmow9pibh0004lg04kh3ga4xm","f","2026-05-08 02:00:10.534"
+"cmow9rwrq000bic04zv15kjdz","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Maulidya Hilda Prameswari telah menyimpan sesi lanjutan demo plot untuk petani Pak Sukiman.","/dashboard/demoplot/detail/cmojvw6nt0004i6040iz7ov72","f","2026-05-08 02:02:02.534"
+"cmow9v5ep000bjg04hpiml5x8","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Maulidya Hilda Prameswari telah menyimpan sesi lanjutan demo plot untuk petani Sumadi.","/dashboard/demoplot/detail/cmojw2xuv0003kw04vw8mt9qb","f","2026-05-08 02:04:33.697"
+"cmow8um2h000nkv04tsgl9524","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Ali.","/dashboard/demoplot/detail/cmow8ulxt0002kv049q08glr7","t","2026-05-08 01:36:09.017"
+"cmowahvio000fic04528dosnc","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Sarkadi.","/dashboard/demoplot/detail/cmowahvhj0002ic04y8luljtr","t","2026-05-08 02:22:13.968"
+"cmowb91gr000hi504or2h3y41","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Sarkadi F.","/dashboard/demoplot/detail/cmowb91fs0004i504tw7eg57k","t","2026-05-08 02:43:21.387"
+"cmowbhgzx0014l8049xr5avli","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Mul.","/dashboard/demoplot/detail/cmowbhgyf000nl804v1yrna4o","t","2026-05-08 02:49:54.765"
+"cmowbytwu000hl4041vinls5a","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Siti juariah.","/dashboard/demoplot/detail/cmowbytv80004l404uysdzqm2","t","2026-05-08 03:03:24.654"
+"cmowc8r4s000kjm04sgnn8pfu","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Sumadi.","/dashboard/demoplot/detail/cmowc8r3i0003jm04y3xcjzx0","t","2026-05-08 03:11:07.612"
+"cmp3dci2b000fju04xnazpp27","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Heko 50 SC 1 L disesuaikan sebesar +297 PCS.
+Keterangan: Penyesuaian","/dashboard/stock/history","t","2026-05-13 01:16:25.331"
+"cmp3dc5fe000bju0468wtvwbc","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Heko 50 SC 1 L disesuaikan sebesar +3 PCS.
+Keterangan: Penyesuaian","/dashboard/stock/history","t","2026-05-13 01:16:08.955"
+"cmpaxlk1j000nk104vs6w8dwj","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Nefos 45 WP 500 gr disesuaikan sebesar +998 Bks.
+Keterangan: penyesuaian","/dashboard/stock/history","f","2026-05-18 08:17:43.352"
+"cmpaxlk1t000rk104ju0c5awc","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Belko 500 ml disesuaikan sebesar +998 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","f","2026-05-18 08:17:43.361"
+"cmpaxlk24000vk10407s6wtjd","cmn2ut4aa0013jy04kr1572fk","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +989 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","f","2026-05-18 08:17:43.373"
+"cmowcaqsa0014jm04fsg78ysl","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Nurkholip.","/dashboard/demoplot/detail/cmowcaqra000njm04psu3tupj","t","2026-05-08 03:12:40.474"
+"cmowcd9ox001ql8041mwltiff","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Supali.","/dashboard/demoplot/detail/cmowcd9nu0019l804j0ihbovg","t","2026-05-08 03:14:38.289"
+"cmowemi7g000fih046hs4lx7m","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Solehan.","/dashboard/demoplot/detail/cmowemi6d0002ih04g256coki","t","2026-05-08 04:17:48.46"
+"cmowo5dtz0006k104a5r6xfe5","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmowo5dtf0001k104920nwklr","t","2026-05-08 08:44:25.799"
+"cmowu59kn0005jv04hwt4bdf5","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Diajeng Nurwahidah Laila Umar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmowu59k60001jv04p9sdzjtj","t","2026-05-08 11:32:17.976"
+"cmox50rei0005kw04j3ieo8cx","cmn2ut48r0009jy04hylrc57r","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOWU59K) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmowu59k60001jv04p9sdzjtj","f","2026-05-08 16:36:43.578"
+"cmoxlgu4o000el404kgmap0ku","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Lukman.","/dashboard/demoplot/detail/cmom6n0dw0003l104onfhwx30","f","2026-05-09 00:17:07.464"
+"cmowqno8c0009kz04psbjjj1g","cmn2ut490000djy043kfw99u4","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOWO5DT) telah disetujui oleh AFA.
+Catatan: Perubahan karena diminta pak dedy untuk sampel 1 tengki","/dashboard/demoplot/detail/cmowo5dtf0001k104920nwklr","t","2026-05-08 09:54:38.316"
+"cmoxojbd0001pl804xq9y33ex","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Bayan.","/dashboard/demoplot/detail/cmoxojbby0018l804gn2g6g02","f","2026-05-09 01:43:01.956"
+"cmoxolikh000cjp04sus51lq8","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Maulidya Hilda Prameswari telah menyimpan sesi lanjutan demo plot untuk petani Sutrisno.","/dashboard/demoplot/detail/cmojvstt4000hld04nink2ned","f","2026-05-09 01:44:44.61"
+"cmowrucvb0001jp04absg5pjk","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-05-08 10:27:49.799"
+"cmoxomdub0001l704xnmcf1jg","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-09 01:45:25.14"
+"cmoxp0ne9000hjs046oephhph","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Khamso.","/dashboard/demoplot/detail/cmoxp0ndc0002js04hfweqwry","f","2026-05-09 01:56:30.706"
+"cmoxpg5ts0001if04y8ulqfpy","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","f","2026-05-09 02:08:34.432"
+"cmoxpjjhx0006ju04m2d8j5w3","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-09 02:11:12.117"
+"cmowrucvg0003jp04agukvy1t","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOV2KRE) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-08 10:27:49.804"
+"cmowtz97j000ljo04ogik5fgz","cmmu0cnp40006zfy02oc00oz1","🧪 Sampel Disetujui SPV — Stok Masuk","Pengajuan sampel Anda (ID: CMOV2G7J) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.","/dashboard/stock","t","2026-05-08 11:27:37.568"
+"cmoxnb1tm0013l804vob90oio","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Mawardi.","/dashboard/demoplot/detail/cmoxnb1p7000ol804mgj51kxp","t","2026-05-09 01:08:36.73"
+"cmoxnifeh000gjr04k2x6bbj3","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Samiran.","/dashboard/demoplot/detail/cmoxnifd30001jr04xwc5utpi","t","2026-05-09 01:14:20.922"
+"cmowqqzlp0009l8049vhxd3ft","cmn2ut48j0007jy040a1gsnei","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMORWUQU) telah disetujui oleh AFA.
+Catatan: 40ml diminta pak dedy untuk sampel","/dashboard/demoplot/detail/cmorwuqud001dl204soxmi8k2","t","2026-05-08 09:57:13.021"
+"cmoxrxjqk0009jp04ikfx44h3","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan sesi lanjutan demo plot untuk petani Pandu.","/dashboard/demoplot/detail/cmokvekrf0025l404xvkz5suz","t","2026-05-09 03:18:04.844"
+"cmoxnxhld000nl10453ads6a5","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Daryadi.","/dashboard/demoplot/detail/cmoxnxhjl0002l1045v26axdw","t","2026-05-09 01:26:03.602"
+"cmoxnzbzk000jjo04uyjyzhi7","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Guntur.","/dashboard/demoplot/detail/cmoxnzbxc0002jo049m176zwp","t","2026-05-09 01:27:29.648"
+"cmoxoeix2000gjj04rvr19nc6","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Mawardi.","/dashboard/demoplot/detail/cmoxoeivy0001jj047gf399xb","t","2026-05-09 01:39:18.47"
+"cmoxomdug0003l704y6ulzkq3","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOV2KRE) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-05-09 01:45:25.145"
+"cmoxpd0go0001k604mlr2n4nz","cmmu0cnp40006zfy02oc00oz1","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOMPBRP) telah ditolak oleh WH Manager.
+Alasan: Heko kosong","/dashboard/stock","t","2026-05-09 02:06:07.512"
+"cmoxpg5u30003if04o4j74sjp","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOV2KRE) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan. Invoice Accurate: 645.26.05.06422.","/dashboard/stock","t","2026-05-09 02:08:34.443"
+"cmoxps15k0003k404f5nvr42n","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Pak Dimo.","/dashboard/demoplot/detail/cmoqkl81o0004l404mg05d7gz","t","2026-05-09 02:17:48.249"
+"cmoxssbzo0003l904prqsq43f","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Ragil.","/dashboard/demoplot/detail/cmomc4wah0002if04j587b2t2","t","2026-05-09 03:42:01.141"
+"cmoxtx0xu0005i604zqvqte28","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-09 04:13:39.714"
+"cmoxtnlsr0006ju04ec5hjr5u","cmmu0cnp40006zfy02oc00oz1","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMOV2KRE) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06422.","/dashboard/stock","t","2026-05-09 04:06:20.188"
+"cmoy44otv000cl504vul03k3f","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Giffari Putra Sudarisman mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmoy44oqi0001l5048ex108pk","f","2026-05-09 08:59:33.427"
+"cmoz4ht28000hjs0476dcc52d","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Muamar.","/dashboard/demoplot/detail/cmoz4hszj0002js04msevu3ea","f","2026-05-10 01:57:31.616"
+"cmoygpc9t000xjj041pjq6lyi","cmnptx8wa0001ih049zvdbkfp","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMOY44OQ) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmoy44oqi0001l5048ex108pk","t","2026-05-09 14:51:32.321"
+"cmoyqlcit000akz04g9z0ezlh","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Bagas Abidin Budiono telah menyimpan realisasi demo plot untuk petani Pardi.","/dashboard/demoplot/detail/cmoyqlcdw0001kz0480jjil9y","t","2026-05-09 19:28:22.181"
+"cmoyrsmgp0005ii04yx5qw494","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Bagas Abidin Budiono telah menyimpan realisasi demo plot untuk petani Pardi.","/dashboard/demoplot/detail/cmoyrsmfw0001ii04dr9fqfp4","t","2026-05-09 20:02:01.274"
+"cmp0jx4rg000oky049pfkp99f","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan sesi lanjutan demo plot untuk petani Pak Muhsin.","/dashboard/demoplot/detail/cmp0jvec90001ky0466szrrsm","t","2026-05-11 01:57:07.036"
+"cmp0huf3a000gla04iajd8yuj","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Saiman.","/dashboard/demoplot/detail/cmp0huey40001la04202ks2xg","t","2026-05-11 00:59:01.222"
+"cmp0jvedo000eky040xp6wm7e","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pak Muhsin.","/dashboard/demoplot/detail/cmp0jvec90001ky0466szrrsm","t","2026-05-11 01:55:46.188"
+"cmp0o8qqd0003l20442rhhafx","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Yanwar Setyabudi AP telah menyimpan sesi lanjutan demo plot untuk petani Anam.","/dashboard/demoplot/detail/cmom7y3ej000sl104d1ag4xud","t","2026-05-11 03:58:07.189"
+"cmp0ss3uc000pjm04iqmos5dt","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Duhri.","/dashboard/demoplot/detail/cmp0ss3rx0006jm04tnn23d8n","f","2026-05-11 06:05:09.108"
+"cmp0vv5px0005l504pjt7tcy3","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-11 07:31:30.357"
+"cmp0jlejs0003le04ubulf7br","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMOXPJJH) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-11 01:47:59.849"
+"cmp0jqpx30001i80488vaae09","cmmu0cnp40006zfy02oc00oz1","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMOXTX0W) telah ditolak oleh SPV.
+Alasan: Kesalahan input volume","/dashboard/stock","t","2026-05-11 01:52:07.863"
+"cmp0ml6ga000rl704bh0yltow","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Pasum Supriyanto.","/dashboard/demoplot/detail/cmp0ml6f60006l7043kwm2ke9","t","2026-05-11 03:11:48.202"
+"cmp0lmeex000rjp044di7rqwi","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Sarjo.","/dashboard/demoplot/detail/cmp0lmedn0006jp040biseyfk","t","2026-05-11 02:44:45.561"
+"cmp0jlejp0001le04yxa0qzvz","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","t","2026-05-11 01:47:59.845"
+"cmp0kg3wk000rle04ghy9ldrt","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak yustava.","/dashboard/demoplot/detail/cmp0kg3v80002le045pertj0u","t","2026-05-11 02:11:52.388"
+"cmp0lh9zd0003jp0455afsgui","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Slamat Dawung.","/dashboard/demoplot/detail/cmoqkc2590004ju04bbey9ads","t","2026-05-11 02:40:46.538"
+"cmp0lrrqe0007jl04hebeuk2p","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Nardi.","/dashboard/demoplot/detail/cmoqj9xbm0003lb04p6zp4dki","t","2026-05-11 02:48:56.103"
+"cmp0m25v6000xjp04wg4f0fm6","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Sunarto.","/dashboard/demoplot/detail/cmoqihyok0002le04awfsbgqd","t","2026-05-11 02:57:00.978"
+"cmp0x6gcu000ajy04eu2qcdgz","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-11 08:08:16.975"
+"cmp0x83fd0005jv04cfel6nqj","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Muhammad Gandhi Gumelar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-11 08:09:33.53"
+"cmp0yzolz000aky0436q62db4","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-11 08:59:00.311"
+"cmp0z0ns6000gky040kth4htb","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-11 08:59:45.894"
+"cmp16bsdn0001jo04v0wet1oi","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-11 12:24:22.379"
+"cmp1xf3s0000cld04e6mwmyby","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Sukamto.","/dashboard/demoplot/detail/cmow8f7tu0001l204albcga8d","f","2026-05-12 01:02:46.753"
+"cmp1ydbdp0016jl04dkeua0oz","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pak Nurrohim.","/dashboard/demoplot/detail/cmp1ydbca000tjl04qx6bxblf","t","2026-05-12 01:29:22.909"
+"cmp1z6blp0005l704m5fab1ev","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-12 01:51:56.222"
+"cmp1vy30p0003la04n88ob9uj","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Yanwar Setyabudi AP telah menyimpan sesi lanjutan demo plot untuk petani Suwarno.","/dashboard/demoplot/detail/cmorzfiun0001ld042nrykvoc","t","2026-05-12 00:21:33.002"
+"cmp1zcpbv0005l504cdusrujr","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-12 01:56:53.947"
+"cmp1zc7w80007l7046zl1ch5t","cmmvjyntc0001l704r738ouwy","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMP1Z6BK) telah ditolak oleh SPV.
+Alasan: bug satuan","/dashboard/stock","t","2026-05-12 01:56:31.353"
+"cmp1zdmp10001jp04cy72z4j4","cmmvjyntc0001l704r738ouwy","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMP1ZCPB) telah ditolak oleh SPV.
+Alasan: tes dari febri, reject saja","/dashboard/stock","t","2026-05-12 01:57:37.19"
+"cmp1zr5u20005jv042kppv9iw","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Dhika Prasetya telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","t","2026-05-12 02:08:08.522"
+"cmp21bsve000hl704ck4m8muf","cmn2ut4aa0013jy04kr1572fk","🧪 Sampel Disetujui SPV — Stok Masuk","Pengajuan sampel Anda (ID: CMP0X83E) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.","/dashboard/stock","f","2026-05-12 02:52:11.114"
+"cmp21dhql0001l704hlpfa0ce","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","f","2026-05-12 02:53:29.997"
+"cmp21djfe000jl704uhxo9mv3","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","f","2026-05-12 02:53:32.187"
+"cmp21djfh000ll704qgp64mlt","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMP0X6GC) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","f","2026-05-12 02:53:32.19"
+"cmp10a3hj000jjo04xu0ia5de","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Yono.","/dashboard/demoplot/detail/cmojfi8px0001ih04acq87ydc","t","2026-05-11 09:35:05.768"
+"cmp10d4f9000dl404zydn7uyo","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Nardi.","/dashboard/demoplot/detail/cmojffns40005jo04ipg2hgnu","t","2026-05-11 09:37:26.949"
+"cmp10eklc000mky04gu3550ra","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Nardi.","/dashboard/demoplot/detail/cmojffns40005jo04ipg2hgnu","t","2026-05-11 09:38:34.56"
+"cmp21ee9v0001ju04k45pnuif","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Dhika Prasetya) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-12 02:54:12.164"
+"cmp21epx10005ju04onh1xn6m","cmnqvkhsd0003l8046midb5wl","📩 Pengajuan Stok Menunggu Approval WH Manager","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui FA Manager dan menunggu approval Anda.","/dashboard/stock","f","2026-05-12 02:54:27.254"
+"cmp21epx50007ju045il2y0w4","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMP0X6GC) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","f","2026-05-12 02:54:27.257"
+"cmp21eea10003ju04xyg2ksbi","cmmvjyntc0001l704r738ouwy","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMP0YZOK) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-05-12 02:54:12.169"
+"cmp1zruhp0001ky04jsdb6rc3","cmmvjyntc0001l704r738ouwy","❌ Pengajuan Stok Ditolak","Pengajuan stok Anda (ID: CMP1ZR5S) telah ditolak oleh SPV.
+Alasan: tes dari febri, reject","/dashboard/stock","t","2026-05-12 02:08:40.477"
+"cmp21ax9z0005l704vfbwgt1t","cmmvjyntc0001l704r738ouwy","🧪 Sampel Disetujui SPV — Stok Masuk","Pengajuan sampel Anda (ID: CMP0Z0NR) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.","/dashboard/stock","t","2026-05-12 02:51:30.168"
+"cmp21dhqr0003l704qsnjlqil","cmmvjyntc0001l704r738ouwy","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMP0YZOK) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-12 02:53:30.003"
+"cmp2g1j0a0005jp04uotsgg1k","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Diajeng Nurwahidah Laila Umar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp2g1izn0001jp04m3l1uttm","t","2026-05-12 09:44:06.01"
+"cmp2g37js0005l7047mu1u1uj","cmn2ut48r0009jy04hylrc57r","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMP2G1IZ) telah disetujui oleh AFA.","/dashboard/demoplot/detail/cmp2g1izn0001jp04m3l1uttm","f","2026-05-12 09:45:24.472"
+"cmp3bdil0000ol80417kbvmuh","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pak Sugeng.","/dashboard/demoplot/detail/cmp3bdij80003l80409781k7q","t","2026-05-13 00:21:13.428"
+"cmp3d49ku000bkz04jbovy1si","cmn2ut48g0005jy040hwfi0jk","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMP3CW5V) telah disetujui oleh AFA.
+Catatan: Ziflo terlalu banyak","/dashboard/demoplot/detail/cmp3cw5vt0001i504u6aondvy","f","2026-05-13 01:10:01.087"
+"cmp3da7h80003ju04j1lfxmv7","cmn2ut48r0009jy04hylrc57r","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar -639500 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","f","2026-05-13 01:14:38.3"
+"cmp3db31o0007ju04y23wzvwk","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Bestzine 20/60 WG 100 Gram disesuaikan sebesar +250 PCS.
+Keterangan: Penyesuaian","/dashboard/stock/history","t","2026-05-13 01:15:19.212"
+"cmp2f0ngf000nkw04lzwmzrm9","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Anton.","/dashboard/demoplot/detail/cmp2f0ndz0002kw04ps25rx2t","t","2026-05-12 09:15:25.504"
+"cmp2fkkt30003ju047l10cpte","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +5 PCS.
+Keterangan: Bug sistem dalam pengajuan stok","/dashboard/stock/history","t","2026-05-12 09:30:55.191"
+"cmp3du201000ijr045d5vrlb1","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Giffari Putra Sudarisman telah menyimpan realisasi demo plot untuk petani Pak Karis.","/dashboard/demoplot/detail/cmp3du1yg0001jr048j5n1knf","f","2026-05-13 01:30:04.322"
+"cmp2g3ryp0005ju04jiuju83r","cmn2ut490000djy043kfw99u4","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMP2G0FQ) telah disetujui oleh AFA.
+Catatan: Sudah diberikan","/dashboard/demoplot/detail/cmp2g0fq1001vju04i9b68t91","t","2026-05-12 09:45:50.93"
+"cmp2g4jp50005jm049o7fhlkz","cmn2ut490000djy043kfw99u4","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMP2G2PH) telah disetujui oleh AFA.
+Catatan: Sudah diberikan, sesuai","/dashboard/demoplot/detail/cmp2g2ph8000bjp04nwj502f0","t","2026-05-12 09:46:26.873"
+"cmp3fomod000cic04avmsnufy","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Maulidya Hilda Prameswari telah menyimpan sesi lanjutan demo plot untuk petani Wiyanto.","/dashboard/demoplot/detail/cmotigec30001ib04d4b7dfzo","f","2026-05-13 02:21:50.413"
+"cmp3h4q8s000cky04bscc4czu","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Maulidya Hilda Prameswari telah menyimpan sesi lanjutan demo plot untuk petani Sapari.","/dashboard/demoplot/detail/cmotij1en0004jr04md0pj15i","f","2026-05-13 03:02:21.149"
+"cmp3feku1001ejr04s8t03b7h","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan sesi lanjutan demo plot untuk petani Seno.","/dashboard/demoplot/detail/cmokrymyf0005jr04hgied1oz","t","2026-05-13 02:14:01.465"
+"cmp3qy6kf000bjm04mewur33z","cmn2ut48g0005jy040hwfi0jk","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMP3QJ76) telah disetujui oleh AFA.
+Catatan: Untuk demplot area MST Karanganyar","/dashboard/demoplot/detail/cmp3qj7690001jm04fy5wamx9","f","2026-05-13 07:37:11.871"
+"cmp3rs19u0003lb04y4965oik","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biomax 500 ml disesuaikan sebesar +500 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-13 08:00:24.69"
+"cmp3sc2kw000il904a39o24xv","cmmvjyntc0001l704r738ouwy","📩 Permintaan Stok Baru (FO)","Diajeng Nurwahidah Laila Umar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp3sc2kd000dl90473e0tsvx","t","2026-05-13 08:15:59.504"
+"cmp3sdv7h0009l6044bhqy069","cmn2ut48r0009jy04hylrc57r","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMP3SC2K) telah disetujui oleh AFA.
+Catatan: karyakan","/dashboard/demoplot/detail/cmp3sc2kd000dl90473e0tsvx","f","2026-05-13 08:17:23.261"
+"cmp4uxnus000fkz04sma6n4mp","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Nasikun.","/dashboard/demoplot/detail/cmp4uxnpt0002kz048yvg0t92","f","2026-05-14 02:16:32.261"
+"cmp4v4086000jky04nbm66n4k","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Surateman.","/dashboard/demoplot/detail/cmp4v40780004ky04p4yihizk","f","2026-05-14 02:21:28.23"
+"cmp4v6d50000yky04xaglltar","cmn2ut4aa0013jy04kr1572fk","📝 Realisasi Demo Plot","Maulidya Hilda Prameswari telah menyimpan realisasi demo plot untuk petani Narto.","/dashboard/demoplot/detail/cmp4v6d3y000lky04i4xu8qf4","f","2026-05-14 02:23:18.277"
+"cmp4v9yvh0018ky04yowh44jc","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Maulidya Hilda Prameswari telah menyimpan sesi lanjutan demo plot untuk petani Maryono (KOL).","/dashboard/demoplot/detail/cmom8ief80006l20452hg5vyx","f","2026-05-14 02:26:06.414"
+"cmp10gc670003jo04oc2e9mhx","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Pak Pardi.","/dashboard/demoplot/detail/cmojfkqap000kih04tswv2zg4","t","2026-05-11 09:39:56.959"
+"cmp16bsdr0003jo04lx1tsoey","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui FA Manager — Menunggu WH Manager","Pengajuan stok Anda (ID: CMOXPJJH) telah disetujui FA Manager. Menunggu approval WH Manager.","/dashboard/stock","t","2026-05-11 12:24:22.383"
+"cmp4s9jkp000el504ohfeho00","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Seno.","/dashboard/demoplot/detail/cmp4s9ji30001l504ao7vjyan","t","2026-05-14 01:01:47.737"
+"cmp4x3c4w000dl10484d4gpg8","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Prayitno.","/dashboard/demoplot/detail/cmp4x3bzq0002l104qbs4y3ga","t","2026-05-14 03:16:56.24"
+"cmp1xo29f000jjs045mern61h","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Abibul.","/dashboard/demoplot/detail/cmp1xo27g0002js04kae7bglv","t","2026-05-12 01:09:44.692"
+"cmp1xpybt0003l404wv8fys4c","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Pak Giono.","/dashboard/demoplot/detail/cmos02k4c000kkw049907rgvb","t","2026-05-12 01:11:12.905"
+"cmp1xv4fe0009jl04h4o94hmi","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Pak Rukiman.","/dashboard/demoplot/detail/cmorzvleb0002l804zkiwct9u","t","2026-05-12 01:15:14.09"
+"cmp1xxwm5000djl04rsojv7ps","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Pak Rukiman.","/dashboard/demoplot/detail/cmorzvleb0002l804zkiwct9u","t","2026-05-12 01:17:23.934"
+"cmp21blt1000bl704eslolxfc","cmmu0cnp40006zfy02oc00oz1","🧪 Sampel Disetujui SPV — Stok Masuk","Pengajuan sampel Anda (ID: CMP0VV5K) telah disetujui SPV. Stok sampel sudah masuk ke gudang Anda.","/dashboard/stock","t","2026-05-12 02:52:01.958"
+"cmp2fkkth0007ju04ut1krvbb","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar +4 PCS.
+Keterangan: Bug sistem dalam pengajuan stok","/dashboard/stock/history","t","2026-05-12 09:30:55.205"
+"cmp2fn13o0003jr045g3x1yz3","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +4 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:32:49.62"
+"cmp2fox5r0003jy048e6xrw28","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +4 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:34:17.824"
+"cmp2fox5w0007jy04zu68ayrj","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar -1 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:34:17.829"
+"cmp2fx6uo001zif04yy4ctv9k","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +4 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:40:43.632"
+"cmp2g0fqv001zju04no2huiok","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp2g0fq1001vju04i9b68t91","t","2026-05-12 09:43:15.127"
+"cmp2g1kxu0009kz04hlgbqcj0","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +4 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:44:08.514"
+"cmp2g1zq3000dkz04ea61q830","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +4 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:44:27.676"
+"cmp2g2m2d0009jp04g0e6tk22","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +5 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:44:56.629"
+"cmp2g2phn000fjp04bp04nrkd","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp2g2ph8000bjp04nwj502f0","t","2026-05-12 09:45:01.068"
+"cmp2g8afw0009l704pnyba9tz","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +4 PCS.
+Keterangan: Bug sistem pengajuan sampel","/dashboard/stock/history","t","2026-05-12 09:49:21.5"
+"cmp3adhc9000kl20488rvdveg","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Ahmadi.","/dashboard/demoplot/detail/cmp3adh9t0001l204aj8mpkz1","t","2026-05-12 23:53:12.202"
+"cmp3b9tvw000djr04o0fvay1z","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Putri Ayuning Sekar telah menyimpan sesi lanjutan demo plot untuk petani Ahmadi.","/dashboard/demoplot/detail/cmotw55sh0003la04id39oyw2","t","2026-05-13 00:18:21.453"
+"cmp3ch9ri0003k10407lr6vuy","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Agung.","/dashboard/demoplot/detail/cmouv74on0003l404fcgudfnd","t","2026-05-13 00:52:08.238"
+"cmp3cm7g40007k104e89ft9wo","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Ratno.","/dashboard/demoplot/detail/cmouvog78000ilf041c4z9z48","t","2026-05-13 00:55:58.516"
+"cmp3cw5wf0006i504ssrxmfxp","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Kiftirul Aziz mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp3cw5vt0001i504u6aondvy","t","2026-05-13 01:03:43.071"
+"cmp3e7ke6000yjr04glhhxul4","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Kiftirul Aziz telah menyimpan realisasi demo plot untuk petani Pak Sugito.","/dashboard/demoplot/detail/cmp3e7kct000ljr049fj37fe2","t","2026-05-13 01:40:34.687"
+"cmp3eqlkx0003l804qh8ajf3y","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Pak Sukimin.","/dashboard/demoplot/detail/cmoutko6a0001kz04ihi85r9f","t","2026-05-13 01:55:22.689"
+"cmp3euqia0003l404bdqo70to","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Sri Widodo.","/dashboard/demoplot/detail/cmousvkgm0002l404084jyzuy","t","2026-05-13 01:58:35.698"
+"cmp3evbn9000rl4047y6h1v1u","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Ngaminah.","/dashboard/demoplot/detail/cmp3evbm40006l404gckm54o3","t","2026-05-13 01:59:03.093"
+"cmp3f1vsr0003i704lfk80bv7","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Parno.","/dashboard/demoplot/detail/cmoutso3a000dlh046b0c33gi","t","2026-05-13 02:04:09.148"
+"cmp3g29o50007l404opac6ssf","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Anggun Susilawati telah menyimpan sesi lanjutan demo plot untuk petani Ratno.","/dashboard/demoplot/detail/cmouw4oiw0003ky04ci664kdj","t","2026-05-13 02:32:26.741"
+"cmp3qj7ar0005jm04l1jz0tty","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Kiftirul Aziz mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp3qj7690001jm04fy5wamx9","t","2026-05-13 07:25:32.98"
+"cmp3xj28o000ejp04j7gq1722","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Heni.","/dashboard/demoplot/detail/cmp3xj22v0001jp04bbxzeht0","t","2026-05-13 10:41:23.737"
+"cmp3xmc3t000el5048g419bd2","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Giarto.","/dashboard/demoplot/detail/cmp3xmc2h0001l504grtgjkmu","t","2026-05-13 10:43:56.49"
+"cmp3xnpsq000ekt04mng2f00e","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Warsito.","/dashboard/demoplot/detail/cmp3xnpra0001kt04wfbxnqjm","t","2026-05-13 10:45:00.891"
+"cmp3xpiuf0011kt04cuybncku","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Warsito.","/dashboard/demoplot/detail/cmp3xpit5000gkt04oei1zpsc","t","2026-05-13 10:46:25.191"
+"cmp425nwk0003ld04f8t04jnq","cmmu0cnp40006zfy02oc00oz1","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +5000 PCS.
+Keterangan: adjustment pengajuan CMOV2KRE","/dashboard/stock/history","t","2026-05-13 12:50:56.708"
+"cmp4w1rf9000fl704kelzg0zt","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Jumiko.","/dashboard/demoplot/detail/cmp4w1rdi0002l70482g6eliu","t","2026-05-14 02:47:43.125"
+"cmp51zc5v0005l704cvhhsh6s","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Danu Bagus Setiawan mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp51zc4s0001l7047y599lth","t","2026-05-14 05:33:47.731"
+"cmp68tv5t000ajv04jyi3cesb","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Muamar.","/dashboard/demoplot/detail/cmoz4hszj0002js04msevu3ea","f","2026-05-15 01:33:15.906"
+"cmp68xtjn000hjv047gc2fnli","cmmu0cn8x0004zfy0rje4s1oa","📩 Pengajuan Stok Baru (AFA)","Orbit Bimasakti Akbar telah mengajukan permintaan restock gudang AFA.","/dashboard/stock","f","2026-05-15 01:36:20.435"
+"cmp7mx8sr000cl404uz4xdlu5","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Sukamto.","/dashboard/demoplot/detail/cmow8f7tu0001l204albcga8d","f","2026-05-16 00:55:34.347"
+"cmp7tx5vm0009ic04uc98n57h","cmoglrsdk0003jp045dbe5d9l","✅ Permintaan Stok Disetujui","Permintaan stok Anda (ID: CMP7TLYA) telah disetujui oleh AFA.
+Catatan: untuk create demand di kecamatan guntur","/dashboard/demoplot/detail/cmp7tlyap0001l404mdqjofcs","f","2026-05-16 04:11:27.875"
+"cmp6dee6h0003jr04rho8pe2i","cmmu0cnp40006zfy02oc00oz1","📝 Update Sesi Demo Plot","Kiftirul Aziz telah menyimpan sesi lanjutan demo plot untuk petani Pak yamto.","/dashboard/demoplot/detail/cmos095680002l40474yx87q0","t","2026-05-15 03:41:12.137"
+"cmp6pmsuc000il40445bix8xn","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Surono.","/dashboard/demoplot/detail/cmp6pmsrz0001l404akgzp3uo","t","2026-05-15 09:23:39.78"
+"cmp7myhe5000jjr04gy4jf3gm","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Tarno.","/dashboard/demoplot/detail/cmp7myhcn0002jr04rluv9b71","t","2026-05-16 00:56:32.142"
+"cmp7ouy53000jia04jkuqlgxi","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Anggun Susilawati telah menyimpan realisasi demo plot untuk petani Warsinu.","/dashboard/demoplot/detail/cmp7ouy190002ia04c5fgfij3","t","2026-05-16 01:49:46.455"
+"cmp7prv5x0006jx04f6kdihke","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Raffli Yoga Prasetyo mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp7prv570001jx0422ihunkz","t","2026-05-16 02:15:22.245"
+"cmp7ry72j000ri804pn95gg6y","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Muhajir.","/dashboard/demoplot/detail/cmp7ry71c0002i804oj8w4byt","t","2026-05-16 03:16:16.844"
+"cmp7snjfo000sle04vitgvqke","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Sunarto.","/dashboard/demoplot/detail/cmp7snje10003le04z8pirmz1","t","2026-05-16 03:35:59.269"
+"cmp7tlpg90006ky04k7gpiy26","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp7tlpfi0001ky04vsk0z7tw","t","2026-05-16 04:02:33.369"
+"cmp7tlyb60006l4045z3g2ome","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","farras raffael mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp7tlyap0001l404mdqjofcs","t","2026-05-16 04:02:44.85"
+"cmp7tsdo70005l204zym62crd","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp7tsdnv0001l204o8zqr9en","t","2026-05-16 04:07:44.695"
+"cmp937i9s000bjl04koruq0af","cmn2ut4aa0013jy04kr1572fk","📝 Update Sesi Demo Plot","Giffari Putra Sudarisman telah menyimpan sesi lanjutan demo plot untuk petani Pak Karis.","/dashboard/demoplot/detail/cmp3du1yg0001jr048j5n1knf","f","2026-05-17 01:19:13.216"
+"cmp8dzck10007l504r7ofum5y","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Aisyah Febry Tri Astuti mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp8dzcg40001l504wq7qi780","t","2026-05-16 13:33:02.161"
+"cmp90vpm8000nkz04zzp7gwgt","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Wahyudi.","/dashboard/demoplot/detail/cmp90vpgx0002kz047siaivq8","t","2026-05-17 00:14:03.633"
+"cmp90wgwd000tkz04g3h32miu","cmmu0cnp40006zfy02oc00oz1","📩 Permintaan Stok Baru (FO)","Putri Ayuning Sekar mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmp90wgvu000pkz04jmap114o","t","2026-05-17 00:14:38.989"
+"cmp912kf6000ll104genglfsx","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Ayu.","/dashboard/demoplot/detail/cmp912kdv0002l104nk73b2hb","t","2026-05-17 00:19:23.49"
+"cmp94w5yp001kjr04o9heh3y5","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Samudi.","/dashboard/demoplot/detail/cmp94w5x5000rjr04ybicbn53","t","2026-05-17 02:06:23.281"
+"cmp695gu5000fjs04k2exq15z","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Fitriyanto.","/dashboard/demoplot/detail/cmp695gsu0002js04rwowzqkn","t","2026-05-15 01:42:17.213"
+"cmp7k4vmm000fky04t5r473og","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Bu Nursalim.","/dashboard/demoplot/detail/cmp7k4vkg0002ky040pu5m4ch","t","2026-05-15 23:37:31.679"
+"cmp7rwstb000li804ssxm3882","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Turwadi.","/dashboard/demoplot/detail/cmp7rwsri0002i804rsjvofo9","t","2026-05-16 03:15:11.711"
+"cmp93fjng000nkw04yfaf1mbp","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Tugino.","/dashboard/demoplot/detail/cmp93fjlo0002kw04ml2rwxks","t","2026-05-17 01:25:28.253"
+"cmp93lvz0001akw04wch5uu36","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Narto.","/dashboard/demoplot/detail/cmp93lvxr000pkw047s8z24ju","t","2026-05-17 01:30:24.157"
+"cmp93qjh0001ykw04fmo4pmtr","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Tohirin.","/dashboard/demoplot/detail/cmp93qjfm001dkw04vlue3zlu","t","2026-05-17 01:34:01.237"
+"cmp93xjas000zjl04gg8k43ei","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Syahrul.","/dashboard/demoplot/detail/cmp93xj9n000ejl04azcdmpd5","t","2026-05-17 01:39:27.604"
+"cmp946dbc000nl504taqaxcla","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Miswan.","/dashboard/demoplot/detail/cmp946d9w0002l504yvbr1mv9","t","2026-05-17 01:46:19.752"
+"cmp94k3sr000mkz04h4qwx6pa","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Hadi.","/dashboard/demoplot/detail/cmp94k3ol0001kz04v2qsis73","t","2026-05-17 01:57:00.604"
+"cmp94pa30000njr04zrmpkopx","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Yanwar Setyabudi AP telah menyimpan realisasi demo plot untuk petani Supriyanto.","/dashboard/demoplot/detail/cmp94pa1b0002jr04hbr0wyj2","t","2026-05-17 02:01:02.028"
+"cmpah9a3d000cl7040faioj6k","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pandu.","/dashboard/demoplot/detail/cmpah9a1f0001l704q2tyqla6","t","2026-05-18 00:40:16.729"
+"cmpakrfkc0003k104sioznjto","cmn2ut48r0009jy04hylrc57r","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar +600 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","f","2026-05-18 02:18:22.477"
+"cmpal3vmv0003ie04hotkhi4y","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Dhika Prasetya) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","f","2026-05-18 02:28:03.176"
+"cmpal3yu50007ie04tqjtww9l","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Muhammad Gandhi Gumelar) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","f","2026-05-18 02:28:07.325"
+"cmpal3yu90009ie04fg7fxtko","cmn2ut4aa0013jy04kr1572fk","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMP0X6GC) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan. Invoice Accurate: 645.26.05.06915.","/dashboard/stock","f","2026-05-18 02:28:07.329"
+"cmpal3vmz0005ie041gmsi0f1","cmmvjyntc0001l704r738ouwy","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMP0YZOK) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan. Invoice Accurate: 645.26.05.06914.","/dashboard/stock","t","2026-05-18 02:28:03.18"
+"cmpal6eia0005jp04n7bo29tm","cmn2ut4aa0013jy04kr1572fk","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMP0X6GC) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06915.","/dashboard/stock","f","2026-05-18 02:30:00.946"
+"cmpal6zsg0003l804cp7ger3k","cmmvjyntc0001l704r738ouwy","📝 Update Sesi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan sesi lanjutan demo plot untuk petani Pandu.","/dashboard/demoplot/detail/cmokvekrf0025l404xvkz5suz","t","2026-05-18 02:30:28.529"
+"cmpal53r4000kld043as4v02b","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Khozin.","/dashboard/demoplot/detail/cmpal53m60001ld04lk8b5fu4","t","2026-05-18 02:29:00.352"
+"cmpal6ir7000uld04skwtugr5","cmmvjyntc0001l704r738ouwy","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMP0YZOK) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06914.","/dashboard/stock","t","2026-05-18 02:30:06.452"
+"cmpambsdq001cld048jiqfrvg","cmmvjyntc0001l704r738ouwy","📝 Realisasi Demo Plot","Diajeng Nurwahidah Laila Umar telah menyimpan realisasi demo plot untuk petani Pratikno.","/dashboard/demoplot/detail/cmpambscf000zld04ffkdoy9i","t","2026-05-18 03:02:11.822"
+"cmpal44fw000bie04jd09gc0a","cmmu0cn8x0004zfy0rje4s1oa","📦 Stok Siap Diterima","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui WH Manager. Silakan lakukan konfirmasi penerimaan.","/dashboard/stock","t","2026-05-18 02:28:14.589"
+"cmpawi79k0001l4047t1wumzs","cmnqvj5hf0001l804cdnu5y2i","📩 Pengajuan Stok Menunggu Approval FA Manager","Pengajuan stok AFA (Orbit Bimasakti Akbar) telah disetujui SPV dan menunggu approval Anda.","/dashboard/stock","f","2026-05-18 07:47:07.209"
+"cmp95d9c9000fl804dokeha5b","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Suswati.","/dashboard/demoplot/detail/cmp95d9aq0002l8040iqw326g","t","2026-05-17 02:19:40.81"
+"cmpawj3460007ky04yost7v8o","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Absina 36 EC 500 ml disesuaikan sebesar +996 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 07:47:48.486"
+"cmpawj34c000bky04xyt86md4","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Bestzine 20/60 WG 100 Gram disesuaikan sebesar +200 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 07:47:48.492"
+"cmpawj34h000fky04oor8orkb","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +1997.9 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 07:47:48.497"
+"cmpawj34l000jky04xs8yef06","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Ziflo 76 WG 800 gr disesuaikan sebesar +799 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 07:47:48.502"
+"cmpawj34q000nky04frzvt1rs","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Nefos 45 WP 500 gr disesuaikan sebesar +498.99 Bks.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 07:47:48.506"
+"cmpawk36n000rky04u7xqup5l","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +0.01 PCS.
+Keterangan: penysuaian","/dashboard/stock/history","t","2026-05-18 07:48:35.232"
+"cmpawkjhb000vky04c524wq5y","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Biogent 50 SC 1 L disesuaikan sebesar +0.09 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 07:48:56.351"
+"cmpaxorkl000zk104k550ggfm","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok nn Nefos 45 WP 500 gr disesuaikan sebesar -1 PCS.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 08:20:13.077"
+"cmpaxorks0013k104qw3rwbf6","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Nefos 45 WP 500 gr disesuaikan sebesar +391.01 Bks.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 08:20:13.085"
+"cmpawj33z0003ky04timty2de","cmmvjyntc0001l704r738ouwy","🔄 Penyesuaian Stok","Stok Zenus 276 SL 1 L disesuaikan sebesar +999 Btl.
+Keterangan: penyesuaian","/dashboard/stock/history","t","2026-05-18 07:47:48.479"
+"cmp973rc7000ila04u14pamlk","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Samudi.","/dashboard/demoplot/detail/cmp973r6z0001la04pd5yp2wh","t","2026-05-17 03:08:16.808"
+"cmpagepj5000hl2049qzc40vc","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Leni.","/dashboard/demoplot/detail/cmpagephj0004l20451dm2k9a","t","2026-05-18 00:16:30.401"
+"cmpagiael0010l204bqb2ditq","cmmu0cnp40006zfy02oc00oz1","📝 Realisasi Demo Plot","Putri Ayuning Sekar telah menyimpan realisasi demo plot untuk petani Leni.","/dashboard/demoplot/detail/cmpagiads000jl2042phbfiui","t","2026-05-18 00:19:17.421"
+"cmpal44fz000die04pz4nkbpl","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui WH Manager — Menunggu Penerimaan SPV","Pengajuan stok Anda (ID: CMOXPJJH) telah disetujui WH Manager. Menunggu SPV konfirmasi penerimaan. Invoice Accurate: 645.26.05.06916.","/dashboard/stock","t","2026-05-18 02:28:14.591"
+"cmpawi79q0003l4049kfjwn9c","cmmu0cnp40006zfy02oc00oz1","✅ Disetujui SPV — Menunggu FA Manager","Pengajuan stok Anda (ID: CMP68XTI) telah disetujui SPV. Menunggu approval FA Manager.","/dashboard/stock","t","2026-05-18 07:47:07.214"
+"cmpawifva0003l104g5fcn4p8","cmmu0cnp40006zfy02oc00oz1","✅ Pengajuan Stok Selesai — Stok Telah Masuk","Pengajuan stok Anda (ID: CMOXPJJH) telah diterima SPV. Stok telah masuk ke ledger Anda. Invoice Accurate: 645.26.05.06916.","/dashboard/stock","t","2026-05-18 07:47:18.358"
+"cmpb3mpb60008l50408xhkmx5","cmn2ut4aa0013jy04kr1572fk","📩 Permintaan Stok Baru (FO)","Maulidya Hilda Prameswari mengajukan permintaan pengambilan stok baru.","/dashboard/demoplot/detail/cmpb3mpac0001l504lwgo8p2d","f","2026-05-18 11:06:34.53"

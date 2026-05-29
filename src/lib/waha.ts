@@ -162,6 +162,7 @@ export async function getMsgTemplate(
     id_pengajuan: string
     peran_penolak: string
     invoice: string
+    catatan_afa: string
   }> = {}
 ): Promise<string> {
   let template = DEFAULT_TEMPLATES[key] ?? ''
@@ -177,8 +178,9 @@ export async function getMsgTemplate(
 
   // Replace all placeholders
   return template
-    .replace(/\{nama_afa\}/g, vars.nama_afa ?? '')
-    .replace(/\{id_pengajuan\}/g, vars.id_pengajuan ?? '')
+    .replace(/\{nama_afa\}/g,      vars.nama_afa      ?? '')
+    .replace(/\{id_pengajuan\}/g,  vars.id_pengajuan  ?? '')
     .replace(/\{peran_penolak\}/g, vars.peran_penolak ?? '')
-    .replace(/\{invoice\}/g, vars.invoice ?? '')
+    .replace(/\{invoice\}/g,       vars.invoice       ?? '')
+    .replace(/\{catatan_afa\}/g,   vars.catatan_afa   ?? '')
 }
