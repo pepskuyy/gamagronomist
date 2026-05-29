@@ -345,7 +345,14 @@ export async function approveFamStockRequest(requestId: string) {
   try {
     const req = await prisma.request.findUnique({
       where: { id: requestId },
-      include: { details: true, fo: true }
+      include: {
+        details: {
+          include: {
+            product: { select: { id: true, name: true, accurateId: true, unit: true } }
+          }
+        },
+        fo: true
+      }
     })
 
     if (!req || req.commodity !== 'AFA_STOCK_IN') {
@@ -353,6 +360,35 @@ export async function approveFamStockRequest(requestId: string) {
     }
     if (req.status !== 'APPROVED_SPV') {
       return { error: 'Pengajuan ini tidak dalam status menunggu FA Manager.' }
+    }
+
+    // ── Cek stok Accurate sebelum approve ─────────────────────────────
+    // availableToSell = stok tersedia SETELAH dikurangi pending SO di Accurate
+    // Jika qty yang diminta AFA > availableToSell, ada risiko konflik dengan SO yang ada
+    let stockWarnings: string[] = []
+    try {
+      const itemNos = req.details
+        .map(d => (d as any).product?.accurateId)
+        .filter(Boolean) as string[]
+
+      if (itemNos.length > 0) {
+        const { fetchAccurateStockLevels } = await import('@/lib/accurate')
+        const stockMap = await fetchAccurateStockLevels(itemNos)
+
+        for (const detail of req.details) {
+          const d = detail as any
+          const itemNo = d.product?.accurateId
+          if (!itemNo) continue
+          const available = stockMap.get(itemNo) ?? null
+          if (available !== null && available < detail.qtyRequested) {
+            stockWarnings.push(
+              `• ${d.product.name}: stok tersedia (non-SO) ${available} ${d.product.unit}, diminta ${detail.qtyRequested} ${d.product.unit}`
+            )
+          }
+        }
+      }
+    } catch (stockErr) {
+      console.warn('[FAM Approve] Gagal cek stok Accurate (non-blocking):', stockErr)
     }
 
     await prisma.request.update({
@@ -391,7 +427,12 @@ export async function approveFamStockRequest(requestId: string) {
     }
 
     revalidatePath('/dashboard/stock')
-    return { success: true }
+    return {
+      success: true,
+      // stockWarnings: array of conflict messages (empty = aman)
+      // FAM tetap bisa approve, tapi UI harus menampilkan warning ini
+      stockWarnings: stockWarnings.length > 0 ? stockWarnings : undefined,
+    }
   } catch (err: any) {
     console.error('approveFamStockRequest error:', err)
     return { error: 'Gagal memproses approval FA Manager.' }

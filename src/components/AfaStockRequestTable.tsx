@@ -63,6 +63,17 @@ export default function AfaStockRequestTable({
       if (res?.error) {
         alert(res.error)
       } else {
+        // Tampilkan peringatan konflik stok jika ada (hanya untuk FAM)
+        if (role === 'FAM' && (res as any)?.stockWarnings?.length > 0) {
+          const warnings = (res as any).stockWarnings as string[]
+          alert(
+            '✅ Pengajuan disetujui FA Manager.\n\n' +
+            '⚠️ PERINGATAN KONFLIK STOK:\n' +
+            'Stok Accurate tidak mencukupi untuk pengajuan ini setelah memperhitungkan Sales Order yang sudah ada:\n\n' +
+            warnings.join('\n') +
+            '\n\nHarap koordinasi dengan tim Sales / WH Manager sebelum melanjutkan ke tahap posting invoice.'
+          )
+        }
         router.refresh()
       }
       setActionId(null)

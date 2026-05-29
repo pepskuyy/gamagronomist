@@ -97,6 +97,55 @@ export async function fetchAccurateItems(): Promise<AccurateItem[]> {
   return allItems
 }
 
+/**
+ * Fetch stok yang tersedia untuk dijual (availableToSell) dari Accurate
+ * untuk daftar item berdasarkan nomor barang (itemNo / SKU).
+ *
+ * availableToSell = stok fisik DIKURANGI qty yang sudah terikat pada Sales Order (SO) yang open.
+ * Ini adalah nilai yang tepat untuk mendeteksi konflik: jika AFA request > availableToSell,
+ * artinya ada SO yang sudah approved dan mungkin tidak bisa dipenuhi.
+ *
+ * @param itemNos - Array nomor barang Accurate (product.accurateId)
+ * @returns Map<itemNo, availableToSell>
+ */
+export async function fetchAccurateStockLevels(itemNos: string[]): Promise<Map<string, number>> {
+  if (itemNos.length === 0) return new Map()
+
+  const { token, secret, host } = getCredentials()
+  const stockMap = new Map<string, number>()
+
+  const batchSize = 20
+  for (let i = 0; i < itemNos.length; i += batchSize) {
+    const batch = itemNos.slice(i, i + batchSize)
+    const headers = buildAuthHeaders(token, secret)
+
+    const url = new URL(`${host}/accurate/api/item/list.do`)
+    url.searchParams.set('fields', 'no,availableToSell')
+    url.searchParams.set('sp.pageSize', String(batch.length))
+    // Filter by itemNo
+    batch.forEach((no, idx) => {
+      url.searchParams.set(`filter.no.val[${idx}]`, no)
+    })
+    url.searchParams.set('filter.no.op', 'EQUAL')
+
+    try {
+      const res = await fetch(url.toString(), { headers, cache: 'no-store' })
+      const data = await res.json()
+      if (data.s && Array.isArray(data.d)) {
+        for (const item of data.d) {
+          const no  = String(item.no ?? '').trim()
+          const qty = typeof item.availableToSell === 'number' ? item.availableToSell : 0
+          if (no) stockMap.set(no, qty)
+        }
+      }
+    } catch (err) {
+      console.warn('[Accurate] fetchAccurateStockLevels batch failed:', err)
+    }
+  }
+
+  return stockMap
+}
+
 // ─── ITEM PRICE LOOKUP ────────────────────────────────────────────
 
 /**
