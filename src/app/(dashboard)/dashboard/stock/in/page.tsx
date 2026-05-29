@@ -75,6 +75,16 @@ export default function StockInPage() {
   const [error, setError]               = useState<string | null>(null)
   const [isPending, startTransition]    = useTransition()
 
+  // Stock conflict check state (MAIN warehouse only)
+  const [isScanning, setIsScanning]     = useState(false)
+  const [conflictInfo, setConflictInfo] = useState<{
+    conflict: boolean | null
+    available?: number
+    requested?: number
+    productName?: string
+    unit?: string
+  } | null>(null)
+
   // Custom (non-SKU) products — only for SAMPLE mode
   const [customProducts, setCustomProducts]         = useState<CustomProduct[]>([])
   const [customName, setCustomName]                 = useState('')
@@ -113,7 +123,13 @@ export default function StockInPage() {
     setCustomUnit('')
     setCustomQty('')
     setCustomNotes('')
+    setConflictInfo(null)
   }, [warehouseSource])
+
+  // Clear conflict info when product or qty changes
+  useEffect(() => {
+    setConflictInfo(null)
+  }, [currentProduct, currentQty])
 
   // Active product list depends on warehouse source
   const isSample = warehouseSource === 'SAMPLE'
@@ -127,7 +143,7 @@ export default function StockInPage() {
     ? (sampleDetail?.balance ?? null)
     : null
 
-  function addProduct() {
+  async function addProduct() {
     const qty = Number(currentQty)
     if (!currentProduct || qty <= 0) return
     if (!Number.isInteger(qty)) {
@@ -164,10 +180,32 @@ export default function StockInPage() {
       return
     }
 
-    // Main warehouse: pull from Accurate products
+    // ── Main warehouse: cek stok Accurate real-time sebelum tambah ──
     if (detail.spvStock != null && qty > detail.spvStock) {
       alert(`Jumlah melebihi stok SPV! Tersedia: ${detail.spvStock} ${detail.unit}`)
       return
+    }
+
+    // Scan Accurate availableToSell (cek konflik dengan pending SO)
+    setIsScanning(true)
+    setConflictInfo(null)
+    try {
+      const res = await fetch(`/api/check-stock-conflict?productId=${currentProduct}&qty=${qty}`)
+      const data = await res.json()
+
+      if (data.conflict === true) {
+        // ADA konflik — blokir penambahan
+        setConflictInfo(data)
+        setIsScanning(false)
+        return  // jangan tambahkan ke list
+      }
+
+      // conflict === false (aman) atau null (tidak bisa cek Accurate)
+      setConflictInfo(data.conflict === false ? data : null)
+    } catch {
+      // Jika API error, tetap lanjut (non-blocking untuk koneksi buruk)
+    } finally {
+      setIsScanning(false)
     }
 
     setSelectedProducts(prev => [...prev, {
@@ -181,6 +219,7 @@ export default function StockInPage() {
     }])
     setCurrentProduct('')
     setCurrentQty('')
+    setConflictInfo(null)
   }
 
   function removeProduct(id: string) {
@@ -369,7 +408,15 @@ export default function StockInPage() {
                   placeholder="Jumlah kemasan"
                 />
               </div>
-              <button type="button" onClick={addProduct} className="btn btn-outline" style={{ height: '42px', padding: '0 1.5rem' }}>Tambah</button>
+              <button
+                type="button"
+                onClick={addProduct}
+                className="btn btn-outline"
+                style={{ height: '42px', padding: '0 1.5rem', minWidth: 100 }}
+                disabled={isScanning}
+              >
+                {isScanning ? '🔍 Cek...' : 'Tambah'}
+              </button>
             </div>
 
             {/* Info produk terpilih — SAMPLE mode */}
@@ -406,6 +453,47 @@ export default function StockInPage() {
                   </span>
                 )}
                 <span style={{ color: '#92400e' }}>⚠️ Pengajuan hanya dalam kemasan utuh</span>
+              </div>
+            )}
+
+            {/* ── Conflict Warning Block ── */}
+            {!isSample && conflictInfo?.conflict === true && (
+              <div style={{
+                marginTop: '0.75rem',
+                padding: '0.85rem 1.1rem',
+                background: '#fef2f2',
+                border: '1.5px solid #fca5a5',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '0.85rem',
+              }}>
+                <div style={{ fontWeight: 700, color: '#b91c1c', marginBottom: '0.4rem' }}>
+                  🚫 Pengajuan Tidak Dapat Dilanjutkan — Konflik dengan Sales Order
+                </div>
+                <div style={{ color: '#7f1d1d', lineHeight: 1.6 }}>
+                  Stok <strong>{conflictInfo.productName}</strong> yang tersedia di Accurate
+                  setelah diperhitungkan Sales Order yang sudah ada hanya{' '}
+                  <strong style={{ color: '#dc2626' }}>{conflictInfo.available} {conflictInfo.unit}</strong>,
+                  sedangkan Anda meminta{' '}
+                  <strong>{conflictInfo.requested} {conflictInfo.unit}</strong>.
+                </div>
+                <div style={{ marginTop: '0.5rem', color: '#92400e', fontSize: '0.78rem' }}>
+                  💡 Kurangi jumlah permintaan atau hubungi SPV / Sales untuk koordinasi alokasi stok.
+                </div>
+              </div>
+            )}
+
+            {/* ── Aman (tidak konflik) ── */}
+            {!isSample && conflictInfo?.conflict === false && (
+              <div style={{
+                marginTop: '0.5rem',
+                padding: '0.5rem 0.9rem',
+                background: '#f0fdf4',
+                border: '1px solid #86efac',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '0.8rem',
+                color: '#166534',
+              }}>
+                ✅ Stok tersedia mencukupi — tidak ada konflik dengan Sales Order ({conflictInfo.available} {conflictInfo.unit} dapat dijual).
               </div>
             )}
 
