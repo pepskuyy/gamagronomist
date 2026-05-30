@@ -194,7 +194,7 @@ export default function BdStockRequestPage() {
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault(); setError(null)
     if (selectedProducts.length === 0) { setError('Masukkan minimal satu produk.'); return }
-    if (requestMode === 'SAMPLE' && !destinationCustomer) { setError('Pilih tujuan pengiriman pelanggan.'); return }
+    if (!destinationCustomer) { setError('Pilih tujuan pengiriman pelanggan.'); return }
 
     const payload = selectedProducts.map(p => ({
       productId:         p.productId,
@@ -202,15 +202,13 @@ export default function BdStockRequestPage() {
       accurateWarehouse: p.accurateWarehouse ?? null,
     }))
 
-    let finalNotes = notes
-    if (requestMode === 'SAMPLE') {
-      const customerObj  = customers.find(c => c.id.toString() === destinationCustomer)
-      const customerName = customerObj ? customerObj.name : '-'
-      finalNotes = `Tujuan Pengiriman: ${customerName}\n\n${notes}`
-    }
+    // Prepend customer name to notes for both modes
+    const customerObj  = customers.find(c => c.id.toString() === destinationCustomer)
+    const customerName = customerObj ? customerObj.name : '-'
+    const finalNotes   = `Tujuan Pengiriman: ${customerName}\n\n${notes || '-'}`
 
     const formData = new FormData()
-    formData.append('notes',           finalNotes || '-')
+    formData.append('notes',           finalNotes)
     formData.append('products',        JSON.stringify(payload))
     formData.append('warehouseSource', requestMode)  // 'SAMPLE' or 'MAIN'
 
@@ -329,36 +327,36 @@ export default function BdStockRequestPage() {
 
             <form onSubmit={handleSubmit}>
 
-              {/* SAMPLE mode: destination customer */}
-              {requestMode === 'SAMPLE' && (
-                <div style={{ marginBottom: '2rem' }}>
-                  <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>📍 Tujuan Pengiriman</h3>
-                  <div className="form-group">
-                    <label className="form-label">Pilih Pelanggan (Busdev) <span style={{ color: 'var(--danger)' }}>*</span></label>
-                    {loadingCustomers ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.9rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                        <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid #7c3aed', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-                        Memuat daftar pelanggan dari Accurate...
-                      </div>
-                    ) : (
-                      <SearchableSelect
-                        options={customers.map(c => ({
-                          value: c.id.toString(),
-                          label: `${c.name}${c.customerNo ? ` (${c.customerNo})` : ''}`,
-                        }))}
-                        value={destinationCustomer}
-                        onChange={setDestinationCustomer}
-                        placeholder={customers.length === 0 ? 'Tidak ada pelanggan tersedia' : '-- Ketik nama pelanggan --'}
-                      />
-                    )}
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      *Menampilkan pelanggan dengan default salesperson "Busdev" di Accurate.
-                    </p>
-                  </div>
+              {/* Customer picker — shown for BOTH modes */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>📍 Tujuan Pengiriman</h3>
+                <div className="form-group">
+                  <label className="form-label">
+                    Pilih Pelanggan (Busdev) <span style={{ color: 'var(--danger)' }}>*</span>
+                  </label>
+                  {loadingCustomers ? (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.9rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                      <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid #7c3aed', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                      Memuat daftar pelanggan dari Accurate...
+                    </div>
+                  ) : (
+                    <SearchableSelect
+                      options={customers.map(c => ({
+                        value: c.id.toString(),
+                        label: `${c.name}${c.customerNo ? ` (${c.customerNo})` : ''}`,
+                      }))}
+                      value={destinationCustomer}
+                      onChange={setDestinationCustomer}
+                      placeholder={customers.length === 0 ? 'Tidak ada pelanggan tersedia' : '-- Ketik nama pelanggan --'}
+                    />
+                  )}
+                  <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                    *Menampilkan pelanggan dengan default salesperson "Busdev" di Accurate.
+                  </p>
                 </div>
-              )}
+              </div>
 
-              {/* MAIN mode info */}
+              {/* MAIN mode info banner */}
               {requestMode === 'MAIN' && (
                 <div style={{ marginBottom: '1.5rem', padding: '0.75rem 1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: '#1d4ed8' }}>
                   🏭 Mode Gudang Utama — Stok akan diambil dari Accurate setelah disetujui WH Manager. Pilih sumber gudang per produk.
@@ -530,7 +528,7 @@ export default function BdStockRequestPage() {
                   background: requestMode === 'MAIN' ? '#1d4ed8' : '#7c3aed',
                   borderColor: requestMode === 'MAIN' ? '#1d4ed8' : '#7c3aed',
                 }}
-                disabled={isPending || selectedProducts.length === 0 || (requestMode === 'SAMPLE' && !destinationCustomer)}
+                disabled={isPending || selectedProducts.length === 0 || !destinationCustomer}
               >
                 {isPending
                   ? 'Mengirim Pengajuan...'
