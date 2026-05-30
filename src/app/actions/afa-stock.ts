@@ -29,7 +29,7 @@ export async function submitAfaStockRequest(formData: FormData) {
   const notes = (formData.get('notes') as string)?.trim() || '-'
   const warehouseSource = (formData.get('warehouseSource') as string) || 'MAIN'
   const productsJSON = formData.get('products') as string
-  let products: { productId: string; qtyRequested: number }[] = []
+  let products: { productId: string; qtyRequested: number; accurateWarehouse?: string | null }[] = []
 
   try {
     if (productsJSON) products = JSON.parse(productsJSON)
@@ -56,6 +56,7 @@ export async function submitAfaStockRequest(formData: FormData) {
             productId: p.productId,
             qtyRequested: p.qtyRequested,
             qtyApproved: p.qtyRequested,
+            accurateWarehouse: p.accurateWarehouse ?? null,
           }))
         }
       }
@@ -519,12 +520,14 @@ export async function approveWhmStockRequest(
             if (qtyFinal <= 0) return null   // skip produk yang qty-nya 0
             const unitPrice = priceMap.get(prod.accurateId) ?? 0
             return {
-              itemNo:    prod.accurateId,
-              quantity:  qtyFinal,
-              unitPrice: unitPrice > 0 ? unitPrice : undefined,
+              itemNo:        prod.accurateId,
+              quantity:      qtyFinal,
+              unitPrice:     unitPrice > 0 ? unitPrice : undefined,
+              warehouseName: (d as any).accurateWarehouse ?? undefined,  // per-SKU warehouse; null → fallback ke header
             }
           })
           .filter((x): x is NonNullable<typeof x> => x !== null)
+
 
         if (invoiceItems.length > 0) {
           const now = new Date()

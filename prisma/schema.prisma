@@ -244,9 +244,10 @@ model RequestDetail {
   productId      String
   product        Product  @relation(fields: [productId], references: [id])
   
-  qtyRequested   Float
-  qtyApproved    Float?
-  requestUnit    String?  // Satuan saat diajukan (ml, gr, Btl, dll) — agar tampilan konsisten
+  qtyRequested      Float
+  qtyApproved       Float?
+  requestUnit       String?  // Satuan saat diajukan (ml, gr, Btl, dll) — agar tampilan konsisten
+  accurateWarehouse String?  // Gudang sumber Accurate per-SKU (null = fallback ke 'Gudang Baik')
 }
 
 model DemoPlot {

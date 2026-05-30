@@ -8,6 +8,7 @@ type DetailItem = {
   id: string
   qtyRequested: number
   qtyApproved: number | null
+  accurateWarehouse?: string | null
   product: {
     id: string
     name: string
@@ -512,6 +513,7 @@ export default function AfaStockRequestTable({
                                   <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Disetujui</th>
                                 )}
                                 <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Satuan</th>
+                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700, color: '#1d4ed8', fontSize: '0.72rem', textTransform: 'uppercase' }}>Gudang Accurate</th>
                                 <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Gramasi</th>
                               </tr>
                             </thead>
@@ -579,6 +581,15 @@ export default function AfaStockRequestTable({
                                     )}
 
                                     <td style={{ padding: '0.5rem 0.75rem', color: 'var(--text-muted)' }}>{d.product.unit}</td>
+                                    <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}>
+                                      {d.accurateWarehouse ? (
+                                        <span style={{ color: '#1d4ed8', fontWeight: 600 }}>🏭 {d.accurateWarehouse}</span>
+                                      ) : req.warehouseSource !== 'SAMPLE' ? (
+                                        <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Gudang Baik</span>
+                                      ) : (
+                                        <span style={{ color: 'var(--text-muted)' }}>—</span>
+                                      )}
+                                    </td>
                                     <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', color: '#2563eb', fontSize: '0.8rem' }}>
                                       {d.product.gramasiPerUnit && d.product.unitGramasi
                                         ? `${(d.qtyRequested * d.product.gramasiPerUnit).toLocaleString('id-ID')}${d.product.unitGramasi}`

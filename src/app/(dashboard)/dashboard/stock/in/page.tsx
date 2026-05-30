@@ -23,13 +23,14 @@ type SampleProduct = {
   balance:        number  // stok sampel SPV (kemasan)
 }
 type SelectedProduct = {
-  productId:      string
-  qtyRequested:   number
-  name:           string
-  unit:           string
-  unitGramasi?:   string | null
-  gramasiPerUnit?:number | null
-  spvStock?:      number | null
+  productId:        string
+  qtyRequested:     number
+  name:             string
+  unit:             string
+  unitGramasi?:     string | null
+  gramasiPerUnit?:  number | null
+  spvStock?:        number | null
+  accurateWarehouse?: string | null  // sumber gudang Accurate per SKU (null = Gudang Baik default)
 }
 type CustomProduct = {
   tempId:   string  // local-only identifier
@@ -92,6 +93,13 @@ export default function StockInPage() {
   const [customQty, setCustomQty]                   = useState('')
   const [customNotes, setCustomNotes]               = useState('')
 
+  // Per-SKU Accurate warehouse selection (MAIN mode only)
+  // Map: productId → selected warehouse name
+  const [selectedWarehouses, setSelectedWarehouses] = useState<Record<string, string>>({})
+  // Cache: productId → warehouses array fetched from Accurate
+  const [warehouseOptions, setWarehouseOptions]     = useState<Record<string, { name: string; qty: number }[]>>({})
+  const [loadingWarehouses, setLoadingWarehouses]   = useState<Record<string, boolean>>({})
+
   useEffect(() => {
     // Fetch Accurate (main warehouse) products
     fetch('/api/spv-stock')
@@ -124,7 +132,36 @@ export default function StockInPage() {
     setCustomQty('')
     setCustomNotes('')
     setConflictInfo(null)
+    setSelectedWarehouses({})
   }, [warehouseSource])
+
+  // When product changes in MAIN mode, fetch warehouse options from Accurate
+  useEffect(() => {
+    if (warehouseSource === 'SAMPLE' || !currentProduct) return
+    const detail = products.find(p => p.id === currentProduct)
+    if (!detail) return
+
+    // Skip if already cached
+    if (warehouseOptions[currentProduct]) return
+
+    setLoadingWarehouses(prev => ({ ...prev, [currentProduct]: true }))
+    fetch(`/api/accurate-warehouses?productId=${currentProduct}`)
+      .then(r => r.json())
+      .then(data => {
+        const whs = data.warehouses ?? [{ name: 'Gudang Baik', qty: 0 }]
+        setWarehouseOptions(prev => ({ ...prev, [currentProduct]: whs }))
+        // Auto-select first warehouse (highest stock)
+        if (whs.length > 0 && !selectedWarehouses[currentProduct]) {
+          setSelectedWarehouses(prev => ({ ...prev, [currentProduct]: whs[0].name }))
+        }
+      })
+      .catch(() => {
+        setWarehouseOptions(prev => ({ ...prev, [currentProduct]: [{ name: 'Gudang Baik', qty: 0 }] }))
+        setSelectedWarehouses(prev => ({ ...prev, [currentProduct]: 'Gudang Baik' }))
+      })
+      .finally(() => setLoadingWarehouses(prev => ({ ...prev, [currentProduct]: false })))
+  }, [currentProduct, warehouseSource])
+
 
   // Clear conflict info when product or qty changes
   useEffect(() => {
@@ -209,13 +246,14 @@ export default function StockInPage() {
     }
 
     setSelectedProducts(prev => [...prev, {
-      productId:      detail.id,
-      qtyRequested:   qty,
-      name:           detail.name,
-      unit:           detail.unit,
-      unitGramasi:    detail.unitGramasi,
-      gramasiPerUnit: detail.gramasiPerUnit,
-      spvStock:       detail.spvStock,
+      productId:        detail.id,
+      qtyRequested:     qty,
+      name:             detail.name,
+      unit:             detail.unit,
+      unitGramasi:      detail.unitGramasi,
+      gramasiPerUnit:   detail.gramasiPerUnit,
+      spvStock:         detail.spvStock,
+      accurateWarehouse: selectedWarehouses[detail.id] ?? null,
     }])
     setCurrentProduct('')
     setCurrentQty('')
@@ -259,8 +297,9 @@ export default function StockInPage() {
       setError('Masukkan minimal satu produk (dari SKU atau produk baru) untuk diajukan.'); return
     }
     const payload = selectedProducts.map(p => ({
-      productId: p.productId,
-      qtyRequested: p.qtyRequested,
+      productId:        p.productId,
+      qtyRequested:     p.qtyRequested,
+      accurateWarehouse: p.accurateWarehouse ?? null,
     }))
     // Append custom product requests to notes as structured text
     let finalNotes = notes
@@ -440,19 +479,47 @@ export default function StockInPage() {
 
             {/* Info produk terpilih — MAIN mode */}
             {!isSample && selectedDetail && (
-              <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
-                {selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
-                  <span>📐 <strong>{selectedDetail.gramasiPerUnit}{selectedDetail.unitGramasi}</strong> per {selectedDetail.unit}</span>
-                )}
-                <span style={{ color: selectedDetail.spvStock ? '#166534' : '#6b7280' }}>
-                  🏪 Stok SPV: <strong>{formatSpvStock(selectedDetail.spvStock, selectedDetail.unit) ?? 'Belum tersinkron dari Accurate'}</strong>
-                </span>
-                {selectedDetail.spvStock != null && selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
-                  <span style={{ color: 'var(--text-muted)' }}>
-                    = {(selectedDetail.spvStock * selectedDetail.gramasiPerUnit).toLocaleString('id-ID')}{selectedDetail.unitGramasi} total
+              <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                  {selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
+                    <span>📐 <strong>{selectedDetail.gramasiPerUnit}{selectedDetail.unitGramasi}</strong> per {selectedDetail.unit}</span>
+                  )}
+                  <span style={{ color: selectedDetail.spvStock ? '#166534' : '#6b7280' }}>
+                    🏪 Stok SPV: <strong>{formatSpvStock(selectedDetail.spvStock, selectedDetail.unit) ?? 'Belum tersinkron dari Accurate'}</strong>
                   </span>
-                )}
-                <span style={{ color: '#92400e' }}>⚠️ Pengajuan hanya dalam kemasan utuh</span>
+                  {selectedDetail.spvStock != null && selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
+                    <span style={{ color: 'var(--text-muted)' }}>
+                      = {(selectedDetail.spvStock * selectedDetail.gramasiPerUnit).toLocaleString('id-ID')}{selectedDetail.unitGramasi} total
+                    </span>
+                  )}
+                  <span style={{ color: '#92400e' }}>⚠️ Pengajuan hanya dalam kemasan utuh</span>
+                </div>
+
+                {/* ── Pilih Gudang Accurate per SKU ── */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <span style={{ fontWeight: 600, fontSize: '0.8rem', color: '#1d4ed8' }}>🏭 Sumber Gudang Accurate:</span>
+                  {loadingWarehouses[currentProduct] ? (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⏳ Memuat daftar gudang...</span>
+                  ) : warehouseOptions[currentProduct] ? (
+                    <select
+                      value={selectedWarehouses[currentProduct] ?? ''}
+                      onChange={e => setSelectedWarehouses(prev => ({ ...prev, [currentProduct]: e.target.value }))}
+                      style={{
+                        padding: '0.3rem 0.6rem', fontSize: '0.82rem',
+                        border: '1.5px solid #bfdbfe', borderRadius: '0.35rem',
+                        background: '#eff6ff', color: '#1d4ed8', fontWeight: 600, cursor: 'pointer',
+                      }}
+                    >
+                      {warehouseOptions[currentProduct].map(wh => (
+                        <option key={wh.name} value={wh.name}>
+                          {wh.name}{wh.qty > 0 ? ` (${wh.qty.toLocaleString('id-ID')} ${selectedDetail.unit} tersedia)` : ' (stok 0)'}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Pilih produk untuk melihat gudang tersedia</span>
+                  )}
+                </div>
               </div>
             )}
 
@@ -520,9 +587,14 @@ export default function StockInPage() {
                               <div style={{ fontSize: '0.75rem', color: '#b45309' }}>🧪 Belum ada di sampel — pengadaan oleh SPV</div>
                             )
                           ) : (
-                            p.spvStock != null && (
-                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok SPV: {p.spvStock} {p.unit}</div>
-                            )
+                            <>
+                              {p.spvStock != null && (
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok SPV: {p.spvStock} {p.unit}</div>
+                              )}
+                              {p.accurateWarehouse && (
+                                <div style={{ fontSize: '0.75rem', color: '#1d4ed8', fontWeight: 600 }}>🏭 {p.accurateWarehouse}</div>
+                              )}
+                            </>
                           )}
                         </td>
                         <td style={tdStyle}>

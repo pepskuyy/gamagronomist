@@ -23,14 +23,22 @@ export async function GET() {
         foId: session.userId,
         commodity: 'AFA_STOCK_IN',
       },
-      include: {
+      select: {
+        id:              true,
+        createdAt:       true,
+        status:          true,
+        plan:            true,
+        warehouseSource: true,
         details: {
-          include: { product: { select: { name: true } } }
-        }
+          include: {
+            product: { select: { name: true } }
+          }
+        },
       },
       orderBy: { createdAt: 'desc' },
       take: 50,
     })
+
 
     return NextResponse.json(requests)
   } catch (e) {
