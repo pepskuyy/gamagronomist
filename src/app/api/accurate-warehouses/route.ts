@@ -2,13 +2,15 @@
  * GET /api/accurate-warehouses?productId=xxx  (resolves via DB to Accurate itemNo)
  * GET /api/accurate-warehouses?itemNo=IK-052  (direct Accurate itemNo)
  *
- * Strategy: 
- * 1. Fetch all warehouses from Accurate (warehouse/list.do) — cached 5min
- * 2. Batch-query item/list.do with warehouseId filter for each warehouse in parallel
- * 3. Return warehouses where the item has stock (availableToSell > 0) + all warehouses (qty 0) for selection
+ * Strategy (correct Accurate API usage):
+ * 1. Fetch all warehouses via warehouse/list.do (cached 5min)
+ * 2. For each warehouse, call item/list.do?no=IK-052&warehouseName=X
+ *    → Accurate returns availableToSell SPECIFIC to that warehouse (not total)
+ * 3. Return warehouses where qty > 0 (sorted desc) + show 0-stock warehouses too
+ *
+ * Key: warehouseName param in item/list.do filters the availableToSell to that warehouse only.
  *
  * Response: { warehouses: [{ name: string; qty: number }] }
- * Sorted: positive qty first (desc), then zero-stock warehouses alphabetically
  */
 
 import { NextResponse } from 'next/server'
@@ -19,7 +21,7 @@ export const dynamic = 'force-dynamic'
 
 const DEFAULT_WAREHOUSE = 'Gudang Baik'
 
-// Simple in-process cache for warehouse list (refreshes every 5 min)
+// In-process cache for warehouse list (5 min TTL)
 let _warehouseCache: { id: number; name: string }[] | null = null
 let _warehouseCacheAt = 0
 
@@ -37,12 +39,10 @@ function getEnv() {
   return { token, secret, host }
 }
 
-/** Fetch list of all warehouses from Accurate. Cached for 5 minutes. */
+/** Fetch all warehouses — cached 5 min */
 async function fetchAllWarehouses(token: string, secret: string, host: string) {
   const now = Date.now()
-  if (_warehouseCache && now - _warehouseCacheAt < 5 * 60 * 1000) {
-    return _warehouseCache
-  }
+  if (_warehouseCache && now - _warehouseCacheAt < 5 * 60 * 1000) return _warehouseCache
 
   const url = new URL(`${host}/accurate/api/warehouse/list.do`)
   url.searchParams.set('fields',      'id,name')
@@ -50,12 +50,11 @@ async function fetchAllWarehouses(token: string, secret: string, host: string) {
 
   const res  = await fetch(url.toString(), { headers: buildHeaders(secret, token), cache: 'no-store' })
   const data = await res.json()
-
   if (!data.s || !Array.isArray(data.d)) return []
 
-  const warehouses = data.d
-    .map((w: any) => ({ id: w.id as number, name: (w.name ?? '') as string }))
-    .filter((w: any) => Boolean(w.name))
+  const warehouses = (data.d as any[])
+    .map(w => ({ id: w.id as number, name: (w.name ?? '') as string }))
+    .filter(w => w.name)
 
   _warehouseCache   = warehouses
   _warehouseCacheAt = now
@@ -63,27 +62,28 @@ async function fetchAllWarehouses(token: string, secret: string, host: string) {
 }
 
 /**
- * For a given itemNo + warehouseId, fetch availableToSell from Accurate.
- * Returns null if item not in warehouse.
+ * Fetch availableToSell for itemNo in a specific warehouse.
+ * Uses warehouseName query param — Accurate returns per-warehouse qty when set.
+ * Returns null if item doesn't exist in this warehouse (no rows returned).
  */
-async function fetchItemQtyInWarehouse(
+async function fetchItemQtyByWarehouseName(
   token: string, secret: string, host: string,
-  itemNo: string, warehouseId: number
+  itemNo: string, warehouseName: string
 ): Promise<number | null> {
   try {
     const url = new URL(`${host}/accurate/api/item/list.do`)
-    url.searchParams.set('fields',                  'no,availableToSell')
-    url.searchParams.set('sp.pageSize',             '5')
-    url.searchParams.set('filter.no.op',            'EQUAL')
-    url.searchParams.set('filter.no.val[0]',        itemNo)
-    url.searchParams.set('filter.warehouseId.op',   'EQUAL')
-    url.searchParams.set('filter.warehouseId.val',  String(warehouseId))
+    url.searchParams.set('fields',           'no,availableToSell')
+    url.searchParams.set('sp.pageSize',      '5')
+    url.searchParams.set('filter.no.op',     'EQUAL')
+    url.searchParams.set('filter.no.val[0]', itemNo)
+    url.searchParams.set('warehouseName',    warehouseName)  // ← KEY: filters availableToSell per warehouse
 
     const res  = await fetch(url.toString(), { headers: buildHeaders(secret, token), cache: 'no-store' })
     const data = await res.json()
 
     if (!data.s || !Array.isArray(data.d) || data.d.length === 0) return null
-    return (data.d[0].availableToSell as number) ?? 0
+    const qty = data.d[0].availableToSell
+    return typeof qty === 'number' ? qty : 0
   } catch {
     return null
   }
@@ -110,14 +110,14 @@ export async function GET(request: Request) {
   try {
     const { token, secret, host } = getEnv()
 
-    // Step 1: Get all warehouses
+    // Step 1: Get all warehouses (cached)
     const allWarehouses = await fetchAllWarehouses(token, secret, host)
     if (allWarehouses.length === 0) {
       return NextResponse.json({ warehouses: [{ name: DEFAULT_WAREHOUSE, qty: 0 }] })
     }
 
-    // Step 2: Parallel query — check stock in each warehouse
-    // Batch in groups of 10 to avoid rate limiting
+    // Step 2: Parallel query — per-warehouse qty using warehouseName param
+    // Batch by 10 to avoid hammering Accurate
     const BATCH = 10
     const results: { name: string; qty: number }[] = []
 
@@ -125,20 +125,20 @@ export async function GET(request: Request) {
       const batch = allWarehouses.slice(i, i + BATCH)
       const batchResults = await Promise.all(
         batch.map(async (wh) => {
-          const qty = await fetchItemQtyInWarehouse(token, secret, host, itemNo!, wh.id)
-          return { name: wh.name, qty: qty ?? 0, hasItem: qty !== null }
+          const qty = await fetchItemQtyByWarehouseName(token, secret, host, itemNo!, wh.name)
+          return qty !== null ? { name: wh.name, qty } : null
         })
       )
-      results.push(...batchResults.filter(r => r.hasItem || r.qty > 0))
+      for (const r of batchResults) {
+        if (r !== null) results.push(r)
+      }
     }
 
     if (results.length === 0) {
-      // Fallback: item not found in any warehouse — return all warehouses with qty 0
-      const fallback = allWarehouses.map(w => ({ name: w.name, qty: 0 }))
-      return NextResponse.json({ warehouses: fallback })
+      return NextResponse.json({ warehouses: [{ name: DEFAULT_WAREHOUSE, qty: 0 }] })
     }
 
-    // Sort: positive stock first (desc), then zero-stock
+    // Sort: highest stock first, then alphabetical
     results.sort((a, b) => b.qty - a.qty || a.name.localeCompare(b.name))
 
     return NextResponse.json({ warehouses: results })
