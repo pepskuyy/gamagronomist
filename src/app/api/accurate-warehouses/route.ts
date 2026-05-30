@@ -84,6 +84,7 @@ async function fetchStockForWarehouse(
     if (typeof d === 'number') return d
     if (d && typeof d === 'object') {
       return (
+        d.availableStock ??    // ← correct field from item/get-stock.do
         d.availableToSell ??
         d.available ??
         d.qty ??
