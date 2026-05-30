@@ -2,13 +2,11 @@
  * GET /api/accurate-warehouses?productId=xxx  (resolves via DB to Accurate itemNo)
  * GET /api/accurate-warehouses?itemNo=IK-052  (direct Accurate itemNo)
  *
- * Strategy (correct Accurate API usage):
+ * Strategy (using correct Accurate API):
  * 1. Fetch all warehouses via warehouse/list.do (cached 5min)
- * 2. For each warehouse, call item/list.do?no=IK-052&warehouseName=X
- *    → Accurate returns availableToSell SPECIFIC to that warehouse (not total)
- * 3. Return warehouses where qty > 0 (sorted desc) + show 0-stock warehouses too
- *
- * Key: warehouseName param in item/list.do filters the availableToSell to that warehouse only.
+ * 2. For each warehouse, call /api/item/get-stock.do?no=IK-052&warehouseName=X
+ *    → Dedicated endpoint: "Mengambil Jumlah barang yang tersedia" per warehouse
+ * 3. Return warehouses sorted by qty desc
  *
  * Response: { warehouses: [{ name: string; qty: number }] }
  */
@@ -62,28 +60,39 @@ async function fetchAllWarehouses(token: string, secret: string, host: string) {
 }
 
 /**
- * Fetch availableToSell for itemNo in a specific warehouse.
- * Uses warehouseName query param — Accurate returns per-warehouse qty when set.
- * Returns null if item doesn't exist in this warehouse (no rows returned).
+ * Use /api/item/get-stock.do to get availableToSell for a specific item + warehouse.
+ * This is the dedicated Accurate endpoint: "Mengambil Jumlah barang yang tersedia"
+ * with warehouseName param: "jika dikosongkan maka diambil nilai total seluruh gudang"
  */
-async function fetchItemQtyByWarehouseName(
+async function fetchStockForWarehouse(
   token: string, secret: string, host: string,
   itemNo: string, warehouseName: string
 ): Promise<number | null> {
   try {
-    const url = new URL(`${host}/accurate/api/item/list.do`)
-    url.searchParams.set('fields',           'no,availableToSell')
-    url.searchParams.set('sp.pageSize',      '5')
-    url.searchParams.set('filter.no.op',     'EQUAL')
-    url.searchParams.set('filter.no.val[0]', itemNo)
-    url.searchParams.set('warehouseName',    warehouseName)  // ← KEY: filters availableToSell per warehouse
+    const url = new URL(`${host}/accurate/api/item/get-stock.do`)
+    url.searchParams.set('no',            itemNo)
+    url.searchParams.set('warehouseName', warehouseName)
 
     const res  = await fetch(url.toString(), { headers: buildHeaders(secret, token), cache: 'no-store' })
     const data = await res.json()
 
-    if (!data.s || !Array.isArray(data.d) || data.d.length === 0) return null
-    const qty = data.d[0].availableToSell
-    return typeof qty === 'number' ? qty : 0
+    // Response structure may be: { s: true, d: { availableToSell: X } }
+    // or { s: true, d: X } (number directly)
+    if (!data.s) return null
+
+    const d = data.d
+    if (typeof d === 'number') return d
+    if (d && typeof d === 'object') {
+      return (
+        d.availableToSell ??
+        d.available ??
+        d.qty ??
+        d.quantity ??
+        d.stock ??
+        0
+      )
+    }
+    return 0
   } catch {
     return null
   }
@@ -93,6 +102,7 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   let itemNo    = searchParams.get('itemNo')?.trim() ?? null
   const productId = searchParams.get('productId')?.trim() ?? null
+  const debug = searchParams.get('debug') === '1'
 
   // Resolve productId → accurateId via DB
   if (!itemNo && productId) {
@@ -110,14 +120,34 @@ export async function GET(request: Request) {
   try {
     const { token, secret, host } = getEnv()
 
-    // Step 1: Get all warehouses (cached)
+    // Step 1: Get all warehouses (cached 5 min)
     const allWarehouses = await fetchAllWarehouses(token, secret, host)
     if (allWarehouses.length === 0) {
       return NextResponse.json({ warehouses: [{ name: DEFAULT_WAREHOUSE, qty: 0 }] })
     }
 
-    // Step 2: Parallel query — per-warehouse qty using warehouseName param
-    // Batch by 10 to avoid hammering Accurate
+    if (debug) {
+      // Debug: check raw response from get-stock.do for first warehouse
+      const firstWh = allWarehouses[0]
+      const url = new URL(`${host}/accurate/api/item/get-stock.do`)
+      url.searchParams.set('no', itemNo)
+      url.searchParams.set('warehouseName', firstWh.name)
+      const raw = await fetch(url.toString(), { headers: buildHeaders(secret, token), cache: 'no-store' }).then(r => r.json())
+
+      // Also without warehouseName (total)
+      const url2 = new URL(`${host}/accurate/api/item/get-stock.do`)
+      url2.searchParams.set('no', itemNo)
+      const rawTotal = await fetch(url2.toString(), { headers: buildHeaders(secret, token), cache: 'no-store' }).then(r => r.json())
+
+      return NextResponse.json({
+        itemNo, firstWarehouse: firstWh.name,
+        rawWithWarehouse: raw,
+        rawTotal,
+        allWarehouses: allWarehouses.slice(0, 5),
+      })
+    }
+
+    // Step 2: Parallel query per warehouse — batched to avoid rate limit
     const BATCH = 10
     const results: { name: string; qty: number }[] = []
 
@@ -125,13 +155,11 @@ export async function GET(request: Request) {
       const batch = allWarehouses.slice(i, i + BATCH)
       const batchResults = await Promise.all(
         batch.map(async (wh) => {
-          const qty = await fetchItemQtyByWarehouseName(token, secret, host, itemNo!, wh.name)
+          const qty = await fetchStockForWarehouse(token, secret, host, itemNo!, wh.name)
           return qty !== null ? { name: wh.name, qty } : null
         })
       )
-      for (const r of batchResults) {
-        if (r !== null) results.push(r)
-      }
+      for (const r of batchResults) if (r !== null) results.push(r)
     }
 
     if (results.length === 0) {
