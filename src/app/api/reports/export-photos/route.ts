@@ -15,36 +15,113 @@ function extractKabupaten(areaStr: string | null | undefined, foAreaName?: strin
   return area || '-'
 }
 
-async function addPhotosToRow(ws: ExcelJS.Worksheet, workbook: ExcelJS.Workbook, row: ExcelJS.Row, rowIndex: number, allPhotoUrls: string[], startCol: number) {
-  const ROW_HEIGHT_PX  = 100   // target image height in pixels
-  // ExcelJS row height unit ≈ 0.75pt, 1pt ≈ 1.33px → height in ExcelJS units = px * 0.75
-  const ROW_HEIGHT_UNIT = ROW_HEIGHT_PX * 0.75
-  const maxPhotos = Math.min(allPhotoUrls.length, 3)
 
-  if (maxPhotos > 0) {
-    row.height = ROW_HEIGHT_UNIT
-    for (let pi = 0; pi < maxPhotos; pi++) {
-      const url = allPhotoUrls[pi]
-      try {
-        const imgRes = await fetch(url)
-        if (!imgRes.ok) continue
-        const buf    = Buffer.from(await imgRes.arrayBuffer())
-        const ext    = url.match(/\.(jpe?g|png|gif|webp)/i)?.[1]?.toLowerCase() || 'jpeg'
-        const imgExt = (ext === 'jpg' ? 'jpeg' : ext) as 'jpeg' | 'png' | 'gif'
-        const imageId = workbook.addImage({ buffer: buf, extension: imgExt })
+/** Parse image dimensions from a raw buffer (JPEG, PNG, WebP) — no external deps needed */
+function getImageDimensions(buf: Buffer, ext: string): { w: number; h: number } | null {
 
-        // twoCell: anchor top-left and bottom-right to the exact cell corners
-        // → image fills the cell completely, just like Excel "Place in Cell"
-        ws.addImage(imageId, {
-          tl:       { col: startCol + pi - 1, row: rowIndex - 1 },
-          br:       { col: startCol + pi,     row: rowIndex },
-          editAs:   'twoCell',
-        } as any)
-      } catch { /* skip failed downloads */ }
+  try {
+    if (ext === 'png') {
+      // PNG spec: width at bytes 16-19, height at bytes 20-23 (big-endian uint32)
+      return { w: buf.readUInt32BE(16), h: buf.readUInt32BE(20) }
     }
-  } else {
+
+    if (ext === 'jpeg' || ext === 'jpg') {
+      // Scan JPEG segments for SOF0/SOF1/SOF2 markers (0xFF 0xC0–0xC2)
+      let i = 2
+      while (i + 9 < buf.length) {
+        if (buf[i] !== 0xFF) break
+        const marker = buf[i + 1]
+        if (marker === 0xC0 || marker === 0xC1 || marker === 0xC2) {
+          return { w: buf.readUInt16BE(i + 7), h: buf.readUInt16BE(i + 5) }
+        }
+        const segLen = buf.readUInt16BE(i + 2)
+        i += 2 + segLen
+      }
+    }
+
+    if (ext === 'webp') {
+      if (buf.toString('ascii', 0, 4) === 'RIFF' && buf.toString('ascii', 8, 12) === 'WEBP') {
+        const chunk = buf.toString('ascii', 12, 16)
+        if (chunk === 'VP8 ') {
+          return { w: (buf[26] | (buf[27] << 8)) & 0x3FFF, h: (buf[28] | (buf[29] << 8)) & 0x3FFF }
+        }
+        if (chunk === 'VP8L') {
+          const bits = buf.readUInt32LE(21)
+          return { w: (bits & 0x3FFF) + 1, h: ((bits >>> 14) & 0x3FFF) + 1 }
+        }
+        if (chunk === 'VP8X') {
+          return {
+            w: (buf[24] | (buf[25] << 8) | (buf[26] << 16)) + 1,
+            h: (buf[27] | (buf[28] << 8) | (buf[29] << 16)) + 1,
+          }
+        }
+      }
+    }
+  } catch { /* fall through */ }
+  return null
+}
+
+/**
+ * Embed photos into an Excel row, maintaining each photo's original aspect ratio.
+ * - Column width is fixed at TARGET_W_PX pixels.
+ * - Row height is set to the tallest photo in this row (calculated from aspect ratio).
+ * - Photos are placed with oneCell anchoring at their correct proportional dimensions.
+ */
+async function addPhotosToRow(
+  ws:        ExcelJS.Worksheet,
+  workbook:  ExcelJS.Workbook,
+  row:       ExcelJS.Row,
+  rowIndex:  number,
+  allPhotoUrls: string[],
+  startCol:  number,          // 1-indexed column of Foto 1
+) {
+  const TARGET_W_PX   = 140   // fixed display width per photo (pixels)
+  const FALLBACK_RATIO = 3/4  // h/w fallback if dimensions can't be parsed
+  const MIN_H_PX       = 60
+  const maxPhotos      = Math.min(allPhotoUrls.length, 3)
+
+  if (maxPhotos === 0) {
     row.height = 22
     row.getCell(startCol).value = 'Tidak ada foto'
+    return
+  }
+
+  type ImgEntry = { buf: Buffer; ext: 'jpeg' | 'png' | 'gif'; dispW: number; dispH: number }
+  const images: ImgEntry[] = []
+  let maxRowHeightPx = MIN_H_PX
+
+  // Phase 1: Download & measure each photo
+  await Promise.all(allPhotoUrls.slice(0, maxPhotos).map(async (url, pi) => {
+    try {
+      const res = await fetch(url)
+      if (!res.ok) return
+      const buf    = Buffer.from(await res.arrayBuffer())
+      const rawExt = url.match(/\.(jpe?g|png|gif|webp)/i)?.[1]?.toLowerCase() ?? 'jpeg'
+      const imgExt = (rawExt === 'jpg' ? 'jpeg' : rawExt) as 'jpeg' | 'png' | 'gif'
+
+      const dims    = getImageDimensions(buf, rawExt)
+      const ratio   = dims ? dims.h / dims.w : FALLBACK_RATIO
+      const dispW   = TARGET_W_PX
+      const dispH   = Math.round(TARGET_W_PX * ratio)
+
+      images[pi] = { buf, ext: imgExt, dispW, dispH }
+      if (dispH > maxRowHeightPx) maxRowHeightPx = dispH
+    } catch { /* skip */ }
+  }))
+
+  // Phase 2: Set row height based on tallest photo (px → Excel pts: ×0.75)
+  row.height = Math.round(maxRowHeightPx * 0.75)
+
+  // Phase 3: Embed images at their correct proportional dimensions
+  for (let pi = 0; pi < maxPhotos; pi++) {
+    const img = images[pi]
+    if (!img) continue
+    const imageId = workbook.addImage({ buffer: img.buf, extension: img.ext })
+    ws.addImage(imageId, {
+      tl:     { col: startCol + pi - 1, row: rowIndex - 1 } as any,
+      ext:    { width: img.dispW, height: img.dispH },
+      editAs: 'oneCell',
+    })
   }
 }
 
