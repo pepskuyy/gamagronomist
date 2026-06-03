@@ -16,26 +16,30 @@ function extractKabupaten(areaStr: string | null | undefined, foAreaName?: strin
 }
 
 async function addPhotosToRow(ws: ExcelJS.Worksheet, workbook: ExcelJS.Workbook, row: ExcelJS.Row, rowIndex: number, allPhotoUrls: string[], startCol: number) {
-  const IMG_W = 140
-  const IMG_H = 100
+  const ROW_HEIGHT_PX  = 100   // target image height in pixels
+  // ExcelJS row height unit ≈ 0.75pt, 1pt ≈ 1.33px → height in ExcelJS units = px * 0.75
+  const ROW_HEIGHT_UNIT = ROW_HEIGHT_PX * 0.75
   const maxPhotos = Math.min(allPhotoUrls.length, 3)
 
   if (maxPhotos > 0) {
-    row.height = IMG_H * 0.75 + 4
+    row.height = ROW_HEIGHT_UNIT
     for (let pi = 0; pi < maxPhotos; pi++) {
       const url = allPhotoUrls[pi]
       try {
         const imgRes = await fetch(url)
         if (!imgRes.ok) continue
-        const buf = Buffer.from(await imgRes.arrayBuffer())
-        const ext = url.match(/\.(jpe?g|png|gif|webp)/i)?.[1]?.toLowerCase() || 'jpeg'
+        const buf    = Buffer.from(await imgRes.arrayBuffer())
+        const ext    = url.match(/\.(jpe?g|png|gif|webp)/i)?.[1]?.toLowerCase() || 'jpeg'
         const imgExt = (ext === 'jpg' ? 'jpeg' : ext) as 'jpeg' | 'png' | 'gif'
         const imageId = workbook.addImage({ buffer: buf, extension: imgExt })
+
+        // twoCell: anchor top-left and bottom-right to the exact cell corners
+        // → image fills the cell completely, just like Excel "Place in Cell"
         ws.addImage(imageId, {
-          tl: { col: startCol + pi - 1, row: rowIndex - 1 } as any, // exceljs expects 0-indexed for col/row in tl
-          ext: { width: IMG_W, height: IMG_H },
-          editAs: 'oneCell',
-        })
+          tl:       { col: startCol + pi - 1, row: rowIndex - 1 },
+          br:       { col: startCol + pi,     row: rowIndex },
+          editAs:   'twoCell',
+        } as any)
       } catch { /* skip failed downloads */ }
     }
   } else {
@@ -43,6 +47,7 @@ async function addPhotosToRow(ws: ExcelJS.Worksheet, workbook: ExcelJS.Workbook,
     row.getCell(startCol).value = 'Tidak ada foto'
   }
 }
+
 
 export async function GET(req: Request) {
   const cookieStore = await cookies()
@@ -270,9 +275,9 @@ export async function GET(req: Request) {
         { header: 'Komoditas',            key: 'komoditas',   width: 14 },
         { header: 'Status',               key: 'status',      width: 22 },
         { header: 'Deskripsi Hasil Demplot', key: 'deskripsi', width: 30 },
-        { header: 'Foto 1',               key: 'foto1',       width: 22 },
-        { header: 'Foto 2',               key: 'foto2',       width: 22 },
-        { header: 'Foto 3',               key: 'foto3',       width: 22 },
+        { header: 'Foto 1',               key: 'foto1',       width: 19 },
+        { header: 'Foto 2',               key: 'foto2',       width: 19 },
+        { header: 'Foto 3',               key: 'foto3',       width: 19 },
       ]
 
       // Foto start column (1-indexed): 9 info cols + produk cols (MAX_PRODUK + (MAX_PRODUK-1) pairs) + 3 meta = ?
