@@ -299,7 +299,7 @@ export async function GET(req: Request) {
           lat:       i.latitude ?? '-',
           lng:       i.longitude ?? '-',
           komoditas: i.commodity ?? i.request?.commodity ?? '-',
-          status:    i.request?.status ?? '-',
+          status:    i.request?.status === 'APPROVED' ? 'SESI AKTIF' : (i.request?.status ?? '-'),
           deskripsi: i.resultNotes ?? '-',
           foto1: '', foto2: '', foto3: '',
         }

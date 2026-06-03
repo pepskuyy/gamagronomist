@@ -184,7 +184,7 @@ export async function GET(req: Request) {
           'No. HP': i.farmer?.phone || '-',
           'Kabupaten': extractKabupaten(i.area, i.fo?.area?.name),
           'Komoditas': i.commodity || '-',
-          'Status': i.status,
+          'Status': i.status === 'APPROVED' ? 'SESI AKTIF' : i.status,
           'Jumlah Sesi Dilakukan': i.demoPlots.length,
           'Link Foto Dokumentasi': allPhotos.length > 0 ? allPhotos.join('\n') : '-'
         }
