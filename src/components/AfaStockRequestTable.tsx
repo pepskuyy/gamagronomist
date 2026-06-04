@@ -252,15 +252,14 @@ export default function AfaStockRequestTable({
 
       doc.setFontSize(16)
       doc.setFont('helvetica', 'bold')
-      doc.text('BUKTI PENERIMAAN STOK (AFA)', 14, 20)
+      doc.text('BUKTI PENERIMAAN STOK', 14, 20)
 
       doc.setFontSize(11)
       doc.setFont('helvetica', 'normal')
       doc.text(`ID Referensi : ${req.id.toUpperCase()}`, 14, 32)
       doc.text(`Tanggal         : ${new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date(req.createdAt))}`, 14, 38)
-      doc.text(`AFA Pemohon: ${req.fo?.name || 'Tidak diketahui'}`, 14, 44)
+      doc.text(`Pemohon      : ${req.fo?.name || 'Tidak diketahui'}`, 14, 44)
       doc.text(`Disetujui Oleh : ${req.afa?.name || 'SPV'}`, 14, 50)
-      doc.text(`Keterangan    : ${req.plan || '-'}`, 14, 56)
 
       const tableBody = req.details.map((d, index) => {
         const qtyReq = d.qtyRequested
@@ -273,21 +272,36 @@ export default function AfaStockRequestTable({
         const qtyAppStr = hasGramasi
           ? `${qtyApp} (${(qtyApp * d.product.gramasiPerUnit!).toLocaleString('id-ID')}${d.product.unitGramasi})`
           : String(qtyApp)
-        return [index + 1, d.product.name, qtyReqStr, qtyAppStr, unitKemasan]
+        
+        const warehouse = d.accurateWarehouse || (req.warehouseSource !== 'SAMPLE' ? 'Gudang Baik' : '-')
+
+        return [index + 1, d.product.name, qtyReqStr, qtyAppStr, unitKemasan, warehouse]
       })
 
       autoTable(doc, {
-        startY: 65,
-        head: [['No', 'Produk', 'Qty Diminta', 'Qty Disetujui', 'Satuan']],
+        startY: 56,
+        head: [['No', 'Produk', 'Qty Diminta', 'Qty Disetujui', 'Satuan', 'Gudang']],
         body: tableBody,
         theme: 'grid',
         headStyles: { fillColor: [41, 128, 185], textColor: 255 }
       })
 
-      const finalY = (doc as any).lastAutoTable?.finalY || 65
+      let finalY = (doc as any).lastAutoTable?.finalY || 56
+
+      finalY += 10
+      doc.setFont('helvetica', 'bold')
+      doc.text('Keterangan / Catatan:', 14, finalY)
+      finalY += 6
+      doc.setFont('helvetica', 'normal')
+      const notes = req.plan || '-'
+      const splitNotes = doc.splitTextToSize(notes, 180)
+      doc.text(splitNotes, 14, finalY)
+
+      finalY += (splitNotes.length * 5) + 10
+
       doc.setDrawColor('#E2E8F0')
-      doc.line(14, finalY + 15, 196, finalY + 15)
-      doc.text('Dokumen ini dibuat secara otomatis oleh sistem Agrolens dan sah tanpa tanda tangan fisik.', 14, finalY + 20)
+      doc.line(14, finalY, 196, finalY)
+      doc.text('Dokumen ini dibuat secara otomatis oleh sistem Agrolens dan sah tanpa tanda tangan fisik.', 14, finalY + 6)
 
       doc.save(`Bukti_Stok_${req.id.slice(0, 8).toUpperCase()}.pdf`)
     } catch (err) {
