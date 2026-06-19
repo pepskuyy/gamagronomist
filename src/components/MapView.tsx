@@ -1,7 +1,8 @@
 'use client'
 
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Tooltip } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Tooltip, Marker, Popup, useMap } from 'react-leaflet'
+import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 type DemoPlotPoint = {
@@ -23,12 +24,36 @@ interface Props {
   typeConfig: TypeConfig
   storePoints?: StorePoint[]
   showStores?: boolean
+  userLocation?: { lat: number; lng: number } | null
+}
+
+// Pulsing blue dot icon for user location
+const userLocationIcon = L.divIcon({
+  className: '',
+  html: `
+    <div style="position:relative;width:24px;height:24px">
+      <div style="position:absolute;top:0;left:0;width:24px;height:24px;background:rgba(59,130,246,0.25);border-radius:50%;animation:locPulse 1.5s ease-out infinite"></div>
+      <div style="position:absolute;top:6px;left:6px;width:12px;height:12px;background:#3b82f6;border:2.5px solid #fff;border-radius:50%;box-shadow:0 1px 4px rgba(0,0,0,0.3)"></div>
+    </div>
+    <style>@keyframes locPulse{0%{transform:scale(1);opacity:.7}100%{transform:scale(2.5);opacity:0}}</style>
+  `,
+  iconSize: [24, 24],
+  iconAnchor: [12, 12],
+})
+
+// Sub-component to fly to user location when it changes
+function FlyToUser({ lat, lng }: { lat: number; lng: number }) {
+  const map = useMap()
+  useEffect(() => {
+    map.flyTo([lat, lng], 14, { duration: 1.2 })
+  }, [lat, lng, map])
+  return null
 }
 
 // Jawa Tengah center
 const CENTER: [number, number] = [-7.15, 110.14]
 
-export default function MapView({ points, typeConfig, storePoints = [], showStores = true }: Props) {
+export default function MapView({ points, typeConfig, storePoints = [], showStores = true, userLocation }: Props) {
   return (
     <MapContainer
       center={CENTER}
@@ -103,6 +128,23 @@ export default function MapView({ points, typeConfig, storePoints = [], showStor
           </Tooltip>
         </CircleMarker>
       ))}
+
+      {/* User location marker */}
+      {userLocation && (
+        <>
+          <FlyToUser lat={userLocation.lat} lng={userLocation.lng} />
+          <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
+            <Popup>
+              <div style={{ fontSize: '0.82rem', lineHeight: 1.5, minWidth: 140 }}>
+                <div style={{ fontWeight: 700, color: '#3b82f6', marginBottom: '0.2rem' }}>📍 Lokasi Anda</div>
+                <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
+                  {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
+                </div>
+              </div>
+            </Popup>
+          </Marker>
+        </>
+      )}
     </MapContainer>
   )
 }

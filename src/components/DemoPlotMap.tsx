@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import dynamic from 'next/dynamic'
 
 type DemoPlotPoint = {
@@ -76,6 +76,12 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
   const [dropdownOpen, setDropdownOpen]         = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  // GPS user location state
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null)
+  const [gpsTracking, setGpsTracking]   = useState(false)
+  const [gpsError, setGpsError]         = useState<string | null>(null)
+  const watchIdRef = useRef<number | null>(null)
+
   useEffect(() => {
     Promise.all([
       fetch(`/api/demoplot-map${filterQuery}`).then(r => r.json()),
@@ -135,6 +141,47 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
   function selectAll() { setSelectedStoreIds(new Set(stores.map(s => s.id))) }
   function clearAll()  { setSelectedStoreIds(new Set()) }
 
+  // GPS tracking
+  const startGpsTracking = useCallback(() => {
+    if (!navigator.geolocation) {
+      setGpsError('Browser tidak mendukung GPS')
+      return
+    }
+    setGpsError(null)
+    setGpsTracking(true)
+
+    // Get initial position immediately
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (err) => { setGpsError('Gagal mendapatkan lokasi: ' + err.message); setGpsTracking(false) },
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+
+    // Then watch for updates
+    watchIdRef.current = navigator.geolocation.watchPosition(
+      (pos) => setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => {},
+      { enableHighAccuracy: true, maximumAge: 5000 }
+    )
+  }, [])
+
+  const stopGpsTracking = useCallback(() => {
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current)
+      watchIdRef.current = null
+    }
+    setGpsTracking(false)
+    setUserLocation(null)
+    setGpsError(null)
+  }, [])
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current)
+    }
+  }, [])
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {/* Header & Legend */}
@@ -177,6 +224,20 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
               color: showStores ? '#5b21b6' : 'var(--text-muted)',
             }}>
             🏪 Toko ({visibleStores.length}/{stores.length})
+          </button>
+
+          {/* My Location button */}
+          <button
+            onClick={() => gpsTracking ? stopGpsTracking() : startGpsTracking()}
+            style={{
+              padding: '0.35rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600,
+              border: gpsTracking ? '2px solid #3b82f6' : '1px solid var(--border)',
+              background: gpsTracking ? '#eff6ff' : 'var(--surface-hover)',
+              color: gpsTracking ? '#1d4ed8' : 'var(--text-muted)',
+              animation: gpsTracking ? 'none' : undefined,
+            }}
+          >
+            {gpsTracking ? '📍 Lokasi Aktif' : '📍 Lokasi Saya'}
           </button>
         </div>
       </div>
@@ -321,7 +382,7 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
       {/* Map */}
       <div style={{ height: 480, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)', background: '#f1f5f9' }}>
         {!loading && (
-          <MapView points={filtered} typeConfig={TYPE_CONFIG} storePoints={visibleStores} showStores={showStores} />
+          <MapView points={filtered} typeConfig={TYPE_CONFIG} storePoints={visibleStores} showStores={showStores} userLocation={userLocation} />
         )}
         {loading && (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '0.75rem', color: '#64748b' }}>
@@ -332,11 +393,17 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
       </div>
 
       {/* Legend indicator */}
-      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+      <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)', alignItems: 'center' }}>
         <span>⭐ Spot Demo Plot — kegiatan terpisah (amber)</span>
         <span>🔵 Mini Demo Plot — 1–3 produk (biru)</span>
         <span>🟢 Full Demo Plot — ≥4 produk (hijau)</span>
         <span style={{ color: '#7c3aed', fontWeight: 600 }}>🟣 Toko/Kios (ungu)</span>
+        {gpsTracking && userLocation && (
+          <span style={{ color: '#3b82f6', fontWeight: 600 }}>📍 Lokasi Anda ({userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)})</span>
+        )}
+        {gpsError && (
+          <span style={{ color: '#dc2626', fontWeight: 600 }}>⚠️ {gpsError}</span>
+        )}
       </div>
 
       {!loading && points.length === 0 && stores.length === 0 && (
