@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Tooltip, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
@@ -69,6 +69,7 @@ export default function MapView({ points, typeConfig, storePoints = [], showStor
       {/* Demo Plot markers */}
       {points.map(p => {
         const cfg = typeConfig[p.type]
+        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${p.lat},${p.lng}`
         return (
           <CircleMarker
             key={p.id}
@@ -80,9 +81,10 @@ export default function MapView({ points, typeConfig, storePoints = [], showStor
               weight: 1.5,
               fillOpacity: 0.85,
             }}
+            eventHandlers={{ click: (e) => e.target.openPopup() }}
           >
-            <Tooltip>
-              <div style={{ minWidth: '180px', fontSize: '0.8rem', lineHeight: 1.5 }}>
+            <Popup>
+              <div style={{ minWidth: '200px', fontSize: '0.8rem', lineHeight: 1.5 }}>
                 <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{cfg.emoji} {cfg.label}</div>
                 <div>🌾 <strong>Petani:</strong> {p.farmerName}</div>
                 <div>📍 <strong>Area:</strong> {p.area}</div>
@@ -98,36 +100,66 @@ export default function MapView({ points, typeConfig, storePoints = [], showStor
                 <div style={{ marginTop: '0.35rem', color: '#6b7280' }}>
                   📅 {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(p.date))}
                 </div>
+                <a
+                  href={gmapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                    marginTop: '0.5rem', padding: '0.35rem 0.7rem', borderRadius: '0.4rem',
+                    background: '#4285F4', color: '#fff', fontSize: '0.75rem', fontWeight: 600,
+                    textDecoration: 'none', border: 'none', cursor: 'pointer',
+                  }}
+                >
+                  🗺️ Arahkan ke Google Maps
+                </a>
               </div>
-            </Tooltip>
+            </Popup>
           </CircleMarker>
         )
       })}
 
       {/* Store markers — ungu */}
-      {showStores && storePoints.map(s => (
-        <CircleMarker
-          key={`store-${s.id}`}
-          center={[s.lat, s.lng]}
-          radius={9}
-          pathOptions={{
-            fillColor: '#7c3aed',
-            color: '#fff',
-            weight: 2,
-            fillOpacity: 0.9,
-          }}
-        >
-          <Tooltip>
-            <div style={{ minWidth: '160px', fontSize: '0.8rem', lineHeight: 1.5 }}>
-              <div style={{ fontWeight: 700, marginBottom: '0.25rem', color: '#7c3aed' }}>🏪 Toko / Kios</div>
-              <div><strong>Nama:</strong> {s.name}</div>
-              {s.code    && <div><strong>Kode:</strong> {s.code}</div>}
-              {s.address && <div><strong>Alamat:</strong> {s.address}</div>}
-              {s.phone   && <div><strong>Telp:</strong> {s.phone}</div>}
-            </div>
-          </Tooltip>
-        </CircleMarker>
-      ))}
+      {showStores && storePoints.map(s => {
+        const gmapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${s.lat},${s.lng}`
+        return (
+          <CircleMarker
+            key={`store-${s.id}`}
+            center={[s.lat, s.lng]}
+            radius={9}
+            pathOptions={{
+              fillColor: '#7c3aed',
+              color: '#fff',
+              weight: 2,
+              fillOpacity: 0.9,
+            }}
+            eventHandlers={{ click: (e) => e.target.openPopup() }}
+          >
+            <Popup>
+              <div style={{ minWidth: '180px', fontSize: '0.8rem', lineHeight: 1.5 }}>
+                <div style={{ fontWeight: 700, marginBottom: '0.25rem', color: '#7c3aed' }}>🏪 Toko / Kios</div>
+                <div><strong>Nama:</strong> {s.name}</div>
+                {s.code    && <div><strong>Kode:</strong> {s.code}</div>}
+                {s.address && <div><strong>Alamat:</strong> {s.address}</div>}
+                {s.phone   && <div><strong>Telp:</strong> {s.phone}</div>}
+                <a
+                  href={gmapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+                    marginTop: '0.5rem', padding: '0.35rem 0.7rem', borderRadius: '0.4rem',
+                    background: '#4285F4', color: '#fff', fontSize: '0.75rem', fontWeight: 600,
+                    textDecoration: 'none', border: 'none', cursor: 'pointer',
+                  }}
+                >
+                  🗺️ Arahkan ke Google Maps
+                </a>
+              </div>
+            </Popup>
+          </CircleMarker>
+        )
+      })}
 
       {/* User location marker */}
       {userLocation && (
