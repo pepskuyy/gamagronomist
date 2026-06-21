@@ -255,12 +255,13 @@ export default function SopClient({ role }: { role: string }) {
 
       {/* Category filter chips */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
-        {CATEGORIES.map(cat => {
+        {categories.map(catObj => {
+          const cat = catObj.name
           const count = sops.filter(s => s.category === cat).length
           const colors = CATEGORY_COLORS[cat] || CATEGORY_COLORS.Umum
           return (
             <button
-              key={cat}
+              key={catObj.id}
               onClick={() => setFilterCategory(filterCategory === cat ? '' : cat)}
               style={{
                 padding: '0.4rem 0.85rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600,
