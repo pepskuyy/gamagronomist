@@ -53,6 +53,9 @@ model User {
 
   // Notifikasi
   notifications     Notification[]
+
+  // SOP
+  sops              Sop[]
 }
 
 model Store {
@@ -467,4 +470,22 @@ model ContentVideoProduct {
   contentVideo    ContentVideo @relation(fields: [contentVideoId], references: [id], onDelete: Cascade)
   productId       String
   product         Product      @relation(fields: [productId], references: [id])
+}
+
+// =======================
+// SOP (Standard Operating Procedure)
+// =======================
+
+model Sop {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   // Markdown content
+  category    String   // e.g. "Gudang", "Lapangan", "Administrasi"
+  isPublished Boolean  @default(true)
+
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }

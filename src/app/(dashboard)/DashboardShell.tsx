@@ -66,6 +66,13 @@ const Icons = {
       <path d="M9 12h6M9 16h4"/>
     </svg>
   ),
+  sop: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+      <path d="M8 7h8M8 11h6M8 15h4"/>
+    </svg>
+  ),
 }
 
 export default function DashboardShell({ session, children }: SidebarProps) {
@@ -80,6 +87,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
     { href: '/dashboard/reports',        label: 'Laporan Aktivitas', icon: Icons.reports, show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
     { href: '/dashboard/opname',         label: 'Stock Opname',   icon: Icons.opname,   show: !['BD', 'FAM', 'WHM'].includes(session?.role) },
     { href: '/dashboard/so',             label: 'Tracking SO',    icon: Icons.so,       show: ['SPV', 'ADMIN', 'BD', 'PLANTATION'].includes(session?.role) },
+    { href: '/dashboard/sop',            label: 'SOP',            icon: Icons.sop,      show: true },
     { href: '/dashboard/settings',       label: 'Pengaturan Akun', icon: Icons.settings, show: true },
   ]
 
