@@ -13,8 +13,6 @@ type Sop = {
   updatedAt: string
 }
 
-const CATEGORIES = ['Gudang', 'Lapangan', 'Administrasi', 'Keuangan', 'Umum']
-
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
   Gudang:       { bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
   Lapangan:     { bg: '#d1fae5', text: '#065f46', border: '#34d399' },
@@ -42,11 +40,17 @@ export default function SopClient({ role }: { role: string }) {
     window.addEventListener('resize', updateWidth)
     return () => window.removeEventListener('resize', updateWidth)
   }, [])
+  // Categories state
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
+  const [showCategoryModal, setShowCategoryModal] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState('')
+  const [editingCategoryId, setEditingCategoryId] = useState<string | null>(null)
+
   // Form state
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formTitle, setFormTitle] = useState('')
-  const [formCategory, setFormCategory] = useState(CATEGORIES[0])
+  const [formCategory, setFormCategory] = useState('')
   const [uploadedFileUrl, setUploadedFileUrl] = useState('')
   const [uploadedFileName, setUploadedFileName] = useState('')
   const [uploading, setUploading] = useState(false)
@@ -54,22 +58,67 @@ export default function SopClient({ role }: { role: string }) {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const fetchSops = useCallback(async () => {
+  const fetchData = useCallback(async () => {
     setLoading(true)
     try {
-      const res = await fetch('/api/sop')
-      const data = await res.json()
-      if (Array.isArray(data)) setSops(data)
+      const [sopRes, catRes] = await Promise.all([
+        fetch('/api/sop'),
+        fetch('/api/sop-categories')
+      ])
+      const sopData = await sopRes.json()
+      const catData = await catRes.json()
+      
+      if (Array.isArray(sopData)) setSops(sopData)
+      if (Array.isArray(catData)) {
+        setCategories(catData)
+        if (!formCategory && catData.length > 0) {
+          setFormCategory(catData[0].name)
+        }
+      }
     } catch { /* ignore */ }
     setLoading(false)
-  }, [])
+  }, [formCategory])
 
-  useEffect(() => { fetchSops() }, [fetchSops])
+  useEffect(() => { fetchData() }, [fetchData])
+
+  async function handleAddCategory() {
+    if (!newCategoryName.trim()) return
+    try {
+      await fetch('/api/sop-categories', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newCategoryName })
+      })
+      setNewCategoryName('')
+      fetchData()
+    } catch { alert('Gagal menambah kategori') }
+  }
+
+  async function handleUpdateCategory(id: string, name: string) {
+    if (!name.trim()) return
+    try {
+      await fetch(`/api/sop-categories/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name })
+      })
+      setEditingCategoryId(null)
+      fetchData()
+    } catch { alert('Gagal mengubah kategori') }
+  }
+
+  async function handleDeleteCategory(id: string) {
+    if (!confirm('Yakin menghapus kategori ini? SOP yang ada tidak akan terhapus, namun nama kategorinya mungkin tidak sesuai.')) return
+    try {
+      await fetch(`/api/sop-categories/${id}`, { method: 'DELETE' })
+      fetchData()
+    } catch { alert('Gagal menghapus kategori') }
+  }
 
   function openCreateForm() {
     setEditingId(null)
     setFormTitle('')
-    setFormCategory(CATEGORIES[0])
+    setFormCategory(categories.length > 0 ? categories[0].name : '')
     setUploadedFileUrl('')
     setUploadedFileName('')
     setUploadError(null)
@@ -177,9 +226,14 @@ export default function SopClient({ role }: { role: string }) {
           </p>
         </div>
         {canEdit && (
-          <button className="btn btn-primary" onClick={openCreateForm} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            ＋ Upload SOP Baru
-          </button>
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            <button className="btn btn-sm" onClick={() => setShowCategoryModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+              ⚙️ Kelola Kategori
+            </button>
+            <button className="btn btn-primary" onClick={openCreateForm} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              ＋ Upload SOP Baru
+            </button>
+          </div>
         )}
       </div>
 
@@ -195,7 +249,7 @@ export default function SopClient({ role }: { role: string }) {
         />
         <select className="form-control" value={filterCategory} onChange={e => setFilterCategory(e.target.value)} style={{ maxWidth: 200 }}>
           <option value="">Semua Kategori</option>
-          {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+          {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
         </select>
       </div>
 
@@ -383,19 +437,9 @@ export default function SopClient({ role }: { role: string }) {
               {/* Category */}
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">Kategori <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <input 
-                  type="text" 
-                  className="form-control" 
-                  list="sop-categories"
-                  value={formCategory} 
-                  onChange={e => setFormCategory(e.target.value)}
-                  placeholder="Pilih atau ketik kategori baru..."
-                />
-                <datalist id="sop-categories">
-                  {Array.from(new Set([...CATEGORIES, ...sops.map(s => s.category)])).map(c => (
-                    <option key={c} value={c} />
-                  ))}
-                </datalist>
+                <select className="form-control" value={formCategory} onChange={e => setFormCategory(e.target.value)}>
+                  {categories.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                </select>
               </div>
 
               {/* PDF Upload */}
@@ -471,6 +515,61 @@ export default function SopClient({ role }: { role: string }) {
             </div>
           </div>
         </>
+      )}
+
+      {/* Category Management Modal */}
+      {showCategoryModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+          background: 'rgba(0,0,0,0.5)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
+        }}>
+          <div className="card" style={{ width: '100%', maxWidth: 500, padding: '1.5rem', maxHeight: '90vh', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+              <h3 style={{ margin: 0 }}>Kelola Kategori SOP</h3>
+              <button className="btn btn-sm" onClick={() => setShowCategoryModal(false)} style={{ fontSize: '1.2rem', lineHeight: 1, padding: '0.2rem 0.5rem' }}>
+                ✕
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem' }}>
+              <input 
+                type="text" 
+                className="form-control" 
+                value={newCategoryName} 
+                onChange={e => setNewCategoryName(e.target.value)}
+                placeholder="Nama kategori baru..." 
+                style={{ flex: 1 }}
+              />
+              <button className="btn btn-primary" onClick={handleAddCategory}>Tambah</button>
+            </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {categories.map(cat => (
+                <div key={cat.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--surface-hover)', borderRadius: '6px' }}>
+                  {editingCategoryId === cat.id ? (
+                    <input 
+                      type="text" 
+                      className="form-control" 
+                      defaultValue={cat.name}
+                      autoFocus
+                      onBlur={(e) => handleUpdateCategory(cat.id, e.target.value)}
+                      onKeyDown={(e) => e.key === 'Enter' && handleUpdateCategory(cat.id, e.currentTarget.value)}
+                    />
+                  ) : (
+                    <span style={{ fontWeight: 500 }}>{cat.name}</span>
+                  )}
+                  
+                  <div style={{ display: 'flex', gap: '0.4rem' }}>
+                    <button className="btn btn-sm" onClick={() => setEditingCategoryId(cat.id)}>✏️</button>
+                    <button className="btn btn-sm" onClick={() => handleDeleteCategory(cat.id)} style={{ color: 'var(--danger)' }}>🗑️</button>
+                  </div>
+                </div>
+              ))}
+              {categories.length === 0 && <p style={{ textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada kategori.</p>}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )
