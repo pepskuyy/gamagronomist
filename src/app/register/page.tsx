@@ -10,14 +10,22 @@ export default function RegisterPage() {
   const [success, setSuccess] = useState(false)
   const [role,    setRole]    = useState('')
   const [areas,   setAreas]   = useState<{ id: string; name: string }[]>([])
-
-
+  const [afas,    setAfas]    = useState<{ id: string; name: string }[]>([])
 
   useEffect(() => {
     fetch('/api/master/areas')
       .then(r => r.json())
       .then(data => {
         if (Array.isArray(data)) setAreas(data)
+      })
+      .catch(console.error)
+
+    fetch('/api/master/users')
+      .then(r => r.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAfas(data.filter(u => u.role === 'AFA' || u.role === 'PLANTATION'))
+        }
       })
       .catch(console.error)
   }, [])
@@ -119,7 +127,12 @@ export default function RegisterPage() {
             {(role === 'FO' || role === 'INTERN') && (
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">Nama Supervisor AFA <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <input name="afaName" type="text" className="form-control" required={role === 'FO' || role === 'INTERN'} placeholder="Nama AFA yang jadi supervisor Anda" />
+                <select name="afaName" className="form-control" required={role === 'FO' || role === 'INTERN'}>
+                  <option value="">-- Pilih Supervisor AFA --</option>
+                  {afas.map(a => (
+                    <option key={a.id} value={a.name}>{a.name}</option>
+                  ))}
+                </select>
               </div>
             )}
 
