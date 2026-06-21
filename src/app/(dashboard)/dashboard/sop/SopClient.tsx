@@ -354,18 +354,18 @@ export default function SopClient({ role }: { role: string }) {
             {/* PDF viewer */}
             <div style={{ flex: 1, background: '#525659', overflowY: 'auto', display: 'flex', justifyContent: 'center', padding: '1rem' }}>
               <Document
-                file={`/api/sop/proxy?url=${encodeURIComponent(viewingSop.fileUrl)}`}
+                file={viewingSop.fileUrl}
                 onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                onLoadError={(error) => console.error('Failed to load PDF:', error)}
                 loading={<div style={{ padding: '2rem', color: '#fff' }}>Memuat PDF... ⏳</div>}
-                error={(err) => (
+                error={
                   <div style={{ padding: '2rem', color: '#fff', textAlign: 'center' }}>
                     <p style={{ marginBottom: '1rem' }}>Gagal memuat pratinjau PDF.</p>
-                    <p style={{ fontSize: '0.8rem', color: '#fca5a5', marginBottom: '1rem' }}>{err.message}</p>
                     <a href={viewingSop.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
                       ⬇️ Unduh File
                     </a>
                   </div>
-                )}
+                }
               >
                 {Array.from(new Array(numPages || 0), (el, index) => (
                   <div key={`page_${index + 1}`} style={{ marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
