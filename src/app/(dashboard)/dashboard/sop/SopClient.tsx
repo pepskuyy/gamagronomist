@@ -383,9 +383,19 @@ export default function SopClient({ role }: { role: string }) {
               {/* Category */}
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">Kategori <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <select className="form-control" value={formCategory} onChange={e => setFormCategory(e.target.value)}>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
+                <input 
+                  type="text" 
+                  className="form-control" 
+                  list="sop-categories"
+                  value={formCategory} 
+                  onChange={e => setFormCategory(e.target.value)}
+                  placeholder="Pilih atau ketik kategori baru..."
+                />
+                <datalist id="sop-categories">
+                  {Array.from(new Set([...CATEGORIES, ...sops.map(s => s.category)])).map(c => (
+                    <option key={c} value={c} />
+                  ))}
+                </datalist>
               </div>
 
               {/* PDF Upload */}
