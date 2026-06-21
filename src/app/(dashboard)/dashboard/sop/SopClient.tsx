@@ -340,7 +340,7 @@ export default function SopClient({ role }: { role: string }) {
             {/* PDF iframe */}
             <div style={{ flex: 1, background: '#525659' }}>
               <iframe
-                src={viewingSop.fileUrl}
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingSop.fileUrl)}&embedded=true`}
                 style={{ width: '100%', height: '100%', border: 'none' }}
                 title={viewingSop.title}
               />
