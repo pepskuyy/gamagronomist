@@ -337,13 +337,21 @@ export default function SopClient({ role }: { role: string }) {
               </div>
             </div>
 
-            {/* PDF iframe */}
+            {/* PDF viewer */}
             <div style={{ flex: 1, background: '#525659' }}>
-              <iframe
-                src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingSop.fileUrl)}&embedded=true`}
-                style={{ width: '100%', height: '100%', border: 'none' }}
-                title={viewingSop.title}
-              />
+              <object
+                data={viewingSop.fileUrl}
+                type="application/pdf"
+                width="100%"
+                height="100%"
+              >
+                <div style={{ padding: '2rem', textAlign: 'center', color: '#fff' }}>
+                  <p style={{ marginBottom: '1rem' }}>Browser Anda tidak mendukung pratinjau PDF langsung.</p>
+                  <a href={viewingSop.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
+                    ⬇️ Unduh File PDF
+                  </a>
+                </div>
+              </object>
             </div>
           </div>
         </>

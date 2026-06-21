@@ -35,14 +35,13 @@ export async function POST(req: NextRequest) {
     const cloudName = process.env.CLOUDINARY_CLOUD_NAME || 'djfhtirfk'
     const uploadPreset = process.env.CLOUDINARY_UPLOAD_PRESET || 'gamagronomist'
 
-    // Upload to Cloudinary as raw file (for PDF)
+    // Upload to Cloudinary (default resource_type 'image' is required for inline PDF viewing)
     const cdnForm = new FormData()
     cdnForm.append('file', file)
     cdnForm.append('upload_preset', uploadPreset)
     cdnForm.append('folder', 'gamagronomist/sop')
-    cdnForm.append('resource_type', 'raw')
 
-    const cdnRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/raw/upload`, {
+    const cdnRes = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
       method: 'POST',
       body: cdnForm,
     })
