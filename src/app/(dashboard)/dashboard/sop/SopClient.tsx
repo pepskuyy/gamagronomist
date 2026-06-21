@@ -1,7 +1,11 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { Document, Page, pdfjs } from 'react-pdf'
+import 'react-pdf/dist/esm/Page/AnnotationLayer.css'
+import 'react-pdf/dist/esm/Page/TextLayer.css'
 
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 type Sop = {
   id: string
   title: string
@@ -31,7 +35,17 @@ export default function SopClient({ role }: { role: string }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
   const [viewingSop, setViewingSop] = useState<Sop | null>(null)
+  
+  // PDF Viewer state
+  const [numPages, setNumPages] = useState<number | null>(null)
+  const [pdfWidth, setPdfWidth] = useState(800)
 
+  useEffect(() => {
+    const updateWidth = () => setPdfWidth(Math.min(window.innerWidth * 0.9, 800))
+    updateWidth()
+    window.addEventListener('resize', updateWidth)
+    return () => window.removeEventListener('resize', updateWidth)
+  }, [])
   // Form state
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -338,20 +352,29 @@ export default function SopClient({ role }: { role: string }) {
             </div>
 
             {/* PDF viewer */}
-            <div style={{ flex: 1, background: '#525659' }}>
-              <object
-                data={viewingSop.fileUrl}
-                type="application/pdf"
-                width="100%"
-                height="100%"
-              >
-                <div style={{ padding: '2rem', textAlign: 'center', color: '#fff' }}>
-                  <p style={{ marginBottom: '1rem' }}>Browser Anda tidak mendukung pratinjau PDF langsung.</p>
+            <div style={{ flex: 1, background: '#525659', overflowY: 'auto', display: 'flex', justifyContent: 'center', padding: '1rem' }}>
+              <Document
+                file={viewingSop.fileUrl}
+                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+                loading={<div style={{ padding: '2rem', color: '#fff' }}>Memuat PDF... ⏳</div>}
+                error={<div style={{ padding: '2rem', color: '#fff', textAlign: 'center' }}>
+                  <p style={{ marginBottom: '1rem' }}>Gagal memuat pratinjau PDF.</p>
                   <a href={viewingSop.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-                    ⬇️ Unduh File PDF
+                    ⬇️ Unduh File
                   </a>
-                </div>
-              </object>
+                </div>}
+              >
+                {Array.from(new Array(numPages || 0), (el, index) => (
+                  <div key={`page_${index + 1}`} style={{ marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
+                    <Page 
+                      pageNumber={index + 1} 
+                      width={pdfWidth} 
+                      renderTextLayer={false} 
+                      renderAnnotationLayer={false} 
+                    />
+                  </div>
+                ))}
+              </Document>
             </div>
           </div>
         </>
