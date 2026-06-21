@@ -1,11 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
-import { Document, Page, pdfjs } from 'react-pdf'
-import 'react-pdf/dist/Page/AnnotationLayer.css'
-import 'react-pdf/dist/Page/TextLayer.css'
 
-pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`
 type Sop = {
   id: string
   title: string
@@ -351,33 +347,13 @@ export default function SopClient({ role }: { role: string }) {
               </div>
             </div>
 
-            {/* PDF viewer */}
-            <div style={{ flex: 1, background: '#525659', overflowY: 'auto', display: 'flex', justifyContent: 'center', padding: '1rem' }}>
-              <Document
-                file={viewingSop.fileUrl}
-                onLoadSuccess={({ numPages }) => setNumPages(numPages)}
-                onLoadError={(error) => console.error('Failed to load PDF:', error)}
-                loading={<div style={{ padding: '2rem', color: '#fff' }}>Memuat PDF... ⏳</div>}
-                error={
-                  <div style={{ padding: '2rem', color: '#fff', textAlign: 'center' }}>
-                    <p style={{ marginBottom: '1rem' }}>Gagal memuat pratinjau PDF.</p>
-                    <a href={viewingSop.fileUrl} target="_blank" rel="noopener noreferrer" className="btn btn-primary">
-                      ⬇️ Unduh File
-                    </a>
-                  </div>
-                }
-              >
-                {Array.from(new Array(numPages || 0), (el, index) => (
-                  <div key={`page_${index + 1}`} style={{ marginBottom: '1rem', boxShadow: '0 4px 12px rgba(0,0,0,0.15)' }}>
-                    <Page 
-                      pageNumber={index + 1} 
-                      width={pdfWidth} 
-                      renderTextLayer={false} 
-                      renderAnnotationLayer={false} 
-                    />
-                  </div>
-                ))}
-              </Document>
+            {/* PDF iframe via Google Docs Viewer */}
+            <div style={{ flex: 1, background: '#525659' }}>
+              <iframe
+                src={`https://docs.google.com/viewer?url=${encodeURIComponent(viewingSop.fileUrl)}&embedded=true`}
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                title={viewingSop.title}
+              />
             </div>
           </div>
         </>
