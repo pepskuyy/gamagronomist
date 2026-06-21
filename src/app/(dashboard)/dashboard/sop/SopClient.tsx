@@ -1,11 +1,12 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useRef } from 'react'
 
 type Sop = {
   id: string
   title: string
-  content: string
+  fileUrl: string
+  fileName: string | null
   category: string
   author: { id: string; name: string; role: string }
   createdAt: string
@@ -29,15 +30,19 @@ export default function SopClient({ role }: { role: string }) {
   const [loading, setLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [filterCategory, setFilterCategory] = useState('')
-  const [expandedId, setExpandedId] = useState<string | null>(null)
+  const [viewingSop, setViewingSop] = useState<Sop | null>(null)
 
   // Form state
   const [showForm, setShowForm] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [formTitle, setFormTitle] = useState('')
-  const [formContent, setFormContent] = useState('')
   const [formCategory, setFormCategory] = useState(CATEGORIES[0])
+  const [uploadedFileUrl, setUploadedFileUrl] = useState('')
+  const [uploadedFileName, setUploadedFileName] = useState('')
+  const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
+  const [uploadError, setUploadError] = useState<string | null>(null)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const fetchSops = useCallback(async () => {
     setLoading(true)
@@ -54,24 +59,67 @@ export default function SopClient({ role }: { role: string }) {
   function openCreateForm() {
     setEditingId(null)
     setFormTitle('')
-    setFormContent('')
     setFormCategory(CATEGORIES[0])
+    setUploadedFileUrl('')
+    setUploadedFileName('')
+    setUploadError(null)
     setShowForm(true)
   }
 
   function openEditForm(sop: Sop) {
     setEditingId(sop.id)
     setFormTitle(sop.title)
-    setFormContent(sop.content)
     setFormCategory(sop.category)
+    setUploadedFileUrl(sop.fileUrl)
+    setUploadedFileName(sop.fileName || '')
+    setUploadError(null)
     setShowForm(true)
   }
 
+  async function handleFileUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    if (file.type !== 'application/pdf') {
+      setUploadError('Hanya file PDF yang diperbolehkan.')
+      return
+    }
+    if (file.size > 20 * 1024 * 1024) {
+      setUploadError('Ukuran file maksimal 20MB.')
+      return
+    }
+
+    setUploading(true)
+    setUploadError(null)
+
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const res = await fetch('/api/sop/upload', { method: 'POST', body: formData })
+      const data = await res.json()
+
+      if (!res.ok) {
+        setUploadError(data.error || 'Gagal mengunggah file.')
+      } else {
+        setUploadedFileUrl(data.url)
+        setUploadedFileName(data.fileName || file.name)
+        // Auto-fill title from filename if empty
+        if (!formTitle.trim()) {
+          setFormTitle(file.name.replace(/\.pdf$/i, '').replace(/[_-]/g, ' '))
+        }
+      }
+    } catch {
+      setUploadError('Gagal mengunggah file. Periksa koneksi internet.')
+    }
+    setUploading(false)
+  }
+
   async function handleSave() {
-    if (!formTitle.trim() || !formContent.trim()) return
+    if (!formTitle.trim() || !uploadedFileUrl) return
     setSaving(true)
     try {
-      const body = { title: formTitle, content: formContent, category: formCategory }
+      const body = { title: formTitle, fileUrl: uploadedFileUrl, fileName: uploadedFileName, category: formCategory }
       if (editingId) {
         await fetch(`/api/sop/${editingId}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       } else {
@@ -87,7 +135,7 @@ export default function SopClient({ role }: { role: string }) {
   async function handleDelete(id: string) {
     if (!confirm('Yakin ingin menghapus SOP ini?')) return
     await fetch(`/api/sop/${id}`, { method: 'DELETE' })
-    if (expandedId === id) setExpandedId(null)
+    if (viewingSop?.id === id) setViewingSop(null)
     fetchSops()
   }
 
@@ -96,7 +144,7 @@ export default function SopClient({ role }: { role: string }) {
     if (filterCategory && s.category !== filterCategory) return false
     if (searchQuery) {
       const q = searchQuery.toLowerCase()
-      return s.title.toLowerCase().includes(q) || s.content.toLowerCase().includes(q) || s.category.toLowerCase().includes(q)
+      return s.title.toLowerCase().includes(q) || s.category.toLowerCase().includes(q)
     }
     return true
   })
@@ -120,7 +168,7 @@ export default function SopClient({ role }: { role: string }) {
         </div>
         {canEdit && (
           <button className="btn btn-primary" onClick={openCreateForm} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            ＋ Buat SOP Baru
+            ＋ Upload SOP Baru
           </button>
         )}
       </div>
@@ -141,7 +189,7 @@ export default function SopClient({ role }: { role: string }) {
         </select>
       </div>
 
-      {/* Stats */}
+      {/* Category filter chips */}
       <div style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.5rem', flexWrap: 'wrap' }}>
         {CATEGORIES.map(cat => {
           const count = sops.filter(s => s.category === cat).length
@@ -178,7 +226,7 @@ export default function SopClient({ role }: { role: string }) {
           <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📄</div>
           <p style={{ fontWeight: 600 }}>{searchQuery || filterCategory ? 'Tidak ada SOP yang cocok dengan filter.' : 'Belum ada SOP.'}</p>
           {canEdit && !searchQuery && !filterCategory && (
-            <button className="btn btn-primary" onClick={openCreateForm} style={{ marginTop: '1rem' }}>＋ Buat SOP Pertama</button>
+            <button className="btn btn-primary" onClick={openCreateForm} style={{ marginTop: '1rem' }}>＋ Upload SOP Pertama</button>
           )}
         </div>
       )}
@@ -198,86 +246,131 @@ export default function SopClient({ role }: { role: string }) {
               <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{items.length} dokumen</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              {items.map(sop => {
-                const isExpanded = expandedId === sop.id
-                return (
-                  <div key={sop.id} className="card" style={{ padding: 0, overflow: 'hidden', border: isExpanded ? `1.5px solid ${colors.border}` : undefined }}>
-                    {/* Title row */}
-                    <div
-                      onClick={() => setExpandedId(isExpanded ? null : sop.id)}
-                      style={{
-                        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                        padding: '0.85rem 1.15rem', cursor: 'pointer',
-                        background: isExpanded ? colors.bg : undefined,
-                        transition: 'background 0.15s',
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1, minWidth: 0 }}>
-                        <span style={{ fontSize: '1.1rem', flexShrink: 0 }}>{isExpanded ? '📖' : '📋'}</span>
-                        <div style={{ minWidth: 0 }}>
-                          <div style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                            {sop.title}
-                          </div>
-                          <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                            Oleh {sop.author.name} • {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(sop.updatedAt))}
-                          </div>
-                        </div>
+            <div style={{ display: 'grid', gap: '0.5rem' }}>
+              {items.map(sop => (
+                <div key={sop.id} className="card" style={{ padding: '0.85rem 1.15rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
+                    <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>📄</span>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                        {sop.title}
                       </div>
-                      <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', flexShrink: 0, transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'rotate(0)' }}>
-                        ▼
-                      </span>
+                      <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                        Oleh {sop.author.name} • {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(sop.updatedAt))}
+                        {sop.fileName && <span> • {sop.fileName}</span>}
+                      </div>
                     </div>
+                  </div>
 
-                    {/* Content - expandable */}
-                    {isExpanded && (
-                      <div style={{ padding: '1.15rem', borderTop: '1px solid var(--border)' }}>
-                        {/* Render content with line breaks */}
-                        <div style={{ whiteSpace: 'pre-wrap', fontSize: '0.88rem', lineHeight: 1.7, color: 'var(--text-main)' }}>
-                          {sop.content}
-                        </div>
-
-                        {/* Actions for editors */}
-                        {canEdit && (
-                          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1.25rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-                            <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); openEditForm(sop) }} style={{ fontSize: '0.8rem' }}>
-                              ✏️ Edit
-                            </button>
-                            <button className="btn btn-sm" onClick={(e) => { e.stopPropagation(); handleDelete(sop.id) }} style={{ fontSize: '0.8rem', color: 'var(--danger)' }}>
-                              🗑️ Hapus
-                            </button>
-                          </div>
-                        )}
-                      </div>
+                  <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                    <button
+                      className="btn btn-sm btn-primary"
+                      onClick={() => setViewingSop(sop)}
+                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.75rem' }}
+                    >
+                      👁️ Lihat
+                    </button>
+                    <a
+                      href={sop.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="btn btn-sm"
+                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.75rem', textDecoration: 'none' }}
+                    >
+                      ⬇️ Unduh
+                    </a>
+                    {canEdit && (
+                      <>
+                        <button className="btn btn-sm" onClick={() => openEditForm(sop)} style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem' }}>
+                          ✏️
+                        </button>
+                        <button className="btn btn-sm" onClick={() => handleDelete(sop.id)} style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', color: 'var(--danger)' }}>
+                          🗑️
+                        </button>
+                      </>
                     )}
                   </div>
-                )
-              })}
+                </div>
+              ))}
             </div>
           </div>
         )
       })}
 
-      {/* Modal Form */}
+      {/* PDF Viewer Modal */}
+      {viewingSop && (
+        <>
+          <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000 }} onClick={() => setViewingSop(null)} />
+          <div style={{
+            position: 'fixed', top: '2%', left: '2%', right: '2%', bottom: '2%',
+            background: 'var(--surface)', borderRadius: 'var(--radius-lg, 12px)',
+            boxShadow: '0 24px 48px rgba(0,0,0,0.3)', zIndex: 1001,
+            display: 'flex', flexDirection: 'column', overflow: 'hidden',
+            animation: 'slideUp 0.2s ease-out',
+          }}>
+            {/* Viewer header */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
+              padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border)', flexShrink: 0,
+            }}>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontWeight: 700, fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  📖 {viewingSop.title}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+                  {viewingSop.category} • Oleh {viewingSop.author.name}
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
+                <a
+                  href={viewingSop.fileUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-sm"
+                  style={{ fontSize: '0.78rem', textDecoration: 'none' }}
+                >
+                  ⬇️ Unduh PDF
+                </a>
+                <button className="btn btn-sm" onClick={() => setViewingSop(null)} style={{ fontSize: '1rem', lineHeight: 1, padding: '0.3rem 0.6rem' }}>
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            {/* PDF iframe */}
+            <div style={{ flex: 1, background: '#525659' }}>
+              <iframe
+                src={viewingSop.fileUrl}
+                style={{ width: '100%', height: '100%', border: 'none' }}
+                title={viewingSop.title}
+              />
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Upload / Edit Form Modal */}
       {showForm && (
         <>
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000 }} onClick={() => setShowForm(false)} />
           <div style={{
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             background: 'var(--surface)', borderRadius: 'var(--radius-lg, 12px)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.2)', padding: '1.75rem', width: '90%', maxWidth: 640, maxHeight: '90vh', overflow: 'auto',
+            boxShadow: '0 24px 48px rgba(0,0,0,0.2)', padding: '1.75rem', width: '90%', maxWidth: 540, maxHeight: '90vh', overflow: 'auto',
             zIndex: 1001, animation: 'slideUp 0.2s ease-out',
           }}>
             <h3 style={{ margin: '0 0 1.25rem', fontSize: '1.1rem' }}>
-              {editingId ? '✏️ Edit SOP' : '📖 Buat SOP Baru'}
+              {editingId ? '✏️ Edit SOP' : '📖 Upload SOP Baru'}
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+              {/* Title */}
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">Judul SOP <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <input type="text" className="form-control" value={formTitle} onChange={e => setFormTitle(e.target.value)} placeholder="contoh: Prosedur Penerimaan Barang Gudang" />
               </div>
 
+              {/* Category */}
               <div className="form-group" style={{ margin: 0 }}>
                 <label className="form-label">Kategori <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <select className="form-control" value={formCategory} onChange={e => setFormCategory(e.target.value)}>
@@ -285,22 +378,74 @@ export default function SopClient({ role }: { role: string }) {
                 </select>
               </div>
 
+              {/* PDF Upload */}
               <div className="form-group" style={{ margin: 0 }}>
-                <label className="form-label">Konten SOP <span style={{ color: 'var(--danger)' }}>*</span></label>
-                <textarea
-                  className="form-control"
-                  value={formContent}
-                  onChange={e => setFormContent(e.target.value)}
-                  rows={12}
-                  placeholder={'Tuliskan langkah-langkah prosedur di sini...\n\n1. Langkah pertama\n2. Langkah kedua\n3. dst.'}
-                  style={{ resize: 'vertical', fontFamily: 'inherit', lineHeight: 1.65 }}
-                />
+                <label className="form-label">File PDF <span style={{ color: 'var(--danger)' }}>*</span></label>
+
+                {/* Current file indicator */}
+                {uploadedFileUrl && (
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.85rem', marginBottom: '0.6rem',
+                    background: '#d1fae5', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid #34d399',
+                  }}>
+                    <span style={{ fontSize: '1.2rem' }}>✅</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.82rem', color: '#065f46' }}>PDF berhasil diunggah</div>
+                      {uploadedFileName && <div style={{ fontSize: '0.75rem', color: '#047857', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{uploadedFileName}</div>}
+                    </div>
+                    {editingId && (
+                      <span style={{ fontSize: '0.72rem', color: '#065f46' }}>Upload baru untuk mengganti</span>
+                    )}
+                  </div>
+                )}
+
+                {/* Upload area */}
+                <div
+                  onClick={() => !uploading && fileInputRef.current?.click()}
+                  style={{
+                    border: '2px dashed var(--border)', borderRadius: 'var(--radius-sm, 6px)',
+                    padding: '1.5rem', textAlign: 'center', cursor: uploading ? 'wait' : 'pointer',
+                    background: 'var(--surface-hover, #f8fafc)', transition: 'border-color 0.15s',
+                  }}
+                >
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="application/pdf"
+                    onChange={handleFileUpload}
+                    style={{ display: 'none' }}
+                  />
+                  {uploading ? (
+                    <div>
+                      <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>⏳</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mengunggah PDF...</div>
+                    </div>
+                  ) : (
+                    <div>
+                      <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>📎</div>
+                      <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>Klik untuk pilih file PDF</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Maks 20MB • Format .pdf</div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Upload error */}
+                {uploadError && (
+                  <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm, 6px)', fontSize: '0.8rem' }}>
+                    ⚠️ {uploadError}
+                  </div>
+                )}
               </div>
             </div>
 
+            {/* Actions */}
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-              <button className="btn" onClick={() => setShowForm(false)} disabled={saving}>Batal</button>
-              <button className="btn btn-primary" onClick={handleSave} disabled={saving || !formTitle.trim() || !formContent.trim()}>
+              <button className="btn" onClick={() => setShowForm(false)} disabled={saving || uploading}>Batal</button>
+              <button
+                className="btn btn-primary"
+                onClick={handleSave}
+                disabled={saving || uploading || !formTitle.trim() || !uploadedFileUrl}
+              >
                 {saving ? 'Menyimpan...' : editingId ? 'Simpan Perubahan' : 'Simpan SOP'}
               </button>
             </div>

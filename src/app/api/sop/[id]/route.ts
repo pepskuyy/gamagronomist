@@ -9,7 +9,7 @@ async function getSession() {
   return decrypt(token as string)
 }
 
-// PUT — update SOP
+// PUT — update SOP (title, category, or replace PDF)
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getSession()
   if (!session?.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
@@ -18,14 +18,21 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
   }
 
   const { id } = await params
-  const { title, content, category } = await req.json()
-  if (!title?.trim() || !content?.trim() || !category?.trim()) {
-    return NextResponse.json({ error: 'Judul, konten, dan kategori wajib diisi.' }, { status: 400 })
+  const { title, fileUrl, fileName, category } = await req.json()
+  if (!title?.trim() || !category?.trim()) {
+    return NextResponse.json({ error: 'Judul dan kategori wajib diisi.' }, { status: 400 })
+  }
+
+  const data: Record<string, string | null> = { title: title.trim(), category: category.trim() }
+  // Only update file if new file is provided
+  if (fileUrl?.trim()) {
+    data.fileUrl = fileUrl.trim()
+    data.fileName = fileName?.trim() || null
   }
 
   const sop = await prisma.sop.update({
     where: { id },
-    data: { title: title.trim(), content: content.trim(), category: category.trim() },
+    data,
     include: { author: { select: { id: true, name: true, role: true } } },
   })
 

@@ -30,15 +30,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Anda tidak memiliki akses untuk membuat SOP.' }, { status: 403 })
   }
 
-  const { title, content, category } = await req.json()
-  if (!title?.trim() || !content?.trim() || !category?.trim()) {
-    return NextResponse.json({ error: 'Judul, konten, dan kategori wajib diisi.' }, { status: 400 })
+  const { title, fileUrl, fileName, category } = await req.json()
+  if (!title?.trim() || !fileUrl?.trim() || !category?.trim()) {
+    return NextResponse.json({ error: 'Judul, file PDF, dan kategori wajib diisi.' }, { status: 400 })
   }
 
   const sop = await prisma.sop.create({
     data: {
       title: title.trim(),
-      content: content.trim(),
+      fileUrl: fileUrl.trim(),
+      fileName: fileName?.trim() || null,
       category: category.trim(),
       authorId: session.userId,
     },

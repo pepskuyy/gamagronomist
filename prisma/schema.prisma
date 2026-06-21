@@ -479,7 +479,8 @@ model ContentVideoProduct {
 model Sop {
   id          String   @id @default(cuid())
   title       String
-  content     String   // Markdown content
+  fileUrl     String   // Cloudinary PDF URL
+  fileName    String?  // Original file name
   category    String   // e.g. "Gudang", "Lapangan", "Administrasi"
   isPublished Boolean  @default(true)
 
