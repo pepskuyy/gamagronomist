@@ -1,6 +1,7 @@
 'use client'
 
-import { useTransition, useRouter } from 'next/navigation'
+import { useTransition } from 'react'
+import { useRouter } from 'next/navigation'
 import { resetRequestToSubmitted } from '@/app/actions/afa-stock'
 
 export function AdminResetButton({ requestId }: { requestId: string }) {
