@@ -417,6 +417,51 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
     }
 
     // ── MAIN WAREHOUSE FLOW (existing) ───────────────────────────────
+    
+    // Process item decisions if provided
+    if (itemDecisions && itemDecisions.length > 0) {
+      const decisionsMap = new Map<string, { approved: boolean; qtyApproved?: number }>(
+        itemDecisions.map(d => [d.detailId, { approved: d.approved, qtyApproved: d.qtyApproved }])
+      )
+      const approvedDetails = req.details.filter(d => {
+        const dec = decisionsMap.get(d.id)
+        return dec === undefined || dec.approved
+      })
+
+      // Jika SEMUA ditolak
+      if (approvedDetails.length === 0) {
+        await prisma.request.update({
+          where: { id: requestId },
+          data: { status: 'REJECTED', rejectReason: 'Semua item ditolak oleh SPV.', afaId: session.userId }
+        })
+        await prisma.notification.create({
+          data: {
+            userId: req.foId,
+            title: '❌ Pengajuan Stok Ditolak',
+            message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah ditolak seluruhnya oleh SPV.`,
+            link: `/dashboard/stock`
+          }
+        })
+        revalidatePath('/dashboard/stock')
+        return { success: true, allRejected: true }
+      }
+
+      // Update qtyApproved untuk item yang disetujui (dan 0 untuk yg ditolak)
+      await prisma.$transaction(async (tx) => {
+        for (const detail of req.details) {
+          const dec = decisionsMap.get(detail.id)
+          const isApproved = dec === undefined || dec.approved
+          const finalQty = isApproved
+            ? (dec?.qtyApproved !== undefined && dec.qtyApproved > 0 ? dec.qtyApproved : detail.qtyRequested)
+            : 0
+          await tx.requestDetail.update({
+            where: { id: detail.id },
+            data: { qtyApproved: finalQty }
+          })
+        }
+      })
+    }
+
     // Update to APPROVED_SPV — no ledger entry yet
     await prisma.request.update({
       where: { id: requestId },

@@ -60,7 +60,7 @@ export async function GET(req: NextRequest) {
     let effectiveProductId = detail.productId
 
     // Legacy fallback: if no stock by exact ID, try by name
-    if (available === 0 && prod?.name) {
+    if (stockRequest.warehouseSource !== 'MAIN' && available === 0 && prod?.name) {
       const altId = nameToId.get(prod.name)
       if (altId && altId !== detail.productId) {
         const altBalance = balanceMap.get(altId) ?? 0
@@ -69,6 +69,10 @@ export async function GET(req: NextRequest) {
           effectiveProductId = altId
         }
       }
+    }
+
+    if (stockRequest.warehouseSource === 'MAIN') {
+      available = 999999 // Unlimited for UI purposes, WHM will validate later
     }
 
     return {

@@ -156,9 +156,9 @@ export default function AfaStockRequestTable({
       if (req) fetchAvailability(id)
       return
     }
-    // SPV approving a SAMPLE request → open partial approval modal
+    // SPV approving a SAMPLE or MAIN request → open partial approval modal
     const req = requests.find(r => r.id === id)
-    if ((role === 'SPV' || role === 'ADMIN') && req?.warehouseSource === 'SAMPLE') {
+    if ((role === 'SPV' || role === 'ADMIN') && (req?.warehouseSource === 'SAMPLE' || req?.warehouseSource === 'MAIN')) {
       setSampleModalId(id)
       fetchSampleBalance(id)
       return
@@ -879,10 +879,10 @@ export default function AfaStockRequestTable({
               onClick={e => e.stopPropagation()}
             >
               <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                🧪 Konfirmasi Pengiriman Sampel
+                {req.warehouseSource === 'SAMPLE' ? '🧪 Konfirmasi Pengiriman Sampel' : '📦 Konfirmasi Pengajuan Stok'}
               </h3>
               <p style={{ margin: '0 0 1.25rem', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
-                Atur jumlah dan keputusan per item. Item yang ditolak tidak akan dipotong dari stok sampel.
+                Atur jumlah dan keputusan per item. Item yang ditolak tidak akan diproses lebih lanjut.
               </p>
 
               {isLoading ? (
@@ -893,7 +893,9 @@ export default function AfaStockRequestTable({
                     <tr style={{ background: 'var(--surface-2, #f8fafc)', borderBottom: '2px solid var(--border)' }}>
                       <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700 }}>Produk</th>
                       <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Diminta</th>
-                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Stok Tersedia</th>
+                      {req.warehouseSource === 'SAMPLE' && (
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Stok Tersedia</th>
+                      )}
                       <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Disetujui</th>
                       <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Tindakan</th>
                     </tr>
@@ -902,9 +904,9 @@ export default function AfaStockRequestTable({
                     {items.map(item => {
                       const dec = decisions[item.detailId] ?? { approved: true, qty: String(item.qtyRequested) }
                       const isApproved = dec.approved !== false
-                      const isInsufficient = item.available < item.qtyRequested
+                      const isInsufficient = req.warehouseSource === 'SAMPLE' && item.available < item.qtyRequested
                       const inputQty = Number(dec.qty)
-                      const qtyExceeds = isApproved && inputQty > item.available
+                      const qtyExceeds = req.warehouseSource === 'SAMPLE' && isApproved && inputQty > item.available
                       return (
                         <tr key={item.detailId} style={{
                           borderBottom: '1px solid var(--border)',
@@ -918,22 +920,24 @@ export default function AfaStockRequestTable({
                           <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                             {item.qtyRequested} {item.unit}
                           </td>
-                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
-                            <span style={{
-                              fontWeight: 700,
-                              color: item.available >= item.qtyRequested ? '#166534' : '#b45309',
-                            }}>
-                              {item.available} {item.unit}
-                            </span>
-                            {isInsufficient && (
-                              <div style={{ fontSize: '0.7rem', color: '#b45309' }}>⚠️ Kurang</div>
-                            )}
-                          </td>
+                          {req.warehouseSource === 'SAMPLE' && (
+                            <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                              <span style={{
+                                fontWeight: 700,
+                                color: item.available >= item.qtyRequested ? '#166534' : '#b45309',
+                              }}>
+                                {item.available} {item.unit}
+                              </span>
+                              {isInsufficient && (
+                                <div style={{ fontSize: '0.7rem', color: '#b45309' }}>⚠️ Kurang</div>
+                              )}
+                            </td>
+                          )}
                           <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
                             <input
                               type="number"
                               min={1}
-                              max={item.available}
+                              max={req.warehouseSource === 'SAMPLE' ? item.available : undefined}
                               value={dec.qty}
                               disabled={!isApproved}
                               onChange={e => setSampleDecisions(prev => ({
@@ -962,7 +966,7 @@ export default function AfaStockRequestTable({
                                 ...prev,
                                 [sampleModalId]: {
                                   ...(prev[sampleModalId] ?? {}),
-                                  [item.detailId]: { approved: !isApproved, qty: !isApproved ? String(Math.min(item.qtyRequested, item.available)) : '' }
+                                  [item.detailId]: { approved: !isApproved, qty: !isApproved ? String(req.warehouseSource === 'SAMPLE' ? Math.min(item.qtyRequested, item.available) : item.qtyRequested) : '' }
                                 }
                               }))}
                               style={{
