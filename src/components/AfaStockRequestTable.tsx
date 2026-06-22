@@ -43,6 +43,15 @@ type AvailabilityItem = {
   qtyApproved: number | null
 }
 
+type SampleBalanceItem = {
+  detailId: string
+  productId: string
+  productName: string
+  unit: string
+  available: number
+  qtyRequested: number
+}
+
 export default function AfaStockRequestTable({
   requests,
   role
@@ -70,6 +79,13 @@ export default function AfaStockRequestTable({
 
   // WHM modal state — show qty confirmation modal before approving
   const [whmModalId, setWhmModalId] = useState<string | null>(null)
+
+  // SPV Sample partial-approval modal state
+  const [sampleModalId, setSampleModalId] = useState<string | null>(null)
+  const [sampleBalance, setSampleBalance] = useState<Record<string, SampleBalanceItem[]>>({})
+  const [loadingSampleBalance, setLoadingSampleBalance] = useState<Record<string, boolean>>({})
+  // Per-item decisions: detailId → { approved, qty }
+  const [sampleDecisions, setSampleDecisions] = useState<Record<string, Record<string, { approved: boolean; qty: string }>>>({})
 
   const toggleExpand = (id: string) => {
     setExpandedRows(prev => {
@@ -102,6 +118,28 @@ export default function AfaStockRequestTable({
     }
   }, [availability, loadingAvailability])
 
+  const fetchSampleBalance = useCallback(async (requestId: string) => {
+    if (sampleBalance[requestId] || loadingSampleBalance[requestId]) return
+    setLoadingSampleBalance(prev => ({ ...prev, [requestId]: true }))
+    try {
+      const res = await fetch(`/api/stock/sample-balance?requestId=${requestId}`)
+      const data = await res.json()
+      if (data.items) {
+        setSampleBalance(prev => ({ ...prev, [requestId]: data.items }))
+        // Pre-fill decisions: all approved, qty = qtyRequested
+        const decisions: Record<string, { approved: boolean; qty: string }> = {}
+        for (const item of data.items as SampleBalanceItem[]) {
+          decisions[item.detailId] = { approved: true, qty: String(item.qtyRequested) }
+        }
+        setSampleDecisions(prev => ({ ...prev, [requestId]: decisions }))
+      }
+    } catch (err) {
+      console.error('Failed to fetch sample balance:', err)
+    } finally {
+      setLoadingSampleBalance(prev => ({ ...prev, [requestId]: false }))
+    }
+  }, [sampleBalance, loadingSampleBalance])
+
   const handleRowExpand = (req: RequestProps) => {
     toggleExpand(req.id)
     // Trigger availability fetch for WHM when expanding APPROVED_FAM rows
@@ -114,9 +152,15 @@ export default function AfaStockRequestTable({
     if (role === 'WHM') {
       // Open WHM modal for qty confirmation
       setWhmModalId(id)
-      // Ensure availability is fetched
       const req = requests.find(r => r.id === id)
       if (req) fetchAvailability(id)
+      return
+    }
+    // SPV approving a SAMPLE request → open partial approval modal
+    const req = requests.find(r => r.id === id)
+    if ((role === 'SPV' || role === 'ADMIN') && req?.warehouseSource === 'SAMPLE') {
+      setSampleModalId(id)
+      fetchSampleBalance(id)
       return
     }
     const confirmMsg = 'Apakah Anda yakin ingin menyetujui pengajuan stok ini?'
@@ -142,6 +186,53 @@ export default function AfaStockRequestTable({
             '\n\nHarap koordinasi dengan tim Sales / WH Manager sebelum melanjutkan ke tahap posting invoice.'
           )
         }
+        router.refresh()
+      }
+      setActionId(null)
+    })
+  }
+
+  const handleSampleConfirm = (requestId: string) => {
+    const items = sampleBalance[requestId] ?? []
+    const decisions = sampleDecisions[requestId] ?? {}
+
+    // Validate: all approved items must have qty > 0 and not exceeding available stock
+    for (const item of items) {
+      const dec = decisions[item.detailId]
+      if (!dec || !dec.approved) continue
+      const qty = Number(dec.qty)
+      if (isNaN(qty) || qty <= 0) {
+        alert(`Masukkan jumlah disetujui yang valid (> 0) untuk: ${item.productName}`)
+        return
+      }
+      if (qty > item.available) {
+        alert(`Stok sampel tidak cukup untuk ${item.productName}: tersedia ${item.available} ${item.unit}, Anda input ${qty} ${item.unit}`)
+        return
+      }
+    }
+
+    const itemDecisions = items.map(item => {
+      const dec = decisions[item.detailId]
+      return {
+        detailId: item.detailId,
+        approved: dec?.approved ?? true,
+        qtyApproved: dec?.approved ? Number(dec.qty) : 0,
+      }
+    })
+
+    setSampleModalId(null)
+    setActionId(requestId)
+    startTransition(async () => {
+      const res = await approveAfaStockRequest(requestId, itemDecisions)
+      if (res?.error) {
+        alert('❌ ' + res.error)
+      } else if ((res as any)?.allRejected) {
+        alert('✅ Semua item telah ditolak. Pengajuan berstatus Ditolak.')
+        router.refresh()
+      } else if ((res as any)?.partialReject) {
+        alert('✅ Pengajuan disetujui sebagian. Item yang ditolak tidak akan masuk stok AFA.')
+        router.refresh()
+      } else {
         router.refresh()
       }
       setActionId(null)
@@ -731,6 +822,162 @@ export default function AfaStockRequestTable({
                   disabled={isPending && actionId === whmModalId}
                 >
                   {isPending && actionId === whmModalId ? '⏳ Memproses...' : '✅ Setujui & Post Invoice'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
+      {/* ── SPV Sample Partial Approval Modal ── */}
+      {sampleModalId && (() => {
+        const req = requests.find(r => r.id === sampleModalId)
+        if (!req) return null
+        const items = sampleBalance[sampleModalId] ?? []
+        const decisions = sampleDecisions[sampleModalId] ?? {}
+        const isLoading = loadingSampleBalance[sampleModalId]
+        const approvedCount = items.filter(item => decisions[item.detailId]?.approved !== false).length
+        return (
+          <div style={{
+            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+            background: 'rgba(0,0,0,0.50)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 9999, padding: '1rem',
+          }}
+            onClick={() => setSampleModalId(null)}
+          >
+            <div
+              className="card"
+              style={{ width: '100%', maxWidth: 700, padding: '1.75rem', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}
+              onClick={e => e.stopPropagation()}
+            >
+              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                🧪 Konfirmasi Pengiriman Sampel
+              </h3>
+              <p style={{ margin: '0 0 1.25rem', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
+                Atur jumlah dan keputusan per item. Item yang ditolak tidak akan dipotong dari stok sampel.
+              </p>
+
+              {isLoading ? (
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>⏳ Memuat saldo stok sampel...</div>
+              ) : (
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', marginBottom: '1rem' }}>
+                  <thead>
+                    <tr style={{ background: 'var(--surface-2, #f8fafc)', borderBottom: '2px solid var(--border)' }}>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700 }}>Produk</th>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Diminta</th>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Stok Tersedia</th>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Disetujui</th>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Tindakan</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {items.map(item => {
+                      const dec = decisions[item.detailId] ?? { approved: true, qty: String(item.qtyRequested) }
+                      const isApproved = dec.approved !== false
+                      const isInsufficient = item.available < item.qtyRequested
+                      const inputQty = Number(dec.qty)
+                      const qtyExceeds = isApproved && inputQty > item.available
+                      return (
+                        <tr key={item.detailId} style={{
+                          borderBottom: '1px solid var(--border)',
+                          background: !isApproved ? '#fff5f5' : isInsufficient ? '#fffbeb' : 'transparent',
+                          opacity: !isApproved ? 0.7 : 1,
+                          transition: 'background 0.15s',
+                        }}>
+                          <td style={{ padding: '0.6rem 0.75rem', fontWeight: 600 }}>
+                            {item.productName}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                            {item.qtyRequested} {item.unit}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                            <span style={{
+                              fontWeight: 700,
+                              color: item.available >= item.qtyRequested ? '#166534' : '#b45309',
+                            }}>
+                              {item.available} {item.unit}
+                            </span>
+                            {isInsufficient && (
+                              <div style={{ fontSize: '0.7rem', color: '#b45309' }}>⚠️ Kurang</div>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                            <input
+                              type="number"
+                              min={1}
+                              max={item.available}
+                              value={dec.qty}
+                              disabled={!isApproved}
+                              onChange={e => setSampleDecisions(prev => ({
+                                ...prev,
+                                [sampleModalId]: {
+                                  ...(prev[sampleModalId] ?? {}),
+                                  [item.detailId]: { ...dec, qty: e.target.value }
+                                }
+                              }))}
+                              style={{
+                                width: 80, padding: '0.35rem 0.5rem', fontSize: '0.88rem', textAlign: 'right', fontWeight: 700,
+                                border: `1.5px solid ${qtyExceeds ? '#fca5a5' : isApproved ? '#d1fae5' : '#e5e7eb'}`,
+                                borderRadius: '0.35rem',
+                                background: !isApproved ? '#f3f4f6' : qtyExceeds ? '#fff1f2' : '#f0fdf4',
+                                color: !isApproved ? '#9ca3af' : 'inherit',
+                              }}
+                            />
+                            <span style={{ marginLeft: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.unit}</span>
+                            {qtyExceeds && (
+                              <div style={{ fontSize: '0.7rem', color: '#dc2626', marginTop: '0.15rem' }}>Melebihi stok!</div>
+                            )}
+                          </td>
+                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                            <button
+                              onClick={() => setSampleDecisions(prev => ({
+                                ...prev,
+                                [sampleModalId]: {
+                                  ...(prev[sampleModalId] ?? {}),
+                                  [item.detailId]: { approved: !isApproved, qty: !isApproved ? String(Math.min(item.qtyRequested, item.available)) : '' }
+                                }
+                              }))}
+                              style={{
+                                padding: '0.3rem 0.7rem', fontSize: '0.78rem', fontWeight: 700, borderRadius: '0.4rem', cursor: 'pointer',
+                                border: '1.5px solid',
+                                borderColor: isApproved ? '#bbf7d0' : '#fecaca',
+                                background: isApproved ? '#dcfce7' : '#fee2e2',
+                                color: isApproved ? '#166534' : '#b91c1c',
+                                transition: 'all 0.15s',
+                              }}
+                            >
+                              {isApproved ? '✅ Setujui' : '❌ Ditolak'}
+                            </button>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              )}
+
+              {!isLoading && items.length > 0 && (
+                <div style={{ marginBottom: '1rem', padding: '0.65rem 0.85rem', borderRadius: '0.5rem', background: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: '0.82rem', color: '#166534' }}>
+                  <strong>{approvedCount}</strong> dari <strong>{items.length}</strong> item akan disetujui.
+                  {approvedCount === 0 && <span style={{ color: '#b91c1c', marginLeft: '0.5rem' }}>⚠️ Semua item ditolak — pengajuan akan berstatus DITOLAK.</span>}
+                </div>
+              )}
+
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+                <button
+                  onClick={() => setSampleModalId(null)}
+                  className="btn"
+                  style={{ padding: '0.55rem 1.25rem', fontSize: '0.85rem' }}
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => handleSampleConfirm(sampleModalId)}
+                  className="btn btn-primary"
+                  style={{ padding: '0.55rem 1.5rem', fontSize: '0.85rem', fontWeight: 700 }}
+                  disabled={isPending && actionId === sampleModalId || isLoading}
+                >
+                  {isPending && actionId === sampleModalId ? '⏳ Memproses...' : '✅ Proses Approval'}
                 </button>
               </div>
             </div>

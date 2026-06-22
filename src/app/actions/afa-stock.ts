@@ -116,8 +116,14 @@ export async function submitAfaStockRequest(formData: FormData) {
 
 // ─── STEP 1: SPV approves ─────────────────────────────────────────
 // MAIN:   → APPROVED_SPV (→ FAM → WHM → SPV final)
-// SAMPLE: → APPROVED directly (deduct SampleLedger now)
-export async function approveAfaStockRequest(requestId: string) {
+// SAMPLE: → APPROVED directly (deduct SampleLedger now), supports partial reject per item
+type ItemDecision = {
+  detailId: string
+  approved: boolean       // false = tolak item ini
+  qtyApproved?: number   // qty yang disetujui (jika approved: true); undefined = pakai qtyRequested
+}
+
+export async function approveAfaStockRequest(requestId: string, itemDecisions?: ItemDecision[]) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
@@ -144,7 +150,6 @@ export async function approveAfaStockRequest(requestId: string) {
 
     // ── SAMPLE WAREHOUSE FLOW ────────────────────────────────────────
     if ((req as any).warehouseSource === 'SAMPLE') {
-      // Validate sample stock availability per product
       const spvId = session.userId
 
       // Get current sample balances for this SPV — include product name for fallback matching
@@ -153,13 +158,10 @@ export async function approveAfaStockRequest(requestId: string) {
         include: { product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } },
       })
       const balanceMap = new Map<string, number>()
-      // nameToSampleId: fallback for legacy requests that stored Accurate productId instead of SMPL- id
-      const nameToSampleId = new Map<string, string>() // productName -> SMPL- productId
-      // productInfoMap: productId -> gramasi details (for converting kemasan to gramasi on AFA ledger credit)
+      const nameToSampleId = new Map<string, string>() // productName → SMPL- productId
       const productInfoMap = new Map<string, { gramasiPerUnit: number | null, unitGramasi: string | null, unit: string }>()
       for (const l of sampleLedgers) {
         balanceMap.set(l.productId, (balanceMap.get(l.productId) ?? 0) + l.quantity)
-        // Keep track of first SMPL- product for each name (prefer positive balance)
         const existing = nameToSampleId.get(l.product.name)
         if (!existing) nameToSampleId.set(l.product.name, l.productId)
         if (!productInfoMap.has(l.productId)) {
@@ -171,16 +173,19 @@ export async function approveAfaStockRequest(requestId: string) {
         }
       }
 
-      // productIdRemap: originalId -> effectiveId (for deduction step)
+      // Build decisions map: detailId → { approved, qtyApproved }
+      const decisionsMap = new Map<string, { approved: boolean; qtyApproved?: number }>(
+        (itemDecisions ?? []).map(d => [d.detailId, { approved: d.approved, qtyApproved: d.qtyApproved }])
+      )
+
+      // productIdRemap: originalId → effectiveId (for deduction step)
       const productIdRemap = new Map<string, string>()
 
-      // Validate all items — collect ALL insufficient items first, with name-based fallback
-      const insufficient: string[] = []
+      // Resolve effective product IDs and validate
       for (const detail of req.details) {
         let available = balanceMap.get(detail.productId) ?? 0
         let effectiveId = detail.productId
 
-        // Fallback: if exact ID has no stock, try to match by product name (legacy requests)
         if (available === 0) {
           const prod = (detail as any).product
           if (prod?.name) {
@@ -195,9 +200,140 @@ export async function approveAfaStockRequest(requestId: string) {
             }
           }
         }
-
         productIdRemap.set(detail.productId, effectiveId)
+      }
 
+      // ── If itemDecisions provided (partial approval mode) ─────────────
+      if (itemDecisions && itemDecisions.length > 0) {
+        const approvedDetails = req.details.filter(d => {
+          const dec = decisionsMap.get(d.id)
+          // If no decision for this item, treat as approved (backward compat)
+          return dec === undefined || dec.approved
+        })
+        const rejectedDetails = req.details.filter(d => {
+          const dec = decisionsMap.get(d.id)
+          return dec !== undefined && !dec.approved
+        })
+
+        // ── Jika SEMUA item ditolak → REJECTED ────────────────────────
+        if (approvedDetails.length === 0) {
+          await prisma.request.update({
+            where: { id: requestId },
+            data: { status: 'REJECTED', rejectReason: 'Semua item ditolak oleh SPV.', afaId: spvId }
+          })
+          const isBDAllReject = req.fo?.role === 'BD'
+          await prisma.notification.create({
+            data: {
+              userId: req.foId,
+              title: '❌ Pengajuan Sampel Ditolak Seluruhnya',
+              message: `Pengajuan sampel Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah ditolak SPV — semua item tidak dapat dipenuhi dari stok sampel.`,
+              link: isBDAllReject ? `/dashboard/stock/bd-request` : `/dashboard/stock`,
+            }
+          })
+          revalidatePath('/dashboard/stock')
+          return { success: true, warehouseSource: 'SAMPLE', allRejected: true }
+        }
+
+        // ── Sebagian item ditolak → proses hanya yang disetujui ────────
+        const requesterLabel = req.fo?.role === 'BD'
+          ? `BD ${req.fo?.name || ''}`
+          : `AFA ${req.fo?.name || ''}`
+
+        await prisma.$transaction(async (tx) => {
+          // Update qtyApproved per detail (0 for rejected items)
+          for (const detail of req.details) {
+            const dec = decisionsMap.get(detail.id)
+            const isApproved = dec === undefined || dec.approved
+            const finalQty = isApproved
+              ? (dec?.qtyApproved !== undefined && dec.qtyApproved > 0 ? dec.qtyApproved : detail.qtyRequested)
+              : 0
+            await tx.requestDetail.update({
+              where: { id: detail.id },
+              data: { qtyApproved: finalQty }
+            })
+          }
+
+          // Deduct SampleLedger + credit AFA Ledger for approved items only
+          for (const detail of approvedDetails) {
+            const dec = decisionsMap.get(detail.id)
+            const qtyKemasan = (dec?.qtyApproved !== undefined && dec.qtyApproved > 0)
+              ? dec.qtyApproved
+              : detail.qtyRequested
+
+            const effectiveProductId = productIdRemap.get(detail.productId) ?? detail.productId
+            await tx.sampleLedger.create({
+              data: {
+                userId: spvId,
+                productId: effectiveProductId,
+                quantity: -qtyKemasan,
+                transactionType: 'SAMPLE_OUT',
+                referenceId: requestId,
+                notes: `Sampel ke ${requesterLabel} (req ${requestId.slice(0, 8).toUpperCase()})`,
+              }
+            })
+
+            const prodInfo = productInfoMap.get(effectiveProductId)
+            const gramasiPerUnit = prodInfo?.gramasiPerUnit ?? (detail as any).product?.gramasiPerUnit ?? null
+            const unitGramasi = prodInfo?.unitGramasi ?? (detail as any).product?.unitGramasi ?? null
+            const unit = prodInfo?.unit ?? (detail as any).product?.unit ?? ''
+            const qtyGramasi = gramasiPerUnit && gramasiPerUnit > 0 ? qtyKemasan * gramasiPerUnit : qtyKemasan
+
+            await tx.ledger.create({
+              data: {
+                userId: req.foId,
+                productId: effectiveProductId,
+                transactionType: 'RECEIVE_FROM_AFA',
+                quantity: qtyGramasi,
+                referenceId: requestId,
+                notes: `Terima sampel dari SPV (${qtyKemasan} ${unit}${gramasiPerUnit ? ` = ${qtyGramasi}${unitGramasi ?? ''}` : ''})`,
+              }
+            })
+          }
+
+          await tx.request.update({
+            where: { id: requestId },
+            data: { status: 'APPROVED', afaId: spvId },
+          })
+        })
+
+        // Notify requester with detail of approved vs rejected items
+        const isBDPartial = req.fo?.role === 'BD'
+        const approvedNames = approvedDetails.map(d => {
+          const dec = decisionsMap.get(d.id)
+          const qty = (dec?.qtyApproved !== undefined && dec.qtyApproved > 0) ? dec.qtyApproved : d.qtyRequested
+          const prod = (d as any).product
+          return `✅ ${prod?.name ?? d.productId}: ${qty} ${prod?.unit ?? ''}`
+        })
+        const rejectedNames = rejectedDetails.map(d => {
+          const prod = (d as any).product
+          return `❌ ${prod?.name ?? d.productId}`
+        })
+        const detailMsg = [
+          ...(approvedNames.length > 0 ? ['Disetujui:', ...approvedNames] : []),
+          ...(rejectedNames.length > 0 ? ['Ditolak oleh SPV:', ...rejectedNames] : []),
+        ].join('\n')
+
+        await prisma.notification.create({
+          data: {
+            userId: req.foId,
+            title: rejectedDetails.length > 0
+              ? '🧪 Sampel Disetujui Sebagian — Stok Masuk'
+              : (isBDPartial ? '📦 Pengajuan Stok BD Disetujui — Sampel Siap' : '🧪 Sampel Disetujui SPV — Stok Masuk'),
+            message: `Pengajuan sampel Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) telah diproses SPV.\n\n${detailMsg}`,
+            link: isBDPartial ? `/dashboard/stock/bd-request` : `/dashboard/stock`,
+          }
+        })
+
+        revalidatePath('/dashboard/stock')
+        return { success: true, warehouseSource: 'SAMPLE', partialReject: rejectedDetails.length > 0 }
+      }
+
+      // ── Default (no itemDecisions): approve all — original behavior ──
+      // Validate all items have sufficient stock
+      const insufficient: string[] = []
+      for (const detail of req.details) {
+        const effectiveId = productIdRemap.get(detail.productId) ?? detail.productId
+        const available = balanceMap.get(effectiveId) ?? 0
         if (available < detail.qtyRequested) {
           const prod = (detail as any).product
           const productName = prod?.name ?? detail.productId
@@ -216,7 +352,6 @@ export async function approveAfaStockRequest(requestId: string) {
 
       // Deduct SampleLedger + update request → APPROVED in one transaction
       await prisma.$transaction(async (tx) => {
-        // Deduct each product from sample ledger (use remapped productId for legacy requests)
         for (const detail of req.details) {
           const effectiveProductId = productIdRemap.get(detail.productId) ?? detail.productId
           const requesterLabel = req.fo?.role === 'BD'
@@ -232,11 +367,8 @@ export async function approveAfaStockRequest(requestId: string) {
               notes: `Sampel ke ${requesterLabel} (req ${requestId.slice(0, 8).toUpperCase()})`,
             }
           })
-          // Credit to requester ledger in GRAMASI units
-          // prodInfo comes from sampleLedger (SMPL- product) — fallback to detail.product if not found
           const prodInfo = productInfoMap.get(effectiveProductId)
           const qtyKemasan = detail.qtyApproved ?? detail.qtyRequested
-          // Prefer prodInfo.gramasiPerUnit (from SMPL- product), fallback to detail.product.gramasiPerUnit
           const gramasiPerUnit = prodInfo?.gramasiPerUnit
             ?? (detail as any).product?.gramasiPerUnit
             ?? null
@@ -259,7 +391,6 @@ export async function approveAfaStockRequest(requestId: string) {
           })
         }
 
-        // Update request: APPROVED directly, record which SPV approved
         await tx.request.update({
           where: { id: requestId },
           data: { status: 'APPROVED', afaId: session.userId },
