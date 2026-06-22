@@ -1056,3 +1056,109 @@ export async function regenerateInvoice(requestId: string) {
     return { error: `Gagal generate invoice: ${err.message}` }
   }
 }
+
+// ─── ADMIN ONLY: Reset request status back to SUBMITTED ──────────────────────
+// Digunakan untuk memperbaiki request yang sudah terlanjur di-approve oleh SPV
+// sehingga bisa diproses ulang dengan fitur partial-approval baru.
+// Hanya berlaku untuk MAIN (APPROVED_SPV) atau SAMPLE (APPROVED) yang belum ada invoice/ledger.
+export async function resetRequestToSubmitted(requestId: string) {
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('session')?.value
+  const session = await decrypt(sessionToken as string)
+
+  if (session?.role !== 'ADMIN') {
+    return { error: 'Hanya ADMIN yang dapat mereset status pengajuan.' }
+  }
+
+  try {
+    const req = await prisma.request.findUnique({
+      where: { id: requestId },
+      include: { details: { select: { id: true } } }
+    })
+
+    if (!req) return { error: 'Pengajuan tidak ditemukan.' }
+    if (!['APPROVED_SPV', 'APPROVED', 'SUBMITTED'].includes(req.status)) {
+      return { error: `Status '${req.status}' tidak dapat di-reset. Hanya status APPROVED_SPV atau APPROVED yang bisa di-rollback ke SPV.` }
+    }
+    if (req.status === 'SUBMITTED') {
+      return { error: 'Pengajuan sudah dalam status SUBMITTED.' }
+    }
+
+    // Safety: pastikan tidak ada invoice Accurate yang sudah terbit
+    if ((req as any).accurateInvoiceNo) {
+      return { error: 'Tidak dapat mereset — invoice Accurate sudah diterbitkan untuk pengajuan ini.' }
+    }
+
+    // For SAMPLE requests that were APPROVED: reverse any SampleLedger / Ledger entries
+    const isSample = (req as any).warehouseSource === 'SAMPLE'
+    if (isSample && req.status === 'APPROVED') {
+      // Check if there are ledger entries for this request
+      const ledgerEntries = await prisma.ledger.findMany({
+        where: { referenceId: requestId }
+      })
+      const sampleLedgerEntries = await prisma.sampleLedger.findMany({
+        where: { referenceId: requestId }
+      })
+
+      if (ledgerEntries.length > 0 || sampleLedgerEntries.length > 0) {
+        // Reverse ledger entries (create offsetting transactions)
+        await prisma.$transaction(async (tx) => {
+          for (const entry of sampleLedgerEntries) {
+            await tx.sampleLedger.create({
+              data: {
+                userId: entry.userId,
+                productId: entry.productId,
+                quantity: -entry.quantity, // reverse
+                transactionType: 'SAMPLE_OUT',
+                referenceId: requestId,
+                notes: `[ROLLBACK ADMIN] Reversal dari approval sampel req ${requestId.slice(0, 8).toUpperCase()}`,
+              }
+            })
+          }
+          for (const entry of ledgerEntries) {
+            await tx.ledger.create({
+              data: {
+                userId: entry.userId,
+                productId: entry.productId,
+                quantity: -entry.quantity, // reverse
+                transactionType: 'RECEIVE_FROM_AFA',
+                referenceId: requestId,
+                notes: `[ROLLBACK ADMIN] Reversal dari approval sampel req ${requestId.slice(0, 8).toUpperCase()}`,
+              }
+            })
+          }
+          // Reset qtyApproved on all details
+          await tx.request.update({
+            where: { id: requestId },
+            data: { status: 'SUBMITTED', afaId: null, rejectReason: null }
+          })
+          // Reset detail qtyApproved
+          for (const detail of req.details) {
+            await tx.requestDetail.update({
+              where: { id: detail.id },
+              data: { qtyApproved: null }
+            })
+          }
+        })
+      } else {
+        // No ledger entries yet — safe to just reset status
+        await prisma.request.update({
+          where: { id: requestId },
+          data: { status: 'SUBMITTED', afaId: null, rejectReason: null }
+        })
+      }
+    } else {
+      // MAIN flow: just reset status (no ledger yet at APPROVED_SPV stage)
+      await prisma.request.update({
+        where: { id: requestId },
+        data: { status: 'SUBMITTED', afaId: null, rejectReason: null }
+      })
+    }
+
+    revalidatePath('/dashboard/stock')
+    return { success: true }
+  } catch (err: any) {
+    console.error('resetRequestToSubmitted error:', err)
+    return { error: `Gagal mereset pengajuan: ${err.message}` }
+  }
+}

@@ -2,7 +2,7 @@
 
 import { useState, useTransition, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { approveAfaStockRequest, approveFamStockRequest, approveWhmStockRequest, receiveSpvStockRequest, rejectAfaStockRequest, regenerateInvoice } from '@/app/actions/afa-stock'
+import { approveAfaStockRequest, approveFamStockRequest, approveWhmStockRequest, receiveSpvStockRequest, rejectAfaStockRequest, regenerateInvoice, resetRequestToSubmitted } from '@/app/actions/afa-stock'
 
 type DetailItem = {
   id: string
@@ -334,6 +334,22 @@ export default function AfaStockRequestTable({
     })
   }
 
+  // ADMIN only: rollback request to SUBMITTED
+  const handleReset = (id: string) => {
+    if (!confirm('⚠️ Reset pengajuan ini ke status SUBMITTED?\n\nJika pengajuan SAMPEL sudah APPROVED, entri ledger akan di-reverse otomatis.\n\nLanjutkan?')) return
+    setActionId(id)
+    startTransition(async () => {
+      const res = await resetRequestToSubmitted(id)
+      if (res?.error) {
+        alert('❌ ' + res.error)
+      } else {
+        alert('✅ Pengajuan berhasil di-reset ke SUBMITTED. SPV sekarang bisa memproses ulang.')
+        router.refresh()
+      }
+      setActionId(null)
+    })
+  }
+
   const handleDownloadPdf = async (req: RequestProps) => {
     try {
       const { default: jsPDF } = await import('jspdf')
@@ -563,6 +579,18 @@ export default function AfaStockRequestTable({
                               disabled={isPending && actionId === req.id}
                             >
                               {isPending && actionId === req.id ? 'Memproses...' : '📦 Terima Stok'}
+                            </button>
+                          )}
+
+                          {role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED'].includes(req.status) && !(req as any).accurateInvoiceNo && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); handleReset(req.id) }}
+                              className="btn"
+                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
+                              disabled={isPending && actionId === req.id}
+                              title="Reset ke SUBMITTED — hanya untuk ADMIN"
+                            >
+                              {isPending && actionId === req.id ? '⏳...' : '↩️ Reset ke SPV'}
                             </button>
                           )}
 
