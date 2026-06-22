@@ -7,6 +7,7 @@ import AfaStockRequestTable from '@/components/AfaStockRequestTable'
 import TeamStockTable from '@/components/TeamStockTable'
 import TableFilter from '@/components/TableFilter'
 import TablePager from '@/components/TablePager'
+import { AdminResetButton } from '@/components/AdminResetButton'
 
 
 export default async function StockDashboardPage(props: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -369,6 +370,9 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                             <Link href={`/dashboard/demoplot/continue/${req.id}`}>
                               <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
                             </Link>
+                          )}
+                          {session.role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED'].includes(req.status) && !req.accurateInvoiceNo && (
+                            <AdminResetButton requestId={req.id} />
                           )}
                           <Link href={`/dashboard/demoplot/detail/${req.id}`}>
                             <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
