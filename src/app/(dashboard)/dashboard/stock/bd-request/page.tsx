@@ -241,6 +241,77 @@ export default function BdStockRequestPage() {
     )
   }
 
+  const handleDownloadPdf = async (req: any) => {
+    try {
+      const { default: jsPDF } = await import('jspdf')
+      const { default: autoTable } = await import('jspdf-autotable')
+
+      const doc = new jsPDF()
+
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.text('BUKTI PENERIMAAN STOK', 14, 20)
+
+      doc.setFontSize(11)
+      doc.setFont('helvetica', 'normal')
+      doc.text(`ID Referensi : ${req.id.toUpperCase()}`, 14, 32)
+      doc.text(`Tanggal         : ${new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date(req.createdAt))}`, 14, 38)
+      doc.text(`Pemohon      : ${req.fo?.name || 'Tidak diketahui'}`, 14, 44)
+      doc.text(`Disetujui Oleh : ${req.afa?.name || 'SPV'}`, 14, 50)
+
+      const tableBody = (req.details || []).map((d: any, index: number) => {
+        const qtyReq = d.qtyRequested
+        const qtyApp = d.qtyApproved || d.qtyRequested
+        const unitKemasan = d.product?.unit || d.requestUnit || ''
+        const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
+        const qtyReqStr = hasGramasi
+          ? `${qtyReq} (${(qtyReq * d.product.gramasiPerUnit).toLocaleString('id-ID')}${d.product.unitGramasi})`
+          : String(qtyReq)
+        const qtyAppStr = hasGramasi
+          ? `${qtyApp} (${(qtyApp * d.product.gramasiPerUnit).toLocaleString('id-ID')}${d.product.unitGramasi})`
+          : String(qtyApp)
+        
+        const warehouse = d.accurateWarehouse || (req.warehouseSource !== 'SAMPLE' ? 'Gudang Baik' : '-')
+
+        return [index + 1, d.product?.name || '-', qtyReqStr, qtyAppStr, unitKemasan, warehouse]
+      })
+
+      autoTable(doc, {
+        startY: 56,
+        head: [['No', 'Produk', 'Qty Diminta', 'Qty Disetujui', 'Satuan', 'Gudang']],
+        body: tableBody,
+        theme: 'grid',
+        headStyles: { fillColor: [41, 128, 185], textColor: 255 }
+      })
+
+      let finalY = (doc as any).lastAutoTable?.finalY || 56
+
+      finalY += 10
+      doc.setFont('helvetica', 'bold')
+      doc.text('Keterangan / Catatan:', 14, finalY)
+      finalY += 6
+      doc.setFont('helvetica', 'normal')
+      const notes = req.plan || '-'
+      const splitNotes = doc.splitTextToSize(notes, 180)
+      doc.text(splitNotes, 14, finalY)
+
+      finalY += (splitNotes.length * 5) + 10
+
+      doc.setDrawColor('#E2E8F0')
+      doc.line(14, finalY, 196, finalY)
+
+      finalY += 6
+      doc.setFontSize(9)
+      doc.setTextColor(100)
+      doc.text('Dokumen ini digenerate secara otomatis oleh sistem.', 14, finalY)
+
+      doc.save(`Stok_${req.id.slice(0, 8).toUpperCase()}.pdf`)
+    } catch (err) {
+      console.error('Failed to generate PDF:', err)
+      alert('Gagal mendownload PDF. Pastikan koneksi internet stabil.')
+    }
+  }
+
   const thStyle: React.CSSProperties = { padding: '0.65rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }
   const tdStyle: React.CSSProperties = { padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem' }
 
@@ -562,6 +633,8 @@ export default function BdStockRequestPage() {
                     <th style={thStyle}>Tujuan / Catatan</th>
                     <th style={thStyle}>Produk</th>
                     <th style={{ ...thStyle, textAlign: 'center' }}>Status</th>
+                    <th style={thStyle}>Invoice</th>
+                    <th style={{ ...thStyle, textAlign: 'center' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -582,12 +655,36 @@ export default function BdStockRequestPage() {
                         {req.plan && req.plan !== '-' ? req.plan.split('\n')[0] : '-'}
                       </td>
                       <td style={{ ...tdStyle, fontSize: '0.82rem' }}>
-                        {req.details?.map(d => {
+                        {req.details?.map((d: any) => {
                           const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
-                          return `${d.product?.name}: ${qty} ${d.requestUnit || ''}`
+                          return `${d.product?.name}: ${qty} ${d.requestUnit || d.product?.unit || ''}`
                         }).join(', ')}
                       </td>
                       <td style={{ ...tdStyle, textAlign: 'center' }}>{getStatusBadge(req.status, req.warehouseSource)}</td>
+                      {req.warehouseSource !== 'SAMPLE' ? (
+                        <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
+                          {req.accurateInvoiceNo ? (
+                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#166534', background: '#dcfce7', padding: '0.2rem 0.6rem', borderRadius: '0.3rem', border: '1px solid #bbf7d0' }}>
+                              📄 {req.accurateInvoiceNo}
+                            </span>
+                          ) : (
+                            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>—</span>
+                          )}
+                        </td>
+                      ) : (
+                        <td style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>—</td>
+                      )}
+                      <td style={{ ...tdStyle, textAlign: 'center' }}>
+                        {(req.status === 'APPROVED' || (req.status === 'APPROVED_WHM' && req.warehouseSource !== 'SAMPLE')) && (
+                          <button
+                            onClick={() => handleDownloadPdf(req)}
+                            className="btn btn-outline"
+                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: '#0ea5e9', borderColor: '#e0f2fe' }}
+                          >
+                            📄 Download PDF
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
