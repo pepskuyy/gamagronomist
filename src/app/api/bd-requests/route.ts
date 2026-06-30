@@ -29,9 +29,12 @@ export async function GET() {
         status:          true,
         plan:            true,
         warehouseSource: true,
+        accurateInvoiceNo: true,
+        fo:  { select: { name: true } },
+        afa: { select: { name: true } },
         details: {
           include: {
-            product: { select: { name: true } }
+            product: { select: { name: true, unit: true, gramasiPerUnit: true, unitGramasi: true } }
           }
         },
       },
