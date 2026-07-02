@@ -20,9 +20,10 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
 
   if (!session?.userId) return null
 
-  // ----- KPI QUERIES -----
+  // ----- KPI QUERIES + STATIC DATA — all run in parallel -----
   const isSPV = session.role === 'SPV' || session.role === 'ADMIN'
   const isAFA = ['AFA', 'PLANTATION'].includes(session.role)
+  const isFieldUser = ['AFA', 'PLANTATION', 'FO', 'INTERN'].includes(session.role)
   
   // Build filter based on role
   const requestFilter: any = {}
@@ -35,7 +36,11 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
     pendingRequests,
     completedDemoPlots,
     recentLedgers,
-    recentRequests
+    recentRequests,
+    allAreas,
+    areas,
+    filterSubordinates,
+    currentUserRecord,
   ] = await Promise.all([
     prisma.request.count({ where: requestFilter }),
     prisma.request.count({ where: { ...requestFilter, status: 'APPROVED' } }),
@@ -52,7 +57,21 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
       include: { fo: true, farmer: true, details: { include: { product: true } } },
       orderBy: { createdAt: 'desc' },
       take: 5
-    })
+    }),
+    // getAreas() — dijalankan paralel, bukan setelah Promise.all pertama
+    getAreas(),
+    // areas untuk chart filter dropdown
+    prisma.area.findMany({ orderBy: { name: 'asc' } }),
+    // subordinates untuk filter dropdown
+    prisma.user.findMany({
+      where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } },
+      select: { id: true, name: true, role: true },
+      orderBy: { name: 'asc' }
+    }),
+    // area user field saat ini (hanya relevan untuk AFA/FO/INTERN)
+    isFieldUser
+      ? prisma.user.findUnique({ where: { id: session.userId }, select: { areaId: true, area: { select: { name: true } } } })
+      : Promise.resolve(null),
   ])
 
   // ----- TARGET DATA -----
@@ -60,20 +79,11 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
   const currentMonth = now.getMonth() + 1
   const currentYear  = now.getFullYear()
 
-  // All areas for dropdowns
-  const allAreas = await getAreas()
-
-  // AFA/FO field user: find their area
-  let userAreaId: string | null = null
-  let userAreaName = 'Tanpa Area'
-  if (['AFA', 'PLANTATION'].includes(session.role) || session.role === 'FO' || session.role === 'INTERN') {
-    const userRecord = await prisma.user.findUnique({ where: { id: session.userId }, select: { areaId: true, area: { select: { name: true } } } })
-    userAreaId   = userRecord?.areaId ?? null
-    userAreaName = userRecord?.area?.name ?? 'Tanpa Area'
-  }
+  // Resolve user area from parallel result
+  const userAreaId   = currentUserRecord?.areaId ?? null
+  const userAreaName = currentUserRecord?.area?.name ?? 'Tanpa Area'
 
   // ----- GLOBAL DASHBOARD FILTER DATA -----
-  const areas = await prisma.area.findMany({ orderBy: { name: 'asc' } })
   // Build chart filter query parameter string to pass down to clients
   const params = new URLSearchParams()
   if (searchParams?.start) params.set('start', searchParams.start)
@@ -82,12 +92,6 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
   if (searchParams?.areaId) params.set('areaId', searchParams.areaId)
   const filterQuery = params.toString() ? `?${params.toString()}` : ''
 
-  // Subordinates for filter dropdown - EVERYONE can see all users so they can filter the global charts freely
-  const filterSubordinates = await prisma.user.findMany({ 
-    where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } }, 
-    select: { id: true, name: true, role: true }, 
-    orderBy: { name: 'asc' } 
-  })
 
   // Stock summary for all users visible to this role
   let stockSummary: { userName: string, role: string, productName: string, unit: string, balance: number }[] = []

@@ -33,90 +33,35 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   const start_f = resolvedParams.start_f ? new Date(resolvedParams.start_f) : undefined
   const end_f = resolvedParams.end_f ? new Date(`${resolvedParams.end_f}T23:59:59.999Z`) : undefined
 
-  // 1. Fetch My Stocks
-  const myStocks = await getStockBalance(session.userId)
+  // Build query conditions first (needed before parallel fetch)
+  const isTeamViewer = ['ADMIN', 'SPV', 'AFA', 'PLANTATION'].includes(session.role)
+  const isAfaStockViewer = ['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role)
 
-  // 2. Fetch Team Users (Pantauan Stok)
-  let teamUsers: { id: string; name: string; role: string; parentName?: string }[] = []
-  let hasMoreUsers = false
-
-  if (['ADMIN', 'SPV', 'AFA', 'PLANTATION'].includes(session.role)) {
-    const userWhere: any = { 
-      role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] },
-      isActive: true,
-      ...(qu ? { name: { contains: qu, mode: 'insensitive' } } : {})
-    }
-    
-    if (session.role === 'SPV' && session.areaId) {
-      userWhere.areaId = session.areaId
-    } else if (['AFA', 'PLANTATION'].includes(session.role)) {
-      userWhere.afaId = session.userId
-    }
-
-    const totalUsers = await prisma.user.count({ where: userWhere })
-    const users = await prisma.user.findMany({
-      where: userWhere,
-      include: { afa: { select: { name: true } }, area: { select: { name: true } } },
-      orderBy: [{ role: 'asc' }, { name: 'asc' }],
-      skip: (pu - 1) * take,
-      take
-    })
-    
-    hasMoreUsers = (pu * take) < totalUsers
-
-    teamUsers = users.map(u => ({
-      id: u.id, name: u.name, role: u.role, 
-      parentName: ['AFA', 'PLANTATION'].includes(u.role) ? (u.area?.name || 'Pusat') : (u.afa?.name || u.area?.name || '-')
-    }))
+  const userWhere: any = {
+    role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] },
+    isActive: true,
+    ...(qu ? { name: { contains: qu, mode: 'insensitive' } } : {})
+  }
+  if (session.role === 'SPV' && session.areaId) {
+    userWhere.areaId = session.areaId
+  } else if (['AFA', 'PLANTATION'].includes(session.role)) {
+    userWhere.afaId = session.userId
   }
 
-  const stocksMap: Record<string, { product: any, quantity: number }[]> = {}
-  await Promise.all(
-    teamUsers.map(async (u) => {
-      stocksMap[u.id] = await getStockBalance(u.id)
-    })
-  )
-
-  const allProducts = await prisma.product.findMany({ orderBy: { name: 'asc' } })
-
-  // 3. Fetch AFA Stock Requests
-  let afaStockRequests: any[] = []
-  let hasMoreAfaReqs = false
-
-  if (['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role)) {
-    let afaStockWhere: any = { commodity: 'AFA_STOCK_IN' }
-    
-    if (['AFA', 'PLANTATION', 'BD'].includes(session.role)) {
-      afaStockWhere.foId = session.userId
-    } else if (session.role === 'SPV' && session.areaId) {
-      afaStockWhere.fo = { areaId: session.areaId }
-    }
-    // FAM and WHM see all AFA_STOCK_IN requests (global scope)
-
-    if (qa) {
-      // `fo` points to the requester (AFA) in AFA_STOCK_IN
-      afaStockWhere.fo = { ...afaStockWhere.fo, name: { contains: qa, mode: 'insensitive' } }
-    }
-    if (start_a || end_a) {
-      afaStockWhere.createdAt = {}
-      if (start_a) afaStockWhere.createdAt.gte = start_a
-      if (end_a) afaStockWhere.createdAt.lte = end_a
-    }
-
-    const totalAfaReq = await prisma.request.count({ where: afaStockWhere })
-    afaStockRequests = await prisma.request.findMany({
-      where: afaStockWhere,
-      include: { fo: true, afa: true, details: { include: { product: true } } },
-      orderBy: { createdAt: 'desc' },
-      skip: (pa - 1) * take,
-      take
-    })
-    hasMoreAfaReqs = (pa * take) < totalAfaReq
+  let afaStockWhere: any = { commodity: 'AFA_STOCK_IN' }
+  if (['AFA', 'PLANTATION', 'BD'].includes(session.role)) {
+    afaStockWhere.foId = session.userId
+  } else if (session.role === 'SPV' && session.areaId) {
+    afaStockWhere.fo = { areaId: session.areaId }
   }
-
-  // 4. Fetch FO Stock Requests
-  let foStockRequests: any[] = []
-  let hasMoreFoReqs = false
+  if (qa) {
+    afaStockWhere.fo = { ...afaStockWhere.fo, name: { contains: qa, mode: 'insensitive' } }
+  }
+  if (start_a || end_a) {
+    afaStockWhere.createdAt = {}
+    if (start_a) afaStockWhere.createdAt.gte = start_a
+    if (end_a) afaStockWhere.createdAt.lte = end_a
+  }
 
   let foStockWhere: any = { OR: [{ commodity: '-' }, { farmerId: null }] }
   if (['FO', 'INTERN'].includes(session.role)) {
@@ -124,7 +69,6 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   } else if (['AFA', 'PLANTATION'].includes(session.role)) {
     foStockWhere.afaId = session.userId
   }
-
   if (qf) {
     foStockWhere.fo = { name: { contains: qf, mode: 'insensitive' } }
   }
@@ -135,16 +79,82 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   }
 
   const stockReqInclude = { fo: true, afa: true, farmer: true, details: { include: { product: true } }, demoPlots: { select: { id: true, isFinalSession: true } } }
-  
-  const totalFoReq = await prisma.request.count({ where: foStockWhere })
-  foStockRequests = await prisma.request.findMany({
-    where: foStockWhere,
-    include: stockReqInclude,
-    orderBy: { createdAt: 'desc' },
-    skip: (pf - 1) * take,
-    take
-  })
-  hasMoreFoReqs = (pf * take) < totalFoReq
+
+  // ── Jalankan SEMUA query dalam satu Promise.all paralel ──
+  const [
+    myStocks,
+    allProducts,
+    totalUsers,
+    rawUsers,
+    totalAfaReq,
+    rawAfaRequests,
+    totalFoReq,
+    rawFoRequests,
+  ] = await Promise.all([
+    // 1. Stok saya
+    getStockBalance(session.userId),
+    // 2. Daftar semua produk master
+    prisma.product.findMany({ orderBy: { name: 'asc' } }),
+    // 3. Hitung total users tim
+    isTeamViewer ? prisma.user.count({ where: userWhere }) : Promise.resolve(0),
+    // 4. Daftar users tim (dengan pagination)
+    isTeamViewer
+      ? prisma.user.findMany({
+          where: userWhere,
+          include: { afa: { select: { name: true } }, area: { select: { name: true } } },
+          orderBy: [{ role: 'asc' }, { name: 'asc' }],
+          skip: (pu - 1) * take,
+          take
+        })
+      : Promise.resolve([]),
+    // 5. Hitung total AFA stock requests
+    isAfaStockViewer ? prisma.request.count({ where: afaStockWhere }) : Promise.resolve(0),
+    // 6. Daftar AFA stock requests (dengan pagination)
+    isAfaStockViewer
+      ? prisma.request.findMany({
+          where: afaStockWhere,
+          include: { fo: true, afa: true, details: { include: { product: true } } },
+          orderBy: { createdAt: 'desc' },
+          skip: (pa - 1) * take,
+          take
+        })
+      : Promise.resolve([]),
+    // 7. Hitung total FO stock requests
+    prisma.request.count({ where: foStockWhere }),
+    // 8. Daftar FO stock requests (dengan pagination)
+    prisma.request.findMany({
+      where: foStockWhere,
+      include: stockReqInclude,
+      orderBy: { createdAt: 'desc' },
+      skip: (pf - 1) * take,
+      take
+    }),
+  ])
+
+  // ── Resolve team variables ──
+  let teamUsers: { id: string; name: string; role: string; parentName?: string }[] = []
+  let hasMoreUsers = false
+  if (isTeamViewer) {
+    hasMoreUsers = (pu * take) < totalUsers
+    teamUsers = (rawUsers as any[]).map((u: any) => ({
+      id: u.id, name: u.name, role: u.role,
+      parentName: ['AFA', 'PLANTATION'].includes(u.role) ? (u.area?.name || 'Pusat') : (u.afa?.name || u.area?.name || '-')
+    }))
+  }
+
+  // ── Stok tim: jalankan setelah list user diketahui (tetap paralel antar user) ──
+  const stocksMap: Record<string, { product: any, quantity: number }[]> = {}
+  await Promise.all(
+    teamUsers.map(async (u) => {
+      stocksMap[u.id] = await getStockBalance(u.id)
+    })
+  )
+
+  // ── AFA & FO requests ──
+  const afaStockRequests: any[] = isAfaStockViewer ? rawAfaRequests as any[] : []
+  const hasMoreAfaReqs = isAfaStockViewer ? (pa * take) < totalAfaReq : false
+  const foStockRequests: any[] = rawFoRequests as any[]
+  const hasMoreFoReqs = (pf * take) < totalFoReq
 
   const getStatusBadge = (status: string) => {
     switch (status) {

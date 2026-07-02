@@ -8,23 +8,25 @@ export async function getStockBalance(userId: string) {
   const ledgers = await prisma.ledger.groupBy({
     by: ['productId'],
     where: { userId },
-    _sum: {
-      quantity: true
-    }
+    _sum: { quantity: true }
   })
 
-  // get product metadata
-  const products = await prisma.product.findMany()
+  if (ledgers.length === 0) return []
 
-  const balance = products.map(product => {
-    const stockAgg = ledgers.find(l => l.productId === product.id)
-    return {
-      product,
-      quantity: stockAgg?._sum.quantity || 0
-    }
+  // Hanya ambil produk yang benar-benar ada di ledger user ini (bukan semua produk)
+  const productIds = ledgers.map(l => l.productId)
+  const products = await prisma.product.findMany({
+    where: { id: { in: productIds } }
   })
 
-  return balance.filter(item => item.quantity > 0)
+  const productMap = new Map(products.map(p => [p.id, p]))
+
+  return ledgers
+    .map(l => ({
+      product: productMap.get(l.productId)!,
+      quantity: l._sum.quantity || 0
+    }))
+    .filter(item => item.quantity > 0 && item.product)
 }
 
 /**
