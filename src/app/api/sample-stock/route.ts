@@ -56,8 +56,8 @@ export async function GET(req: Request) {
         })
       }
     }
-
-    return NextResponse.json(Array.from(balanceMap.values()))
+    const finalBalances = Array.from(balanceMap.values()).filter(item => item.balance > 0)
+    return NextResponse.json(finalBalances)
   } catch (e) {
     console.error(e)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
