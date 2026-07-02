@@ -508,7 +508,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
     return { success: true }
   } catch (err: any) {
     console.error('approveAfaStockRequest error:', err)
-    return { error: 'Gagal memproses approval SPV.' }
+    return { error: `Gagal memproses approval SPV. Detail: ${err?.message || String(err)}` }
   }
 }
 
