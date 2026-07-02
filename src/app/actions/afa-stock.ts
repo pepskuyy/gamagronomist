@@ -244,9 +244,15 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
           for (const detail of req.details) {
             const dec = decisionsMap.get(detail.id)
             const isApproved = dec === undefined || dec.approved
-            const finalQty = isApproved
-              ? (dec?.qtyApproved !== undefined && dec.qtyApproved > 0 ? dec.qtyApproved : detail.qtyRequested)
-              : 0
+            
+            // Safe fallback for finalQty
+            let finalQty = 0
+            if (isApproved) {
+              const reqQty = Number(detail.qtyRequested) || 0
+              const approvedQty = Number(dec?.qtyApproved) || 0
+              finalQty = (approvedQty > 0) ? approvedQty : reqQty
+            }
+
             await tx.requestDetail.update({
               where: { id: detail.id },
               data: { qtyApproved: finalQty }
@@ -256,9 +262,10 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
           // Deduct SampleLedger + credit AFA Ledger for approved items only
           for (const detail of approvedDetails) {
             const dec = decisionsMap.get(detail.id)
-            const qtyKemasan = (dec?.qtyApproved !== undefined && dec.qtyApproved > 0)
-              ? dec.qtyApproved
-              : detail.qtyRequested
+            
+            const reqQty = Number(detail.qtyRequested) || 0
+            const approvedQty = Number(dec?.qtyApproved) || 0
+            const qtyKemasan = (approvedQty > 0) ? approvedQty : reqQty
 
             const effectiveProductId = productIdRemap.get(detail.productId) ?? detail.productId
             await tx.sampleLedger.create({
@@ -273,10 +280,10 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             })
 
             const prodInfo = productInfoMap.get(effectiveProductId)
-            const gramasiPerUnit = prodInfo?.gramasiPerUnit ?? (detail as any).product?.gramasiPerUnit ?? null
+            const gramasiPerUnit = Number(prodInfo?.gramasiPerUnit ?? (detail as any).product?.gramasiPerUnit) || null
             const unitGramasi = prodInfo?.unitGramasi ?? (detail as any).product?.unitGramasi ?? null
             const unit = prodInfo?.unit ?? (detail as any).product?.unit ?? ''
-            const qtyGramasi = gramasiPerUnit && gramasiPerUnit > 0 ? qtyKemasan * gramasiPerUnit : qtyKemasan
+            const qtyGramasi = (gramasiPerUnit !== null && gramasiPerUnit > 0) ? qtyKemasan * gramasiPerUnit : qtyKemasan
 
             await tx.ledger.create({
               data: {
@@ -361,22 +368,18 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             data: {
               userId: spvId,
               productId: effectiveProductId,
-              quantity: -detail.qtyRequested,
+              quantity: -(Number(detail.qtyRequested) || 0),
               transactionType: 'SAMPLE_OUT',
               referenceId: requestId,
               notes: `Sampel ke ${requesterLabel} (req ${requestId.slice(0, 8).toUpperCase()})`,
             }
           })
           const prodInfo = productInfoMap.get(effectiveProductId)
-          const qtyKemasan = detail.qtyApproved ?? detail.qtyRequested
-          const gramasiPerUnit = prodInfo?.gramasiPerUnit
-            ?? (detail as any).product?.gramasiPerUnit
-            ?? null
-          const unitGramasi = prodInfo?.unitGramasi
-            ?? (detail as any).product?.unitGramasi
-            ?? null
+          const qtyKemasan = Number(detail.qtyApproved ?? detail.qtyRequested) || 0
+          const gramasiPerUnit = Number(prodInfo?.gramasiPerUnit ?? (detail as any).product?.gramasiPerUnit) || null
+          const unitGramasi = prodInfo?.unitGramasi ?? (detail as any).product?.unitGramasi ?? null
           const unit = prodInfo?.unit ?? (detail as any).product?.unit ?? ''
-          const qtyGramasi = gramasiPerUnit && gramasiPerUnit > 0
+          const qtyGramasi = (gramasiPerUnit !== null && gramasiPerUnit > 0)
             ? qtyKemasan * gramasiPerUnit
             : qtyKemasan
           await tx.ledger.create({
