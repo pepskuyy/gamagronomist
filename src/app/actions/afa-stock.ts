@@ -862,13 +862,13 @@ export async function receiveSpvStockRequest(requestId: string) {
     })
 
     // 1 + 2: Atomic — status APPROVED + ledger masuk dalam satu transaction
-    await prisma.$transaction([
-      prisma.request.update({
+    await prisma.$transaction(async (tx) => {
+      await tx.request.update({
         where: { id: requestId },
         data: { status: 'APPROVED' }
-      }),
-      prisma.ledger.createMany({ data: ledgerData })
-    ])
+      })
+      await tx.ledger.createMany({ data: ledgerData })
+    }, { maxWait: 5000, timeout: 20000 })
 
     // 3. Notify AFA — invoice sudah dibuat di step WHM approve
     const existingInvoiceNo = (req as any).accurateInvoiceNo as string | null ?? null
@@ -1187,7 +1187,7 @@ export async function resetRequestToSubmitted(requestId: string) {
               data: { qtyApproved: null }
             })
           }
-        })
+        }, { maxWait: 5000, timeout: 20000 })
       } else {
         // No ledger entries yet — safe to just reset status
         await prisma.request.update({
