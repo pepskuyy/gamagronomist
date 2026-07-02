@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { usePathname } from 'next/navigation'
+import { useState, useTransition } from 'react'
+import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 
 type SidebarProps = {
@@ -77,7 +77,10 @@ const Icons = {
 
 export default function DashboardShell({ session, children }: SidebarProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [loadingHref, setLoadingHref] = useState<string | null>(null)
+  const [isPending, startTransition] = useTransition()
   const pathname = usePathname()
+  const router = useRouter()
 
   const navItems = [
     { href: '/dashboard',          label: 'Dashboard',          icon: Icons.dashboard, show: true },
@@ -93,6 +96,21 @@ export default function DashboardShell({ session, children }: SidebarProps) {
 
   const isActive = (href: string) =>
     href === '/dashboard' ? pathname === '/dashboard' : pathname.startsWith(href)
+
+  // Clear loadingHref once navigation lands on the target page
+  if (loadingHref && pathname === loadingHref) {
+    setLoadingHref(null)
+  }
+
+  function handleNavClick(e: React.MouseEvent, href: string) {
+    if (pathname === href) return // already here
+    setSidebarOpen(false)
+    setLoadingHref(href)
+    startTransition(() => {
+      router.push(href)
+    })
+    e.preventDefault()
+  }
 
   const roleColor: Record<string, string> = {
     ADMIN: '#b91c1c', SPV: '#a16207', AFA: '#15803d', FO: '#1d4ed8', FAM: '#7c3aed', WHM: '#0891b2', BD: '#c2410c', PLANTATION: '#0f766e'
@@ -116,18 +134,26 @@ export default function DashboardShell({ session, children }: SidebarProps) {
 
         {/* Nav items */}
         <nav style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, width: '100%', alignItems: 'center' }}>
-          {navItems.filter(n => n.show).map(item => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`nav-icon-btn ${isActive(item.href) ? 'active' : ''}`}
-              data-label={item.label}
-              onClick={() => setSidebarOpen(false)}
-            >
-              {item.icon}
-              <span className="nav-label">{item.label}</span>
-            </Link>
-          ))}
+          {navItems.filter(n => n.show).map(item => {
+            const isLoading = isPending && loadingHref === item.href
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`nav-icon-btn ${isActive(item.href) ? 'active' : ''}`}
+                data-label={item.label}
+                onClick={(e) => handleNavClick(e, item.href)}
+                style={isLoading ? { opacity: 0.7, pointerEvents: 'none' } : undefined}
+              >
+                {isLoading ? (
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: 'spin 0.8s linear infinite' }}>
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+                  </svg>
+                ) : item.icon}
+                <span className="nav-label">{item.label}</span>
+              </Link>
+            )
+          })}
         </nav>
 
         {/* User avatar + logout */}

@@ -42,10 +42,84 @@ export default function RootLayout({
       </head>
       <body>
         {children}
-        {/* Register Service Worker */}
+        {/* Register Service Worker + Navigation Progress Bar */}
+        <style dangerouslySetInnerHTML={{ __html: `
+          #nav-progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            width: 0%;
+            background: linear-gradient(90deg, #1a9b55, #4ade80);
+            z-index: 99999;
+            transition: width 0.2s ease, opacity 0.4s ease;
+            opacity: 0;
+            pointer-events: none;
+            border-radius: 0 2px 2px 0;
+            box-shadow: 0 0 8px rgba(26,155,85,0.6);
+          }
+          #nav-progress-bar.loading {
+            opacity: 1;
+            animation: nav-grow 1.2s ease-out forwards;
+          }
+          #nav-progress-bar.done {
+            width: 100% !important;
+            opacity: 0;
+            transition: width 0.15s ease, opacity 0.5s ease 0.15s;
+          }
+          @keyframes nav-grow {
+            0%   { width: 0%; }
+            30%  { width: 40%; }
+            60%  { width: 65%; }
+            80%  { width: 80%; }
+            100% { width: 90%; }
+          }
+        `}} />
+        <div id="nav-progress-bar" />
         <script
           dangerouslySetInnerHTML={{
             __html: `
+              // ── Navigation Progress Bar ──────────────────────────
+              (function() {
+                var bar = null;
+                var timer = null;
+                function getBar() {
+                  if (!bar) bar = document.getElementById('nav-progress-bar');
+                  return bar;
+                }
+                function startProgress() {
+                  var b = getBar(); if (!b) return;
+                  clearTimeout(timer);
+                  b.className = 'loading';
+                }
+                function doneProgress() {
+                  var b = getBar(); if (!b) return;
+                  b.className = 'done';
+                  timer = setTimeout(function() { b.className = ''; b.style.width = ''; }, 700);
+                }
+                // Hook into Next.js App Router via MutationObserver on <html> data attributes
+                // which change during RSC navigation
+                var prevPathname = location.pathname;
+                function checkNavigation() {
+                  if (location.pathname !== prevPathname) {
+                    prevPathname = location.pathname;
+                    doneProgress();
+                  }
+                }
+                // Listen to popstate and click on <a> tags for SPA navigation start
+                document.addEventListener('click', function(e) {
+                  var a = e.target && e.target.closest('a[href]');
+                  if (!a) return;
+                  var href = a.getAttribute('href');
+                  if (!href || href.startsWith('#') || href.startsWith('http') || href.startsWith('mailto')) return;
+                  if (href !== location.pathname) startProgress();
+                }, true);
+                window.addEventListener('popstate', function() { startProgress(); });
+                // Poll to detect when navigation is complete
+                setInterval(checkNavigation, 100);
+              })();
+
+              // ── Service Worker Registration ───────────────────────
               if ('serviceWorker' in navigator) {
                 window.addEventListener('load', function() {
                   navigator.serviceWorker.register('/sw.js')
@@ -66,7 +140,7 @@ export default function RootLayout({
                           '/dashboard/offline-queue',
                         ];
                         
-                        caches.open('agrolens-v3').then(function(cache) {
+                        caches.open('agrolens-v5').then(function(cache) {
                           pagesToCache.forEach(function(url) {
                             fetch(url, { credentials: 'include' })
                               .then(function(res) {

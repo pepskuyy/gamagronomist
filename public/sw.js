@@ -1,5 +1,5 @@
 // ============================================================
-// Service Worker — Agrolens PWA  v4
+// Service Worker — Agrolens PWA  v5
 //
 // Strategi:
 //   /_next/static/**   → Cache First (aset immutable, fingerprinted)
@@ -22,7 +22,7 @@
 //   5. CLEAR_PAGE_CACHE message → invalidasi cache on-demand setelah mutasi
 // ============================================================
 
-const CACHE_NAME = 'agrolens-v4'
+const CACHE_NAME = 'agrolens-v5'
 const DB_NAME    = 'agrolens-offline'
 const DB_VERSION = 1
 const STORE      = 'pending-reports'
@@ -187,7 +187,7 @@ async function staleWhileRevalidate(request) {
 async function networkFirst(request) {
   const cache = await caches.open(CACHE_NAME)
   try {
-    const response = await fetch(request, { signal: AbortSignal.timeout(5000) })
+    const response = await fetch(request, { signal: AbortSignal.timeout(12000) })
     if (response.ok || response.status === 304) {
       // Hanya cache halaman HTML (bukan JSON, binary, dll)
       const ct = response.headers.get('content-type') || ''
