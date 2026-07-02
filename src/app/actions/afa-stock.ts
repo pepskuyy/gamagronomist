@@ -301,7 +301,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             where: { id: requestId },
             data: { status: 'APPROVED', afaId: spvId },
           })
-        })
+        }, { maxWait: 5000, timeout: 20000 })
 
         // Notify requester with detail of approved vs rejected items
         const isBDPartial = req.fo?.role === 'BD'
@@ -398,7 +398,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
           where: { id: requestId },
           data: { status: 'APPROVED', afaId: session.userId },
         })
-      })
+      }, { maxWait: 5000, timeout: 20000 })
 
       // Notify requester (BD or AFA)
       const isBDReq = req.fo?.role === 'BD'
@@ -462,7 +462,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             data: { qtyApproved: finalQty }
           })
         }
-      })
+      }, { maxWait: 5000, timeout: 20000 })
     }
 
     // Update to APPROVED_SPV — no ledger entry yet
