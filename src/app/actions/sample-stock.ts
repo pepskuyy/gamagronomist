@@ -192,24 +192,18 @@ export async function removeSampleProduct(productId: string, currentBalance: num
     })
     if (!product) return { error: 'Produk tidak ditemukan.' }
 
-    // Jika masih ada saldo, buat entri void untuk zeroing
-    if (currentBalance !== 0) {
-      await prisma.sampleLedger.create({
-        data: {
-          userId: session.userId,
-          productId,
-          quantity: -currentBalance, // nol-kan saldo
-          transactionType: 'OPNAME_MINUS',
-          notes: `[VOID] Produk dihapus dari Gudang Sampel oleh SPV`,
-        },
-      })
-    }
+    // Hapus semua histori stok untuk produk ini dari gudang SPV ini agar benar-benar lenyap dari daftar
+    await prisma.sampleLedger.deleteMany({
+      where: {
+        userId: session.userId,
+        productId: productId
+      }
+    })
 
     // Jika produk custom (SMPL-) dan tidak punya accurateId, hapus dari Product
     const isCustom = product.code?.startsWith('SMPL-') && !product.accurateId
     if (isCustom) {
-      // Hapus semua ledger entries dulu, lalu hapus produk
-      await prisma.sampleLedger.deleteMany({ where: { productId } })
+      // Cek apakah produk custom ini masih dipakai di tabel lain sebelum hapus dari master product
       // Cek apakah produk dipakai di tabel lain sebelum hapus
       const usedInRequest = await prisma.requestDetail.findFirst({ where: { productId } })
       const usedInLedger  = await prisma.ledger.findFirst({ where: { productId } })
