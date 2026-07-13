@@ -6,6 +6,7 @@ import UpdateEmailForm from '@/components/UpdateEmailForm'
 import UpdatePhoneForm from '@/components/UpdatePhoneForm'
 import UpdateProfilePhotoForm from '@/components/UpdateProfilePhotoForm'
 import WahaSettingsClient from './WahaSettingsClient'
+import MaintenanceToggle from '@/components/MaintenanceToggle'
 
 
 export default async function SettingsPage() {
@@ -20,6 +21,13 @@ export default async function SettingsPage() {
     where: { id: session.userId },
     select: { email: true, phone: true, photo: true }
   })
+
+  // Fetch maintenance mode status
+  let isMaintenanceMode = false
+  if (session.role === 'ADMIN') {
+    const maintenanceConfig = await prisma.systemConfig.findUnique({ where: { key: 'maintenance_mode' } })
+    isMaintenanceMode = maintenanceConfig?.value === 'true'
+  }
 
   return (
     <div>
@@ -74,15 +82,24 @@ export default async function SettingsPage() {
         <ChangePasswordForm />
       </div>
 
-      {/* WAHA WhatsApp Integration — Admin only */}
+      {/* Admin Only Sections */}
       {session.role === 'ADMIN' && (
         <>
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', marginBottom: '2rem' }} />
+          
+          <div className="card" style={{ marginBottom: '2rem' }}>
+            <h3 style={{ marginBottom: '0.4rem' }}>🚧 Maintenance Mode</h3>
+            <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+              Aktifkan mode ini saat Anda sedang melakukan pemeliharaan server (contoh: migrasi database).
+              Traffic pengguna lain akan dialihkan ke halaman Maintenance.
+            </p>
+            <MaintenanceToggle initialStatus={isMaintenanceMode} />
+          </div>
+
           <WahaSettingsClient />
         </>
       )}
     </div>
   )
 }
-
 
