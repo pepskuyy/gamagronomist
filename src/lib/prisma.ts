@@ -16,18 +16,12 @@ const globalForPrisma = globalThis as unknown as {
 
 // Buat pool koneksi pg dengan konfigurasi yang optimal untuk serverless (Neon)
 const connectionString = process.env.DATABASE_URL
-const pool = new Pool({
-  connectionString,
-  max: 5,                      // batasi koneksi max agar tidak overwhelm Neon serverless
-  idleTimeoutMillis: 30000,    // lepas koneksi idle setelah 30 detik
-  connectionTimeoutMillis: 5000, // timeout tunggu koneksi baru
-})
-const adapter = new PrismaPg(pool)
+// Tidak menggunakan adapter pg custom lagi agar Prisma menggunakan Rust engine bawaannya
+// yang secara otomatis mengenali ?schema=gamagronomist di URL.
 
 export const prisma =
   globalForPrisma.prisma ??
   new PrismaClient({
-    adapter, // Gunakan pg adapter
     log: process.env.NODE_ENV === 'development' ? ['error', 'warn'] : ['error'],
   })
 
