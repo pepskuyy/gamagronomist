@@ -11,9 +11,10 @@ export async function GET(req: any) {
     if (!session?.userId) return NextResponse.json([])
 
     // Import helper
-    const { buildActivityWhereClause } = await import('@/lib/kpi-filters')
+    const { buildActivityWhereClause, buildDemoPlotWhereClause } = await import('@/lib/kpi-filters')
     const searchParams = req.nextUrl.searchParams
     const whereClause = await buildActivityWhereClause(session, searchParams)
+    const demoPlotWhereClause = await buildDemoPlotWhereClause(session, searchParams)
 
     // Run count queries in parallel
     const [
@@ -21,23 +22,48 @@ export async function GET(req: any) {
       countKios,
       countFarmer,
       countCompany,
-      countDemplot,
-      countVideo
+      countSpotDemplot,
+      countVideo,
+      allDemoPlots
     ] = await Promise.all([
       prisma.customerBehavior.count({ where: whereClause }),
       prisma.visitKios.count({ where: whereClause }),
       prisma.farmerGathering.count({ where: whereClause }),
       prisma.visitCompany.count({ where: whereClause }),
       prisma.spotDemplot.count({ where: whereClause }),
-      prisma.contentVideo.count({ where: whereClause })
+      prisma.contentVideo.count({ where: whereClause }),
+      prisma.demoPlot.findMany({
+        where: demoPlotWhereClause,
+        select: {
+          details: { select: { id: true } },
+          request: { select: { details: { select: { id: true } } } }
+        }
+      })
     ])
+
+    let countMiniDemplot = 0
+    let countFullDemplot = 0
+
+    allDemoPlots.forEach((dp: any) => {
+      const productCount = dp.details.length > 0 
+        ? dp.details.length 
+        : (dp.request?.details?.length || 0)
+      
+      if (productCount >= 4) {
+        countFullDemplot++
+      } else {
+        countMiniDemplot++
+      }
+    })
 
     const tally: Record<string, number> = {
       'Customer Behavior': countCB,
       'Kunjungan Kios': countKios,
       'Kunjungan Petani': countFarmer,
       'Kunjungan Perusahaan': countCompany,
-      'Spot Demplot': countDemplot,
+      'Spot Demplot': countSpotDemplot,
+      'Mini Demo Plot': countMiniDemplot,
+      'Full Demo Plot': countFullDemplot,
       'Content Video': countVideo
     }
 
