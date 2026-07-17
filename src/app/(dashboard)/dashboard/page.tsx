@@ -5,6 +5,7 @@ import { getAreas } from '@/app/actions/kpi'
 import KpiSection from '@/components/KpiSection'
 import KpiFieldDashboard from '@/components/KpiFieldDashboard'
 import DemoPlotMap from '@/components/DemoPlotMap'
+import ActivitiesChart from '@/components/ActivitiesChart'
 import CommodityChart from '@/components/CommodityChart'
 import CbProductChart from '@/components/CbProductChart'
 import CbBuyReasonChart from '@/components/CbBuyReasonChart'
@@ -229,6 +230,11 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
       {/* Demo Plot Map Section */}
       <div className="card" style={{ marginBottom: '2.5rem' }}>
         <DemoPlotMap filterQuery={filterQuery} />
+      </div>
+
+      {/* Activities Chart Section */}
+      <div className="card" style={{ marginBottom: '2.5rem' }}>
+        <ActivitiesChart filterQuery={filterQuery} />
       </div>
 
       {/* Commodity Chart Section */}
