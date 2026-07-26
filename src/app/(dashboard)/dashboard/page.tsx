@@ -4,6 +4,7 @@ import { decrypt } from '@/lib/auth'
 import { getAreas } from '@/app/actions/kpi'
 import KpiSection from '@/components/KpiSection'
 import KpiFieldDashboard from '@/components/KpiFieldDashboard'
+import TargetTrendChart from '@/components/TargetTrendChart'
 import DemoPlotMap from '@/components/DemoPlotMap'
 import ActivitiesChart from '@/components/ActivitiesChart'
 import CommodityChart from '@/components/CommodityChart'
@@ -200,6 +201,13 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
           />
         </div>
       )}
+
+      {/* Target Trend Chart (Visible to all, below Target Dashboard) */}
+      <TargetTrendChart 
+        areaId={userAreaId}
+        areaName={userAreaName}
+        allAreas={allAreas}
+      />
       
       {/* Area Leaderboard Section (Visible to all) */}
       <AreaLeaderboard />
