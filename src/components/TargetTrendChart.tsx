@@ -37,7 +37,12 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
 
   async function fetchData() {
     setLoading(true)
-    const res = await fetch(`/api/target-trend?areaId=${selectedAreaId}&activityType=${activityType}`)
+    const params = new URLSearchParams({
+      areaId: selectedAreaId,
+      activityType: activityType,
+      _t: String(Date.now())
+    })
+    const res = await fetch(`/api/target-trend?${params.toString()}`, { cache: 'no-store' })
     if (res.ok) {
       setData(await res.json())
     }
