@@ -62,7 +62,7 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
     <div className="card" style={{ marginBottom: '2.5rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>dY"I Tren Pencapaian Target</h2>
+          <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>📊 Tren Pencapaian Target</h2>
           <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             Perbandingan target vs realisasi 6 bulan terakhir
           </p>
