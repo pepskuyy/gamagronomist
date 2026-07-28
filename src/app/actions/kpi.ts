@@ -5,7 +5,7 @@ import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 
 
-// ── Types ──────────────────────────────────────────────────────────────────
+// "?"? Types "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
 
 export type Targets = {
   targetDemoPlot:  number
@@ -45,7 +45,7 @@ const EMPTY_TARGETS: Targets = {
   targetGathering: 0, targetCompany: 0, targetBehavior: 0,
 }
 
-// ── Set Target (SPV/ADMIN only, per area) ─────────────────────────────────
+// "?"? Set Target (SPV/ADMIN only, per area) "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
 
 export async function setAreaTarget(data: {
   areaId: string | null   // null = "Tanpa Area"
@@ -54,25 +54,22 @@ export async function setAreaTarget(data: {
 } & Targets) {
   try {
     const { areaId, month, year, ...targets } = data
-    console.log(`[KPI SET] Saving target: areaId=${areaId}, month=${month}, year=${year}`, targets)
-    // Prisma upsert does not allow null in compound unique constraints.
-    // So we manually find and update or create.
+    
     const existing = await prisma.kpiTarget.findFirst({
       where: { areaId: areaId ?? null, month, year }
     })
     
-    let result;
     if (existing) {
-      result = await prisma.kpiTarget.update({
+      await prisma.kpiTarget.update({
         where: { id: existing.id },
         data: targets
       })
     } else {
-      result = await prisma.kpiTarget.create({
+      await prisma.kpiTarget.create({
         data: { areaId: areaId ?? null, month, year, ...targets }
       })
     }
-    console.log(`[KPI SET] Saved record id=${result.id}, areaId=${result.areaId}`)
+    
     revalidatePath('/dashboard')
     return { success: true }
   } catch (error) {
@@ -81,13 +78,13 @@ export async function setAreaTarget(data: {
   }
 }
 
-// ── Get all areas (for dropdown) ──────────────────────────────────────────
+// "?"? Get all areas (for dropdown) "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
 
 export async function getAreas() {
   return prisma.area.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } })
 }
 
-// ── Core: get target + actuals + user contributions for one area ──────────
+// "?"? Core: get target + actuals + user contributions for one area "?"?"?"?"?"?"?"?"?"?
 
 async function computeForArea(
   userIds: string[],
@@ -124,25 +121,51 @@ async function computeForArea(
   })
   const userMap = new Map(users.map(u => [u.id, u]))
 
-  // Per-user counts in parallel
-  const [dpCounts, kiosCounts, gatherCounts, compCounts, cbCounts] = await Promise.all([
-    // Demo plot: counted per foId on the request, filtered by actual activity 'date'
-    Promise.all(userIds.map(uid =>
-      prisma.demoPlot.count({ where: { date: { gte: startDate, lte: endDate }, request: { foId: uid } } }).then(c => ({ uid, c }))
-    )),
-    Promise.all(userIds.map(uid =>
-      prisma.visitKios.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
-    )),
-    Promise.all(userIds.map(uid =>
-      prisma.farmerGathering.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
-    )),
-    Promise.all(userIds.map(uid =>
-      prisma.visitCompany.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
-    )),
-    Promise.all(userIds.map(uid =>
-      prisma.customerBehavior.count({ where: { ...df, userId: uid } }).then(c => ({ uid, c }))
-    )),
+  // Optimized query using groupBy to avoid N+1 query exhaustions
+  const [dpData, kiosData, gatherData, compData, cbData] = await Promise.all([
+    // Demo plot requires special handling since userId is inside request
+    // Prisma groupBy doesn't support relation fields directly if it's deeply nested
+    // So we fetch matching raw records and group in memory (much faster than N+1)
+    prisma.demoPlot.findMany({
+      where: { date: { gte: startDate, lte: endDate }, request: { foId: { in: userIds } } },
+      select: { request: { select: { foId: true } } }
+    }),
+    prisma.visitKios.groupBy({
+      by: ['userId'],
+      where: { ...df, userId: { in: userIds } },
+      _count: { userId: true }
+    }),
+    prisma.farmerGathering.groupBy({
+      by: ['userId'],
+      where: { ...df, userId: { in: userIds } },
+      _count: { userId: true }
+    }),
+    prisma.visitCompany.groupBy({
+      by: ['userId'],
+      where: { ...df, userId: { in: userIds } },
+      _count: { userId: true }
+    }),
+    prisma.customerBehavior.groupBy({
+      by: ['userId'],
+      where: { ...df, userId: { in: userIds } },
+      _count: { userId: true }
+    }),
   ])
+
+  // Group DemoPlots in memory
+  const dpCountsMap: Record<string, number> = {}
+  dpData.forEach(dp => {
+    const uid = dp.request?.foId
+    if (uid) {
+      dpCountsMap[uid] = (dpCountsMap[uid] || 0) + 1
+    }
+  })
+  const dpCounts = Object.entries(dpCountsMap).map(([uid, c]) => ({ uid, c }))
+
+  const kiosCounts = kiosData.map(d => ({ uid: d.userId, c: d._count.userId }))
+  const gatherCounts = gatherData.map(d => ({ uid: d.userId, c: d._count.userId }))
+  const compCounts = compData.map(d => ({ uid: d.userId, c: d._count.userId }))
+  const cbCounts = cbData.map(d => ({ uid: d.userId, c: d._count.userId }))
 
   function toContrib(counts: { uid: string; c: number }[]): UserContribution[] {
     return counts
@@ -181,13 +204,13 @@ async function computeForArea(
   }
 }
 
-// ── Public API ─────────────────────────────────────────────────────────────
+// "?"? Public API "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
 
 /**
  * Get target data for one area OR all areas combined.
- * areaId = null → aggregate all areas (including "Tanpa Area" users)
- * areaId = 'none' → only "Tanpa Area" users (no area assigned)
- * areaId = '<id>'  → specific area
+ * areaId = null +' aggregate all areas (including "Tanpa Area" users)
+ * areaId = 'none' +' only "Tanpa Area" users (no area assigned)
+ * areaId = '<id>'  +' specific area
  */
 export async function getAreaTargetData(
   areaId: string | null,
@@ -215,12 +238,6 @@ export async function getAreaTargetData(
       },
       _count: true,
     })
-
-    console.log(`[KPI] Semua Area aggregate for ${month}/${year}: count=${agg._count}`, agg._sum)
-
-    // Also log individual records for debugging
-    const allRecords = await prisma.kpiTarget.findMany({ where: { month, year }, select: { areaId: true, targetDemoPlot: true } })
-    console.log(`[KPI] Individual records:`, JSON.stringify(allRecords))
 
     const sumTargets: Targets = {
       targetDemoPlot:  agg._sum.targetDemoPlot  ?? 0,
