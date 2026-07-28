@@ -33,7 +33,7 @@ export async function getTargetTrendData(areaId: string | null, activityType: st
   let userIds: string[] = []
   if (areaId === null) {
     const allUsers = await prisma.user.findMany({
-      where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] }, isActive: true },
+      where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } },
       select: { id: true }
     })
     userIds = allUsers.map(u => u.id)
@@ -42,7 +42,6 @@ export async function getTargetTrendData(areaId: string | null, activityType: st
     const users = await prisma.user.findMany({
       where: {
         role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] },
-        isActive: true,
         areaId: actualAreaId,
       },
       select: { id: true }

@@ -221,7 +221,7 @@ export async function getAreaTargetData(
   if (areaId === null) {
     // ALL areas combined
     const allUsers = await prisma.user.findMany({
-      where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] }, isActive: true },
+      where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } },
       select: { id: true }
     })
     const userIds = allUsers.map(u => u.id)
@@ -257,7 +257,6 @@ export async function getAreaTargetData(
   const users = await prisma.user.findMany({
     where: {
       role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] },
-      isActive: true,
       areaId: actualAreaId,
     },
     select: { id: true }
