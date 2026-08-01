@@ -979,8 +979,8 @@ export async function regenerateInvoice(requestId: string) {
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (session?.role !== 'SPV' && session?.role !== 'ADMIN') {
-    return { error: 'Hanya SPV atau Admin yang dapat menerbitkan ulang invoice.' }
+  if (session?.role !== 'SPV' && session?.role !== 'ADMIN' && session?.role !== 'WHM') {
+    return { error: 'Hanya SPV, WHM, atau Admin yang dapat menerbitkan ulang invoice.' }
   }
 
   try {
