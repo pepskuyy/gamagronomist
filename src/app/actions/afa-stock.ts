@@ -992,8 +992,8 @@ export async function regenerateInvoice(requestId: string) {
     if (!req || req.commodity !== 'AFA_STOCK_IN') {
       return { error: 'Pengajuan stok tidak ditemukan.' }
     }
-    if (req.status !== 'APPROVED') {
-      return { error: 'Invoice hanya bisa di-generate ulang untuk pengajuan yang sudah SELESAI.' }
+    if (req.status !== 'APPROVED' && req.status !== 'APPROVED_WHM') {
+      return { error: 'Invoice hanya bisa di-generate ulang untuk pengajuan yang sudah disetujui WHM.' }
     }
     if ((req as any).accurateInvoiceNo) {
       return { error: 'Invoice sudah ada: ' + (req as any).accurateInvoiceNo }
