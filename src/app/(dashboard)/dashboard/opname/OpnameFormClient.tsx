@@ -16,6 +16,8 @@ type ProductMaster = {
   id: string
   name: string
   unit: string
+  unitGramasi: string | null
+  gramasiPerUnit: number | null
 }
 
 export default function OpnameFormClient() {
@@ -118,7 +120,7 @@ export default function OpnameFormClient() {
     ...products,
     ...addedProductIds.map(id => {
       const p = allProducts.find(x => x.id === id)!
-      return { id: p.id, name: p.name, unit: p.unit, systemStock: 0 }
+      return { id: p.id, name: p.name, unit: p.unitGramasi || p.unit, systemStock: 0 }
     })
   ]
 
