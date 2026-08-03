@@ -21,6 +21,7 @@ export async function GET() {
         accurateId:     true,
         updatedAt:      true,
       },
+      where: { accurateId: { not: null } },
       orderBy: { name: 'asc' },
     })
 
