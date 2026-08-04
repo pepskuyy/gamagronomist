@@ -670,80 +670,6 @@ export async function approveWhmStockRequest(
       data: { status: 'APPROVED_WHM' }
     })
 
-    // ── Buat Sales Invoice di Accurate (non-blocking) ─────────────────
-    // WHM approve = konfirmasi pengeluaran stok dari gudang
-    let savedInvoiceNo: string | null = null
-    try {
-      const productIds = req.details.map(d => d.productId)
-      const productInfos = await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true, accurateId: true },
-      })
-      const productMap = new Map(productInfos.map(p => [p.id, p]))
-
-      const itemCodes = req.details
-        .map(d => productMap.get(d.productId)?.accurateId)
-        .filter((x): x is string => !!x)
-
-      if (itemCodes.length > 0) {
-        // ── Fetch harga CJ R2 per item sebelum buat invoice ────────────
-        // Accurate tidak otomatis apply priceLevelName via API — harga harus dikirim eksplisit
-        const priceMap = await fetchItemPrices(itemCodes, 'CJ R2')
-        console.log(`[WHM Approve] Price lookup CJ R2:`, Object.fromEntries(priceMap))
-
-        const invoiceItems = req.details
-          .map(d => {
-            const prod = productMap.get(d.productId)
-            if (!prod?.accurateId) return null
-            const qtyFinal = d.qtyApproved ?? d.qtyRequested
-            if (qtyFinal <= 0) return null   // skip produk yang qty-nya 0
-            const unitPrice = priceMap.get(prod.accurateId) ?? 0
-            return {
-              itemNo:        prod.accurateId,
-              quantity:      qtyFinal,
-              unitPrice:     unitPrice > 0 ? unitPrice : undefined,
-              warehouseName: (d as any).accurateWarehouse ?? undefined,  // per-SKU warehouse; null → fallback ke header
-            }
-          })
-          .filter((x): x is NonNullable<typeof x> => x !== null)
-
-
-        if (invoiceItems.length > 0) {
-          const now = new Date()
-          const transDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
-
-          // BLOCKING: retry hingga 3x, jika gagal lempar error dan blokir WHM approval
-          const invoiceResult = await withRetry(
-            () => createSalesInvoice(
-              'T/027',
-              transDate,
-              invoiceItems,
-              `Diajukan untuk kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
-              'Kantor Pusat SMG',
-              'Gudang Baik',
-              'CJ R2'
-            ).then(r => {
-              if (!r.success) throw new Error(r.error ?? 'Accurate API returned failure')
-              return r
-            }),
-            { maxAttempts: 3, initialDelayMs: 1000, label: 'Accurate createSalesInvoice' }
-          )
-
-          savedInvoiceNo = invoiceResult.invoiceNo ?? null
-          console.log(`[WHM Approve] Accurate invoice created: ${savedInvoiceNo}`)
-          if (savedInvoiceNo) {
-            await prisma.request.update({
-              where: { id: requestId },
-              data: { accurateInvoiceNo: savedInvoiceNo },
-            })
-          }
-        }
-      }
-    } catch (accErr: any) {
-      console.error('[WHM Approve] Accurate API error (BLOCKING — approval dibatalkan):', accErr.message)
-      return { error: `Gagal membuat invoice di Accurate: ${accErr.message}. Coba lagi dalam beberapa menit.` }
-    }
-
     // Notify SPV(s) in the same area as AFA + global SPVs (areaId=null)
     const afaUser = await prisma.user.findUnique({ where: { id: req.foId } })
     const spvReceiveWhere: any = { role: 'SPV', isActive: true }
@@ -766,7 +692,6 @@ export async function approveWhmStockRequest(
     }
 
     // Notify AFA with approved quantities detail
-    const invoiceInfo = savedInvoiceNo ? ` Invoice Accurate: ${savedInvoiceNo}.` : ''
     const productDetails = await prisma.product.findMany({
       where: { id: { in: req.details.map(d => d.productId) } },
       select: { id: true, name: true, unit: true }
@@ -784,7 +709,7 @@ export async function approveWhmStockRequest(
       data: {
         userId: req.foId,
         title: '✅ Disetujui WH Manager — Menunggu Penerimaan SPV',
-        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) disetujui WHM.\n\nKuantitas final:\n${qtyDetailMsg}${invoiceInfo}`,
+        message: `Pengajuan stok Anda (ID: ${requestId.slice(0, 8).toUpperCase()}) disetujui WHM.\n\nKuantitas final:\n${qtyDetailMsg}`,
         link: `/dashboard/stock`
       }
     })
@@ -870,8 +795,72 @@ export async function receiveSpvStockRequest(requestId: string) {
       await tx.ledger.createMany({ data: ledgerData })
     }, { maxWait: 5000, timeout: 20000 })
 
-    // 3. Notify AFA — invoice sudah dibuat di step WHM approve
-    const existingInvoiceNo = (req as any).accurateInvoiceNo as string | null ?? null
+    // 3. Buat Sales Invoice di Accurate (BLOCKING — jika gagal, lempar error)
+    // Invoice terbit saat SPV konfirmasi terima stok (bukan saat WHM approve)
+    let savedInvoiceNo: string | null = null
+    try {
+      const itemCodes = productInfos
+        .map(p => p.accurateId)
+        .filter((x): x is string => !!x)
+
+      if (itemCodes.length > 0) {
+        const priceMap = await fetchItemPrices(itemCodes, 'CJ R2')
+        console.log(`[SPV Receive] Price lookup CJ R2:`, Object.fromEntries(priceMap))
+
+        const invoiceItems = req.details
+          .map(d => {
+            const prod = productMap.get(d.productId)
+            if (!prod?.accurateId) return null
+            const qtyFinal = d.qtyApproved ?? d.qtyRequested
+            if (qtyFinal <= 0) return null
+            const unitPrice = priceMap.get(prod.accurateId) ?? 0
+            return {
+              itemNo:        prod.accurateId,
+              quantity:      qtyFinal,
+              unitPrice:     unitPrice > 0 ? unitPrice : undefined,
+              warehouseName: (d as any).accurateWarehouse ?? undefined,
+            }
+          })
+          .filter((x): x is NonNullable<typeof x> => x !== null)
+
+        if (invoiceItems.length > 0) {
+          const now = new Date()
+          const transDate = `${String(now.getDate()).padStart(2, '0')}/${String(now.getMonth() + 1).padStart(2, '0')}/${now.getFullYear()}`
+
+          const invoiceResult = await withRetry(
+            () => createSalesInvoice(
+              'T/027',
+              transDate,
+              invoiceItems,
+              `Diajukan untuk kebutuhan ${req.fo?.name ?? 'AFA'} — Ref: ${requestId.slice(0, 8).toUpperCase()}`,
+              'Kantor Pusat SMG',
+              'Gudang Baik',
+              'CJ R2'
+            ).then(r => {
+              if (!r.success) throw new Error(r.error ?? 'Accurate API returned failure')
+              return r
+            }),
+            { maxAttempts: 3, initialDelayMs: 1000, label: 'Accurate createSalesInvoice (SPV Receive)' }
+          )
+
+          savedInvoiceNo = invoiceResult.invoiceNo ?? null
+          console.log(`[SPV Receive] Accurate invoice created: ${savedInvoiceNo}`)
+          if (savedInvoiceNo) {
+            await prisma.request.update({
+              where: { id: requestId },
+              data: { accurateInvoiceNo: savedInvoiceNo },
+            })
+          }
+        }
+      }
+    } catch (accErr: any) {
+      // Invoice gagal tapi ledger sudah masuk — catat error tapi jangan rollback
+      // SPV bisa generate ulang invoice via tombol Generate Invoice
+      console.error('[SPV Receive] Accurate invoice error (non-blocking):', accErr.message)
+    }
+
+    // 4. Notify AFA — sertakan nomor invoice jika berhasil
+    const existingInvoiceNo = savedInvoiceNo ?? ((req as any).accurateInvoiceNo as string | null) ?? null
     const invoiceInfo = existingInvoiceNo ? ` Invoice Accurate: ${existingInvoiceNo}.` : ''
     await prisma.notification.create({
       data: {

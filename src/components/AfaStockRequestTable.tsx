@@ -594,7 +594,7 @@ export default function AfaStockRequestTable({
                             </button>
                           )}
 
-                          {req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && (req.status === 'APPROVED' || req.status === 'APPROVED_WHM') && (role === 'SPV' || role === 'ADMIN' || role === 'WHM') && (
+                          {req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && req.status === 'APPROVED' && (role === 'SPV' || role === 'ADMIN' || role === 'WHM') && (
                             <button
                               onClick={() => handleRegenerate(req.id)}
                               className="btn"
