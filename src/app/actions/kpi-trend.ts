@@ -11,25 +11,32 @@ export type TrendData = {
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
 
-export async function getTargetTrendData(areaId: string | null, activityType: string): Promise<TrendData[]> {
-  const trend: TrendData[] = []
-  const now = new Date()
-  let currentMonth = now.getMonth() + 1
-  let currentYear = now.getFullYear()
-
-  // Generate last 6 months (including current)
-  const periods = []
-  for (let i = 5; i >= 0; i--) {
-    let m = currentMonth - i
-    let y = currentYear
-    if (m <= 0) {
-      m += 12
-      y -= 1
-    }
+function generatePeriods(fromMonth: number, fromYear: number, toMonth: number, toYear: number) {
+  const periods: { m: number; y: number }[] = []
+  let m = fromMonth
+  let y = fromYear
+  while (y < toYear || (y === toYear && m <= toMonth)) {
     periods.push({ m, y })
+    m++
+    if (m > 12) { m = 1; y++ }
+    // safety cap: max 12
+    if (periods.length >= 12) break
   }
+  return periods
+}
 
-  // 1. Get user IDs for the area
+export async function getTargetTrendData(
+  areaId: string | null,
+  activityType: string,
+  fromMonth: number,
+  fromYear: number,
+  toMonth: number,
+  toYear: number,
+): Promise<TrendData[]> {
+  const periods = generatePeriods(fromMonth, fromYear, toMonth, toYear)
+  if (periods.length === 0) return []
+
+  // 1. Get user IDs for the area (once, reused for all periods)
   let userIds: string[] = []
   if (areaId === null) {
     const allUsers = await prisma.user.findMany({
@@ -40,21 +47,17 @@ export async function getTargetTrendData(areaId: string | null, activityType: st
   } else {
     const actualAreaId = areaId === 'none' ? null : areaId
     const users = await prisma.user.findMany({
-      where: {
-        role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] },
-        areaId: actualAreaId,
-      },
+      where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] }, areaId: actualAreaId },
       select: { id: true }
     })
     userIds = users.map(u => u.id)
   }
 
-  // 2. Fetch targets and actuals for all 6 months concurrently
+  // 2. Fetch targets and actuals for all periods concurrently
   const results = await Promise.all(
     periods.map(async (p) => {
-      // Targets
       let targets: Targets = { targetDemoPlot: 0, targetVisitKios: 0, targetGathering: 0, targetCompany: 0, targetBehavior: 0 }
-      
+
       if (areaId === null) {
         const agg = await prisma.kpiTarget.aggregate({
           where: { month: p.m, year: p.y },
@@ -83,15 +86,14 @@ export async function getTargetTrendData(areaId: string | null, activityType: st
         }
       }
 
-      // Actuals (Optimized: direct count instead of per-user map)
       const startDate = new Date(p.y, p.m - 1, 1)
       const endDate   = new Date(p.y, p.m, 0, 23, 59, 59, 999)
       const df = { createdAt: { gte: startDate, lte: endDate } }
-      
+
       let dpCount = 0, kiosCount = 0, gatherCount = 0, compCount = 0, cbCount = 0
-      
+
       if (userIds.length > 0) {
-        [dpCount, kiosCount, gatherCount, compCount, cbCount] = await Promise.all([
+        ;[dpCount, kiosCount, gatherCount, compCount, cbCount] = await Promise.all([
           prisma.demoPlot.count({ where: { date: { gte: startDate, lte: endDate }, request: { foId: { in: userIds } } } }),
           prisma.visitKios.count({ where: { ...df, userId: { in: userIds } } }),
           prisma.farmerGathering.count({ where: { ...df, userId: { in: userIds } } }),
@@ -101,45 +103,28 @@ export async function getTargetTrendData(areaId: string | null, activityType: st
       }
 
       return {
-        m: p.m,
-        y: p.y,
+        m: p.m, y: p.y,
         targets,
-        actuals: {
-          demoPlot: dpCount,
-          visitKios: kiosCount,
-          gathering: gatherCount,
-          company: compCount,
-          behavior: cbCount,
-        }
+        actuals: { demoPlot: dpCount, visitKios: kiosCount, gathering: gatherCount, company: compCount, behavior: cbCount }
       }
     })
   )
 
-  for (const data of results) {
+  const targetMap: Record<string, keyof Targets> = {
+    demoPlot: 'targetDemoPlot', visitKios: 'targetVisitKios',
+    gathering: 'targetGathering', company: 'targetCompany', behavior: 'targetBehavior',
+  }
+
+  return results.map(data => {
     let target = 0
     let actual = 0
-
     if (activityType === 'all') {
       target = Object.values(data.targets).reduce((a, b) => a + b, 0)
       actual = Object.values(data.actuals).reduce((a, b) => a + b, 0)
     } else {
-      const targetMap: Record<string, keyof typeof data.targets> = {
-        demoPlot: 'targetDemoPlot',
-        visitKios: 'targetVisitKios',
-        gathering: 'targetGathering',
-        company: 'targetCompany',
-        behavior: 'targetBehavior',
-      }
       target = data.targets[targetMap[activityType]] || 0
       actual = data.actuals[activityType as keyof typeof data.actuals] || 0
     }
-
-    trend.push({
-      monthLabel: `${MONTHS[data.m - 1]} ${data.y}`,
-      target,
-      actual
-    })
-  }
-
-  return trend
+    return { monthLabel: `${MONTHS[data.m - 1]} ${data.y}`, target, actual }
+  })
 }
