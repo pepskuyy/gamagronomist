@@ -22,8 +22,8 @@ const ACTIVITIES = [
   { key: 'behavior',  label: 'Customer Behavior' },
 ]
 
-const MONTH_NAMES = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
-const MONTH_FULL  = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+const MONTH_NAMES = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
+const MONTH_SHORT = ['Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des']
 
 function defaultRange() {
   const now = new Date()
@@ -39,24 +39,32 @@ function monthDiff(fm: number, fy: number, tm: number, ty: number) {
   return (ty - fy) * 12 + (tm - fm)
 }
 
+// Generate list of {month, year} options for N years back/forward from current
+function buildMonthOptions(currentYear: number) {
+  const options: { month: number; year: number; label: string }[] = []
+  for (let y = currentYear - 2; y <= currentYear + 1; y++) {
+    for (let m = 1; m <= 12; m++) {
+      options.push({ month: m, year: y, label: `${MONTH_NAMES[m - 1]} ${y}` })
+    }
+  }
+  return options
+}
+
 export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetTrendChartProps) {
   const def = defaultRange()
   const now = new Date()
   const currentYear = now.getFullYear()
+  const monthOptions = buildMonthOptions(currentYear)
 
   const [selectedAreaId, setSelectedAreaId] = useState<string>(areaId ?? 'all')
   const [activityType,   setActivityType]   = useState<string>('all')
-
   const [fromMonth, setFromMonth] = useState(def.fromMonth)
   const [fromYear,  setFromYear]  = useState(def.fromYear)
   const [toMonth,   setToMonth]   = useState(def.toMonth)
   const [toYear,    setToYear]    = useState(def.toYear)
-
-  const [data,    setData]    = useState<TrendData[]>([])
-  const [loading, setLoading] = useState(true)
+  const [data,      setData]      = useState<TrendData[]>([])
+  const [loading,   setLoading]   = useState(true)
   const [rangeError, setRangeError] = useState<string | null>(null)
-
-  const years = [currentYear - 2, currentYear - 1, currentYear, currentYear + 1]
 
   const validate = useCallback(() => {
     const diff = monthDiff(fromMonth, fromYear, toMonth, toYear)
@@ -91,42 +99,18 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
     fontSize: '0.85rem', color: '#374151', background: '#fff', cursor: 'pointer', outline: 'none',
   }
 
-  const rangeLabel = `${MONTH_FULL[fromMonth - 1]} ${fromYear} — ${MONTH_FULL[toMonth - 1]} ${toYear}`
+  const rangeLabel = `${MONTH_NAMES[fromMonth - 1]} ${fromYear} — ${MONTH_NAMES[toMonth - 1]} ${toYear}`
+  const fromValue = `${fromYear}-${String(fromMonth).padStart(2,'0')}`
+  const toValue   = `${toYear}-${String(toMonth).padStart(2,'0')}`
 
-  // Month slider: value = index 0..11 relative to fromYear Jan
-  // Render two range inputs stacked for from/to
-  function MonthSlider({
-    label, month, year, onChange,
-  }: { label: string; month: number; year: number; onChange: (m: number, y: number) => void }) {
-    // absolute month index from Jan 2020 as base
-    const base = 2020
-    const absMin = (years[0] - base) * 12
-    const absMax = (years[years.length - 1] - base) * 12 + 11
-    const absVal = (year - base) * 12 + (month - 1)
+  function handleFrom(val: string) {
+    const [y, m] = val.split('-').map(Number)
+    setFromMonth(m); setFromYear(y)
+  }
 
-    function handleChange(v: number) {
-      const y = Math.floor(v / 12) + base
-      const m = (v % 12) + 1
-      onChange(m, y)
-    }
-
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flex: 1 }}>
-        <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 600, whiteSpace: 'nowrap', minWidth: 32 }}>{label}</span>
-        <input
-          type="range"
-          min={absMin} max={absMax} value={absVal}
-          onChange={e => handleChange(Number(e.target.value))}
-          style={{ flex: 1, accentColor: '#0ea5e9', cursor: 'pointer' }}
-        />
-        <span style={{
-          fontSize: '0.82rem', fontWeight: 700, color: '#0ea5e9',
-          background: '#e0f2fe', borderRadius: '0.4rem', padding: '0.2rem 0.55rem', whiteSpace: 'nowrap', minWidth: 70, textAlign: 'center'
-        }}>
-          {MONTH_NAMES[month - 1]} {year}
-        </span>
-      </div>
-    )
+  function handleTo(val: string) {
+    const [y, m] = val.split('-').map(Number)
+    setToMonth(m); setToYear(y)
   }
 
   return (
@@ -141,8 +125,8 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
         </div>
       </div>
 
-      {/* Filter Row 1: Area + Kegiatan */}
-      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1rem', alignItems: 'center' }}>
+      {/* Filters */}
+      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Area:</span>
           <select style={selectStyle} value={selectedAreaId} onChange={e => setSelectedAreaId(e.target.value)}>
@@ -153,6 +137,7 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
             ))}
           </select>
         </div>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
           <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Kegiatan:</span>
           <select style={selectStyle} value={activityType} onChange={e => setActivityType(e.target.value)}>
@@ -160,30 +145,25 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
           </select>
         </div>
 
-        {/* Year picker */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Tahun:</span>
-          <select style={selectStyle} value={fromYear}
-            onChange={e => { const y = Number(e.target.value); setFromYear(y); if (toYear < y) setToYear(y) }}>
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
-          </select>
-          <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>–</span>
-          <select style={selectStyle} value={toYear}
-            onChange={e => { const y = Number(e.target.value); setToYear(y); if (fromYear > y) setFromYear(y) }}>
-            {years.map(y => <option key={y} value={y}>{y}</option>)}
+          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Dari:</span>
+          <select style={selectStyle} value={fromValue} onChange={e => handleFrom(e.target.value)}>
+            {monthOptions.map(o => {
+              const v = `${o.year}-${String(o.month).padStart(2,'0')}`
+              return <option key={v} value={v}>{o.label}</option>
+            })}
           </select>
         </div>
-      </div>
 
-      {/* Filter Row 2: Month sliders */}
-      <div style={{
-        background: '#f8fafc', border: '1px solid #e5e7eb', borderRadius: '0.6rem',
-        padding: '0.75rem 1rem', marginBottom: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.6rem'
-      }}>
-        <MonthSlider label="Dari" month={fromMonth} year={fromYear}
-          onChange={(m, y) => { setFromMonth(m); setFromYear(y) }} />
-        <MonthSlider label="Sampai" month={toMonth} year={toYear}
-          onChange={(m, y) => { setToMonth(m); setToYear(y) }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Sampai:</span>
+          <select style={selectStyle} value={toValue} onChange={e => handleTo(e.target.value)}>
+            {monthOptions.map(o => {
+              const v = `${o.year}-${String(o.month).padStart(2,'0')}`
+              return <option key={v} value={v}>{o.label}</option>
+            })}
+          </select>
+        </div>
       </div>
 
       {rangeError && (
@@ -216,3 +196,4 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
     </div>
   )
 }
+
