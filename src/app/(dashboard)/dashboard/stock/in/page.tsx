@@ -191,9 +191,6 @@ export default function StockInPage() {
       alert('Produk ini sudah ada dalam daftar.'); return
     }
 
-    const detail = products.find(p => p.id === currentProduct)
-    if (!detail) return
-
     if (isSample) {
       // SAMPLE mode: use sampleProducts (SMPL- IDs) directly
       const sampleP = sampleProducts.find(s => s.productId === currentProduct)
@@ -218,6 +215,9 @@ export default function StockInPage() {
     }
 
     // ── Main warehouse: cek stok Accurate real-time sebelum tambah ──
+    const detail = products.find(p => p.id === currentProduct)
+    if (!detail) return
+
     if (detail.spvStock != null && qty > detail.spvStock) {
       alert(`Jumlah melebihi stok SPV! Tersedia: ${detail.spvStock} ${detail.unit}`)
       return
