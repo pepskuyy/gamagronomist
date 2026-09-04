@@ -1,5 +1,5 @@
 // ============================================================
-// Service Worker — Agrolens PWA  v5
+// Service Worker — Agrolens PWA  v6
 //
 // Strategi:
 //   /_next/static/**   → Cache First (aset immutable, fingerprinted)
@@ -10,7 +10,7 @@
 //   /api/**            → Network Only (data realtime, error JSON saat offline)
 //   emsifa.github.io   → Cache First (data wilayah, jarang berubah)
 //   Cloudinary CDN     → Cache First
-//   /dashboard/**      → Network First + fallback cache
+//   /dashboard/**      → Network First + fallback cache (dengan TTL)
 //                        (fresh data setelah mutasi, tapi bisa dibuka offline)
 //   lainnya            → Network First dengan fallback cache
 //
@@ -20,12 +20,42 @@
 //   3. Tambah /api/products + /api/cb-farmers ke SWR → form bisa diisi offline
 //   4. Tambah halaman form ke PRECACHE_URLS → bisa dibuka tanpa internet
 //   5. CLEAR_PAGE_CACHE message → invalidasi cache on-demand setelah mutasi
+//
+// Fix v6 — akar masalah "cache nyangkut":
+//   1. TTL 30 menit untuk cached HTML → stale entry self-healing, tidak permanen
+//   2. Status 304 tidak lagi di-cache → mencegah halaman blank dari body kosong
+//   3. Halaman maintenance & redirect tidak pernah masuk cache (marker header)
+//   4. PREWARM_PAGES message → pre-warm dikelola SW, bukan hardcode di layout
+//   5. CLEAR_ALL_PAGES message → admin/mutasi bisa reset seluruh cache HTML
 // ============================================================
 
-const CACHE_NAME = 'agrolens-v5'
+const CACHE_NAME = 'agrolens-v6'
 const DB_NAME    = 'agrolens-offline'
 const DB_VERSION = 1
 const STORE      = 'pending-reports'
+
+// TTL untuk halaman HTML di cache (ms). Lewat dari ini → dianggap stale,
+// tidak dipakai sebagai fallback offline. Mencegah cache "nyangkut" permanen.
+const HTML_CACHE_TTL = 30 * 60 * 1000  // 30 menit
+
+// Header internal untuk menandai kapan entry disimpan
+const CACHED_AT_HEADER = 'x-sw-cached-at'
+
+// Marker di body HTML yang menandakan halaman TIDAK boleh di-cache.
+// Halaman maintenance menyisipkan string ini.
+const NO_CACHE_MARKER = 'data-sw-no-cache'
+
+// Halaman yang dikecualikan dari TTL — harus selalu tersedia offline
+const TTL_EXEMPT_PAGES = [
+  '/login',
+  '/dashboard/demoplot/new',
+  '/dashboard/reports/spot-demplot/new',
+  '/dashboard/reports/cb/new',
+  '/dashboard/reports/kios/new',
+  '/dashboard/reports/gathering/new',
+  '/dashboard/reports/company/new',
+  '/dashboard/offline-queue',
+]
 
 // URL yang di-pre-cache saat SW install (App Shell + halaman form penting)
 const PRECACHE_URLS = [
@@ -38,6 +68,18 @@ const PRECACHE_URLS = [
   '/icons/icon-512x512.png',
 ]
 
+// Halaman yang di-pre-warm saat online (dipicu via message dari client)
+const PREWARM_PAGES = [
+  '/dashboard',
+  '/dashboard/reports',
+  '/dashboard/reports/spot-demplot/new',
+  '/dashboard/reports/cb/new',
+  '/dashboard/reports/kios/new',
+  '/dashboard/reports/gathering/new',
+  '/dashboard/reports/company/new',
+  '/dashboard/offline-queue',
+]
+
 // API yang dibutuhkan form saat offline (data master, jarang berubah)
 const OFFLINE_DATA_APIS = [
   '/api/products',
@@ -48,9 +90,14 @@ const OFFLINE_DATA_APIS = [
 // ── Install ────────────────────────────────────────────────────────
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) =>
-      cache.addAll(PRECACHE_URLS).catch(() => Promise.resolve())
-    )
+    caches.open(CACHE_NAME).then(async (cache) => {
+      // Cache satu per satu: jika satu URL gagal (mis. session expired →
+      // redirect), sisanya tetap tersimpan. cache.addAll() akan menolak
+      // seluruh batch bila ada satu yang gagal atau ter-redirect.
+      await Promise.all(
+        PRECACHE_URLS.map((u) => cache.add(new Request(u)).catch(() => null))
+      )
+    })
   )
   self.skipWaiting()
 })
@@ -58,11 +105,15 @@ self.addEventListener('install', (event) => {
 // ── Activate ───────────────────────────────────────────────────────
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
-    )
+    (async () => {
+      // Hapus cache versi lama
+      const keys = await caches.keys()
+      await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      // Bersihkan entry HTML basi di cache versi ini
+      await pruneStaleHtml()
+      await self.clients.claim()
+    })()
   )
-  self.clients.claim()
 })
 
 // ── Fetch ──────────────────────────────────────────────────────────
@@ -148,6 +199,26 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(networkFirst(request))
 })
 
+// ── Periodic cleanup: buang entry HTML yang sudah kadaluarsa ───────
+// Dipicu saat SW aktif dan setiap kali ada message masuk, agar cache
+// tidak menumpuk entry basi walau user jarang offline.
+async function pruneStaleHtml() {
+  const cache = await caches.open(CACHE_NAME)
+  const keys  = await cache.keys()
+  const now   = Date.now()
+  await Promise.all(
+    keys.map(async (req) => {
+      const path = new URL(req.url).pathname
+      if (TTL_EXEMPT_PAGES.includes(path)) return
+      const res = await cache.match(req)
+      const ct  = res?.headers.get('content-type') || ''
+      if (!ct.includes('text/html')) return
+      const cachedAt = Number(res.headers.get(CACHED_AT_HEADER) || 0)
+      if (!cachedAt || now - cachedAt > HTML_CACHE_TTL) await cache.delete(req)
+    })
+  )
+}
+
 // ── Strategi Cache ─────────────────────────────────────────────────
 
 /** Cache First: serve cache, fetch jika belum ada */
@@ -183,23 +254,75 @@ async function staleWhileRevalidate(request) {
   return offlineFallbackPage()
 }
 
-/** Network First: coba network, fallback ke cache, fallback ke offline page */
+/** Network First: coba network, fallback ke cache (dengan TTL), fallback ke offline page */
 async function networkFirst(request) {
   const cache = await caches.open(CACHE_NAME)
   try {
     const response = await fetch(request, { signal: AbortSignal.timeout(12000) })
-    if (response.ok || response.status === 304) {
-      // Hanya cache halaman HTML (bukan JSON, binary, dll)
-      const ct = response.headers.get('content-type') || ''
-      if (ct.includes('text/html')) {
-        cache.put(request, response.clone())
-      }
+    // Hanya cache 2xx. Status 304 punya body kosong — jika di-cache akan
+    // menimpa entry bagus dengan halaman blank.
+    if (response.ok) {
+      await putCacheableHtml(cache, request, response)
     }
     return response
   } catch {
-    const cached = await cache.match(request)
+    const cached = await getFreshCached(cache, request)
     return cached || offlineFallbackPage()
   }
+}
+
+/**
+ * Simpan response HTML ke cache dengan timestamp, dengan guard:
+ *  - hanya content-type text/html
+ *  - bukan hasil redirect (mencegah halaman /login tersimpan sebagai /dashboard)
+ *  - bukan halaman yang menandai dirinya no-cache (mis. halaman maintenance)
+ */
+async function putCacheableHtml(cache, request, response) {
+  const ct = response.headers.get('content-type') || ''
+  if (!ct.includes('text/html')) return
+  // Response hasil redirect (mis. session expired → /login) tidak boleh
+  // disimpan di bawah URL asal.
+  if (response.redirected) return
+  if (response.type === 'opaqueredirect') return
+
+  const html = await response.clone().text()
+  // Halaman maintenance menyisipkan marker ini. Jangan pernah di-cache —
+  // inilah penyebab utama user "nyangkut" di mode maintenance.
+  if (html.includes(NO_CACHE_MARKER)) {
+    await cache.delete(request)
+    return
+  }
+
+  const headers = new Headers(response.headers)
+  headers.set(CACHED_AT_HEADER, String(Date.now()))
+  await cache.put(request, new Response(html, { status: response.status, statusText: response.statusText, headers }))
+}
+
+/**
+ * Ambil entry dari cache hanya jika masih dalam TTL.
+ * Halaman shell (form offline) dikecualikan dari TTL agar tetap bisa
+ * dibuka tanpa internet kapan pun.
+ * Entry kadaluarsa dihapus agar tidak menumpuk.
+ */
+async function getFreshCached(cache, request) {
+  const cached = await cache.match(request)
+  if (!cached) return null
+
+  const ct = cached.headers.get('content-type') || ''
+  // Non-HTML (mis. aset statis) tidak perlu TTL
+  if (!ct.includes('text/html')) return cached
+
+  // Halaman form offline harus selalu tersedia — jangan kena TTL
+  const path = new URL(request.url).pathname
+  if (TTL_EXEMPT_PAGES.includes(path)) return cached
+
+  const cachedAt = Number(cached.headers.get(CACHED_AT_HEADER) || 0)
+  // Entry lama tanpa timestamp (dari versi SW sebelumnya) dianggap stale
+  if (!cachedAt || Date.now() - cachedAt > HTML_CACHE_TTL) {
+    await cache.delete(request)
+    return null
+  }
+  return cached
 }
 
 function offlineFallbackPage() {
@@ -284,6 +407,21 @@ self.addEventListener('message', (event) => {
     return
   }
 
+  // Pre-warm halaman penting agar bisa dibuka offline.
+  // Dipicu dari client saat online. Daftar URL dikelola di SW (PREWARM_PAGES)
+  // agar tidak ada duplikasi nama cache / daftar URL di layout.
+  if (event.data?.type === 'PREWARM_PAGES') {
+    event.waitUntil(pruneStaleHtml().then(prewarmPages))
+    return
+  }
+
+  // Reset seluruh cache HTML — dipakai saat keluar dari maintenance
+  // atau ketika user melaporkan tampilan stale.
+  if (event.data?.type === 'CLEAR_ALL_PAGES') {
+    event.waitUntil(clearAllHtmlCache())
+    return
+  }
+
   // Invalidasi cache halaman tertentu setelah mutasi (approval, submit, dll)
   // Dikirim dari komponen UI setelah Server Action berhasil.
   if (event.data?.type === 'CLEAR_PAGE_CACHE') {
@@ -298,6 +436,37 @@ self.addEventListener('message', (event) => {
     return
   }
 })
+
+/** Pre-warm halaman penting. Guard redirect agar /login tidak tersimpan sebagai /dashboard. */
+async function prewarmPages() {
+  const cache = await caches.open(CACHE_NAME)
+  await Promise.all(
+    PREWARM_PAGES.map(async (url) => {
+      try {
+        const res = await fetch(url, { credentials: 'include', redirect: 'follow' })
+        // Session expired → middleware redirect ke /login.
+        // Tanpa guard ini, HTML login tersimpan di bawah key /dashboard.
+        if (!res.ok || res.redirected) return
+        await putCacheableHtml(cache, new Request(url), res)
+      } catch {
+        // offline / gagal — abaikan
+      }
+    })
+  )
+}
+
+/** Hapus semua entry HTML dari cache, sisakan aset statis. */
+async function clearAllHtmlCache() {
+  const cache = await caches.open(CACHE_NAME)
+  const keys  = await cache.keys()
+  await Promise.all(
+    keys.map(async (req) => {
+      const res = await cache.match(req)
+      const ct  = res?.headers.get('content-type') || ''
+      if (ct.includes('text/html')) await cache.delete(req)
+    })
+  )
+}
 
 // ── Background Sync ────────────────────────────────────────────────
 self.addEventListener('sync', (event) => {

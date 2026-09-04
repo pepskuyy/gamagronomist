@@ -126,30 +126,25 @@ export default function RootLayout({
                     .then(function(reg) {
                       console.log('[SW] Registered');
 
-                      // Pre-warm cache: simpan halaman penting saat online
-                      // agar bisa diakses saat offline
-                      if (navigator.onLine) {
-                        var pagesToCache = [
-                          '/dashboard',
-                          '/dashboard/reports',
-                          '/dashboard/reports/spot-demplot/new',
-                          '/dashboard/reports/cb/new',
-                          '/dashboard/reports/kios/new',
-                          '/dashboard/reports/gathering/new',
-                          '/dashboard/reports/company/new',
-                          '/dashboard/offline-queue',
-                        ];
-                        
-                        caches.open('agrolens-v5').then(function(cache) {
-                          pagesToCache.forEach(function(url) {
-                            fetch(url, { credentials: 'include' })
-                              .then(function(res) {
-                                if (res.ok) cache.put(url, res);
-                              })
-                              .catch(function() {});
-                          });
-                        });
+                      // Pre-warm cache lewat SW (daftar URL & nama cache
+                      // dikelola di sw.js agar tidak ada duplikasi/hardcode).
+                      // SW juga menolak menyimpan response hasil redirect,
+                      // sehingga halaman /login tidak pernah tersimpan
+                      // sebagai /dashboard saat session expired.
+                      function askPrewarm() {
+                        if (!navigator.onLine) return;
+                        var sw = reg.active || navigator.serviceWorker.controller;
+                        if (sw) sw.postMessage({ type: 'PREWARM_PAGES' });
                       }
+
+                      if (reg.active) askPrewarm();
+                      else reg.addEventListener('updatefound', function() {
+                        if (reg.installing) {
+                          reg.installing.addEventListener('statechange', function() {
+                            if (this.state === 'activated') askPrewarm();
+                          });
+                        }
+                      });
                     })
                     .catch(function(err) { console.log('[SW] Error:', err); });
                 });

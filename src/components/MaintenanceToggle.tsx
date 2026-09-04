@@ -13,6 +13,12 @@ export default function MaintenanceToggle({ initialStatus }: { initialStatus: bo
     startTransition(async () => {
       try {
         await toggleMaintenanceMode(newValue)
+        // Saat keluar dari maintenance, minta Service Worker membuang seluruh
+        // cache HTML. Tanpa ini, client yang sempat menyimpan halaman
+        // maintenance bisa tetap melihatnya walau mode sudah dimatikan.
+        if (!newValue && typeof navigator !== 'undefined') {
+          navigator.serviceWorker?.controller?.postMessage({ type: 'CLEAR_ALL_PAGES' })
+        }
       } catch (err) {
         setIsActive(!newValue)
         alert('Gagal mengubah status maintenance')
