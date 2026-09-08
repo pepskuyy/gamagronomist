@@ -29,7 +29,7 @@
 //   5. CLEAR_ALL_PAGES message → admin/mutasi bisa reset seluruh cache HTML
 // ============================================================
 
-const CACHE_NAME = 'agrolens-v6'
+const CACHE_NAME = 'agrolens-v7'
 const DB_NAME    = 'agrolens-offline'
 const DB_VERSION = 1
 const STORE      = 'pending-reports'
@@ -42,12 +42,11 @@ const HTML_CACHE_TTL = 30 * 60 * 1000  // 30 menit
 const CACHED_AT_HEADER = 'x-sw-cached-at'
 
 // Marker di body HTML yang menandakan halaman TIDAK boleh di-cache.
-// Halaman maintenance menyisipkan string ini.
+// Halaman maintenance & login menyisipkan string ini.
 const NO_CACHE_MARKER = 'data-sw-no-cache'
 
 // Halaman yang dikecualikan dari TTL — harus selalu tersedia offline
 const TTL_EXEMPT_PAGES = [
-  '/login',
   '/dashboard/demoplot/new',
   '/dashboard/reports/spot-demplot/new',
   '/dashboard/reports/cb/new',
@@ -59,7 +58,6 @@ const TTL_EXEMPT_PAGES = [
 
 // URL yang di-pre-cache saat SW install (App Shell + halaman form penting)
 const PRECACHE_URLS = [
-  '/login',
   '/dashboard/demoplot/new',
   '/dashboard/reports/spot-demplot/new',
   '/dashboard/reports/cb/new',

@@ -2,7 +2,6 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { login } from '../actions/auth'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -15,25 +14,35 @@ export default function LoginPage() {
     setError(null)
     
     const formData = new FormData(e.currentTarget)
-    const res = await login(formData)
-    
-    if (res?.error) {
-      setError(res.error)
-      setLoading(false)
-    } else if (res?.success) {
-      // Login berhasil, navigasi ke dashboard
-      setLoading(false)
-      router.push('/dashboard')
-      router.refresh()
-    } else {
-      // Tidak ada error maupun success — server action tidak merespons normal
-      setError('Server tidak merespons. Coba lagi.')
+    const username = (formData.get('username') as string)?.trim() || ''
+    const password = (formData.get('password') as string) || ''
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      })
+
+      const data = await res.json().catch(() => ({}))
+
+      if (!res.ok || data.error) {
+        setError(data.error || 'Gagal login. Coba lagi.')
+        setLoading(false)
+      } else {
+        // Login berhasil, navigasi ke dashboard
+        setLoading(false)
+        router.push('/dashboard')
+        router.refresh()
+      }
+    } catch (err) {
+      setError('Gagal terhubung ke server. Periksa koneksi internet.')
       setLoading(false)
     }
   }
 
   return (
-    <div className="login-container">
+    <div className="login-container" data-sw-no-cache="1">
       <div className="login-card">
         <div className="login-header">
           <div className="logo">
