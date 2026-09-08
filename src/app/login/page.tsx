@@ -1,10 +1,8 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
-  const router = useRouter()
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
 
@@ -27,16 +25,18 @@ export default function LoginPage() {
       const data = await res.json().catch(() => ({}))
 
       if (!res.ok || data.error) {
-        setError(data.error || 'Gagal login. Coba lagi.')
+        setError(data.error || 'Gagal login. Periksa username dan password.')
         setLoading(false)
+      } else if (data.success) {
+        // Login berhasil, arahkan ke dashboard via full reload
+        window.location.href = '/dashboard'
       } else {
-        // Login berhasil, navigasi ke dashboard
+        setError('Respons server tidak valid. Coba lagi.')
         setLoading(false)
-        router.push('/dashboard')
-        router.refresh()
       }
-    } catch (err) {
-      setError('Gagal terhubung ke server. Periksa koneksi internet.')
+    } catch (err: any) {
+      console.error('Login submit error:', err)
+      setError(`Gagal terhubung ke server (${err.message || 'Network error'}).`)
       setLoading(false)
     }
   }
@@ -62,6 +62,7 @@ export default function LoginPage() {
               className="form-control" 
               required 
               placeholder="Masukkan username"
+              autoComplete="username"
             />
           </div>
           <div className="form-group">
@@ -72,6 +73,7 @@ export default function LoginPage() {
               className="form-control" 
               required 
               placeholder="Masukkan password"
+              autoComplete="current-password"
             />
           </div>
           <button 
