@@ -69,6 +69,7 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
   const [loading, setLoading]       = useState(true)
   const [activeFilter, setActiveFilter] = useState<'all' | 'spot' | 'mini' | 'full'>('all')
   const [showStores, setShowStores] = useState(true)
+  const [mapMode, setMapMode]       = useState<'osm' | 'satellite'>('osm')
 
   // Multi-select store filter state
   const [selectedStoreIds, setSelectedStoreIds] = useState<Set<string>>(new Set())
@@ -239,6 +240,20 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
           >
             {gpsTracking ? '📍 Lokasi Aktif' : '📍 Lokasi Saya'}
           </button>
+
+          {/* Map Mode (Satellite vs Street) Toggle */}
+          <button
+            type="button"
+            onClick={() => setMapMode(m => m === 'satellite' ? 'osm' : 'satellite')}
+            style={{
+              padding: '0.35rem 0.9rem', borderRadius: '999px', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600,
+              border: mapMode === 'satellite' ? '2px solid #059669' : '1px solid var(--border)',
+              background: mapMode === 'satellite' ? '#ecfdf5' : 'var(--surface-hover)',
+              color: mapMode === 'satellite' ? '#047857' : 'var(--text-muted)',
+            }}
+          >
+            {mapMode === 'satellite' ? '🛰️ Mode Satelit (Esri)' : '🛰️ Lihat Satelit'}
+          </button>
         </div>
       </div>
 
@@ -382,7 +397,15 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
       {/* Map */}
       <div style={{ height: 480, borderRadius: 'var(--radius-md)', overflow: 'hidden', border: '1px solid var(--border)', background: '#f1f5f9' }}>
         {!loading && (
-          <MapView points={filtered} typeConfig={TYPE_CONFIG} storePoints={visibleStores} showStores={showStores} userLocation={userLocation} />
+          <MapView
+            points={filtered}
+            typeConfig={TYPE_CONFIG}
+            storePoints={visibleStores}
+            showStores={showStores}
+            userLocation={userLocation}
+            mapMode={mapMode}
+            onToggleMapMode={() => setMapMode(m => m === 'satellite' ? 'osm' : 'satellite')}
+          />
         )}
         {loading && (
           <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '0.75rem', color: '#64748b' }}>
@@ -394,6 +417,9 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
 
       {/* Legend indicator */}
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)', alignItems: 'center' }}>
+        <span style={{ color: mapMode === 'satellite' ? '#047857' : '#2563eb', fontWeight: 600 }}>
+          {mapMode === 'satellite' ? '🛰️ Satelit Esri (Penampakan Bumi)' : '🗺️ Peta Jalan (OSM)'}
+        </span>
         <span>⭐ Spot Demo Plot — kegiatan terpisah (amber)</span>
         <span>🔵 Mini Demo Plot — 1–3 produk (biru)</span>
         <span>🟢 Full Demo Plot — ≥4 produk (hijau)</span>

@@ -25,6 +25,8 @@ interface Props {
   storePoints?: StorePoint[]
   showStores?: boolean
   userLocation?: { lat: number; lng: number } | null
+  mapMode?: 'osm' | 'satellite'
+  onToggleMapMode?: () => void
 }
 
 // Pulsing blue dot icon for user location
@@ -53,18 +55,67 @@ function FlyToUser({ lat, lng }: { lat: number; lng: number }) {
 // Jawa Tengah center
 const CENTER: [number, number] = [-7.15, 110.14]
 
-export default function MapView({ points, typeConfig, storePoints = [], showStores = true, userLocation }: Props) {
+export default function MapView({
+  points,
+  typeConfig,
+  storePoints = [],
+  showStores = true,
+  userLocation,
+  mapMode = 'osm',
+  onToggleMapMode,
+}: Props) {
   return (
-    <MapContainer
-      center={CENTER}
-      zoom={8}
-      style={{ width: '100%', height: '100%' }}
-      scrollWheelZoom={true}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-      />
+    <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+      {onToggleMapMode && (
+        <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 1000 }}>
+          <button
+            type="button"
+            onClick={onToggleMapMode}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              padding: '0.45rem 0.85rem',
+              background: '#fff',
+              border: '1px solid rgba(0,0,0,0.2)',
+              borderRadius: '6px',
+              boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+              fontSize: '0.8rem',
+              fontWeight: 700,
+              cursor: 'pointer',
+              color: '#0f172a',
+            }}
+            title="Ganti Mode Peta (Jalan / Satelit Esri)"
+          >
+            {mapMode === 'satellite' ? '🗺️ Peta Jalan' : '🛰️ Satelit Esri'}
+          </button>
+        </div>
+      )}
+
+      <MapContainer
+        center={CENTER}
+        zoom={8}
+        style={{ width: '100%', height: '100%' }}
+        scrollWheelZoom={true}
+      >
+        {mapMode === 'satellite' ? (
+          <>
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+              attribution='Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+              maxZoom={19}
+            />
+            <TileLayer
+              url="https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}"
+              maxZoom={19}
+            />
+          </>
+        ) : (
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+          />
+        )}
 
       {/* Demo Plot markers */}
       {points.map(p => {
@@ -177,6 +228,7 @@ export default function MapView({ points, typeConfig, storePoints = [], showStor
           </Marker>
         </>
       )}
-    </MapContainer>
+      </MapContainer>
+    </div>
   )
 }
