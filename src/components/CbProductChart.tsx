@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { PALETTE } from './CommodityChart'
+import { getDateRangeLabel } from '@/lib/date-utils'
 
 type CbItem = { name: string; count: number; pct: number }
 type StatsData = { total: number; items: CbItem[] }
@@ -42,14 +43,26 @@ export default function CbProductChart({ filterQuery = '' }: { filterQuery?: str
   )
 
   const topItems = data.items.slice(0, 12)
+  const dateRangeLabel = getDateRangeLabel(filterQuery)
 
   return (
     <div>
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.2rem' }}>🧪 Produk Preferensi Petani (Customer Behavior)</h2>
-        <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          Berdasarkan <strong>{data.total}</strong> input preferensi produk
-        </p>
+      <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div>
+          <h2 style={{ margin: 0, fontSize: '1.2rem' }}>🧪 Produk Preferensi Petani (Customer Behavior)</h2>
+          <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            Berdasarkan <strong>{data.total}</strong> input preferensi produk
+          </p>
+        </div>
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
+          fontSize: '0.78rem', fontWeight: 600,
+          color: '#475569', background: '#f1f5f9',
+          border: '1px solid #e2e8f0', borderRadius: '9999px',
+          padding: '0.25rem 0.75rem', whiteSpace: 'nowrap'
+        }}>
+          📅 Periode: <span style={{ color: '#0f172a' }}>{dateRangeLabel}</span>
+        </div>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(260px, 320px) 1fr', gap: '2rem', alignItems: 'center' }}>
