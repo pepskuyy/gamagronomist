@@ -39,6 +39,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Exclude: API routes, Next.js internals, static files, images, PWA assets
-  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons|.well-known|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.webp|.*\\.ico|.*\\.css|.*\\.js).*)'],
+  // Exclude: API routes, Next.js internals, static files, images, PWA assets, GeoJSON
+  matcher: ['/((?!api|_next/static|_next/image|favicon.ico|manifest.json|sw.js|icons|geojson|.well-known|.*\\.png|.*\\.jpg|.*\\.jpeg|.*\\.gif|.*\\.svg|.*\\.webp|.*\\.ico|.*\\.css|.*\\.js).*)'],
 }
