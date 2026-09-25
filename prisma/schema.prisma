@@ -497,3 +497,48 @@ model SopCategory {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// =======================
+// SIMOTANDI — Fase Tanam Padi (sumber: simotandi.pertanian.go.id)
+// Hanya provinsi Jawa Tengah (33), DI Yogyakarta (34), Jawa Timur (35)
+// =======================
+
+model SimotandiPeriode {
+  id        Int      @id          // nilai periode dari SIMOTANDI, mis. 51
+  kode      String                // kode periode, mis. "202621"
+  label     String                // "202621 | 29 Agustus 2026 - 09 September 2026"
+  startDate DateTime?
+  endDate   DateTime?
+  syncedAt  DateTime @default(now())
+  rows      SimotandiWilayah[]
+
+  @@index([kode])
+}
+
+model SimotandiWilayah {
+  id             String @id @default(cuid())
+  periodeId      Int
+  level          String // provinsi | kabupaten | kecamatan
+  nama           String
+  kdpr           String // kode provinsi BPS, mis. "33"
+  kdkb           String? // kode kabupaten BPS, mis. "3307"
+  kdkc           String? // kode kecamatan BPS, mis. "330701"
+
+  bera           Float
+  penyiapanLahan Float
+  tanam          Float // tanam_1_12_hst
+  veg1           Float // veg_1_13_36_hst
+  veg2           Float // veg_2_37_60_hst
+  gen1           Float // gen_1_61_84_hst
+  gen2           Float // gen_2_85_110_hst
+  panen          Float
+  standingCrop   Float
+  lsb            Float
+
+  periode SimotandiPeriode @relation(fields: [periodeId], references: [id], onDelete: Cascade)
+
+  @@unique([periodeId, level, kdkb, kdkc])
+  @@index([periodeId, level])
+  @@index([kdkb])
+  @@index([kdkc])
+}

@@ -4,6 +4,9 @@ import { useEffect } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
+import FaseTanamLayer from '@/components/map/FaseTanamLayer'
+import KecamatanLayer from '@/components/map/KecamatanLayer'
+import type { SimotandiWilayahRow } from '@/lib/simotandi-fase'
 
 type DemoPlotPoint = {
   id: string; lat: number; lng: number
@@ -19,6 +22,22 @@ type StorePoint = {
 
 type TypeConfig = Record<string, { label: string; desc: string; color: string; emoji: string; bg: string; border: string; textColor: string }>
 
+type FaseTanamProps = {
+  data: any | null
+  rowsByKdkb: Map<string, SimotandiWilayahRow>
+  selectedKdkb: string | null
+  onSelect: (kdkb: string) => void
+  dataKey: string
+}
+
+type KecamatanProps = {
+  data: any | null
+  rowsByKdkc: Map<string, SimotandiWilayahRow>
+  selectedKdkc: string | null
+  onSelect: (kdkc: string) => void
+  dataKey: string
+}
+
 interface Props {
   points: DemoPlotPoint[]
   typeConfig: TypeConfig
@@ -27,6 +46,8 @@ interface Props {
   userLocation?: { lat: number; lng: number } | null
   mapMode?: 'osm' | 'satellite'
   onToggleMapMode?: () => void
+  faseTanam?: FaseTanamProps | null
+  kecamatan?: KecamatanProps | null
 }
 
 // Pulsing blue dot icon for user location
@@ -52,8 +73,8 @@ function FlyToUser({ lat, lng }: { lat: number; lng: number }) {
   return null
 }
 
-// Jawa Tengah center
-const CENTER: [number, number] = [-7.15, 110.14]
+// Jawa Tengah + DIY + Jawa Timur
+const CENTER: [number, number] = [-7.55, 110.7]
 
 export default function MapView({
   points,
@@ -63,6 +84,8 @@ export default function MapView({
   userLocation,
   mapMode = 'osm',
   onToggleMapMode,
+  faseTanam = null,
+  kecamatan = null,
 }: Props) {
   return (
     <div style={{ position: 'relative', width: '100%', height: '100%' }}>
@@ -94,10 +117,32 @@ export default function MapView({
 
       <MapContainer
         center={CENTER}
-        zoom={8}
+        zoom={7}
         style={{ width: '100%', height: '100%' }}
         scrollWheelZoom={true}
       >
+        {/* Layer fase tanam padi (choropleth kabupaten) — paling bawah */}
+        {faseTanam?.data?.features?.length ? (
+          <FaseTanamLayer
+            data={faseTanam.data}
+            rowsByKdkb={faseTanam.rowsByKdkb}
+            selectedKdkb={faseTanam.selectedKdkb}
+            onSelect={faseTanam.onSelect}
+            dataKey={faseTanam.dataKey}
+          />
+        ) : null}
+
+        {/* Layer batas kecamatan (opsional, kabupaten terpilih) */}
+        {kecamatan?.data?.features?.length ? (
+          <KecamatanLayer
+            data={kecamatan.data}
+            rowsByKdkc={kecamatan.rowsByKdkc}
+            selectedKdkc={kecamatan.selectedKdkc}
+            onSelect={kecamatan.onSelect}
+            dataKey={kecamatan.dataKey}
+          />
+        ) : null}
+
         {mapMode === 'satellite' ? (
           <>
             <TileLayer

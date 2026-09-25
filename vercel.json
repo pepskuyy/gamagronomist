@@ -3,6 +3,10 @@
     {
       "path": "/api/accurate-sync-cron",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/simotandi-sync",
+      "schedule": "0 22 * * *"
     }
   ]
 }
