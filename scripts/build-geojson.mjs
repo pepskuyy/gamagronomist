@@ -13,6 +13,11 @@
  *   public/geojson/index.json             -> metadata + bbox per kabupaten
  *
  * Jalankan:  node scripts/build-geojson.mjs
+ *
+ * Catatan: script ini butuh `mapshaper`, yang TIDAK dipasang sebagai dependency
+ * tetap agar image Docker tetap ringan. Pasang dulu sebelum menjalankan:
+ *   npm i -D mapshaper
+ * Setelah selesai boleh dihapus lagi: npm uninstall mapshaper
  */
 
 import fs from 'node:fs/promises'
@@ -20,7 +25,14 @@ import path from 'node:path'
 import { createRequire } from 'node:module'
 
 const require = createRequire(import.meta.url)
-const mapshaper = require('mapshaper')
+
+let mapshaper
+try {
+  mapshaper = require('mapshaper')
+} catch {
+  console.error('mapshaper belum terpasang.\nJalankan: npm i -D mapshaper\n')
+  process.exit(1)
+}
 
 const GADM_BASE = 'https://geodata.ucdavis.edu/gadm/gadm4.1/json'
 const SIMOTANDI  = 'https://simotandi.pertanian.go.id'

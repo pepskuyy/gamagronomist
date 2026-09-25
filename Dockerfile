@@ -22,6 +22,9 @@ RUN npx prisma generate
 # Build Next.js
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
+# Batasi heap V8 agar build tidak dibunuh OOM killer di VPS ber-RAM terbatas.
+# Jika log menampilkan "JavaScript heap out of memory", naikkan nilai ini.
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 RUN npm run build
 
 # 3. Production image, copy all the files and run next
