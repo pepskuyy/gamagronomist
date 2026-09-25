@@ -63,3 +63,17 @@ BEGIN
             ON DELETE CASCADE ON UPDATE CASCADE;
     END IF;
 END $$;
+
+-- PENTING:
+-- SQL Editor Supabase berjalan sebagai `supabase_admin`, sehingga tabel di atas
+-- dimiliki supabase_admin. Aplikasi terhubung sebagai `postgres` (bukan superuser)
+-- dan akan mendapat "permission denied" bila owner tidak dialihkan.
+-- Blok ini mengalihkan kepemilikan ke role aplikasi.
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres') THEN
+        ALTER TABLE gamagronomist."SimotandiPeriode" OWNER TO postgres;
+        ALTER TABLE gamagronomist."SimotandiWilayah" OWNER TO postgres;
+    END IF;
+END $$;
+

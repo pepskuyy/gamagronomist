@@ -59,6 +59,27 @@ const MONTHS_ID = {
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+/**
+ * Koneksi DB publik (lewat proxy Supabase) kadang timeout. Ulangi operasi
+ * yang gagal karena masalah koneksi — aman karena tiap provinsi ditulis
+ * dengan pola delete-then-insert (idempoten).
+ */
+async function withDbRetry(fn, label, attempts = 4) {
+  for (let i = 1; i <= attempts; i++) {
+    try {
+      return await fn()
+    } catch (err) {
+      const msg = String(err?.message ?? err)
+      const transient = /can't reach database|timeout|ECONNRESET|ECONNREFUSED|P1001|P1002|P1017|connection/i.test(msg)
+      if (i === attempts || !transient) throw err
+      const delay = 2000 * i
+      console.log(`    ${label}: koneksi gagal, retry ${i}/${attempts} dalam ${delay / 1000}s`)
+      await sleep(delay)
+    }
+  }
+  throw new Error('unreachable')
+}
+
 const HEADERS_HTML = {
   'User-Agent':
     'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
@@ -74,13 +95,29 @@ const HEADERS_JSON = {
   'X-Requested-With': 'XMLHttpRequest',
 }
 
-async function getText(url, json = false) {
-  const res = await fetch(url, { headers: json ? HEADERS_JSON : HEADERS_HTML })
-  if (!res.ok) {
-    const body = await res.text().catch(() => '')
-    throw new Error(`HTTP ${res.status} — ${body.replace(/\s+/g, ' ').slice(0, 180)}`)
+async function getText(url, json = false, retries = 3) {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetch(url, { headers: json ? HEADERS_JSON : HEADERS_HTML })
+      if (!res.ok) {
+        const body = await res.text().catch(() => '')
+        const err = new Error(
+          `HTTP ${res.status}${body ? ' — ' + body.replace(/\s+/g, ' ').slice(0, 120) : ''}`
+        )
+        err.status = res.status
+        throw err
+      }
+      return await res.text()
+    } catch (err) {
+      // Jangan retry untuk 4xx (kecuali 429); retry untuk 5xx / error jaringan
+      const retryable = !err.status || err.status >= 500 || err.status === 429
+      if (attempt === retries || !retryable) throw err
+      const delay = 2000 * Math.pow(2, attempt)
+      console.log(`    retry ${attempt + 1}/${retries} dalam ${delay / 1000}s (${String(err.message).slice(0, 60)})`)
+      await sleep(delay)
+    }
   }
-  return res.text()
+  throw new Error('unreachable')
 }
 
 const num = (v) => (Number.isFinite(Number(v)) ? Number(v) : 0)
@@ -113,24 +150,47 @@ function parsePeriodeLabel(label) {
   return { kode, startDate: parseDateId(rawStart, fallback), endDate }
 }
 
-async function scrapePeriods() {
-  const html = await getText(`${BASE}/data-tabular`)
-  const start = html.indexOf('id="periode"')
-  if (start < 0) throw new Error('Elemen <select id="periode"> tidak ditemukan')
-  const end = html.indexOf('</select>', start)
-  const block = html.slice(start, end > 0 ? end : undefined)
+const PERIODS_CACHE = path.resolve(process.cwd(), 'src', 'lib', 'simotandi-periods.json')
 
-  const periods = []
-  const re = /<option[^>]*value="(\d+)"[^>]*>([\s\S]*?)<\/option>/g
-  let m
-  while ((m = re.exec(block)) !== null) {
-    const id = parseInt(m[1], 10)
-    const label = m[2].replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
-    if (!label || !Number.isFinite(id)) continue
-    periods.push({ id, label, ...parsePeriodeLabel(label) })
+function loadCachedPeriods() {
+  try {
+    return JSON.parse(fs.readFileSync(PERIODS_CACHE, 'utf8'))
+  } catch {
+    return null
   }
-  if (periods.length === 0) throw new Error('Tidak ada periode yang ter-parse')
-  return periods
+}
+
+async function scrapePeriods() {
+  try {
+    const html = await getText(`${BASE}/data-tabular`)
+    const start = html.indexOf('id="periode"')
+    if (start < 0) throw new Error('Elemen <select id="periode"> tidak ditemukan')
+    const end = html.indexOf('</select>', start)
+    const block = html.slice(start, end > 0 ? end : undefined)
+
+    const periods = []
+    const re = /<option[^>]*value="(\d+)"[^>]*>([\s\S]*?)<\/option>/g
+    let m
+    while ((m = re.exec(block)) !== null) {
+      const id = parseInt(m[1], 10)
+      const label = m[2].replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
+      if (!label || !Number.isFinite(id)) continue
+      periods.push({ id, label, ...parsePeriodeLabel(label) })
+    }
+    if (periods.length === 0) throw new Error('Tidak ada periode yang ter-parse')
+
+    // Segarkan cache agar daftar periode tetap mutakhir
+    try {
+      fs.writeFileSync(PERIODS_CACHE, JSON.stringify(periods, null, 0))
+    } catch {}
+    return periods
+  } catch (err) {
+    const cached = loadCachedPeriods()
+    if (!cached || cached.length === 0) throw err
+    console.warn(`  Halaman SIMOTANDI gagal (${String(err.message).slice(0, 70)})`)
+    console.warn(`  Memakai daftar periode tersimpan (${cached.length} periode)\n`)
+    return cached
+  }
 }
 
 async function fetchProvinceData(periodeId, kdpr) {
@@ -164,32 +224,39 @@ async function fetchProvinceData(periodeId, kdpr) {
 }
 
 async function syncPeriod(period, index, total) {
-  await prisma.simotandiPeriode.upsert({
-    where: { id: period.id },
-    update: {
-      kode: period.kode,
-      label: period.label,
-      startDate: period.startDate,
-      endDate: period.endDate,
-      syncedAt: new Date(),
-    },
-    create: {
-      id: period.id,
-      kode: period.kode,
-      label: period.label,
-      startDate: period.startDate,
-      endDate: period.endDate,
-    },
-  })
+  await withDbRetry(
+    () =>
+      prisma.simotandiPeriode.upsert({
+        where: { id: period.id },
+        update: {
+          kode: period.kode,
+          label: period.label,
+          startDate: period.startDate,
+          endDate: period.endDate,
+          syncedAt: new Date(),
+        },
+        create: {
+          id: period.id,
+          kode: period.kode,
+          label: period.label,
+          startDate: period.startDate,
+          endDate: period.endDate,
+        },
+      }),
+    `upsert ${period.kode}`,
+  )
 
   let totalRows = 0
   for (const kdpr of PROVINCES) {
     const rows = await fetchProvinceData(period.id, kdpr)
     if (rows.length > 0) {
-      await prisma.simotandiWilayah.deleteMany({ where: { periodeId: period.id, kdpr } })
-      await prisma.simotandiWilayah.createMany({
-        data: rows.map((r) => ({ ...r, periodeId: period.id })),
-      })
+      // delete + insert di dalam satu retry agar idempoten bila koneksi putus
+      await withDbRetry(async () => {
+        await prisma.simotandiWilayah.deleteMany({ where: { periodeId: period.id, kdpr } })
+        await prisma.simotandiWilayah.createMany({
+          data: rows.map((r) => ({ ...r, periodeId: period.id })),
+        })
+      }, `${period.kode}/${kdpr}`)
       totalRows += rows.length
     }
     await sleep(1000)

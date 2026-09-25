@@ -7,6 +7,8 @@
  * Side Effects  : HTTP GET ke situs SIMOTANDI (dengan jeda antar request)
  */
 
+import FALLBACK_PERIODS from './simotandi-periods.json'
+
 export const SIMOTANDI_BASE = 'https://simotandi.pertanian.go.id'
 
 /** Provinsi yang didukung: Jawa Tengah, DI Yogyakarta, Jawa Timur */
@@ -153,26 +155,39 @@ export function parsePeriodeLabel(label: string): {
 
 /** Ambil daftar periode dari <select id="periode"> pada halaman data-tabular */
 export async function scrapePeriods(): Promise<SimotandiPeriodeInfo[]> {
-  const html = await politeText(`${SIMOTANDI_BASE}/data-tabular`)
+  try {
+    const html = await politeText(`${SIMOTANDI_BASE}/data-tabular`)
 
-  const selectStart = html.indexOf('id="periode"')
-  if (selectStart < 0) throw new Error('Elemen <select id="periode"> tidak ditemukan')
-  const selectEnd = html.indexOf('</select>', selectStart)
-  const block = html.slice(selectStart, selectEnd > 0 ? selectEnd : undefined)
+    const selectStart = html.indexOf('id="periode"')
+    if (selectStart < 0) throw new Error('Elemen <select id="periode"> tidak ditemukan')
+    const selectEnd = html.indexOf('</select>', selectStart)
+    const block = html.slice(selectStart, selectEnd > 0 ? selectEnd : undefined)
 
-  const periods: SimotandiPeriodeInfo[] = []
-  const optionRe = /<option[^>]*value="(\d+)"[^>]*>([\s\S]*?)<\/option>/g
-  let m: RegExpExecArray | null
-  while ((m = optionRe.exec(block)) !== null) {
-    const id = parseInt(m[1], 10)
-    const label = m[2].replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
-    if (!label || !Number.isFinite(id)) continue
-    const { kode, startDate, endDate } = parsePeriodeLabel(label)
-    periods.push({ id, kode, label, startDate, endDate })
+    const periods: SimotandiPeriodeInfo[] = []
+    const optionRe = /<option[^>]*value="(\d+)"[^>]*>([\s\S]*?)<\/option>/g
+    let m: RegExpExecArray | null
+    while ((m = optionRe.exec(block)) !== null) {
+      const id = parseInt(m[1], 10)
+      const label = m[2].replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim()
+      if (!label || !Number.isFinite(id)) continue
+      const { kode, startDate, endDate } = parsePeriodeLabel(label)
+      periods.push({ id, kode, label, startDate, endDate })
+    }
+
+    if (periods.length === 0) throw new Error('Tidak ada periode yang ter-parse')
+    return periods
+  } catch (err) {
+    // Halaman HTML SIMOTANDI sering 522/403. Pakai daftar periode yang tersimpan
+    // agar sinkronisasi data tetap bisa berjalan.
+    console.warn('[simotandi] scrape periode gagal, memakai daftar tersimpan:', (err as Error).message)
+    return (FALLBACK_PERIODS as any[]).map((p) => ({
+      id: p.id,
+      kode: p.kode,
+      label: p.label,
+      startDate: p.startDate ? new Date(p.startDate) : null,
+      endDate: p.endDate ? new Date(p.endDate) : null,
+    }))
   }
-
-  if (periods.length === 0) throw new Error('Tidak ada periode yang ter-parse')
-  return periods
 }
 
 /** Daftar kabupaten/kota satu provinsi (untuk validasi/pencarian nama) */
