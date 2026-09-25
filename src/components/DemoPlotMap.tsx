@@ -209,10 +209,15 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
   }, [])
 
   // ── Region selection & filtering ───────────────────────────────
+  // Wilayah terpilih: utamakan polygon kecamatan bila ada, jika tidak pakai kabupaten
   const selectedGeometry = useMemo(() => {
+    if (selectedKdkc && kecGeo?.features) {
+      const f = kecGeo.features.find((x: any) => x?.properties?.kdkc === selectedKdkc)
+      if (f?.geometry) return f.geometry
+    }
     if (!selectedKdkb || !kabGeo?.features) return null
     return kabGeo.features.find((f: any) => f?.properties?.kdkb === selectedKdkb)?.geometry ?? null
-  }, [selectedKdkb, kabGeo])
+  }, [selectedKdkc, selectedKdkb, kecGeo, kabGeo])
 
   const regionPoints = useMemo(
     () => (selectedGeometry ? filterPointsInGeometry(points, selectedGeometry) : points),
@@ -391,19 +396,8 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
           </p>
         </div>
 
-        {/* Filter chips */}
+        {/* Filter chips — jenis titik & toko diatur lewat kartu di bawah */}
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
-          <button onClick={() => setActiveFilter('all')} style={chip(activeFilter === 'all', '#6366f1', '#eef2ff')}>
-            Semua ({counts.all})
-          </button>
-          {(['spot', 'mini', 'full'] as const).map(t => (
-            <button key={t} onClick={() => setActiveFilter(t)} style={chip(activeFilter === t, TYPE_CONFIG[t].color, TYPE_CONFIG[t].bg)}>
-              {TYPE_CONFIG[t].emoji} {TYPE_CONFIG[t].label} ({counts[t]})
-            </button>
-          ))}
-          <button onClick={() => setShowStores(v => !v)} style={chip(showStores, '#7c3aed', '#f5f3ff')}>
-            🏪 Toko ({visibleStores.length}/{stores.length})
-          </button>
           <button
             onClick={() => (gpsTracking ? stopGpsTracking() : startGpsTracking())}
             style={chip(gpsTracking, '#3b82f6', '#eff6ff')}
@@ -533,7 +527,25 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
         </div>
       )}
 
-      {/* Stat cards */}
+      {/* Stat cards — sekaligus filter jenis titik */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+          Filter Titik — klik kartu untuk menyaring
+        </span>
+        {(activeFilter !== 'all' || !showStores) && (
+          <button
+            type="button"
+            onClick={() => { setActiveFilter('all'); setShowStores(true) }}
+            style={{
+              background: 'transparent', border: 'none', color: 'var(--danger)',
+              fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600, padding: 0,
+            }}
+          >
+            ✕ Tampilkan Semua
+          </button>
+        )}
+      </div>
+
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.75rem' }}>
         {(['spot', 'mini', 'full'] as const).map(t => (
           <div key={t} onClick={() => setActiveFilter(activeFilter === t ? 'all' : t)}

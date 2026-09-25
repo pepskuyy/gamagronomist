@@ -9,6 +9,7 @@ interface Props {
   selectedKdkb: string | null
   onSelect: (kdkb: string) => void
   dataKey: string
+  pane?: string
 }
 
 /**
@@ -16,7 +17,7 @@ interface Props {
  * Hanya dirender di dalam MapContainer (react-leaflet), komponen ini
  * di-import statis oleh MapView yang sudah di-dynamic import.
  */
-export default function FaseTanamLayer({ data, rowsByKdkb, selectedKdkb, onSelect, dataKey }: Props) {
+export default function FaseTanamLayer({ data, rowsByKdkb, selectedKdkb, onSelect, dataKey, pane }: Props) {
   if (!data?.features?.length) return null
 
   const style = (feature: any) => {
@@ -63,5 +64,5 @@ export default function FaseTanamLayer({ data, rowsByKdkb, selectedKdkb, onSelec
     })
   }
 
-  return <GeoJSON key={dataKey} data={data} style={style} onEachFeature={onEachFeature} />
+  return <GeoJSON key={dataKey} data={data} style={style} onEachFeature={onEachFeature} pane={pane} />
 }

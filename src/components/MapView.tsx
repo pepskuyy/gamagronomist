@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from 'react'
-import { MapContainer, TileLayer, CircleMarker, Marker, Popup, useMap } from 'react-leaflet'
+import { MapContainer, TileLayer, CircleMarker, Marker, Popup, Pane, useMap } from 'react-leaflet'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import FaseTanamLayer from '@/components/map/FaseTanamLayer'
@@ -121,6 +121,14 @@ export default function MapView({
         style={{ width: '100%', height: '100%' }}
         scrollWheelZoom={true}
       >
+        {/*
+          Polygon wilayah ditaruh di pane ber-z-index lebih rendah daripada
+          overlayPane (default marker/path = 400) supaya titik toko & demo plot
+          tetap di atas dan bisa diklik.
+        */}
+        <Pane name="faseTanamPane" style={{ zIndex: 340 }} />
+        <Pane name="kecamatanPane" style={{ zIndex: 360 }} />
+
         {/* Layer fase tanam padi (choropleth kabupaten) — paling bawah */}
         {faseTanam?.data?.features?.length ? (
           <FaseTanamLayer
@@ -129,6 +137,7 @@ export default function MapView({
             selectedKdkb={faseTanam.selectedKdkb}
             onSelect={faseTanam.onSelect}
             dataKey={faseTanam.dataKey}
+            pane="faseTanamPane"
           />
         ) : null}
 
@@ -140,6 +149,7 @@ export default function MapView({
             selectedKdkc={kecamatan.selectedKdkc}
             onSelect={kecamatan.onSelect}
             dataKey={kecamatan.dataKey}
+            pane="kecamatanPane"
           />
         ) : null}
 

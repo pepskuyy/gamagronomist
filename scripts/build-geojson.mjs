@@ -51,6 +51,11 @@ const KEC_DIR = path.join(OUT_DIR, 'kecamatan')
 
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 
+const normName = (s) =>
+  String(s ?? '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, '')
+
 async function fetchJson(url, { retries = 2 } = {}) {
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
@@ -117,6 +122,24 @@ async function fetchSimotandiKabupaten(provinsi) {
     console.warn(`  Gagal ambil daftar kabupaten SIMOTANDI provinsi ${provinsi}: ${err.message}`)
     return new Map()
   }
+}
+
+/**
+ * Ambil daftar kecamatan SIMOTANDI untuk satu kabupaten.
+ * Kode kecamatan GADM (7 digit) TIDAK konsisten dengan BPS, jadi pemetaan
+ * dilakukan berdasarkan nama.
+ */
+async function fetchSimotandiKecamatan(kdkb) {
+  const list = await fetchJson(`${SIMOTANDI}/data-tabular/kecamatan?kabupaten=${kdkb}`)
+  const byName = new Map()
+  const byCode = new Map()
+  for (const item of list ?? []) {
+    const kode = String(item.value)
+    const nama = item.value_label || item.label || kode
+    byName.set(normName(nama), { kdkc: kode, nama })
+    byCode.set(kode, nama)
+  }
+  return { byName, byCode }
 }
 
 async function main() {
@@ -196,17 +219,36 @@ async function main() {
     const kdkb = kab.properties.kdkb
     const features = byKab.get(kdkb) ?? []
 
-    const kecClean = {
-      type: 'FeatureCollection',
-      features: features.map((f) => ({
-        type: 'Feature',
-        properties: {
-          kdkc: String(f.properties.CC_3),
-          nama: String(f.properties.NAME_3 || '').replace(/([a-z])([A-Z])/g, '$1 $2'),
-        },
-        geometry: f.geometry,
-      })),
+    // Kode kecamatan GADM (7 digit) tidak konsisten dengan BPS (6 digit),
+    // jadi pemetaan kode dilakukan lewat nama kecamatan.
+    let namaMap = { byName: new Map(), byCode: new Map() }
+    try {
+      namaMap = await fetchSimotandiKecamatan(kdkb)
+    } catch (err) {
+      console.warn(`   ${kdkb}: gagal ambil daftar kecamatan SIMOTANDI (${err.message})`)
     }
+
+    const mappedFeatures = []
+    for (const f of features) {
+      const origCode = String(f.properties.CC_3)
+      // Buang fitur non-administratif GADM (waduk/danau), kode berakhiran 888
+      if (origCode.endsWith('888')) continue
+
+      const gadmName = String(f.properties.NAME_3 || '').replace(/([a-z])([A-Z])/g, '$1 $2')
+      const hit = namaMap.byName.get(normName(gadmName))
+      const sliced = origCode.slice(0, 6)
+      const kdkc = hit?.kdkc ?? (namaMap.byCode.has(sliced) ? sliced : origCode)
+      const nama = hit?.nama ?? namaMap.byCode.get(kdkc) ?? gadmName
+
+      mappedFeatures.push({
+        type: 'Feature',
+        properties: { kdkc, nama },
+        geometry: f.geometry,
+      })
+    }
+    await sleep(250)
+
+    const kecClean = { type: 'FeatureCollection', features: mappedFeatures }
 
     let output = kecClean
     if (features.length > 0) {

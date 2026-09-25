@@ -9,13 +9,14 @@ interface Props {
   selectedKdkc: string | null
   onSelect: (kdkc: string) => void
   dataKey: string
+  pane?: string
 }
 
 /**
  * Layer batas kecamatan (opsional, hanya untuk kabupaten terpilih).
  * Dimuat lazy oleh parent saat toggle "Batas Kecamatan" diaktifkan.
  */
-export default function KecamatanLayer({ data, rowsByKdkc, selectedKdkc, onSelect, dataKey }: Props) {
+export default function KecamatanLayer({ data, rowsByKdkc, selectedKdkc, onSelect, dataKey, pane }: Props) {
   if (!data?.features?.length) return null
 
   const style = (feature: any) => {
@@ -56,5 +57,5 @@ export default function KecamatanLayer({ data, rowsByKdkc, selectedKdkc, onSelec
     })
   }
 
-  return <GeoJSON key={dataKey} data={data} style={style} onEachFeature={onEachFeature} />
+  return <GeoJSON key={dataKey} data={data} style={style} onEachFeature={onEachFeature} pane={pane} />
 }
