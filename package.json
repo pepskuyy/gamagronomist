@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "npx tsx prisma/seed.ts",
+    "build:geojson": "node scripts/build-geojson.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -36,6 +37,7 @@
     "@types/react-dom": "^19.0.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "^15.3.0",
+    "mapshaper": "^0.7.67",
     "pg": "^8.21.0",
     "prisma": "^6.6.0",
     "sharp": "^0.34.5",
