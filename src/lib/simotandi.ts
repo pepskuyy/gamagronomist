@@ -53,18 +53,41 @@ const MONTHS_ID: Record<string, number> = {
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms))
 
-const REQUEST_INIT: RequestInit = {
-  headers: {
-    'User-Agent': 'Agrolens/1.0 (internal agronomy dashboard; +https://agrolens.gamaagrosejati.co.id)',
-    Accept: 'application/json, text/html;q=0.9, */*;q=0.8',
-  },
+/**
+ * Header mirip browser. Beberapa WAF pemerintah menolak User-Agent non-browser
+ * atau request tanpa Accept-Language/Referer.
+ */
+function buildHeaders(json: boolean, referer?: string): Record<string, string> {
+  const headers: Record<string, string> = {
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36',
+    'Accept-Language': 'id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7',
+    'Accept': json
+      ? 'application/json, text/javascript, */*; q=0.01'
+      : 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8',
+    'Cache-Control': 'no-cache',
+    'Pragma': 'no-cache',
+  }
+  if (referer) headers['Referer'] = referer
+  if (json) headers['X-Requested-With'] = 'XMLHttpRequest'
+  else headers['Upgrade-Insecure-Requests'] = '1'
+  return headers
 }
 
-async function politeText(url: string, { retries = 2 } = {}): Promise<string> {
+async function politeText(
+  url: string,
+  { json = false, retries = 2 }: { json?: boolean; retries?: number } = {}
+): Promise<string> {
+  const referer = `${SIMOTANDI_BASE}/data-tabular`
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      const res = await fetch(url, REQUEST_INIT)
-      if (!res.ok) throw new Error(`HTTP ${res.status}`)
+      const res = await fetch(url, { headers: buildHeaders(json, referer) })
+      if (!res.ok) {
+        // Sertakan potongan body agar penyebab (WAF/blokir IP) terlihat di log
+        const body = await res.text().catch(() => '')
+        const snippet = body.replace(/\s+/g, ' ').slice(0, 180)
+        throw new Error(`HTTP ${res.status}${snippet ? ` — ${snippet}` : ''}`)
+      }
       return await res.text()
     } catch (err) {
       if (attempt === retries) throw err
@@ -154,7 +177,7 @@ export async function scrapePeriods(): Promise<SimotandiPeriodeInfo[]> {
 
 /** Daftar kabupaten/kota satu provinsi (untuk validasi/pencarian nama) */
 export async function fetchKabupatenList(kdpr: string): Promise<{ kode: string; nama: string }[]> {
-  const text = await politeText(`${SIMOTANDI_BASE}/data-tabular/kabupaten?provinsi=${kdpr}`)
+  const text = await politeText(`${SIMOTANDI_BASE}/data-tabular/kabupaten?provinsi=${kdpr}`, { json: true })
   const list = JSON.parse(text)
   return (Array.isArray(list) ? list : []).map((x: any) => ({
     kode: String(x.value),
@@ -168,7 +191,7 @@ export async function fetchKabupatenList(kdpr: string): Promise<{ kode: string; 
  */
 export async function fetchProvinceData(periodeId: number, kdpr: string): Promise<SimotandiRow[]> {
   const url = `${SIMOTANDI_BASE}/data-tabular/data?periode=${periodeId}&provinsi=${kdpr}`
-  const text = await politeText(url)
+  const text = await politeText(url, { json: true })
   const json = JSON.parse(text)
   const data: any[] = Array.isArray(json?.data) ? json.data : []
 
