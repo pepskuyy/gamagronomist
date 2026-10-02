@@ -4,69 +4,95 @@ import { verifyOpenApiKey } from '@/lib/open-api-auth'
 
 export const dynamic = 'force-dynamic'
 
+/**
+ * GET /api/v1/demoplot
+ * Demo-plot-centric: setiap baris adalah satu sesi DemoPlot dengan koordinat GPS
+ * (latitude, longitude) di level atas, lengkap dengan farmer, request, dan produk.
+ */
 export async function GET(req: NextRequest) {
   const auth = await verifyOpenApiKey(req)
   if (!auth.ok) return auth.response
 
-  const sp = req.nextUrl.searchParams
-  const from    = sp.get('from')
-  const to      = sp.get('to')
-  const sales   = sp.get('sales')   // filter by user name (contains)
-  const area    = sp.get('area')    // filter by snapshotAreaId or area area name (contains)
-  const status  = sp.get('status')  // e.g. SUBMITTED, APPROVED, DEMO_PLOT_SELESAI
-  const limit   = Math.min(parseInt(sp.get('limit') || '50'), 200)
-  const page    = Math.max(parseInt(sp.get('page') || '1'), 1)
+  const sp         = req.nextUrl.searchParams
+  const from       = sp.get('from')
+  const to         = sp.get('to')
+  const sales      = sp.get('sales')      // filter by pelaksana (request.fo.name)
+  const area       = sp.get('area')       // filter by area/desa (contains)
+  const status     = sp.get('status')     // request status
+  const hasCoords  = sp.get('has_coords') // "1" = hanya yang punya latitude & longitude
+  const limit      = Math.min(parseInt(sp.get('limit') || '50'), 200)
+  const page       = Math.max(parseInt(sp.get('page') || '1'), 1)
 
-  const where: Record<string, any> = {
-    commodity: { not: '-' },
-    farmer: { isNot: null },
-  }
+  const where: Record<string, any> = {}
 
   if (from || to) {
-    where.createdAt = {}
-    if (from) where.createdAt.gte = new Date(from)
+    where.date = {}
+    if (from) where.date.gte = new Date(from)
     if (to) {
       const toDate = new Date(to)
       toDate.setHours(23, 59, 59, 999)
-      where.createdAt.lte = toDate
+      where.date.lte = toDate
     }
   }
 
-  if (status) where.status = status
+  if (area) where.area = { contains: area, mode: 'insensitive' }
 
-  if (sales) {
-    where.fo = { name: { contains: sales, mode: 'insensitive' } }
+  if (hasCoords === '1') {
+    where.latitude  = { not: null }
+    where.longitude = { not: null }
   }
 
+  const requestFilter: Record<string, any> = {}
+  if (status) requestFilter.status = status
+  if (sales) requestFilter.fo = { name: { contains: sales, mode: 'insensitive' } }
+  if (Object.keys(requestFilter).length > 0) where.request = requestFilter
+
   const [rows, total] = await Promise.all([
-    prisma.request.findMany({
+    prisma.demoPlot.findMany({
       where,
-      include: {
-        fo: { select: { id: true, name: true, role: true } },
+      select: {
+        id: true,
+        date: true,
+        area: true,
+        snapshotAreaId: true,
+        commodity: true,
+        cropAgeDays: true,
+        landSize: true,
+        landSizeUnit: true,
+        resultNotes: true,
+        photos: true,
+        latitude: true,
+        longitude: true,
+        isFinalSession: true,
+        createdAt: true,
+        updatedAt: true,
         farmer: { select: { id: true, name: true, phone: true, address: true } },
-        details: {
-          include: {
-            product: { select: { id: true, name: true, code: true, unit: true } }
+        request: {
+          select: {
+            id: true,
+            status: true,
+            commodity: true,
+            problem: true,
+            plan: true,
+            createdAt: true,
+            fo:  { select: { id: true, name: true, role: true } },
+            afa: { select: { id: true, name: true } },
           }
         },
-        demoPlots: {
+        details: {
           select: {
-            id: true, date: true, area: true, commodity: true, cropAgeDays: true,
-            landSize: true, landSizeUnit: true, resultNotes: true, latitude: true,
-            longitude: true, isFinalSession: true, createdAt: true,
-            details: {
-              include: {
-                product: { select: { id: true, name: true, code: true, unit: true } }
-              }
-            }
+            id: true,
+            actualUsage: true,
+            usedFarmerProduct: true,
+            product: { select: { id: true, name: true, code: true, unit: true } },
           }
-        }
+        },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { date: 'desc' },
       skip: (page - 1) * limit,
       take: limit,
     }),
-    prisma.request.count({ where }),
+    prisma.demoPlot.count({ where }),
   ])
 
   return NextResponse.json({

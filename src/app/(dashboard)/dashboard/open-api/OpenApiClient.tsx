@@ -20,8 +20,8 @@ const ENDPOINTS = [
   {
     method: 'GET',
     path: '/api/v1/demoplot',
-    desc: 'Pengajuan & laporan sesi demo plot lapangan',
-    params: 'from, to, sales, status, limit, page',
+    desc: 'Daftar demo plot + koordinat GPS (latitude, longitude) & produk',
+    params: 'from, to, sales, area, status, has_coords, limit, page',
   },
   {
     method: 'GET',

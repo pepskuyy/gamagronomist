@@ -40,13 +40,15 @@ const spec = {
   paths: {
     '/demoplot': {
       get: {
-        summary: 'Daftar Demo Plot',
-        description: 'Pengajuan dan laporan hasil sesi demplot lapangan beserta rincian produk yang digunakan.',
+        summary: 'Daftar Demo Plot (termasuk koordinat GPS)',
+        description: 'Daftar sesi demo plot lapangan beserta rincian produk. Setiap baris memiliki latitude & longitude di level atas (dapat bernilai null bila belum diisi).',
         parameters: [
           { $ref: '#/components/parameters/from' },
           { $ref: '#/components/parameters/to' },
           { $ref: '#/components/parameters/sales' },
+          { name: 'area', in: 'query', schema: { type: 'string' }, description: 'Filter area/desa (pencarian parsial)' },
           { name: 'status', in: 'query', schema: { type: 'string' }, description: 'Status pengajuan: SUBMITTED, APPROVED, REJECTED, DEMO_PLOT_SELESAI' },
+          { name: 'has_coords', in: 'query', schema: { type: 'string', enum: ['1'] }, description: 'Set "1" untuk hanya mengembalikan demo plot yang memiliki latitude & longitude' },
           { $ref: '#/components/parameters/limit' },
           { $ref: '#/components/parameters/page' },
         ],
