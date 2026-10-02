@@ -49,3 +49,6 @@ next-env.d.ts
 /app/
 .kilo
 
+# Tesseract.js language data (downloaded at runtime)
+*.traineddata
+

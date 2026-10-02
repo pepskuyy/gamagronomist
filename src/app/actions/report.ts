@@ -101,6 +101,9 @@ export async function submitFarmerGathering(formData: FormData) {
 
   try {
     const costInput = formData.get('cost')
+    const lat = formData.get('latitude') ? parseFloat(formData.get('latitude') as string) : null
+    const lng = formData.get('longitude') ? parseFloat(formData.get('longitude') as string) : null
+
     const data = {
       userId: session.userId,
       snapshotAreaId: session.areaId ?? null,
@@ -112,6 +115,8 @@ export async function submitFarmerGathering(formData: FormData) {
       cost: costInput ? parseFloat(costInput as string) : null,
       costDetail: formData.get('costDetail') as string,
       photos: formData.get('photos') as string,
+      latitude: (lat !== null && !isNaN(lat)) ? lat : null,
+      longitude: (lng !== null && !isNaN(lng)) ? lng : null,
     }
 
     const report = await prisma.farmerGathering.create({ data })

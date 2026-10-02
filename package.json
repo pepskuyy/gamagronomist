@@ -9,6 +9,7 @@
     "lint": "next lint",
     "seed": "npx tsx prisma/seed.ts",
     "build:geojson": "node scripts/build-geojson.mjs",
+    "backfill:gathering-coords": "node --env-file=.env scripts/backfill-gathering-coords.mjs",
     "postinstall": "prisma generate"
   },
   "dependencies": {
@@ -27,6 +28,7 @@
     "react-dom": "^19.0.0",
     "react-leaflet": "^5.0.0",
     "recharts": "^3.8.0",
+    "tesseract.js": "^7.0.0",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
