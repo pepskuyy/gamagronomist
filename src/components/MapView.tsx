@@ -13,6 +13,8 @@ type DemoPlotPoint = {
   farmerName: string; area: string; commodity: string; foName: string
   date: string; productCount: number; products: string[]
   type: 'spot' | 'mini' | 'full'
+  sessionCount?: number
+  isCompleted?: boolean
 }
 
 type StorePoint = {
@@ -192,11 +194,30 @@ export default function MapView({
             <Popup>
               <div style={{ minWidth: '200px', fontSize: '0.8rem', lineHeight: 1.5 }}>
                 <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{cfg.emoji} {cfg.label}</div>
+                {p.type !== 'spot' && (
+                  <div style={{ marginBottom: '0.35rem' }}>
+                    <span style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.25rem',
+                      padding: '0.15rem 0.5rem',
+                      borderRadius: '9999px',
+                      fontSize: '0.72rem',
+                      fontWeight: 700,
+                      background: p.isCompleted ? '#dcfce7' : '#dbeafe',
+                      color: p.isCompleted ? '#15803d' : '#1d4ed8',
+                      border: `1px solid ${p.isCompleted ? '#bbf7d0' : '#bfdbfe'}`,
+                    }}>
+                      {p.isCompleted ? '✅ Selesai' : '⏳ Berlangsung'}
+                      {p.sessionCount && p.sessionCount > 1 ? ` (${p.sessionCount} Sesi)` : p.sessionCount === 1 ? ' (1 Sesi)' : ''}
+                    </span>
+                  </div>
+                )}
                 <div>🌾 <strong>Petani:</strong> {p.farmerName}</div>
                 <div>📍 <strong>Area:</strong> {p.area}</div>
                 <div>🌱 <strong>Komoditas:</strong> {p.commodity}</div>
                 <div>👤 <strong>FO:</strong> {p.foName}</div>
-                <div>🧪 <strong>Produk ({p.productCount}):</strong></div>
+                <div>🧪 <strong>Produk Akumulasi ({p.productCount}):</strong></div>
                 {p.products.length > 0 && (
                   <ul style={{ paddingLeft: '1rem', margin: '0.15rem 0 0', listStyle: 'disc' }}>
                     {p.products.slice(0, 5).map((pr, i) => <li key={i}>{pr}</li>)}
@@ -204,7 +225,7 @@ export default function MapView({
                   </ul>
                 )}
                 <div style={{ marginTop: '0.35rem', color: '#6b7280' }}>
-                  📅 {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(p.date))}
+                  📅 Sesi Terakhir: {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(p.date))}
                 </div>
                 <a
                   href={gmapsUrl}

@@ -21,6 +21,8 @@ type DemoPlotPoint = {
   productCount: number
   products: string[]
   type: 'spot' | 'mini' | 'full'
+  sessionCount?: number
+  isCompleted?: boolean
 }
 
 type StorePoint = {

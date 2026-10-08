@@ -53,35 +53,74 @@ export async function GET(req: any) {
     const allAreas = await prisma.area.findMany()
     const areaMap = new Map(allAreas.map(a => [a.id, a.name]))
 
-    // Map DemoPlot records (mini / full)
-    const demoPlotPoints = demoPlots
-      .filter(dp => dp.latitude !== null && dp.longitude !== null)
-      .map(dp => {
-        // Count distinct products used in this session
-        const products = dp.details.length > 0
-          ? dp.details.map(d => d.product.name)
-          : dp.request?.details?.map(d => d.product.name) ?? []
+    // Group DemoPlot records by requestId so each Demo Plot shows only 1 point (latest session)
+    // with accumulated products from all sessions
+    type DemoPlotGroup = {
+      latestSession: (typeof demoPlots)[0]
+      sessionCount: number
+      productNames: Set<string>
+      isCompleted: boolean
+    }
 
-        const type = classifyDemoPlot(products.length)
-        
-        // Priority for Area: snapshotAreaId -> FO's current area -> recorded area
-        const mappedSnapshotArea = dp.snapshotAreaId ? areaMap.get(dp.snapshotAreaId) : null
-        const internalArea = mappedSnapshotArea ?? dp.request?.fo?.area?.name ?? dp.area ?? '-'
+    const groupMap = new Map<string, DemoPlotGroup>()
 
-        return {
-          id: dp.id,
-          lat: dp.latitude!,
-          lng: dp.longitude!,
-          farmerName: dp.farmer?.name ?? 'Tidak diketahui',
-          area: internalArea,
-          commodity: dp.commodity ?? dp.request?.commodity ?? '-',
-          foName: dp.request?.fo?.name ?? '-',
-          date: dp.date.toISOString(),
-          productCount: products.length,
-          products,
-          type,
+    for (const dp of demoPlots) {
+      if (dp.latitude === null || dp.longitude === null) continue
+
+      const groupKey = dp.requestId ? `req_${dp.requestId}` : `dp_${dp.id}`
+      const existing = groupMap.get(groupKey)
+
+      // Collect products from this session (or fallback to request details)
+      const sessionProducts = dp.details.length > 0
+        ? (dp.details.map(d => d.product?.name).filter(Boolean) as string[])
+        : (dp.request?.details?.map(d => d.product?.name).filter(Boolean) as string[] ?? [])
+
+      const isFinal = Boolean(dp.isFinalSession || dp.request?.status === 'DEMO_PLOT_SELESAI')
+
+      if (!existing) {
+        // Since demoPlots is ordered by createdAt desc, the first record is the latest session
+        const productSet = new Set<string>(sessionProducts)
+        groupMap.set(groupKey, {
+          latestSession: dp,
+          sessionCount: 1,
+          productNames: productSet,
+          isCompleted: isFinal,
+        })
+      } else {
+        existing.sessionCount += 1
+        sessionProducts.forEach(p => existing.productNames.add(p))
+        if (isFinal) {
+          existing.isCompleted = true
         }
-      })
+      }
+    }
+
+    // Map grouped DemoPlot records (mini / full)
+    const demoPlotPoints = Array.from(groupMap.values()).map(group => {
+      const dp = group.latestSession
+      const products = Array.from(group.productNames)
+      const type = classifyDemoPlot(products.length)
+
+      // Priority for Area: snapshotAreaId -> FO's current area -> recorded area
+      const mappedSnapshotArea = dp.snapshotAreaId ? areaMap.get(dp.snapshotAreaId) : null
+      const internalArea = mappedSnapshotArea ?? dp.request?.fo?.area?.name ?? dp.area ?? '-'
+
+      return {
+        id: dp.id,
+        lat: dp.latitude!,
+        lng: dp.longitude!,
+        farmerName: dp.farmer?.name ?? 'Tidak diketahui',
+        area: internalArea,
+        commodity: dp.commodity ?? dp.request?.commodity ?? '-',
+        foName: dp.request?.fo?.name ?? '-',
+        date: dp.date.toISOString(),
+        productCount: products.length,
+        products,
+        type,
+        sessionCount: group.sessionCount,
+        isCompleted: group.isCompleted,
+      }
+    })
 
     // Fetch Spot Demo Plots (separate model: SpotDemplot)
     // Apply the same dashboard filters (areaId, userId, start, end) as DemoPlot
@@ -139,6 +178,8 @@ export async function GET(req: any) {
           productCount: products.length,
           products,
           type: 'spot' as const,
+          sessionCount: 1,
+          isCompleted: true,
         }
       })
 
