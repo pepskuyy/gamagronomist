@@ -1,12 +1,13 @@
 'use client'
 
-import { useEffect, useState, useTransition } from 'react'
+import { useEffect, useState, useTransition, useMemo } from 'react'
 import DemoplotImpactMap from '@/components/demoplot-impact/DemoplotImpactMap'
 import DemoplotImpactSidebar from '@/components/demoplot-impact/DemoplotImpactSidebar'
 import StoreHistoryModal from '@/components/demoplot-impact/StoreHistoryModal'
 import TopDemoplotProductsChart from '@/components/demoplot-impact/TopDemoplotProductsChart'
 import { MapDemoplotItem } from '@/components/demoplot-impact/DemoplotImpactMapInner'
 import { DemoplotImpactDetail, StoreImpactResult } from '@/lib/demoplot-impact'
+import { formatDateId } from '@/lib/date-utils'
 
 export default function DemoplotImpactPage() {
   const [demoplots, setDemoplots] = useState<MapDemoplotItem[]>([])
@@ -24,10 +25,19 @@ export default function DemoplotImpactPage() {
   const [isSyncing, startSync] = useTransition()
   const [syncMsg, setSyncMsg] = useState<string | null>(null)
 
-  // 1. Ambil daftar demoplot & produk teratas
-  const loadDemoplotList = () => {
+  // Filter rentang tanggal
+  const [fromDate, setFromDate] = useState<string>('')
+  const [toDate, setToDate] = useState<string>('')
+  const [activePreset, setActivePreset] = useState<string>('all')
+
+  // 1. Ambil daftar demoplot & produk teratas berdasarkan rentang tanggal
+  const loadDemoplotList = (from?: string, to?: string) => {
     setLoadingList(true)
-    fetch('/api/demoplot-impact/list')
+    const params = new URLSearchParams()
+    if (from) params.set('from', from)
+    if (to) params.set('to', to)
+
+    fetch(`/api/demoplot-impact/list?${params.toString()}`)
       .then((res) => {
         if (!res.ok) throw new Error('Gagal memuat data demoplot.')
         return res.json()
@@ -38,9 +48,15 @@ export default function DemoplotImpactPage() {
         setTopProducts(data.topProducts || [])
         setLoadingList(false)
 
-        // Otomatis pilih demoplot pertama jika belum ada yang dipilih dan data tersedia
-        if (dps.length > 0 && !selectedDemoplotId) {
-          handleSelectDemoplot(dps[0])
+        // Otomatis pilih demoplot pertama jika belum ada atau yang terpilih tidak ada di list
+        if (dps.length > 0) {
+          const stillExists = dps.some((d) => d.id === selectedDemoplotId)
+          if (!stillExists) {
+            handleSelectDemoplot(dps[0])
+          }
+        } else {
+          setSelectedDemoplotId(null)
+          setImpactDetail(null)
         }
       })
       .catch((err) => {
@@ -83,7 +99,62 @@ export default function DemoplotImpactPage() {
     setIsStoreModalOpen(true)
   }
 
-  // 4. Trigger sinkronisasi data sales manual
+  // 4. Quick Presets Rentang Tanggal
+  const handlePreset = (preset: string) => {
+    setActivePreset(preset)
+    const now = new Date()
+    const today = now.toISOString().slice(0, 10)
+
+    if (preset === 'all') {
+      setFromDate('')
+      setToDate('')
+      loadDemoplotList('', '')
+      return
+    }
+
+    if (preset === 'year') {
+      const year = now.getFullYear()
+      const f = `${year}-01-01`
+      const t = today
+      setFromDate(f)
+      setToDate(t)
+      loadDemoplotList(f, t)
+      return
+    }
+
+    let days = 30
+    if (preset === '60d') days = 60
+    if (preset === '90d') days = 90
+
+    const f = new Date(now.getTime() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    setFromDate(f)
+    setToDate(today)
+    loadDemoplotList(f, today)
+  }
+
+  const handleApplyCustomFilter = (e: React.FormEvent) => {
+    e.preventDefault()
+    setActivePreset('custom')
+    loadDemoplotList(fromDate, toDate)
+  }
+
+  const handleResetFilter = () => {
+    setActivePreset('all')
+    setFromDate('')
+    setToDate('')
+    loadDemoplotList('', '')
+  }
+
+  const periodLabel = useMemo(() => {
+    if (fromDate && toDate) {
+      return `${formatDateId(fromDate)} — ${formatDateId(toDate)}`
+    }
+    if (fromDate) return `Sejak ${formatDateId(fromDate)}`
+    if (toDate) return `Hingga ${formatDateId(toDate)}`
+    return 'Semua Waktu'
+  }, [fromDate, toDate])
+
+  // 5. Trigger sinkronisasi data sales manual
   const handleSyncSales = () => {
     if (!confirm('Jalankan sinkronisasi data toko & faktur penjualan dari Sales Dashboard sekarang?')) return
 
@@ -94,7 +165,7 @@ export default function DemoplotImpactPage() {
         const json = await res.json()
         if (json.success) {
           setSyncMsg(`✅ Sinkronisasi berhasil! ${json.customers?.upserted || 0} toko & ${json.invoices?.total || 0} faktur diperbarui.`)
-          loadDemoplotList()
+          loadDemoplotList(fromDate, toDate)
           if (selectedDemoplotId) {
             const current = demoplots.find((d) => d.id === selectedDemoplotId)
             if (current) handleSelectDemoplot(current)
@@ -109,7 +180,7 @@ export default function DemoplotImpactPage() {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Page Header */}
       <div
         style={{
@@ -183,6 +254,122 @@ export default function DemoplotImpactPage() {
         </div>
       )}
 
+      {/* Date Range Filter Bar */}
+      <div className="card" style={{ padding: '1.1rem 1.35rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '1.1rem' }}>📅</span>
+            <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
+              Filter Rentang Tanggal Kegiatan Demo Plot
+            </span>
+            <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.15rem 0.55rem', borderRadius: '9999px', background: '#f1f5f9', color: '#475569' }}>
+              {demoplots.length} kegiatan tampil
+            </span>
+          </div>
+
+          {/* Preset Buttons */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+            {[
+              { id: 'all', label: 'Semua Waktu' },
+              { id: '30d', label: '30 Hari Terakhir' },
+              { id: '60d', label: '60 Hari Terakhir' },
+              { id: '90d', label: '90 Hari Terakhir' },
+              { id: 'year', label: 'Tahun Ini' },
+            ].map((p) => {
+              const isActive = activePreset === p.id
+              return (
+                <button
+                  key={p.id}
+                  type="button"
+                  onClick={() => handlePreset(p.id)}
+                  style={{
+                    padding: '0.25rem 0.65rem',
+                    borderRadius: '9999px',
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                    border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
+                    background: isActive ? 'var(--primary-light)' : 'transparent',
+                    color: isActive ? 'var(--primary)' : 'var(--text-muted)',
+                    transition: 'var(--transition)',
+                  }}
+                >
+                  {p.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Date Inputs Form */}
+        <form onSubmit={handleApplyCustomFilter} style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Dari:</span>
+            <input
+              type="date"
+              value={fromDate}
+              onChange={(e) => {
+                setFromDate(e.target.value)
+                setActivePreset('custom')
+              }}
+              style={{
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                padding: '0.4rem 0.65rem',
+                fontSize: '0.82rem',
+                color: '#374151',
+                background: '#fff',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Sampai:</span>
+            <input
+              type="date"
+              value={toDate}
+              onChange={(e) => {
+                setToDate(e.target.value)
+                setActivePreset('custom')
+              }}
+              style={{
+                border: '1px solid #d1d5db',
+                borderRadius: '0.5rem',
+                padding: '0.4rem 0.65rem',
+                fontSize: '0.82rem',
+                color: '#374151',
+                background: '#fff',
+                outline: 'none',
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            className="btn btn-primary"
+            style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 600 }}
+          >
+            Terapkan
+          </button>
+
+          {(fromDate || toDate) && (
+            <button
+              type="button"
+              onClick={handleResetFilter}
+              className="btn btn-outline"
+              style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', color: 'var(--danger)', borderColor: '#fca5a5' }}
+            >
+              ✕ Reset
+            </button>
+          )}
+
+          <div style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            Periode aktif: <strong>{periodLabel}</strong>
+          </div>
+        </form>
+      </div>
+
       {/* Main Container: Map (Left) + Detail Sidebar (Right) */}
       <div
         style={{
@@ -230,7 +417,11 @@ export default function DemoplotImpactPage() {
       </div>
 
       {/* Bottom Section: Top Products Chart */}
-      <TopDemoplotProductsChart data={topProducts} loading={loadingList} />
+      <TopDemoplotProductsChart
+        data={topProducts}
+        loading={loadingList}
+        periodLabel={periodLabel}
+      />
 
       {/* Store 12-Month History Modal */}
       <StoreHistoryModal

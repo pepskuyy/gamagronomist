@@ -523,12 +523,20 @@ export async function calculateDemoplotImpact(
 // -------------------------------------------------------------
 // 4. Daftar Demplot untuk Peta (dengan Indikator Dampak Ringan)
 // -------------------------------------------------------------
-export async function getDemoplotsWithImpactSummary() {
+export async function getDemoplotsWithImpactSummary(fromDate?: string, toDate?: string) {
+  const whereClause: any = {
+    latitude: { not: null },
+    longitude: { not: null },
+  }
+
+  if (fromDate || toDate) {
+    whereClause.date = {}
+    if (fromDate) whereClause.date.gte = new Date(`${fromDate}T00:00:00.000Z`)
+    if (toDate) whereClause.date.lte = new Date(`${toDate}T23:59:59.999Z`)
+  }
+
   const demoPlots = await prisma.demoPlot.findMany({
-    where: {
-      latitude: { not: null },
-      longitude: { not: null },
-    },
+    where: whereClause,
     include: {
       farmer: { select: { name: true } },
       request: {
@@ -652,8 +660,18 @@ export async function getStore12MonthInvoices(customerId?: string, storeName?: s
 // -------------------------------------------------------------
 // 6. Produk Paling Sering Dipakai di Kegiatan Demo Plot
 // -------------------------------------------------------------
-export async function getTopDemoplotProducts(limit = 10) {
+export async function getTopDemoplotProducts(limit = 10, fromDate?: string, toDate?: string) {
+  const whereClause: any = {}
+  if (fromDate || toDate) {
+    whereClause.demoPlot = {
+      date: {}
+    }
+    if (fromDate) whereClause.demoPlot.date.gte = new Date(`${fromDate}T00:00:00.000Z`)
+    if (toDate) whereClause.demoPlot.date.lte = new Date(`${toDate}T23:59:59.999Z`)
+  }
+
   const usages = await prisma.demoPlotDetail.findMany({
+    where: whereClause,
     select: {
       productId: true,
       product: { select: { name: true, unit: true } }

@@ -8,9 +8,10 @@ interface ProductStat {
 interface Props {
   data: ProductStat[]
   loading?: boolean
+  periodLabel?: string
 }
 
-export default function TopDemoplotProductsChart({ data, loading }: Props) {
+export default function TopDemoplotProductsChart({ data, loading, periodLabel }: Props) {
   if (loading) {
     return (
       <div className="card" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -27,13 +28,30 @@ export default function TopDemoplotProductsChart({ data, loading }: Props) {
 
   return (
     <div className="card" style={{ padding: '1.5rem' }}>
-      <div style={{ marginBottom: '1.25rem' }}>
-        <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-          Produk Paling Sering Dipakai di Kegiatan
-        </h3>
-        <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          Frekuensi penggunaan produk agrokimia dalam kegiatan demoplot di lapangan
-        </p>
+      <div style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
+        <div>
+          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+            Produk Paling Sering Dipakai di Kegiatan
+          </h3>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+            Frekuensi penggunaan produk agrokimia dalam kegiatan demoplot di lapangan
+          </p>
+        </div>
+        {periodLabel && (
+          <span
+            style={{
+              fontSize: '0.78rem',
+              fontWeight: 600,
+              padding: '0.2rem 0.65rem',
+              borderRadius: '9999px',
+              background: '#f1f5f9',
+              color: '#475569',
+              border: '1px solid #e2e8f0',
+            }}
+          >
+            📅 {periodLabel}
+          </span>
+        )}
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

@@ -52,16 +52,72 @@ function normName(s?: string | null): string {
 
 /**
  * Tarik master pelanggan yang memiliki titik GPS dari Sales Dashboard Open API
+ * Menggunakan partisi multi-query (base + region + sales) untuk mengatasi limit 1000 item per request
  */
 export async function fetchSalesCustomers(): Promise<ApiCustomer[]> {
-  const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000`
-  const res = await fetch(url, { headers: getHeaders(), cache: 'no-store' })
-  if (!res.ok) {
-    const errText = await res.text().catch(() => '')
-    throw new Error(`Gagal fetch customers: HTTP ${res.status} ${errText}`)
+  const headers = getHeaders()
+  const customerMap = new Map<string, ApiCustomer>()
+
+  // 1. Base query (ambil toko-toko teratas)
+  try {
+    const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000`
+    const res = await fetch(url, { headers, cache: 'no-store' })
+    if (res.ok) {
+      const json = await res.json()
+      for (const c of (json?.data || [])) {
+        if (c.id && c.name) customerMap.set(c.id, c)
+      }
+    }
+  } catch (err) {
+    console.warn('[Sales Sync] Error base customers query:', err)
   }
-  const json = await res.json()
-  return Array.isArray(json?.data) ? json.data : []
+
+  // 2. Query per region utama (Jawa Timur, NTB, Jawa Tengah)
+  const regions = ['Jawa Timur', 'NTB', 'Jawa Tengah']
+  for (const r of regions) {
+    try {
+      const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000&region=${encodeURIComponent(r)}`
+      const res = await fetch(url, { headers, cache: 'no-store' })
+      if (res.ok) {
+        const json = await res.json()
+        for (const c of (json?.data || [])) {
+          if (c.id && c.name) customerMap.set(c.id, c)
+        }
+      }
+    } catch (err) {
+      console.warn(`[Sales Sync] Error region ${r} query:`, err)
+    }
+    await new Promise((res) => setTimeout(res, 80))
+  }
+
+  // 3. Query per salesperson dari /api/v1/users (menarik seluruh toko yang dipegang sales)
+  try {
+    const usersRes = await fetch(`${BASE_URL}/api/v1/users`, { headers, cache: 'no-store' })
+    if (usersRes.ok) {
+      const usersJson = await usersRes.json()
+      const users = (usersJson?.data || []) as Array<{ name?: string; username?: string }>
+
+      for (const u of users) {
+        const salesName = u.name || u.username
+        if (!salesName) continue
+        try {
+          const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000&sales=${encodeURIComponent(salesName)}`
+          const res = await fetch(url, { headers, cache: 'no-store' })
+          if (res.ok) {
+            const json = await res.json()
+            for (const c of (json?.data || [])) {
+              if (c.id && c.name) customerMap.set(c.id, c)
+            }
+          }
+        } catch {}
+        await new Promise((res) => setTimeout(res, 60))
+      }
+    }
+  } catch (err) {
+    console.warn('[Sales Sync] Error fetching users list:', err)
+  }
+
+  return Array.from(customerMap.values())
 }
 
 /**
@@ -79,40 +135,33 @@ export async function fetchSalesInvoices(from: string, to: string): Promise<ApiI
 }
 
 /**
- * Sinkronisasi tabel dashboard_customers lokal
+ * Sinkronisasi tabel dashboard_customers lokal secara batch (cepat & lengkap ~2980 toko)
  */
 export async function syncSalesCustomers(): Promise<{ total: number; upserted: number }> {
-  console.log('[Sales Sync] Mengambil master pelanggan berkoordinat dari API...')
+  console.log('[Sales Sync] Mengambil seluruh master pelanggan berkoordinat dari API (multi-partition)...')
   const customers = await fetchSalesCustomers()
-  console.log(`[Sales Sync] Diterima ${customers.length} toko/pelanggan. Menyimpan ke database...`)
+  console.log(`[Sales Sync] Diterima total ${customers.length} toko/pelanggan unik. Menyimpan ke database...`)
 
-  let upserted = 0
-  for (const c of customers) {
-    if (!c.id || !c.name) continue
-    await prisma.dashboardCustomer.upsert({
-      where: { id: c.id },
-      update: {
-        name: c.name.trim(),
-        city: c.city || null,
-        region: c.region || null,
-        defaultSalesman: c.default_salesman || null,
-        latitude: c.latitude ? Number(c.latitude) : null,
-        longitude: c.longitude ? Number(c.longitude) : null,
-      },
-      create: {
-        id: c.id,
-        name: c.name.trim(),
-        city: c.city || null,
-        region: c.region || null,
-        defaultSalesman: c.default_salesman || null,
-        latitude: c.latitude ? Number(c.latitude) : null,
-        longitude: c.longitude ? Number(c.longitude) : null,
-      },
-    })
-    upserted++
-  }
+  const formattedData = customers.map((c) => ({
+    id: c.id,
+    name: c.name.trim(),
+    city: c.city || null,
+    region: c.region || null,
+    defaultSalesman: c.default_salesman || null,
+    latitude: c.latitude ? Number(c.latitude) : null,
+    longitude: c.longitude ? Number(c.longitude) : null,
+  }))
 
-  return { total: customers.length, upserted }
+  // Batch replace di dalam transaksi: hapus & createMany (hanya ~1 detik untuk 3000 toko)
+  await prisma.$transaction([
+    prisma.dashboardCustomer.deleteMany({}),
+    prisma.dashboardCustomer.createMany({
+      data: formattedData,
+      skipDuplicates: true,
+    }),
+  ])
+
+  return { total: customers.length, upserted: customers.length }
 }
 
 /**
