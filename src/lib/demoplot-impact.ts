@@ -304,7 +304,7 @@ export async function calculateDemoplotImpact(
     // Identifikasi store id target
     let targetStoreId = inv.customerId
     if (!targetStoreId || !storeIdSet.has(targetStoreId)) {
-      const match = storeNameMap.get(norm(inv.namaToko))
+      const match = storeNameMap.get(norm(inv.namaToko || ''))
       if (match) targetStoreId = match.store.id
     }
 
@@ -602,7 +602,7 @@ export async function getDemoplotsWithImpactSummary(fromDate?: string, toDate?: 
       hasImpact = recentInvoices.some(inv => {
         const invTime = new Date(inv.tanggal).getTime()
         if (invTime < dpTime || invTime > afterEndTime) return false
-        const isStoreMatch = (inv.customerId && storeIdSet.has(inv.customerId)) || storeNameSet.has(norm(inv.namaToko))
+        const isStoreMatch = (inv.customerId && storeIdSet.has(inv.customerId)) || storeNameSet.has(norm(inv.namaToko || ''))
         if (!isStoreMatch) return false
 
         const items = Array.isArray(inv.items) ? (inv.items as any[]) : []
@@ -658,35 +658,75 @@ export async function getStore12MonthInvoices(customerId?: string, storeName?: s
 }
 
 // -------------------------------------------------------------
-// 6. Produk Paling Sering Dipakai di Kegiatan Demo Plot
+// 6. Produk Paling Sering Dipakai di Kegiatan Demo Plot & Lapangan
 // -------------------------------------------------------------
-export async function getTopDemoplotProducts(limit = 10, fromDate?: string, toDate?: string) {
-  const whereClause: any = {}
-  if (fromDate || toDate) {
-    whereClause.demoPlot = {
-      date: {}
+export async function getTopDemoplotProducts(
+  limit = 10,
+  fromDate?: string,
+  toDate?: string,
+  activityType: 'demoplot' | 'spot-demplot' | 'all' = 'demoplot'
+) {
+  const countMap = new Map<string, { name: string; count: number }>()
+
+  // 1. Ambil data dari DemoPlotDetail (Khusus Demplot atau Semua)
+  if (activityType === 'demoplot' || activityType === 'all') {
+    const whereClause: any = {}
+    if (fromDate || toDate) {
+      whereClause.demoPlot = {
+        date: {}
+      }
+      if (fromDate) whereClause.demoPlot.date.gte = new Date(`${fromDate}T00:00:00.000Z`)
+      if (toDate) whereClause.demoPlot.date.lte = new Date(`${toDate}T23:59:59.999Z`)
     }
-    if (fromDate) whereClause.demoPlot.date.gte = new Date(`${fromDate}T00:00:00.000Z`)
-    if (toDate) whereClause.demoPlot.date.lte = new Date(`${toDate}T23:59:59.999Z`)
+
+    const usages = await prisma.demoPlotDetail.findMany({
+      where: whereClause,
+      select: {
+        productId: true,
+        product: { select: { name: true, unit: true } }
+      }
+    })
+
+    for (const u of usages) {
+      const name = u.product?.name
+      if (!name) continue
+      const existing = countMap.get(name)
+      if (existing) {
+        existing.count++
+      } else {
+        countMap.set(name, { name, count: 1 })
+      }
+    }
   }
 
-  const usages = await prisma.demoPlotDetail.findMany({
-    where: whereClause,
-    select: {
-      productId: true,
-      product: { select: { name: true, unit: true } }
+  // 2. Ambil data dari SpotDemplotDetail (Spot Demplot atau Semua)
+  if (activityType === 'spot-demplot' || activityType === 'all') {
+    const spotWhere: any = {}
+    if (fromDate || toDate) {
+      spotWhere.spotDemplot = {
+        date: {}
+      }
+      if (fromDate) spotWhere.spotDemplot.date.gte = new Date(`${fromDate}T00:00:00.000Z`)
+      if (toDate) spotWhere.spotDemplot.date.lte = new Date(`${toDate}T23:59:59.999Z`)
     }
-  })
 
-  const countMap = new Map<string, { name: string; count: number }>()
-  for (const u of usages) {
-    const name = u.product?.name
-    if (!name) continue
-    const existing = countMap.get(name)
-    if (existing) {
-      existing.count++
-    } else {
-      countMap.set(name, { name, count: 1 })
+    const spotUsages = await prisma.spotDemplotDetail.findMany({
+      where: spotWhere,
+      select: {
+        productId: true,
+        product: { select: { name: true, unit: true } }
+      }
+    })
+
+    for (const u of spotUsages) {
+      const name = u.product?.name
+      if (!name) continue
+      const existing = countMap.get(name)
+      if (existing) {
+        existing.count++
+      } else {
+        countMap.set(name, { name, count: 1 })
+      }
     }
   }
 

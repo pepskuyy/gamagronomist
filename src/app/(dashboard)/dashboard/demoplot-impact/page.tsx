@@ -29,13 +29,15 @@ export default function DemoplotImpactPage() {
   const [fromDate, setFromDate] = useState<string>('')
   const [toDate, setToDate] = useState<string>('')
   const [activePreset, setActivePreset] = useState<string>('all')
+  const [topProductType, setTopProductType] = useState<'demoplot' | 'spot-demplot' | 'all'>('demoplot')
 
   // 1. Ambil daftar demoplot & produk teratas berdasarkan rentang tanggal
-  const loadDemoplotList = (from?: string, to?: string) => {
+  const loadDemoplotList = (from?: string, to?: string, type = topProductType) => {
     setLoadingList(true)
     const params = new URLSearchParams()
     if (from) params.set('from', from)
     if (to) params.set('to', to)
+    if (type) params.set('type', type)
 
     fetch(`/api/demoplot-impact/list?${params.toString()}`)
       .then((res) => {
@@ -97,6 +99,11 @@ export default function DemoplotImpactPage() {
   const handleSelectStore = (store: StoreImpactResult) => {
     setSelectedStore(store)
     setIsStoreModalOpen(true)
+  }
+
+  const handleTopProductTypeChange = (newType: 'demoplot' | 'spot-demplot' | 'all') => {
+    setTopProductType(newType)
+    loadDemoplotList(fromDate, toDate, newType)
   }
 
   // 4. Quick Presets Rentang Tanggal
@@ -421,6 +428,8 @@ export default function DemoplotImpactPage() {
         data={topProducts}
         loading={loadingList}
         periodLabel={periodLabel}
+        activeType={topProductType}
+        onTypeChange={handleTopProductTypeChange}
       />
 
       {/* Store 12-Month History Modal */}

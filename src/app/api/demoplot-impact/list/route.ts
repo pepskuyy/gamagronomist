@@ -8,10 +8,11 @@ export async function GET(req: Request) {
     const url = new URL(req.url)
     const from = url.searchParams.get('from') || undefined
     const to = url.searchParams.get('to') || undefined
+    const type = (url.searchParams.get('type') as any) || 'demoplot'
 
     const [demoplots, topProducts] = await Promise.all([
       getDemoplotsWithImpactSummary(from, to),
-      getTopDemoplotProducts(10, from, to),
+      getTopDemoplotProducts(10, from, to, type),
     ])
 
     return NextResponse.json({

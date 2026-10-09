@@ -9,9 +9,17 @@ interface Props {
   data: ProductStat[]
   loading?: boolean
   periodLabel?: string
+  activeType?: 'demoplot' | 'spot-demplot' | 'all'
+  onTypeChange?: (type: 'demoplot' | 'spot-demplot' | 'all') => void
 }
 
-export default function TopDemoplotProductsChart({ data, loading, periodLabel }: Props) {
+export default function TopDemoplotProductsChart({
+  data,
+  loading,
+  periodLabel,
+  activeType = 'demoplot',
+  onTypeChange,
+}: Props) {
   if (loading) {
     return (
       <div className="card" style={{ padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
@@ -37,21 +45,78 @@ export default function TopDemoplotProductsChart({ data, loading, periodLabel }:
             Frekuensi penggunaan produk agrokimia dalam kegiatan demoplot di lapangan
           </p>
         </div>
-        {periodLabel && (
-          <span
-            style={{
-              fontSize: '0.78rem',
-              fontWeight: 600,
-              padding: '0.2rem 0.65rem',
-              borderRadius: '9999px',
-              background: '#f1f5f9',
-              color: '#475569',
-              border: '1px solid #e2e8f0',
-            }}
-          >
-            📅 {periodLabel}
-          </span>
-        )}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          {onTypeChange && (
+            <div style={{ display: 'flex', gap: '3px', background: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+              <button
+                type="button"
+                onClick={() => onTypeChange('demoplot')}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: activeType === 'demoplot' ? '#8b5cf6' : 'transparent',
+                  color: activeType === 'demoplot' ? '#fff' : '#64748b',
+                  transition: 'all 0.15s',
+                }}
+              >
+                🌾 Demplot
+              </button>
+              <button
+                type="button"
+                onClick={() => onTypeChange('spot-demplot')}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: activeType === 'spot-demplot' ? '#8b5cf6' : 'transparent',
+                  color: activeType === 'spot-demplot' ? '#fff' : '#64748b',
+                  transition: 'all 0.15s',
+                }}
+              >
+                🌿 Spot Demplot
+              </button>
+              <button
+                type="button"
+                onClick={() => onTypeChange('all')}
+                style={{
+                  fontSize: '0.72rem',
+                  fontWeight: 600,
+                  padding: '3px 8px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: activeType === 'all' ? '#8b5cf6' : 'transparent',
+                  color: activeType === 'all' ? '#fff' : '#64748b',
+                  transition: 'all 0.15s',
+                }}
+              >
+                📊 Semua
+              </button>
+            </div>
+          )}
+          {periodLabel && (
+            <span
+              style={{
+                fontSize: '0.78rem',
+                fontWeight: 600,
+                padding: '0.2rem 0.65rem',
+                borderRadius: '9999px',
+                background: '#f1f5f9',
+                color: '#475569',
+                border: '1px solid #e2e8f0',
+              }}
+            >
+              📅 {periodLabel}
+            </span>
+          )}
+        </div>
       </div>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
