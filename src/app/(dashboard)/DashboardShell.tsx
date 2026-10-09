@@ -78,6 +78,13 @@ const Icons = {
       <path d="M21 2l-2 2m-7.61 7.61a5.5 5.5 0 1 1-7.778 7.778 5.5 5.5 0 0 1 7.777-7.777zm0 0L15.5 7.5m0 0l3 3L22 7l-3-3m-3.5 3.5L19 4"/>
     </svg>
   ),
+  impact: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="20" x2="18" y2="10"/>
+      <line x1="12" y1="20" x2="12" y2="4"/>
+      <line x1="6" y1="20" x2="6" y2="14"/>
+    </svg>
+  ),
 }
 
 export default function DashboardShell({ session, children }: SidebarProps) {
@@ -88,8 +95,9 @@ export default function DashboardShell({ session, children }: SidebarProps) {
   const router = useRouter()
 
   const navItems = [
-    { href: '/dashboard',          label: 'Dashboard',          icon: Icons.dashboard, show: true },
-    { href: '/dashboard/master',        label: 'Master Data',     icon: Icons.master,   show: session?.role === 'ADMIN' || session?.role === 'SPV' },
+    { href: '/dashboard',                label: 'Dashboard',        icon: Icons.dashboard, show: true },
+    { href: '/dashboard/demoplot-impact', label: 'Analitik Demplot', icon: Icons.impact,    show: true },
+    { href: '/dashboard/master',          label: 'Master Data',     icon: Icons.master,   show: session?.role === 'ADMIN' || session?.role === 'SPV' },
     { href: '/dashboard/stock/bd-request', label: 'Stok BD',      icon: Icons.stock,    show: session?.role === 'BD' },
     { href: '/dashboard/stock',          label: ['FAM','WHM'].includes(session?.role) ? 'Approval Stok' : 'Manajemen Stok', icon: Icons.stock, show: !['BD'].includes(session?.role) },
     { href: '/dashboard/reports',        label: 'Laporan Aktivitas', icon: Icons.reports, show: !['BD', 'FAM', 'WHM'].includes(session?.role) },

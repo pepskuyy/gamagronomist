@@ -567,3 +567,40 @@ model SimotandiWilayah {
   @@index([kdkb])
   @@index([kdkc])
 }
+
+// =======================
+// SALES DASHBOARD SYNC (Demoplot Impact Analytics)
+// =======================
+
+model DashboardCustomer {
+  id              String   @id // id dari Sales Dashboard (UUID)
+  accurateId      String?  @map("accurate_id")
+  customerNo      String?  @map("customer_no")
+  name            String
+  city            String?
+  region          String?
+  defaultSalesman String?  @map("default_salesman")
+  latitude        Float?
+  longitude       Float?
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("dashboard_customers")
+  @@index([name])
+}
+
+model DashboardInvoice {
+  id              String   @id @map("id_invoice") // no faktur dari Sales Dashboard (mis. "645.26.09.13307")
+  customerId      String?  @map("customer_id")
+  namaToko        String?  @map("nama_toko")
+  namaSales       String?  @map("nama_sales")
+  tanggal         DateTime
+  status          String?  // jika "Retur", nilai omset/qty diperlakukan minus
+  omset           Float    @default(0)
+  items           Json     // array item transaksi [{ item_no, item_name, quantity, unit, unit_price, total_price }]
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@map("dashboard_invoices")
+  @@index([customerId])
+  @@index([namaToko])
+  @@index([tanggal])
+}
