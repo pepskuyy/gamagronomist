@@ -1,4 +1,6 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
+import { decrypt } from '@/lib/auth'
 import { runFullSalesSync, syncSalesCustomers, syncSalesInvoices } from '@/lib/sales-dashboard'
 
 export const dynamic = 'force-dynamic'
@@ -10,12 +12,29 @@ export async function GET(req: Request) {
   const secretParam = url.searchParams.get('secret')
   const cronSecret = process.env.CRON_SECRET
 
-  if (cronSecret) {
-    const isBearerValid = authHeader === `Bearer ${cronSecret}`
-    const isParamValid = secretParam === cronSecret
-    if (!isBearerValid && !isParamValid) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  // 1. Cek apakah pemanggil memiliki session login valid (dipicu dari tombol web dashboard)
+  let isAuthenticatedUser = false
+  try {
+    const cookieStore = await cookies()
+    const sessionToken = cookieStore.get('session')?.value
+    if (sessionToken) {
+      const session = await decrypt(sessionToken)
+      if (session?.userId) {
+        isAuthenticatedUser = true
+      }
     }
+  } catch {
+    isAuthenticatedUser = false
+  }
+
+  // 2. Cek apakah request dari Cron / API eksternal dengan CRON_SECRET yang valid
+  const isCronAuthorized = cronSecret
+    ? authHeader === `Bearer ${cronSecret}` || secretParam === cronSecret
+    : false
+
+  // Jika CRON_SECRET diset, pemanggil harus salah satu: user terautentikasi ATAU cron secret valid
+  if (cronSecret && !isAuthenticatedUser && !isCronAuthorized) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
   }
 
   const from = url.searchParams.get('from') || undefined

@@ -90,7 +90,7 @@ export default function DemoplotImpactPage() {
     setSyncMsg(null)
     startSync(async () => {
       try {
-        const res = await fetch('/api/cron/sync-sales-dashboard')
+        const res = await fetch('/api/cron/sync-sales-dashboard', { credentials: 'include' })
         const json = await res.json()
         if (json.success) {
           setSyncMsg(`✅ Sinkronisasi berhasil! ${json.customers?.upserted || 0} toko & ${json.invoices?.total || 0} faktur diperbarui.`)
