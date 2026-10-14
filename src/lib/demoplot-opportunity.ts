@@ -95,6 +95,15 @@ export interface OpportunityFinderResult {
 
 const CONFIG_KEY = 'demoplot_development_products'
 
+// Quick Bounding Box check: 1 deg lat/lon ~ 111 km. 5 km ~ 0.045 deg.
+function isNearbyFast(lat1: number, lon1: number, lat2: number, lon2: number, maxKm: number): boolean {
+  const maxDeg = maxKm / 100 // 5km -> 0.05 deg (safety margin)
+  if (Math.abs(lat1 - lat2) > maxDeg || Math.abs(lon1 - lon2) > maxDeg) {
+    return false
+  }
+  return haversineKm(lat1, lon1, lat2, lon2) <= maxKm
+}
+
 /**
  * Mengambil daftar produk pengembangan yang aktif
  */
@@ -137,7 +146,23 @@ export async function calculateOpportunityZones(filters?: {
     )
   }
 
-  // 2. Ambil semua Toko berkoordinat
+  // JIKA TIDAK ADA PRODUK PENGEMBANGAN AKTIF:
+  // Return langsung tanpa melakukan kalkulasi spasial berat
+  if (devProducts.length === 0) {
+    return {
+      summary: {
+        active_dev_products_count: 0,
+        active_dev_products: [],
+        total_zones_found: 0,
+        urgent_sellout_zones_count: 0,
+        total_stocked_stores: 0,
+        total_dev_stock_omset: 0,
+      },
+      zones: [],
+    }
+  }
+
+  // 2. Ambil Toko berkoordinat
   const customerWhere: any = {
     latitude: { not: null },
     longitude: { not: null },
@@ -200,7 +225,6 @@ export async function calculateOpportunityZones(filters?: {
   })
 
   // 4. Petakan transaksi per Toko
-  // Map<customerId or norm(namaToko), Map<productName, StockedProductItem>>
   const storeDevStockMap = new Map<string, Map<string, StockedProductItem>>()
   const storeAllOmsetMap = new Map<string, number>()
 
@@ -218,8 +242,8 @@ export async function calculateOpportunityZones(filters?: {
       storeAllOmsetMap.set(k, (storeAllOmsetMap.get(k) || 0) + omsetVal)
     }
 
-    // Cek apakah ada produk pengembangan di invoice
-    if (devProducts.length > 0 && Array.isArray(inv.items)) {
+    // Cek produk pengembangan di invoice
+    if (Array.isArray(inv.items)) {
       for (const rawItem of inv.items as any[]) {
         if (!rawItem || !rawItem.item_name) continue
 
@@ -277,7 +301,7 @@ export async function calculateOpportunityZones(filters?: {
     }
   })
 
-  // 6. Ambil seluruh kegiatan Demo Plot & Spot Demplot yang ada koordinatnya (1 tahun terakhir)
+  // 6. Ambil seluruh kegiatan Demo Plot & Spot Demplot (1 tahun terakhir)
   const oneYearAgo = new Date(Date.now() - 365 * 24 * 60 * 60 * 1000)
   const [demoPlots, spotDemoplots] = await Promise.all([
     prisma.demoPlot.findMany({
@@ -286,12 +310,18 @@ export async function calculateOpportunityZones(filters?: {
         longitude: { not: null },
         date: { gte: oneYearAgo },
       },
-      include: {
+      select: {
+        id: true,
+        commodity: true,
+        date: true,
+        latitude: true,
+        longitude: true,
         farmer: { select: { name: true } },
         request: { select: { commodity: true, fo: { select: { name: true } } } },
-        details: { include: { product: { select: { name: true } } } },
+        details: { select: { product: { select: { name: true } } } },
       },
       orderBy: { date: 'desc' },
+      take: 500,
     }),
     prisma.spotDemplot.findMany({
       where: {
@@ -299,11 +329,17 @@ export async function calculateOpportunityZones(filters?: {
         longitude: { not: null },
         date: { gte: oneYearAgo },
       },
-      include: {
+      select: {
+        id: true,
+        weeds: true,
+        date: true,
+        latitude: true,
+        longitude: true,
         user: { select: { name: true } },
-        details: { include: { product: { select: { name: true } } } },
+        details: { select: { product: { select: { name: true } } } },
       },
       orderBy: { date: 'desc' },
+      take: 500,
     }),
   ])
 
@@ -341,13 +377,18 @@ export async function calculateOpportunityZones(filters?: {
     })),
   ]
 
-  // 7. Spatial Clustering: Buat Zona Peluang
-  // Anchor utama: Toko-toko yang memiliki stok produk pengembangan (Follow-the-Sales)
-  // Anchor sekunder: Klaster toko padat (Retail Density)
+  // 7. Spatial Clustering Cepat
+  // Prioritas anchor: Toko yang memiliki stok produk fokus
   const stockedStores = storeDetails.filter((s) => s.hasDevStock)
-  const candidateAnchors = stockedStores.length > 0 ? stockedStores : storeDetails
+  const candidateAnchors = stockedStores.length > 0
+    ? stockedStores
+    : [...storeDetails].sort((a, b) => b.totalAllOmset - a.totalAllOmset).slice(0, 40)
 
-  // Greedy Clustering dengan radius merger 3.5 km
+  // Batasi candidate anchors maksimal 50 untuk menjaga performa real-time
+  const sortedAnchors = [...candidateAnchors]
+    .sort((a, b) => b.totalDevOmset - a.totalDevOmset || b.totalAllOmset - a.totalAllOmset)
+    .slice(0, 50)
+
   const visitedStoreIds = new Set<string>()
   const rawClusters: Array<{
     centroidLat: number
@@ -355,22 +396,16 @@ export async function calculateOpportunityZones(filters?: {
     anchorStores: typeof storeDetails
   }> = []
 
-  // Urutkan toko berstok tertinggi terlebih dahulu
-  const sortedAnchors = [...candidateAnchors].sort(
-    (a, b) => b.totalDevOmset - a.totalDevOmset || b.totalAllOmset - a.totalAllOmset
-  )
-
   for (const anchor of sortedAnchors) {
     if (visitedStoreIds.has(anchor.id)) continue
 
-    // Cari toko tetangga dalam radius 3.5 km untuk digabung dalam satu cluster centroid
+    // Cari tetangga dalam radius 3.5 km menggunakan fast bounding box
     const neighbors = storeDetails.filter(
-      (s) => haversineKm(anchor.latitude, anchor.longitude, s.latitude, s.longitude) <= 3.5
+      (s) => isNearbyFast(anchor.latitude, anchor.longitude, s.latitude, s.longitude, 3.5)
     )
 
     neighbors.forEach((n) => visitedStoreIds.add(n.id))
 
-    // Hitung centroid rata-rata dari cluster
     const avgLat = neighbors.reduce((acc, n) => acc + n.latitude, 0) / neighbors.length
     const avgLng = neighbors.reduce((acc, n) => acc + n.longitude, 0) / neighbors.length
 
@@ -379,6 +414,8 @@ export async function calculateOpportunityZones(filters?: {
       centroidLng: avgLng,
       anchorStores: neighbors,
     })
+
+    if (rawClusters.length >= 25) break // Cukup 25 klaster zona terbaik
   }
 
   // 8. Evaluasi setiap Cluster dalam Radius Cakupan 5 km
@@ -390,8 +427,9 @@ export async function calculateOpportunityZones(filters?: {
     const cLat = cluster.centroidLat
     const cLng = cluster.centroidLng
 
-    // Cari semua toko di radius 5 km dari centroid
+    // Cari toko di radius 5 km dari centroid menggunakan fast bounding box
     const storesInRadius = storeDetails
+      .filter((s) => isNearbyFast(cLat, cLng, s.latitude, s.longitude, 5.0))
       .map((s) => {
         const dist = haversineKm(cLat, cLng, s.latitude, s.longitude)
         return {
@@ -410,11 +448,9 @@ export async function calculateOpportunityZones(filters?: {
           stocked_items: s.stockedItems,
         }
       })
-      .filter((s) => s.distance_km <= 5.0)
 
     if (storesInRadius.length === 0) continue
 
-    // Urutkan toko: yang berstok dev paling atas, lalu yang terdekat
     storesInRadius.sort((a, b) => {
       if (a.has_dev_stock !== b.has_dev_stock) return a.has_dev_stock ? -1 : 1
       return a.distance_km - b.distance_km
@@ -426,7 +462,7 @@ export async function calculateOpportunityZones(filters?: {
     const totalDevStockOmset = stockedInRadius.reduce((acc, s) => acc + s.total_dev_omset, 0)
     const totalAllStoreOmset = storesInRadius.reduce((acc, s) => acc + s.total_all_omset_90d, 0)
 
-    // Agregasi produk pengembangan yang ada di zona ini
+    // Agregasi produk fokus yang ada di zona ini
     const devProdMap = new Map<string, { total_qty: number; total_omset: number; store_count: number }>()
     for (const s of stockedInRadius) {
       for (const item of s.stocked_items) {
@@ -444,6 +480,7 @@ export async function calculateOpportunityZones(filters?: {
 
     // Cek demplot di radius 5 km
     const nearbyDemoplots: ZoneDemoplotHistory[] = allDemoplots
+      .filter((dp) => isNearbyFast(cLat, cLng, dp.latitude, dp.longitude, 5.0))
       .map((dp) => {
         const dist = haversineKm(cLat, cLng, dp.latitude, dp.longitude)
         return {
@@ -456,10 +493,8 @@ export async function calculateOpportunityZones(filters?: {
           fo_name: dp.foName || null,
         }
       })
-      .filter((dp) => dp.distance_km <= 5.0)
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
 
-    // Hitung hari sejak demplot terakhir
     let lastDemoplotDaysAgo: number | null = null
     if (nearbyDemoplots.length > 0) {
       const mostRecentTime = new Date(nearbyDemoplots[0].date).getTime()
@@ -471,60 +506,51 @@ export async function calculateOpportunityZones(filters?: {
     // ---------------------------------------------------------
     let score = 0
 
-    // 1. Pilar Follow-The-Sales (Maks 50 Poin)
     if (stockedInRadius.length > 0) {
-      score += 30 // Ada toko yang sudah kulakan produk pengembangan
-      score += Math.min(15, stockedInRadius.length * 5) // +5 per toko berstok
-      if (totalDevStockOmset >= 5000000) score += 5 // Nilai barang di toko cukup besar
+      score += 35
+      score += Math.min(15, stockedInRadius.length * 5)
+      if (totalDevStockOmset >= 3000000) score += 5
     }
 
-    // 2. Pilar Ketiadaan Edukasi / Blank Spot (Maks 30 Poin)
     if (lastDemoplotDaysAgo === null) {
-      score += 30 // Belum pernah ada demplot sama sekali
+      score += 30
     } else if (lastDemoplotDaysAgo > 180) {
-      score += 25 // Sudah lebih dari 6 bulan nihil demplot
+      score += 25
     } else if (lastDemoplotDaysAgo > 90) {
-      score += 15 // Nihil dalam 3 bulan
+      score += 15
     } else if (lastDemoplotDaysAgo < 60) {
-      score -= 35 // Penalti: Baru saja ada demplot < 60 hari lalu (jangan duplikasi)
+      score -= 35
     }
 
-    // Cek apakah demplot lalu pernah memakai produk pengembangan ini
     const pastHasDevProd = nearbyDemoplots.some((dp) =>
       dp.products.some((pName) => devProducts.some((devP) => productsMatch(devP.name, pName)))
     )
     if (!pastHasDevProd && stockedInRadius.length > 0) {
-      score += 10 // Produk pengembangan ini benar-benar BELUM PERNAH didemplotkan di area ini!
+      score += 10
     }
 
-    // 3. Pilar Kepadatan Toko / Retail Gravity (Maks 20 Poin)
-    if (storesInRadius.length >= 6) score += 20
-    else if (storesInRadius.length >= 4) score += 15
-    else if (storesInRadius.length >= 2) score += 10
+    if (storesInRadius.length >= 6) score += 15
+    else if (storesInRadius.length >= 3) score += 10
     else score += 5
 
-    // Normalisasi skor 0 - 100
     score = Math.max(5, Math.min(99, Math.round(score)))
 
-    // ---------------------------------------------------------
-    // KLASIFIKASI & URGENSI
-    // ---------------------------------------------------------
     let urgency: OpportunityZone['urgency'] = 'HIGH_POTENTIAL'
     let urgency_label = 'Prioritas Pendampingan'
     let urgency_badge_color: OpportunityZone['urgency_badge_color'] = 'amber'
     let action_summary = ''
 
     if (stockedInRadius.length > 0 && (lastDemoplotDaysAgo === null || lastDemoplotDaysAgo > 60)) {
-      if (score >= 75) {
+      if (score >= 70) {
         urgency = 'URGENT_SELLOUT'
         urgency_label = 'Wajib Segera Demplot (Kawal Sell-Out)'
         urgency_badge_color = 'red'
-        action_summary = `${stockedInRadius.length} toko sudah memasok produk pengembangan (${devProductsSummary.map((d) => d.name).join(', ')}) senilai Rp ${(totalDevStockOmset / 1e6).toFixed(1)} jt. Lakukan demplot segera agar produk terserap petani dan memicu repeat order!`
+        action_summary = `${stockedInRadius.length} toko sudah memasok produk fokus (${devProductsSummary.map((d) => d.name).join(', ')}) senilai Rp ${(totalDevStockOmset / 1e6).toFixed(1)} jt. Lakukan demplot segera agar produk terserap petani dan memicu repeat order!`
       } else {
         urgency = 'HIGH_POTENTIAL'
         urgency_label = 'Kawal Penyerapan Stok'
         urgency_badge_color = 'amber'
-        action_summary = `Toko telah memiliki stok produk pengembangan. Perlu pengawalan demplot di desa terdekat.`
+        action_summary = `Toko telah memiliki stok produk fokus. Perlu pengawalan demplot di desa terdekat.`
       }
     } else if (lastDemoplotDaysAgo !== null && lastDemoplotDaysAgo <= 60) {
       urgency = 'ALREADY_COVERED'
@@ -535,10 +561,9 @@ export async function calculateOpportunityZones(filters?: {
       urgency = 'EXPANSION_OPPORTUNITY'
       urgency_label = 'Peluang Penetrasi Pasar Baru'
       urgency_badge_color = 'blue'
-      action_summary = `Klaster ${storesInRadius.length} toko potensial belum tersentuh produk pengembangan. Demplot akan membuka pasar dan pintu masuk bagi tim sales.`
+      action_summary = `Klaster ${storesInRadius.length} toko potensial belum tersentuh produk fokus. Demplot akan membuka pasar dan pintu masuk bagi tim sales.`
     }
 
-    // Nama/label klaster
     const cities = Array.from(new Set(storesInRadius.map((s) => s.city).filter(Boolean)))
     const regionName = storesInRadius.find((s) => s.region)?.region || null
     const primaryCity = cities[0] || 'Wilayah Terpadu'
@@ -550,7 +575,7 @@ export async function calculateOpportunityZones(filters?: {
 
     zoneList.push({
       id: `zone_${idx + 1}_${cLat.toFixed(3)}_${cLng.toFixed(3)}`,
-      rank: 0, // diisi setelah sort
+      rank: 0,
       title: zoneTitle,
       city: primaryCity,
       region: regionName,
@@ -577,14 +602,12 @@ export async function calculateOpportunityZones(filters?: {
     })
   }
 
-  // Urutkan zona berdasarkan Skor tertinggi
   zoneList.sort((a, b) => b.score - a.score)
   zoneList.forEach((z, i) => {
     z.rank = i + 1
   })
 
-  // Ambil top 40 zona paling potensial
-  const topZones = zoneList.slice(0, 40)
+  const topZones = zoneList.slice(0, 25)
 
   const urgentCount = topZones.filter((z) => z.urgency === 'URGENT_SELLOUT').length
   const totalStocked = topZones.reduce((acc, z) => acc + z.stocked_stores_count, 0)

@@ -14,6 +14,8 @@ import { OpportunityZone, OpportunityFinderResult, ZoneStoreItem } from '@/lib/d
 import { formatDateId } from '@/lib/date-utils'
 
 export default function DemoplotImpactPage() {
+  const [mounted, setMounted] = useState(false)
+
   // Tab aktif: 'impact' (Evaluasi Dampak) atau 'opportunity' (Opportunity Finder)
   const [activeTab, setActiveTab] = useState<'impact' | 'opportunity'>('impact')
 
@@ -204,9 +206,16 @@ export default function DemoplotImpactPage() {
 
   // Load initial data
   useEffect(() => {
+    setMounted(true)
     loadDemoplotList()
-    loadOpportunities()
   }, [])
+
+  // Lazy load opportunity finder data only when Tab 2 is clicked
+  useEffect(() => {
+    if (activeTab === 'opportunity' && !oppResult && !loadingOpp) {
+      loadOpportunities()
+    }
+  }, [activeTab])
 
   const selectedZone = useMemo(() => {
     if (!oppResult?.zones) return null
@@ -264,6 +273,27 @@ export default function DemoplotImpactPage() {
   }
 
   const formatRp = (n: number) => `Rp ${Math.round(n).toLocaleString('id-ID')}`
+
+  if (!mounted) {
+    return (
+      <div style={{ padding: '3.5rem 1rem', textAlign: 'center', color: '#64748b' }}>
+        <div
+          style={{
+            width: '36px',
+            height: '36px',
+            border: '3px solid #cbd5e1',
+            borderTopColor: '#0284c7',
+            borderRadius: '50%',
+            animation: 'spin 0.8s linear infinite',
+            margin: '0 auto 1rem',
+          }}
+        />
+        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+          Memuat Analitik & Rekomendasi Demplot...
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
@@ -828,6 +858,52 @@ export default function DemoplotImpactPage() {
               )}
             </div>
           </div>
+
+          {/* Banner jika belum ada produk fokus yang diaktifkan */}
+          {!loadingOpp && (!oppResult || oppResult.summary.active_dev_products_count === 0) && (
+            <div
+              className="card"
+              style={{
+                padding: '3rem 1.5rem',
+                textAlign: 'center',
+                background: '#ffffff',
+                border: '1.5px dashed #cbd5e1',
+                borderRadius: '1rem',
+              }}
+            >
+              <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🎯</div>
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+                Belum Ada Produk Fokus yang Diaktifkan
+              </h3>
+              <p
+                style={{
+                  margin: '0.5rem auto 1.5rem',
+                  maxWidth: '540px',
+                  color: '#64748b',
+                  fontSize: '0.88rem',
+                  lineHeight: 1.6,
+                }}
+              >
+                Mesin <strong>Opportunity Finder</strong> mendeteksi titik rekomendasi demplot berdasarkan data penjualan produk fokus di toko binaan (strategi <em>Follow-The-Sales</em>). Silakan pilih minimal 1 produk fokus terlebih dahulu agar sistem dapat menganalisis area prioritas.
+              </p>
+              <button
+                type="button"
+                onClick={() => setIsDevModalOpen(true)}
+                className="btn btn-primary"
+                style={{
+                  padding: '0.65rem 1.5rem',
+                  fontSize: '0.9rem',
+                  fontWeight: 700,
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                }}
+              >
+                <span>⚙️</span>
+                <span>Pilih & Aktifkan Produk Fokus Sekarang</span>
+              </button>
+            </div>
+          )}
 
           {/* Main Opportunity Container: Map (Left) + Detail Sidebar (Right) */}
           <div

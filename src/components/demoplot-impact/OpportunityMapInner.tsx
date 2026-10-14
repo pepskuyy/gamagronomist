@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Fragment } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Tooltip, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
 import { OpportunityZone, ZoneStoreItem } from '@/lib/demoplot-opportunity'
@@ -313,7 +313,7 @@ export default function OpportunityMapInner({
           const style = getZoneColor(zone, isSelected)
 
           return (
-            <div key={zone.id}>
+            <Fragment key={zone.id}>
               {/* Lingkaran Radius 5km */}
               <Circle
                 center={[zone.centroid.latitude, zone.centroid.longitude]}
@@ -417,7 +417,7 @@ export default function OpportunityMapInner({
                   </div>
                 </Popup>
               </CircleMarker>
-            </div>
+            </Fragment>
           )
         })}
 
