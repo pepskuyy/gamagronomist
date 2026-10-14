@@ -13,13 +13,35 @@ export interface DevelopmentProduct {
   createdAt?: string
 }
 
+export interface CandidateProduct {
+  id: string
+  name: string
+  code?: string | null
+  unit?: string | null
+  source: 'master' | 'sales_invoice'
+}
+
 const CONFIG_KEY = 'demoplot_development_products'
 
 export async function GET() {
   try {
-    const config = await prisma.systemConfig.findUnique({
-      where: { key: CONFIG_KEY },
-    })
+    const [config, masterProducts, recentInvoices] = await Promise.all([
+      prisma.systemConfig.findUnique({
+        where: { key: CONFIG_KEY },
+      }),
+      prisma.product.findMany({
+        select: { id: true, name: true, code: true, unit: true },
+        orderBy: { name: 'asc' },
+      }).catch((e) => {
+        console.warn('Failed to fetch master products:', e)
+        return []
+      }),
+      prisma.dashboardInvoice.findMany({
+        take: 800,
+        select: { items: true },
+        orderBy: { tanggal: 'desc' },
+      }).catch(() => []),
+    ])
 
     let products: DevelopmentProduct[] = []
     if (config?.value) {
@@ -31,9 +53,51 @@ export async function GET() {
       }
     }
 
+    // Bangun daftar kandidat produk dari master + invoice
+    const candidateMap = new Map<string, CandidateProduct>()
+
+    // 1. Dari master product
+    for (const p of masterProducts) {
+      if (!p.name) continue
+      const key = p.name.trim().toLowerCase()
+      candidateMap.set(key, {
+        id: p.id,
+        name: p.name.trim(),
+        code: p.code || null,
+        unit: p.unit || null,
+        source: 'master',
+      })
+    }
+
+    // 2. Dari item faktur penjualan (Sales Dashboard)
+    for (const inv of recentInvoices) {
+      if (Array.isArray(inv.items)) {
+        for (const it of inv.items as any[]) {
+          if (!it || !it.item_name) continue
+          const trimmed = String(it.item_name).trim()
+          const key = trimmed.toLowerCase()
+          if (!candidateMap.has(key)) {
+            candidateMap.set(key, {
+              id: it.item_no || `inv_${trimmed.replace(/[^a-zA-Z0-9]/g, '_')}`,
+              name: trimmed,
+              code: it.item_no || null,
+              unit: it.unit || null,
+              source: 'sales_invoice',
+            })
+          }
+        }
+      }
+    }
+
+    const candidateList = Array.from(candidateMap.values()).sort((a, b) =>
+      a.name.localeCompare(b.name, 'id', { sensitivity: 'base' })
+    )
+
     return NextResponse.json({
       success: true,
       products,
+      candidates: candidateList,
+      totalCandidates: candidateList.length,
     })
   } catch (err: any) {
     console.error('[API development-products GET] Error:', err)

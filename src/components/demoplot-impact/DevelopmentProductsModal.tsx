@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 export interface DevelopmentProduct {
   id: string
@@ -11,11 +11,12 @@ export interface DevelopmentProduct {
   isActive: boolean
 }
 
-interface MasterProduct {
+interface CandidateProduct {
   id: string
   name: string
   code?: string | null
-  unit?: string
+  unit?: string | null
+  source?: 'master' | 'sales_invoice'
 }
 
 interface Props {
@@ -26,7 +27,7 @@ interface Props {
 
 export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: Props) {
   const [products, setProducts] = useState<DevelopmentProduct[]>([])
-  const [masterList, setMasterList] = useState<MasterProduct[]>([])
+  const [candidates, setCandidates] = useState<CandidateProduct[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -38,20 +39,24 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
   const [notes, setNotes] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Load data produk pengembangan & master produk
+  // Load data produk pengembangan & master kandidat produk
   useEffect(() => {
     if (!isOpen) return
 
     setLoading(true)
     setMsg(null)
+    setSearchTerm('')
 
-    Promise.all([
-      fetch('/api/demoplot-impact/development-products').then((r) => r.json()),
-      fetch('/api/master/products').then((r) => r.json()).catch(() => []),
-    ])
-      .then(([devData, masterData]) => {
-        if (devData.products) setProducts(devData.products)
-        if (Array.isArray(masterData)) setMasterList(masterData)
+    fetch('/api/demoplot-impact/development-products')
+      .then((r) => {
+        if (!r.ok) throw new Error('Gagal memuat produk pengembangan.')
+        return r.json()
+      })
+      .then((data) => {
+        if (data.products) setProducts(data.products)
+        if (data.candidates && Array.isArray(data.candidates)) {
+          setCandidates(data.candidates)
+        }
         setLoading(false)
       })
       .catch((err) => {
@@ -60,24 +65,39 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
       })
   }, [isOpen])
 
+  // Filter kandidat master produk berdasarkan pencarian live
+  const filteredCandidates = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return candidates
+    }
+    const term = searchTerm.toLowerCase().trim()
+    return candidates.filter((c) => {
+      const matchName = c.name.toLowerCase().includes(term)
+      const matchCode = c.code ? c.code.toLowerCase().includes(term) : false
+      return matchName || matchCode
+    })
+  }, [candidates, searchTerm])
+
   if (!isOpen) return null
 
-  // Filter dropdown master produk
-  const filteredMaster = masterList.filter((m) =>
-    m.name.toLowerCase().includes(searchTerm.toLowerCase())
-  ).slice(0, 30)
-
-  // Handle pilih dari master
+  // Handle pilih dari dropdown select
   const handleSelectMaster = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const val = e.target.value
     setSelectedMasterId(val)
     if (val) {
-      const found = masterList.find((m) => m.id === val)
+      const found = candidates.find((m) => m.id === val)
       if (found) setCustomName(found.name)
     }
   }
 
-  // Tambahkan ke list sementara
+  // Handle klik cepat dari tag suggestion
+  const handleQuickPick = (item: CandidateProduct) => {
+    setSelectedMasterId(item.id)
+    setCustomName(item.name)
+    setSearchTerm('')
+  }
+
+  // Tambahkan ke list produk pengembangan
   const handleAddProduct = (e: React.FormEvent) => {
     e.preventDefault()
     const nameToAdd = customName.trim()
@@ -91,11 +111,11 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
       (p) => p.name.toLowerCase() === nameToAdd.toLowerCase()
     )
     if (exists) {
-      setMsg({ type: 'error', text: 'Produk ini sudah ada di daftar.' })
+      setMsg({ type: 'error', text: `Produk "${nameToAdd}" sudah terdaftar dalam daftar.` })
       return
     }
 
-    const matchedMaster = masterList.find((m) => m.id === selectedMasterId)
+    const matchedMaster = candidates.find((m) => m.id === selectedMasterId)
 
     const newProd: DevelopmentProduct = {
       id: selectedMasterId || `custom_${Date.now()}`,
@@ -112,7 +132,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
     setTargetCrop('')
     setNotes('')
     setSearchTerm('')
-    setMsg({ type: 'success', text: `Produk "${nameToAdd}" ditambahkan ke daftar.` })
+    setMsg({ type: 'success', text: `Produk "${nameToAdd}" berhasil ditambahkan ke daftar.` })
   }
 
   // Toggle status aktif
@@ -178,9 +198,9 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
         style={{
           backgroundColor: 'var(--card-bg, #ffffff)',
           borderRadius: '1rem',
-          maxWidth: '780px',
+          maxWidth: '820px',
           width: '100%',
-          maxHeight: '90vh',
+          maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1)',
@@ -205,7 +225,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
               <span style={{ fontSize: '1.25rem' }}>🎯</span>
               <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#ffffff' }}>
-                Kelola Produk Pengembangan
+                Kelola Produk Pengembangan & Fokus Penjualan
               </h3>
             </div>
             <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
@@ -251,35 +271,118 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
               background: '#f8fafc',
               border: '1px solid #e2e8f0',
               borderRadius: '0.75rem',
-              padding: '1rem 1.25rem',
+              padding: '1.1rem 1.25rem',
               marginBottom: '1.5rem',
             }}
           >
-            <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.9rem', fontWeight: 700, color: '#334155' }}>
-              ➕ Tambah Produk Fokus Baru
-            </h4>
-            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+              <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#1e293b' }}>
+                ➕ Tambah Produk Fokus Baru
+              </h4>
+              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                {candidates.length > 0 ? `Tersedia ${candidates.length} master SKU produk` : 'Memuat produk...'}
+              </span>
+            </div>
+
+            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {/* Kolom Pencarian Cepat Master SKU */}
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>
+                  🔍 Cari Master SKU Produk (Ketik kata kunci untuk memfilter dropdown)
+                </label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input
+                    type="text"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="Ketik nama atau kode produk, misal: Biogent, Ziflo, Tandem, Cabe, Jagung..."
+                    style={{
+                      flex: 1,
+                      padding: '0.5rem 0.75rem',
+                      fontSize: '0.84rem',
+                      borderRadius: '0.375rem',
+                      border: '1.5px solid #0284c7',
+                      background: '#ffffff',
+                      outline: 'none',
+                    }}
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm('')}
+                      style={{
+                        padding: '0.4rem 0.75rem',
+                        fontSize: '0.75rem',
+                        borderRadius: '0.375rem',
+                        border: '1px solid #cbd5e1',
+                        background: '#ffffff',
+                        cursor: 'pointer',
+                        color: '#64748b',
+                      }}
+                    >
+                      Reset Filter
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Tag Quick-Pick jika ada hasil pencarian spesifik */}
+              {searchTerm.trim().length >= 2 && filteredCandidates.length > 0 && (
+                <div style={{ background: '#f1f5f9', padding: '0.6rem 0.75rem', borderRadius: '0.375rem' }}>
+                  <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
+                    ⚡ Klik langsung untuk memilih ({filteredCandidates.length} hasil):
+                  </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', maxHeight: '100px', overflowY: 'auto' }}>
+                    {filteredCandidates.slice(0, 15).map((item) => (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => handleQuickPick(item)}
+                        style={{
+                          padding: '0.2rem 0.55rem',
+                          borderRadius: '9999px',
+                          border: '1px solid #cbd5e1',
+                          background: selectedMasterId === item.id ? '#0284c7' : '#ffffff',
+                          color: selectedMasterId === item.id ? '#ffffff' : '#0f172a',
+                          fontSize: '0.75rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        + {item.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Dropdown Select Master SKU & Input Nama */}
+              <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
-                    Pilih Dari Master SKU
-                  </label>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                      Pilih Dari Dropdown Master SKU
+                    </label>
+                    <span style={{ fontSize: '0.7rem', color: '#0284c7', fontWeight: 600 }}>
+                      {filteredCandidates.length} SKU tampil
+                    </span>
+                  </div>
                   <select
                     value={selectedMasterId}
                     onChange={handleSelectMaster}
                     style={{
                       width: '100%',
-                      padding: '0.45rem 0.6rem',
+                      padding: '0.5rem 0.6rem',
                       fontSize: '0.82rem',
                       borderRadius: '0.375rem',
                       border: '1px solid #cbd5e1',
                       background: '#ffffff',
                     }}
                   >
-                    <option value="">-- Pilih dari Master Produk --</option>
-                    {filteredMaster.map((m) => (
+                    <option value="">-- Pilih dari Master Produk ({filteredCandidates.length} SKU) --</option>
+                    {filteredCandidates.map((m) => (
                       <option key={m.id} value={m.id}>
-                        {m.name} {m.code ? `(${m.code})` : ''}
+                        {m.name} {m.code ? `[${m.code}]` : ''}
                       </option>
                     ))}
                   </select>
@@ -287,7 +390,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
 
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
-                    Nama Produk (atau sesuaikan) *
+                    Nama Produk (atau ketik nama custom) *
                   </label>
                   <input
                     type="text"
@@ -297,7 +400,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     required
                     style={{
                       width: '100%',
-                      padding: '0.45rem 0.6rem',
+                      padding: '0.5rem 0.6rem',
                       fontSize: '0.82rem',
                       borderRadius: '0.375rem',
                       border: '1px solid #cbd5e1',
@@ -306,16 +409,17 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                 </div>
               </div>
 
+              {/* Input Komoditas & Catatan */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div>
                   <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
-                    Target Komoditas / Hama (Opsional)
+                    Target Komoditas / Sasaran Hama (Opsional)
                   </label>
                   <input
                     type="text"
                     value={targetCrop}
                     onChange={(e) => setTargetCrop(e.target.value)}
-                    placeholder="misal: Padi, Bawang Merah, Wereng"
+                    placeholder="misal: Padi, Jagung, Bawang Merah, Wereng"
                     style={{
                       width: '100%',
                       padding: '0.45rem 0.6rem',
@@ -334,7 +438,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     type="text"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
-                    placeholder="misal: Fokus Nasional Musim Tanam 1 2026"
+                    placeholder="misal: Fokus Penjualan Nasional Q1 2026"
                     style={{
                       width: '100%',
                       padding: '0.45rem 0.6rem',
@@ -351,30 +455,33 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                   type="submit"
                   className="btn btn-secondary"
                   style={{
-                    padding: '0.45rem 1rem',
-                    fontSize: '0.82rem',
+                    padding: '0.5rem 1.25rem',
+                    fontSize: '0.84rem',
                     fontWeight: 700,
                     background: '#0284c7',
                     color: '#ffffff',
                     border: 'none',
                     borderRadius: '0.375rem',
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.4rem',
                   }}
                 >
-                  ➕ Masukkan ke Daftar
+                  ➕ Masukkan ke Daftar Produk Fokus
                 </button>
               </div>
             </form>
           </div>
 
-          {/* Daftar Produk Saat Ini */}
+          {/* Daftar Produk Fokus Saat Ini */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>
-                Daftar Produk Pengembangan ({products.filter((p) => p.isActive).length} Aktif / {products.length} Total)
+              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
+                Daftar Produk Pengembangan Terdaftar ({products.filter((p) => p.isActive).length} Aktif / {products.length} Total)
               </h4>
               <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                Produk aktif otomatis menjadi acuan Opportunity Finder
+                Produk aktif langsung dianalisis oleh mesin Opportunity Finder
               </span>
             </div>
 
@@ -396,7 +503,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                 <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>📦</div>
                 <div style={{ fontWeight: 600 }}>Belum ada produk pengembangan yang didaftarkan.</div>
                 <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                  Gunakan form di atas untuk menambahkan produk prioritas penjualan Gama Agro.
+                  Gunakan form di atas untuk memilih dan mendaftarkan produk prioritas penjualan Gama Agro.
                 </div>
               </div>
             ) : (
