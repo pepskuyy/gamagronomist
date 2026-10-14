@@ -40,19 +40,20 @@ export async function GET(req: Request) {
   const from = url.searchParams.get('from') || undefined
   const to = url.searchParams.get('to') || undefined
   const only = url.searchParams.get('only')
+  const triggerType: 'MANUAL' | 'OTOMATIS' = isCronAuthorized && !isAuthenticatedUser ? 'OTOMATIS' : 'MANUAL'
 
   try {
     if (only === 'customers') {
-      const res = await syncSalesCustomers()
+      const res = await syncSalesCustomers(triggerType)
       return NextResponse.json({ success: true, type: 'customers', ...res })
     }
 
     if (only === 'invoices') {
-      const res = await syncSalesInvoices(from, to)
+      const res = await syncSalesInvoices(from, to, triggerType)
       return NextResponse.json({ success: true, type: 'invoices', from, to, ...res })
     }
 
-    const res = await runFullSalesSync(from, to)
+    const res = await runFullSalesSync(from, to, triggerType)
     return NextResponse.json({
       success: true,
       from: from || '90-days-ago',

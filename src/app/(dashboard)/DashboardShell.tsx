@@ -85,6 +85,11 @@ const Icons = {
       <line x1="6" y1="20" x2="6" y2="14"/>
     </svg>
   ),
+  sync: (
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+    </svg>
+  ),
 }
 
 export default function DashboardShell({ session, children }: SidebarProps) {
@@ -97,6 +102,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
   const navItems = [
     { href: '/dashboard',                label: 'Dashboard',        icon: Icons.dashboard, show: true },
     { href: '/dashboard/demoplot-impact', label: 'Analitik Demplot', icon: Icons.impact,    show: true },
+    { href: '/dashboard/sync-monitor',    label: 'Monitor Sinkronisasi', icon: Icons.sync,     show: session?.role === 'ADMIN' },
     { href: '/dashboard/master',          label: 'Master Data',     icon: Icons.master,   show: session?.role === 'ADMIN' || session?.role === 'SPV' },
     { href: '/dashboard/stock/bd-request', label: 'Stok BD',      icon: Icons.stock,    show: session?.role === 'BD' },
     { href: '/dashboard/stock',          label: ['FAM','WHM'].includes(session?.role) ? 'Approval Stok' : 'Manajemen Stok', icon: Icons.stock, show: !['BD'].includes(session?.role) },

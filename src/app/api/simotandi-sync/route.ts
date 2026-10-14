@@ -38,6 +38,7 @@ export async function GET(req: Request) {
     const result = await runSimotandiSync({
       mode,
       periode: parsedPeriode && !isNaN(parsedPeriode) ? parsedPeriode : null,
+      triggerType: 'OTOMATIS',
     })
 
     revalidatePath('/dashboard')

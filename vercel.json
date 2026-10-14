@@ -1,12 +1,16 @@
 {
   "crons": [
     {
-      "path": "/api/accurate-sync-cron",
-      "schedule": "0 0 * * *"
+      "path": "/api/cron/sync-sales-dashboard",
+      "schedule": "0 22 * * *"
     },
     {
       "path": "/api/simotandi-sync",
-      "schedule": "0 22 * * *"
+      "schedule": "20 22 * * *"
+    },
+    {
+      "path": "/api/accurate-sync-cron",
+      "schedule": "0 0 * * *"
     }
   ]
 }

@@ -22,7 +22,7 @@ export async function GET(req: Request) {
 
   try {
     console.log('[accurate-sync-cron] Memulai auto-sync dari Accurate...')
-    const result = await runAccurateSync()
+    const result = await runAccurateSync('OTOMATIS')
     console.log(`[accurate-sync-cron] Selesai: ${result.updated} updated, ${result.inserted} inserted, ${result.skipped} skipped`)
 
     return NextResponse.json({

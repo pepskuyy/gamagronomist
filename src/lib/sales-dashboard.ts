@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { startSyncLog, completeSyncLog, failSyncLog } from '@/lib/sync-logger'
 
 const BASE_URL = (process.env.SALES_DASHBOARD_URL || 'https://sales.gamaagrosejati.co.id').replace(/\/$/, '')
 const API_KEY = process.env.SALES_DASHBOARD_API_KEY || ''
@@ -137,31 +138,57 @@ export async function fetchSalesInvoices(from: string, to: string): Promise<ApiI
 /**
  * Sinkronisasi tabel dashboard_customers lokal secara batch (cepat & lengkap ~2980 toko)
  */
-export async function syncSalesCustomers(): Promise<{ total: number; upserted: number }> {
-  console.log('[Sales Sync] Mengambil seluruh master pelanggan berkoordinat dari API (multi-partition)...')
-  const customers = await fetchSalesCustomers()
-  console.log(`[Sales Sync] Diterima total ${customers.length} toko/pelanggan unik. Menyimpan ke database...`)
+export async function syncSalesCustomers(
+  triggerType: 'MANUAL' | 'OTOMATIS' = 'MANUAL'
+): Promise<{ total: number; upserted: number }> {
+  const startTime = Date.now()
+  const logId = await startSyncLog({
+    dataType: 'Master Data Pelanggan',
+    triggerType,
+    message: 'Mengambil master toko berkoordinat dari Sales Dashboard...',
+  })
 
-  const formattedData = customers.map((c) => ({
-    id: c.id,
-    name: c.name.trim(),
-    city: c.city || null,
-    region: c.region || null,
-    defaultSalesman: c.default_salesman || null,
-    latitude: c.latitude ? Number(c.latitude) : null,
-    longitude: c.longitude ? Number(c.longitude) : null,
-  }))
+  try {
+    console.log('[Sales Sync] Mengambil seluruh master pelanggan berkoordinat dari API (multi-partition)...')
+    const customers = await fetchSalesCustomers()
+    console.log(`[Sales Sync] Diterima total ${customers.length} toko/pelanggan unik. Menyimpan ke database...`)
 
-  // Batch replace di dalam transaksi: hapus & createMany (hanya ~1 detik untuk 3000 toko)
-  await prisma.$transaction([
-    prisma.dashboardCustomer.deleteMany({}),
-    prisma.dashboardCustomer.createMany({
-      data: formattedData,
-      skipDuplicates: true,
-    }),
-  ])
+    const formattedData = customers.map((c) => ({
+      id: c.id,
+      name: c.name.trim(),
+      city: c.city || null,
+      region: c.region || null,
+      defaultSalesman: c.default_salesman || null,
+      latitude: c.latitude ? Number(c.latitude) : null,
+      longitude: c.longitude ? Number(c.longitude) : null,
+    }))
 
-  return { total: customers.length, upserted: customers.length }
+    // Batch replace di dalam transaksi: hapus & createMany (hanya ~1 detik untuk 3000 toko)
+    await prisma.$transaction([
+      prisma.dashboardCustomer.deleteMany({}),
+      prisma.dashboardCustomer.createMany({
+        data: formattedData,
+        skipDuplicates: true,
+      }),
+    ])
+
+    const duration = Date.now() - startTime
+    await completeSyncLog(logId, {
+      processedCount: customers.length,
+      message: `Sinkronisasi selesai: ${customers.length} toko berhasil diperbarui, 0 error`,
+      durationMs: duration,
+    })
+
+    return { total: customers.length, upserted: customers.length }
+  } catch (err: any) {
+    const duration = Date.now() - startTime
+    await failSyncLog(logId, {
+      error: err,
+      message: `Gagal sinkronisasi master toko: ${err?.message || 'Error'}`,
+      durationMs: duration,
+    })
+    throw err
+  }
 }
 
 /**
@@ -177,89 +204,120 @@ function formatDate(d: Date): string {
  */
 export async function syncSalesInvoices(
   fromDate?: string,
-  toDate?: string
+  toDate?: string,
+  triggerType: 'MANUAL' | 'OTOMATIS' = 'MANUAL'
 ): Promise<{ total: number; chunks: number }> {
+  const startTime = Date.now()
   const end = toDate ? new Date(toDate) : new Date()
   const start = fromDate ? new Date(fromDate) : new Date(end.getTime() - 90 * 24 * 60 * 60 * 1000)
+  const rangeLabel = `${formatDate(start)} - ${formatDate(end)}`
 
-  console.log(`[Sales Sync] Memulai sinkronisasi faktur dari ${formatDate(start)} s/d ${formatDate(end)}...`)
-
-  // Pre-load map pelanggan lokal (normName -> customer.id) untuk menautkan customerId
-  const dbCustomers = await prisma.dashboardCustomer.findMany({
-    select: { id: true, name: true },
+  const logId = await startSyncLog({
+    dataType: `Transaksi SO & Invoice (${rangeLabel})`,
+    triggerType,
+    message: `Menarik faktur penjualan dari Sales Dashboard (${rangeLabel})...`,
   })
-  const custMap = new Map<string, string>()
-  for (const c of dbCustomers) {
-    custMap.set(normName(c.name), c.id)
-  }
 
-  // Pecah rentang tanggal ke dalam chunk 7 hari
-  const chunks: { from: string; to: string }[] = []
-  let currentStart = new Date(start)
+  try {
+    console.log(`[Sales Sync] Memulai sinkronisasi faktur dari ${formatDate(start)} s/d ${formatDate(end)}...`)
 
-  while (currentStart < end) {
-    const currentEnd = new Date(Math.min(currentStart.getTime() + 7 * 24 * 60 * 60 * 1000, end.getTime()))
-    chunks.push({
-      from: formatDate(currentStart),
-      to: formatDate(currentEnd),
+    // Pre-load map pelanggan lokal (normName -> customer.id) untuk menautkan customerId
+    const dbCustomers = await prisma.dashboardCustomer.findMany({
+      select: { id: true, name: true },
     })
-    currentStart = new Date(currentEnd.getTime() + 24 * 60 * 60 * 1000)
-  }
-
-  let totalInvoices = 0
-
-  for (let i = 0; i < chunks.length; i++) {
-    const chunk = chunks[i]
-    console.log(`[Sales Sync] Chunk ${i + 1}/${chunks.length}: ${chunk.from} s/d ${chunk.to}`)
-    const invoices = await fetchSalesInvoices(chunk.from, chunk.to)
-
-    for (const inv of invoices) {
-      if (!inv.id_invoice || !inv.tanggal) continue
-
-      const normToko = normName(inv.nama_toko)
-      const matchedCustId = custMap.get(normToko) || null
-      const omsetVal = Number(inv.omset) || (Number(inv.omset_raw) || 0)
-      const salesName = inv.nama_sales || inv.master_salesman || null
-
-      await prisma.dashboardInvoice.upsert({
-        where: { id: inv.id_invoice },
-        update: {
-          customerId: matchedCustId,
-          namaToko: inv.nama_toko || null,
-          namaSales: salesName,
-          tanggal: new Date(inv.tanggal),
-          status: inv.status || null,
-          omset: omsetVal,
-          items: (inv.items || []) as any,
-        },
-        create: {
-          id: inv.id_invoice,
-          customerId: matchedCustId,
-          namaToko: inv.nama_toko || null,
-          namaSales: salesName,
-          tanggal: new Date(inv.tanggal),
-          status: inv.status || null,
-          omset: omsetVal,
-          items: (inv.items || []) as any,
-        },
-      })
-      totalInvoices++
+    const custMap = new Map<string, string>()
+    for (const c of dbCustomers) {
+      custMap.set(normName(c.name), c.id)
     }
 
-    // Beri jeda kecil agar sopan ke server API
-    await new Promise((r) => setTimeout(r, 200))
-  }
+    // Pecah rentang tanggal ke dalam chunk 7 hari
+    const chunks: { from: string; to: string }[] = []
+    let currentStart = new Date(start)
 
-  console.log(`[Sales Sync] Selesai: ${totalInvoices} faktur berhasil disinkronkan.`)
-  return { total: totalInvoices, chunks: chunks.length }
+    while (currentStart < end) {
+      const currentEnd = new Date(Math.min(currentStart.getTime() + 7 * 24 * 60 * 60 * 1000, end.getTime()))
+      chunks.push({
+        from: formatDate(currentStart),
+        to: formatDate(currentEnd),
+      })
+      currentStart = new Date(currentEnd.getTime() + 24 * 60 * 60 * 1000)
+    }
+
+    let totalInvoices = 0
+
+    for (let i = 0; i < chunks.length; i++) {
+      const chunk = chunks[i]
+      console.log(`[Sales Sync] Chunk ${i + 1}/${chunks.length}: ${chunk.from} s/d ${chunk.to}`)
+      const invoices = await fetchSalesInvoices(chunk.from, chunk.to)
+
+      for (const inv of invoices) {
+        if (!inv.id_invoice || !inv.tanggal) continue
+
+        const normToko = normName(inv.nama_toko)
+        const matchedCustId = custMap.get(normToko) || null
+        const omsetVal = Number(inv.omset) || (Number(inv.omset_raw) || 0)
+        const salesName = inv.nama_sales || inv.master_salesman || null
+
+        await prisma.dashboardInvoice.upsert({
+          where: { id: inv.id_invoice },
+          update: {
+            customerId: matchedCustId,
+            namaToko: inv.nama_toko || null,
+            namaSales: salesName,
+            tanggal: new Date(inv.tanggal),
+            status: inv.status || null,
+            omset: omsetVal,
+            items: (inv.items || []) as any,
+          },
+          create: {
+            id: inv.id_invoice,
+            customerId: matchedCustId,
+            namaToko: inv.nama_toko || null,
+            namaSales: salesName,
+            tanggal: new Date(inv.tanggal),
+            status: inv.status || null,
+            omset: omsetVal,
+            items: (inv.items || []) as any,
+          },
+        })
+        totalInvoices++
+      }
+
+      // Beri jeda kecil agar sopan ke server API
+      await new Promise((r) => setTimeout(r, 200))
+    }
+
+    const duration = Date.now() - startTime
+    console.log(`[Sales Sync] Selesai: ${totalInvoices} faktur berhasil disinkronkan.`)
+
+    await completeSyncLog(logId, {
+      processedCount: totalInvoices,
+      message: `Sinkronisasi delta 90 hari selesai (${totalInvoices} faktur diproses dari ${chunks.length} periode mingguan)`,
+      durationMs: duration,
+    })
+
+    return { total: totalInvoices, chunks: chunks.length }
+  } catch (err: any) {
+    const duration = Date.now() - startTime
+    await failSyncLog(logId, {
+      error: err,
+      message: `Gagal sinkronisasi faktur: ${err?.message || 'Error'}`,
+      durationMs: duration,
+    })
+    throw err
+  }
 }
 
 /**
  * Jalankan sinkronisasi lengkap: Toko + Faktur
  */
-export async function runFullSalesSync(fromDate?: string, toDate?: string) {
-  const custRes = await syncSalesCustomers()
-  const invRes = await syncSalesInvoices(fromDate, toDate)
+export async function runFullSalesSync(
+  fromDate?: string,
+  toDate?: string,
+  triggerType: 'MANUAL' | 'OTOMATIS' = 'MANUAL'
+) {
+  const custRes = await syncSalesCustomers(triggerType)
+  const invRes = await syncSalesInvoices(fromDate, toDate, triggerType)
   return {
     customers: custRes,
     invoices: invRes,
