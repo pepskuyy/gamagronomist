@@ -8,6 +8,7 @@ import TopDemoplotProductsChart from '@/components/demoplot-impact/TopDemoplotPr
 import OpportunityMap from '@/components/demoplot-impact/OpportunityMap'
 import OpportunitySidebar from '@/components/demoplot-impact/OpportunitySidebar'
 import DevelopmentProductsModal from '@/components/demoplot-impact/DevelopmentProductsModal'
+import OpportunityScoringModal from '@/components/demoplot-impact/OpportunityScoringModal'
 import { MapDemoplotItem } from '@/components/demoplot-impact/DemoplotImpactMapInner'
 import { DemoplotImpactDetail, StoreImpactResult } from '@/lib/demoplot-impact'
 import { OpportunityZone, OpportunityFinderResult, ZoneStoreItem } from '@/lib/demoplot-opportunity'
@@ -21,6 +22,7 @@ export default function DemoplotImpactPage() {
 
   // Modal states
   const [isDevModalOpen, setIsDevModalOpen] = useState(false)
+  const [isScoringModalOpen, setIsScoringModalOpen] = useState(false)
   const [selectedStore, setSelectedStore] = useState<StoreImpactResult | null>(null)
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false)
 
@@ -731,7 +733,28 @@ export default function DemoplotImpactPage() {
                 </span>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsScoringModalOpen(true)}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    background: '#f0f9ff',
+                    color: '#0369a1',
+                    border: '1px solid #bae6fd',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
+                  }}
+                >
+                  <span>💡</span>
+                  <span>Mekanisme Skoring</span>
+                </button>
+
                 <button
                   type="button"
                   onClick={() => setIsDevModalOpen(true)}
@@ -744,9 +767,13 @@ export default function DemoplotImpactPage() {
                     color: '#c2410c',
                     border: '1px solid #ffedd5',
                     cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.35rem',
                   }}
                 >
-                  ⚙️ Kelola Produk Fokus ({oppResult?.summary.active_dev_products_count || 0})
+                  <span>⚙️</span>
+                  <span>Kelola Produk Fokus ({oppResult?.summary.active_dev_products_count || 0})</span>
                 </button>
               </div>
             </div>
@@ -958,8 +985,30 @@ export default function DemoplotImpactPage() {
                 </p>
               </div>
 
-              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Menampilkan <strong>{oppResult?.zones.length || 0}</strong> zona prioritas
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <button
+                  type="button"
+                  onClick={() => setIsScoringModalOpen(true)}
+                  style={{
+                    padding: '0.3rem 0.65rem',
+                    borderRadius: '0.375rem',
+                    fontSize: '0.74rem',
+                    fontWeight: 700,
+                    background: '#f0f9ff',
+                    color: '#0369a1',
+                    border: '1px solid #bae6fd',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '0.3rem',
+                  }}
+                >
+                  <span>💡</span>
+                  <span>Cara Kerja Skoring</span>
+                </button>
+                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                  Menampilkan <strong>{oppResult?.zones.length || 0}</strong> zona prioritas
+                </div>
               </div>
             </div>
 
@@ -1108,6 +1157,12 @@ export default function DemoplotImpactPage() {
         onSaved={() => {
           loadOpportunities(oppRegion, oppSalesman, oppProduct)
         }}
+      />
+
+      {/* Modal Penjelasan Mekanisme Skoring */}
+      <OpportunityScoringModal
+        isOpen={isScoringModalOpen}
+        onClose={() => setIsScoringModalOpen(false)}
       />
 
       {/* Modal Riwayat 12 Bulan Transaksi Toko */}
