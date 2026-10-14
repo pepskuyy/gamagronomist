@@ -319,30 +319,6 @@ export default function DemoplotImpactPage() {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-          {/* Tombol Kelola Produk Pengembangan */}
-          <button
-            onClick={() => setIsDevModalOpen(true)}
-            type="button"
-            className="btn btn-secondary"
-            style={{
-              padding: '0.55rem 1rem',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.45rem',
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#0f172a',
-              cursor: 'pointer',
-            }}
-          >
-            <span>🎯</span>
-            <span>
-              Kelola Produk Fokus ({oppResult?.summary.active_dev_products_count || 0})
-            </span>
-          </button>
-
           {/* Tombol Sinkronisasi Data Sales */}
           <button
             onClick={handleSyncSales}
