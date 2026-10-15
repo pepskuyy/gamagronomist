@@ -1,107 +1,33 @@
 import { NextResponse } from 'next/server'
-import prisma from '@/lib/prisma'
 import { requireApiSession } from '@/lib/session'
+import {
+  listDevelopmentProducts,
+  getCandidateProducts,
+  bulkUpsertDevelopmentProducts,
+  updateDevelopmentProduct,
+  deleteDevelopmentProduct,
+  type UpsertInput,
+} from '@/lib/development-products'
 
 export const dynamic = 'force-dynamic'
 
-export interface DevelopmentProduct {
-  id: string
-  name: string
-  code?: string | null
-  targetCrop?: string | null
-  notes?: string | null
-  isActive: boolean
-  createdAt?: string
-}
+const MAX_IMPORT_ROWS = 1000
 
-export interface CandidateProduct {
-  id: string
-  name: string
-  code?: string | null
-  unit?: string | null
-  source: 'master' | 'sales_invoice'
-}
-
-const CONFIG_KEY = 'demoplot_development_products'
-
+/** GET — daftar produk fokus + kandidat SKU Accurate untuk dipilih */
 export async function GET() {
   const auth = await requireApiSession()
   if (auth instanceof NextResponse) return auth
 
   try {
-    const [config, masterProducts, recentInvoices] = await Promise.all([
-      prisma.systemConfig.findUnique({
-        where: { key: CONFIG_KEY },
-      }),
-      prisma.product.findMany({
-        select: { id: true, name: true, code: true, unit: true },
-        orderBy: { name: 'asc' },
-      }).catch((e) => {
-        console.warn('Failed to fetch master products:', e)
-        return []
-      }),
-      prisma.dashboardInvoice.findMany({
-        take: 800,
-        select: { items: true },
-        orderBy: { tanggal: 'desc' },
-      }).catch(() => []),
+    const [products, candidates] = await Promise.all([
+      listDevelopmentProducts(),
+      getCandidateProducts(),
     ])
-
-    let products: DevelopmentProduct[] = []
-    if (config?.value) {
-      try {
-        products = JSON.parse(config.value)
-      } catch (e) {
-        console.warn('Failed to parse demoplot_development_products json:', e)
-        products = []
-      }
-    }
-
-    // Bangun daftar kandidat produk dari master + invoice
-    const candidateMap = new Map<string, CandidateProduct>()
-
-    // 1. Dari master product
-    for (const p of masterProducts) {
-      if (!p.name) continue
-      const key = p.name.trim().toLowerCase()
-      candidateMap.set(key, {
-        id: p.id,
-        name: p.name.trim(),
-        code: p.code || null,
-        unit: p.unit || null,
-        source: 'master',
-      })
-    }
-
-    // 2. Dari item faktur penjualan (Sales Dashboard)
-    for (const inv of recentInvoices) {
-      if (Array.isArray(inv.items)) {
-        for (const it of inv.items as any[]) {
-          if (!it || !it.item_name) continue
-          const trimmed = String(it.item_name).trim()
-          const key = trimmed.toLowerCase()
-          if (!candidateMap.has(key)) {
-            candidateMap.set(key, {
-              id: it.item_no || `inv_${trimmed.replace(/[^a-zA-Z0-9]/g, '_')}`,
-              name: trimmed,
-              code: it.item_no || null,
-              unit: it.unit || null,
-              source: 'sales_invoice',
-            })
-          }
-        }
-      }
-    }
-
-    const candidateList = Array.from(candidateMap.values()).sort((a, b) =>
-      a.name.localeCompare(b.name, 'id', { sensitivity: 'base' })
-    )
-
     return NextResponse.json({
       success: true,
       products,
-      candidates: candidateList,
-      totalCandidates: candidateList.length,
+      candidates,
+      totalCandidates: candidates.length,
     })
   } catch (err: any) {
     console.error('[API development-products GET] Error:', err)
@@ -112,55 +38,80 @@ export async function GET() {
   }
 }
 
+/**
+ * POST — tambah / perbarui produk.
+ * Body: { products: UpsertInput[], rowOffset?: number }
+ * Dipakai untuk tambah satu produk (array 1 item) maupun import Excel.
+ */
 export async function POST(req: Request) {
   const auth = await requireApiSession()
   if (auth instanceof NextResponse) return auth
 
   try {
     const body = await req.json()
-    const { products } = body
+    const products: UpsertInput[] = body?.products
 
-    if (!Array.isArray(products)) {
+    if (!Array.isArray(products) || products.length === 0) {
       return NextResponse.json(
         { error: 'Format data tidak valid. Wajib berupa array produk.' },
         { status: 400 }
       )
     }
+    if (products.length > MAX_IMPORT_ROWS) {
+      return NextResponse.json(
+        { error: `Maksimal ${MAX_IMPORT_ROWS} baris per import.` },
+        { status: 400 }
+      )
+    }
 
-    // Sanitasi dan format data
-    const sanitized: DevelopmentProduct[] = products.map((p: any) => ({
-      id: String(p.id || ''),
-      name: String(p.name || '').trim(),
-      code: p.code ? String(p.code).trim() : null,
-      targetCrop: p.targetCrop ? String(p.targetCrop).trim() : null,
-      notes: p.notes ? String(p.notes).trim() : null,
-      isActive: p.isActive !== false,
-      createdAt: p.createdAt || new Date().toISOString(),
-    })).filter(p => p.name.length > 0)
-
-    const updated = await prisma.systemConfig.upsert({
-      where: { key: CONFIG_KEY },
-      update: {
-        value: JSON.stringify(sanitized),
-        label: 'Daftar Produk Pengembangan Demplot',
-      },
-      create: {
-        key: CONFIG_KEY,
-        value: JSON.stringify(sanitized),
-        label: 'Daftar Produk Pengembangan Demplot',
-      },
-    })
-
-    return NextResponse.json({
-      success: true,
-      products: sanitized,
-      updatedAt: updated.updatedAt,
-    })
+    const rowOffset = Number.isInteger(body?.rowOffset) ? body.rowOffset : 1
+    const result = await bulkUpsertDevelopmentProducts(products, auth.userId, rowOffset)
+    return NextResponse.json({ success: true, ...result })
   } catch (err: any) {
     console.error('[API development-products POST] Error:', err)
     return NextResponse.json(
       { error: err.message || 'Gagal menyimpan produk pengembangan.' },
       { status: 500 }
     )
+  }
+}
+
+/** PATCH — ubah status aktif / komoditas / catatan satu produk. Body: { id, isActive?, targetCrop?, notes? } */
+export async function PATCH(req: Request) {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
+  try {
+    const { id, ...data } = await req.json()
+    if (!id) return NextResponse.json({ error: 'ID produk wajib diisi.' }, { status: 400 })
+
+    const product = await updateDevelopmentProduct(String(id), data, auth.userId)
+    return NextResponse.json({ success: true, product })
+  } catch (err: any) {
+    if (err?.code === 'P2025') {
+      return NextResponse.json({ error: 'Produk tidak ditemukan (mungkin sudah dihapus).' }, { status: 404 })
+    }
+    console.error('[API development-products PATCH] Error:', err)
+    return NextResponse.json({ error: 'Gagal memperbarui produk.' }, { status: 500 })
+  }
+}
+
+/** DELETE — hapus satu produk. Query: ?id=xxx */
+export async function DELETE(req: Request) {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
+  try {
+    const id = new URL(req.url).searchParams.get('id')
+    if (!id) return NextResponse.json({ error: 'ID produk wajib diisi.' }, { status: 400 })
+
+    await deleteDevelopmentProduct(id)
+    return NextResponse.json({ success: true })
+  } catch (err: any) {
+    if (err?.code === 'P2025') {
+      return NextResponse.json({ success: true }) // sudah terhapus oleh user lain
+    }
+    console.error('[API development-products DELETE] Error:', err)
+    return NextResponse.json({ error: 'Gagal menghapus produk.' }, { status: 500 })
   }
 }

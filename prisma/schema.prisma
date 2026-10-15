@@ -627,3 +627,22 @@ model SyncLog {
   @@index([status])
   @@index([startedAt])
 }
+
+// Daftar Produk Fokus / Pengembangan (Opportunity Finder di Analitik Demplot).
+// Global (bukan per user). Dicocokkan ke nama item invoice Sales Dashboard (SKU Accurate).
+model DevelopmentProduct {
+  id          String   @id @default(cuid())
+  name        String
+  nameKey     String   @unique @map("name_key") // nama ternormalisasi, untuk cegah duplikat
+  code        String?  // no_barang / SKU Accurate (opsional)
+  targetCrop  String?  @map("target_crop")
+  notes       String?
+  isActive    Boolean  @default(true) @map("is_active")
+  createdById String?  @map("created_by_id")
+  updatedById String?  @map("updated_by_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("development_products")
+  @@index([isActive])
+}

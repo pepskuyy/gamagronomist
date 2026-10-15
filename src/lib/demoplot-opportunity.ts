@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { haversineKm, productsMatch, norm } from '@/lib/demoplot-impact'
+import { getActiveDevelopmentProducts } from '@/lib/development-products'
 
 export interface DevelopmentProduct {
   id: string
@@ -93,8 +94,6 @@ export interface OpportunityFinderResult {
   zones: OpportunityZone[]
 }
 
-const CONFIG_KEY = 'demoplot_development_products'
-
 // Quick Bounding Box check: 1 deg lat/lon ~ 111 km. 5 km ~ 0.045 deg.
 function isNearbyFast(lat1: number, lon1: number, lat2: number, lon2: number, maxKm: number): boolean {
   const maxDeg = maxKm / 100 // 5km -> 0.05 deg (safety margin)
@@ -102,24 +101,6 @@ function isNearbyFast(lat1: number, lon1: number, lat2: number, lon2: number, ma
     return false
   }
   return haversineKm(lat1, lon1, lat2, lon2) <= maxKm
-}
-
-/**
- * Mengambil daftar produk pengembangan yang aktif
- */
-export async function getActiveDevelopmentProducts(): Promise<DevelopmentProduct[]> {
-  try {
-    const config = await prisma.systemConfig.findUnique({
-      where: { key: CONFIG_KEY },
-    })
-
-    if (!config?.value) return []
-    const parsed: DevelopmentProduct[] = JSON.parse(config.value)
-    return parsed.filter((p) => p.isActive)
-  } catch (err) {
-    console.warn('[demoplot-opportunity] Failed to get active dev products:', err)
-    return []
-  }
 }
 
 /**
@@ -137,7 +118,10 @@ export async function calculateOpportunityZones(filters?: {
   const windowStart = new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
   // 1. Ambil Produk Pengembangan Aktif
-  let devProducts = await getActiveDevelopmentProducts()
+  // allActive selalu dikembalikan utuh di summary (untuk jumlah di tombol & dropdown filter),
+  // devProducts dipersempit sesuai filter produk untuk perhitungan skor.
+  const allActive: DevelopmentProduct[] = await getActiveDevelopmentProducts()
+  let devProducts = allActive
 
   // Jika ada filter spesifik produk
   if (filters?.productName) {
@@ -151,8 +135,8 @@ export async function calculateOpportunityZones(filters?: {
   if (devProducts.length === 0) {
     return {
       summary: {
-        active_dev_products_count: 0,
-        active_dev_products: [],
+        active_dev_products_count: allActive.length,
+        active_dev_products: allActive,
         total_zones_found: 0,
         urgent_sellout_zones_count: 0,
         total_stocked_stores: 0,
@@ -194,8 +178,8 @@ export async function calculateOpportunityZones(filters?: {
   if (customers.length === 0) {
     return {
       summary: {
-        active_dev_products_count: devProducts.length,
-        active_dev_products: devProducts,
+        active_dev_products_count: allActive.length,
+        active_dev_products: allActive,
         total_zones_found: 0,
         urgent_sellout_zones_count: 0,
         total_stocked_stores: 0,
@@ -615,8 +599,8 @@ export async function calculateOpportunityZones(filters?: {
 
   return {
     summary: {
-      active_dev_products_count: devProducts.length,
-      active_dev_products: devProducts,
+      active_dev_products_count: allActive.length,
+      active_dev_products: allActive,
       total_zones_found: topZones.length,
       urgent_sellout_zones_count: urgentCount,
       total_stocked_stores: totalStocked,

@@ -1,6 +1,7 @@
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
+import DevelopmentProductImport from './DevelopmentProductImport'
 
 export interface DevelopmentProduct {
   id: string
@@ -16,7 +17,7 @@ interface CandidateProduct {
   name: string
   code?: string | null
   unit?: string | null
-  source?: 'master' | 'sales_invoice'
+  source?: 'accurate' | 'sales_invoice'
 }
 
 interface Props {
@@ -25,11 +26,17 @@ interface Props {
   onSaved: () => void
 }
 
+const API = '/api/demoplot-impact/development-products'
+
 export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: Props) {
   const [products, setProducts] = useState<DevelopmentProduct[]>([])
   const [candidates, setCandidates] = useState<CandidateProduct[]>([])
   const [loading, setLoading] = useState(true)
-  const [saving, setSaving] = useState(false)
+  const [loadError, setLoadError] = useState<string | null>(null)
+  const [adding, setAdding] = useState(false)
+  const [busyId, setBusyId] = useState<string | null>(null)
+  const [changed, setChanged] = useState(false)
+  const [showImport, setShowImport] = useState(false)
   const [msg, setMsg] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   // Form input tambah produk baru
@@ -39,33 +46,35 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
   const [notes, setNotes] = useState('')
   const [searchTerm, setSearchTerm] = useState('')
 
-  // Load data produk pengembangan & master kandidat produk
+  // Selalu ambil data terbaru dari server (data global, bisa diubah akun lain)
+  const loadData = useCallback(async () => {
+    setLoading(true)
+    setLoadError(null)
+    try {
+      const r = await fetch(API, { cache: 'no-store' })
+      const data = await r.json().catch(() => ({}))
+      if (!r.ok) throw new Error(data.error || 'Gagal memuat produk pengembangan.')
+      setProducts(Array.isArray(data.products) ? data.products : [])
+      setCandidates(Array.isArray(data.candidates) ? data.candidates : [])
+    } catch (err: any) {
+      console.error('Error loading dev products:', err)
+      setProducts([])
+      setLoadError(err.message || 'Gagal memuat produk pengembangan.')
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
   useEffect(() => {
     if (!isOpen) return
-
-    setLoading(true)
     setMsg(null)
     setSearchTerm('')
+    setShowImport(false)
+    setChanged(false)
+    loadData()
+  }, [isOpen, loadData])
 
-    fetch('/api/demoplot-impact/development-products')
-      .then((r) => {
-        if (!r.ok) throw new Error('Gagal memuat produk pengembangan.')
-        return r.json()
-      })
-      .then((data) => {
-        if (data.products) setProducts(data.products)
-        if (data.candidates && Array.isArray(data.candidates)) {
-          setCandidates(data.candidates)
-        }
-        setLoading(false)
-      })
-      .catch((err) => {
-        console.error('Error loading dev products:', err)
-        setLoading(false)
-      })
-  }, [isOpen])
-
-  // Filter kandidat master produk berdasarkan pencarian live
+  // Filter kandidat SKU berdasarkan pencarian live
   const filteredCandidates = useMemo(() => {
     if (!searchTerm.trim()) {
       return candidates
@@ -79,6 +88,13 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
   }, [candidates, searchTerm])
 
   if (!isOpen) return null
+
+  const canEdit = !loading && !loadError
+
+  const handleClose = () => {
+    if (changed) onSaved()
+    onClose()
+  }
 
   // Handle pilih dari dropdown select
   const handleSelectMaster = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -97,16 +113,16 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
     setSearchTerm('')
   }
 
-  // Tambahkan ke list produk pengembangan
-  const handleAddProduct = (e: React.FormEvent) => {
+  // Tambah produk — langsung tersimpan ke database
+  const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!canEdit) return
     const nameToAdd = customName.trim()
     if (!nameToAdd) {
       setMsg({ type: 'error', text: 'Nama produk tidak boleh kosong.' })
       return
     }
 
-    // Cek duplikasi
     const exists = products.some(
       (p) => p.name.toLowerCase() === nameToAdd.toLowerCase()
     )
@@ -115,64 +131,87 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
       return
     }
 
-    const matchedMaster = candidates.find((m) => m.id === selectedMasterId)
+    const matched = candidates.find((m) => m.id === selectedMasterId)
 
-    const newProd: DevelopmentProduct = {
-      id: selectedMasterId || `custom_${Date.now()}`,
-      name: nameToAdd,
-      code: matchedMaster?.code || null,
-      targetCrop: targetCrop.trim() || null,
-      notes: notes.trim() || null,
-      isActive: true,
-    }
-
-    setProducts([newProd, ...products])
-    setSelectedMasterId('')
-    setCustomName('')
-    setTargetCrop('')
-    setNotes('')
-    setSearchTerm('')
-    setMsg({ type: 'success', text: `Produk "${nameToAdd}" berhasil ditambahkan ke daftar.` })
-  }
-
-  // Toggle status aktif
-  const handleToggleActive = (idx: number) => {
-    const copy = [...products]
-    copy[idx].isActive = !copy[idx].isActive
-    setProducts(copy)
-  }
-
-  // Hapus produk dari list
-  const handleDelete = (idx: number) => {
-    const prod = products[idx]
-    if (!confirm(`Hapus produk "${prod.name}" dari list produk pengembangan?`)) return
-    const copy = [...products]
-    copy.splice(idx, 1)
-    setProducts(copy)
-  }
-
-  // Simpan ke database
-  const handleSaveAll = async () => {
-    setSaving(true)
+    setAdding(true)
     setMsg(null)
     try {
-      const res = await fetch('/api/demoplot-impact/development-products', {
+      const res = await fetch(API, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ products }),
+        body: JSON.stringify({
+          products: [{
+            name: nameToAdd,
+            code: matched?.code || null,
+            targetCrop: targetCrop.trim() || null,
+            notes: notes.trim() || null,
+            isActive: true,
+          }],
+        }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error || 'Gagal menyimpan.')
+      if (!res.ok) throw new Error(data.error || 'Gagal menyimpan produk.')
+      if (data.errors?.length) throw new Error(data.errors[0].reason)
 
-      setMsg({ type: 'success', text: 'Daftar produk pengembangan berhasil disimpan!' })
-      setSaving(false)
-      onSaved()
-      setTimeout(() => {
-        onClose()
-      }, 700)
+      setSelectedMasterId('')
+      setCustomName('')
+      setTargetCrop('')
+      setNotes('')
+      setSearchTerm('')
+      setChanged(true)
+      setMsg({
+        type: 'success',
+        text: data.updated > 0
+          ? `Produk "${nameToAdd}" sudah ada (ditambahkan akun lain) dan telah diperbarui.`
+          : `Produk "${nameToAdd}" berhasil ditambahkan.`,
+      })
+      await loadData()
     } catch (err: any) {
       setMsg({ type: 'error', text: err.message })
-      setSaving(false)
+    } finally {
+      setAdding(false)
+    }
+  }
+
+  // Toggle status aktif — langsung tersimpan
+  const handleToggleActive = async (prod: DevelopmentProduct) => {
+    const next = !prod.isActive
+    setBusyId(prod.id)
+    setMsg(null)
+    setProducts((list) => list.map((p) => (p.id === prod.id ? { ...p, isActive: next } : p)))
+    try {
+      const res = await fetch(API, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: prod.id, isActive: next }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Gagal memperbarui status.')
+      setChanged(true)
+    } catch (err: any) {
+      setProducts((list) => list.map((p) => (p.id === prod.id ? { ...p, isActive: prod.isActive } : p)))
+      setMsg({ type: 'error', text: err.message })
+      if (String(err.message).includes('tidak ditemukan')) loadData()
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  // Hapus produk — langsung tersimpan
+  const handleDelete = async (prod: DevelopmentProduct) => {
+    if (!confirm(`Hapus produk "${prod.name}" dari list produk pengembangan?`)) return
+    setBusyId(prod.id)
+    setMsg(null)
+    try {
+      const res = await fetch(`${API}?id=${encodeURIComponent(prod.id)}`, { method: 'DELETE' })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error || 'Gagal menghapus produk.')
+      setProducts((list) => list.filter((p) => p.id !== prod.id))
+      setChanged(true)
+    } catch (err: any) {
+      setMsg({ type: 'error', text: err.message })
+    } finally {
+      setBusyId(null)
     }
   }
 
@@ -192,7 +231,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
         padding: '1rem',
         backdropFilter: 'blur(3px)',
       }}
-      onClick={onClose}
+      onClick={handleClose}
     >
       <div
         style={{
@@ -233,7 +272,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={handleClose}
             style={{
               background: 'rgba(255,255,255,0.1)',
               border: 'none',
@@ -265,7 +304,49 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
 
         {/* Content Body */}
         <div style={{ padding: '1.25rem 1.5rem', overflowY: 'auto', flex: 1 }}>
+          {/* Error saat memuat — form dikunci agar tidak menimpa data */}
+          {loadError && (
+            <div
+              style={{
+                padding: '1rem 1.25rem',
+                marginBottom: '1.5rem',
+                background: '#fef2f2',
+                border: '1px solid #fecaca',
+                borderRadius: '0.75rem',
+                color: '#991b1b',
+                fontSize: '0.85rem',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: '1rem',
+              }}
+            >
+              <span>⚠️ {loadError} Perubahan dinonaktifkan sampai data berhasil dimuat.</span>
+              <button
+                type="button"
+                onClick={loadData}
+                style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', fontWeight: 600, borderRadius: '0.375rem', border: '1px solid #fca5a5', background: '#ffffff', color: '#991b1b', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Coba Lagi
+              </button>
+            </div>
+          )}
+
+          {/* Import Excel */}
+          {showImport && canEdit && (
+            <DevelopmentProductImport
+              candidates={candidates}
+              existingNames={products.map((p) => p.name)}
+              onCancel={() => setShowImport(false)}
+              onImported={() => {
+                setChanged(true)
+                loadData()
+              }}
+            />
+          )}
+
           {/* Form Tambah Produk */}
+          {!showImport && (
           <div
             style={{
               background: '#f8fafc',
@@ -273,22 +354,43 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
               borderRadius: '0.75rem',
               padding: '1.1rem 1.25rem',
               marginBottom: '1.5rem',
+              opacity: canEdit ? 1 : 0.55,
             }}
           >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem', flexWrap: 'wrap' }}>
               <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#1e293b' }}>
                 ➕ Tambah Produk Fokus Baru
               </h4>
-              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
-                {candidates.length > 0 ? `Tersedia ${candidates.length} master SKU produk` : 'Memuat produk...'}
-              </span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                  {loading ? 'Memuat produk...' : `Tersedia ${candidates.length} SKU Accurate`}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowImport(true)}
+                  disabled={!canEdit}
+                  style={{
+                    padding: '0.35rem 0.75rem',
+                    fontSize: '0.78rem',
+                    fontWeight: 700,
+                    borderRadius: '0.375rem',
+                    border: '1px solid #16a34a',
+                    background: '#f0fdf4',
+                    color: '#166534',
+                    cursor: canEdit ? 'pointer' : 'not-allowed',
+                  }}
+                >
+                  📥 Import Excel
+                </button>
+              </div>
             </div>
 
             <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              {/* Kolom Pencarian Cepat Master SKU */}
+              <fieldset disabled={!canEdit || adding} style={{ border: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+              {/* Kolom Pencarian Cepat SKU */}
               <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>
-                  🔍 Cari Master SKU Produk (Ketik kata kunci untuk memfilter dropdown)
+                  🔍 Cari SKU Accurate (Ketik kata kunci untuk memfilter dropdown)
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
@@ -356,12 +458,12 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                 </div>
               )}
 
-              {/* Dropdown Select Master SKU & Input Nama */}
+              {/* Dropdown Select SKU & Input Nama */}
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
                     <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
-                      Pilih Dari Dropdown Master SKU
+                      Pilih Dari Dropdown SKU Accurate
                     </label>
                     <span style={{ fontSize: '0.7rem', color: '#0284c7', fontWeight: 600 }}>
                       {filteredCandidates.length} SKU tampil
@@ -379,7 +481,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                       background: '#ffffff',
                     }}
                   >
-                    <option value="">-- Pilih dari Master Produk ({filteredCandidates.length} SKU) --</option>
+                    <option value="">-- Pilih dari SKU Accurate ({filteredCandidates.length} SKU) --</option>
                     {filteredCandidates.map((m) => (
                       <option key={m.id} value={m.id}>
                         {m.name} {m.code ? `[${m.code}]` : ''}
@@ -468,11 +570,13 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     gap: '0.4rem',
                   }}
                 >
-                  ➕ Masukkan ke Daftar Produk Fokus
+                  {adding ? '⏳ Menyimpan...' : '➕ Tambahkan ke Daftar Produk Fokus'}
                 </button>
               </div>
+              </fieldset>
             </form>
           </div>
+          )}
 
           {/* Daftar Produk Fokus Saat Ini */}
           <div>
@@ -489,7 +593,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
               <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
                 Memuat daftar produk...
               </div>
-            ) : products.length === 0 ? (
+            ) : loadError ? null : products.length === 0 ? (
               <div
                 style={{
                   padding: '2.5rem 1rem',
@@ -503,14 +607,14 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                 <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>📦</div>
                 <div style={{ fontWeight: 600 }}>Belum ada produk pengembangan yang didaftarkan.</div>
                 <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
-                  Gunakan form di atas untuk memilih dan mendaftarkan produk prioritas penjualan Gama Agro.
+                  Gunakan form di atas atau Import Excel untuk mendaftarkan produk prioritas penjualan Gama Agro.
                 </div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-                {products.map((prod, idx) => (
+                {products.map((prod) => (
                   <div
-                    key={prod.id || idx}
+                    key={prod.id}
                     style={{
                       display: 'flex',
                       alignItems: 'center',
@@ -519,13 +623,14 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                       borderRadius: '0.5rem',
                       background: prod.isActive ? '#ffffff' : '#f1f5f9',
                       border: `1px solid ${prod.isActive ? '#cbd5e1' : '#e2e8f0'}`,
-                      opacity: prod.isActive ? 1 : 0.6,
+                      opacity: busyId === prod.id ? 0.5 : prod.isActive ? 1 : 0.6,
                     }}
                   >
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <button
                         type="button"
-                        onClick={() => handleToggleActive(idx)}
+                        onClick={() => handleToggleActive(prod)}
+                        disabled={busyId === prod.id}
                         title={prod.isActive ? 'Klik untuk nonaktifkan' : 'Klik untuk aktifkan'}
                         style={{
                           width: '36px',
@@ -537,6 +642,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                           position: 'relative',
                           transition: 'background 0.2s',
                           padding: 0,
+                          flexShrink: 0,
                         }}
                       >
                         <span
@@ -555,7 +661,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                       </button>
 
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
                           <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>
                             {prod.name}
                           </span>
@@ -603,7 +709,8 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
 
                     <button
                       type="button"
-                      onClick={() => handleDelete(idx)}
+                      onClick={() => handleDelete(prod)}
+                      disabled={busyId === prod.id}
                       title="Hapus produk"
                       style={{
                         background: 'transparent',
@@ -636,47 +743,24 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
           }}
         >
           <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
-            Data tersimpan secara global di sistem Gama Agronomist
+            Setiap perubahan langsung tersimpan & berlaku untuk semua akun
           </div>
-          <div style={{ display: 'flex', gap: '0.75rem' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={saving}
-              style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                borderRadius: '0.375rem',
-                border: '1px solid #cbd5e1',
-                background: '#ffffff',
-                color: '#475569',
-                cursor: 'pointer',
-              }}
-            >
-              Tutup
-            </button>
-            <button
-              type="button"
-              onClick={handleSaveAll}
-              disabled={saving}
-              style={{
-                padding: '0.5rem 1.25rem',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                borderRadius: '0.375rem',
-                border: 'none',
-                background: '#16a34a',
-                color: '#ffffff',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '0.4rem',
-              }}
-            >
-              {saving ? 'Menyimpan...' : '💾 Simpan Konfigurasi'}
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={handleClose}
+            style={{
+              padding: '0.5rem 1.25rem',
+              fontSize: '0.85rem',
+              fontWeight: 700,
+              borderRadius: '0.375rem',
+              border: 'none',
+              background: '#16a34a',
+              color: '#ffffff',
+              cursor: 'pointer',
+            }}
+          >
+            Selesai
+          </button>
         </div>
       </div>
     </div>
