@@ -961,30 +961,8 @@ export default function DemoplotImpactPage() {
                 </p>
               </div>
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <button
-                  type="button"
-                  onClick={() => setIsScoringModalOpen(true)}
-                  style={{
-                    padding: '0.3rem 0.65rem',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.74rem',
-                    fontWeight: 700,
-                    background: '#f0f9ff',
-                    color: '#0369a1',
-                    border: '1px solid #bae6fd',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.3rem',
-                  }}
-                >
-                  <span>💡</span>
-                  <span>Cara Kerja Skoring</span>
-                </button>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Menampilkan <strong>{oppResult?.zones.length || 0}</strong> zona prioritas
-                </div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                Menampilkan <strong>{oppResult?.zones.length || 0}</strong> zona prioritas
               </div>
             </div>
 
