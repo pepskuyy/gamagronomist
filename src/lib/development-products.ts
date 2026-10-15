@@ -210,12 +210,18 @@ export async function bulkUpsertDevelopmentProducts(
   const result: BulkUpsertResult = { inserted: 0, updated: 0, skipped: 0, errors: [] }
   await migrateLegacyIfNeeded()
 
-  // Lengkapi nama dari SKU Accurate jika hanya kode yang diisi
-  const needsLookup = inputs.some((i) => !clean(i.name) && clean(i.code))
+  // Lengkapi data dari SKU Accurate:
+  // - hanya kode diisi → nama diambil dari SKU
+  // - hanya nama diisi & sama persis dengan nama SKU → kode diisi otomatis,
+  //   agar pencocokan invoice memakai kode (per ukuran kemasan), bukan nama
+  const needsLookup = inputs.some((i) => !clean(i.code) || !clean(i.name))
   const byCode = new Map<string, string>()
+  const codeByName = new Map<string, string>()
   if (needsLookup) {
     for (const c of await getCandidateProducts()) {
-      if (c.code) byCode.set(c.code.toLowerCase(), c.name)
+      if (!c.code) continue
+      byCode.set(c.code.toLowerCase(), c.name)
+      codeByName.set(normalizeProductName(c.name), c.code)
     }
   }
 
@@ -223,8 +229,9 @@ export async function bulkUpsertDevelopmentProducts(
   for (let i = 0; i < inputs.length; i++) {
     const input = inputs[i]
     const row = i + rowOffset
-    const code = clean(input.code)
-    const name = clean(input.name) ?? (code ? byCode.get(code.toLowerCase()) ?? null : null)
+    const inputCode = clean(input.code)
+    const name = clean(input.name) ?? (inputCode ? byCode.get(inputCode.toLowerCase()) ?? null : null)
+    const code = inputCode ?? (name ? codeByName.get(normalizeProductName(name)) ?? null : null)
 
     if (!name) {
       result.skipped++

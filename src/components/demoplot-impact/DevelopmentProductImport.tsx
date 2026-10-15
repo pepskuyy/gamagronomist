@@ -181,6 +181,7 @@ export default function DevelopmentProductImport({ candidates, existingNames, on
           <p style={{ margin: '0 0 0.85rem', fontSize: '0.8rem', color: '#64748b' }}>
             Isi <code>kode_sku</code> (SKU Accurate) <strong>atau</strong> <code>nama_produk</code>. Jika hanya kode yang diisi, nama diambil otomatis dari SKU Accurate.
             Produk yang sudah terdaftar akan <strong>diperbarui</strong>; kolom kosong tidak menimpa data lama. Kolom <code>aktif</code>: Ya / Tidak.
+            Produk ber-kode dicocokkan ke invoice per kode SKU (satu ukuran kemasan); nama tanpa kode dicocokkan per nama (semua ukuran).
           </p>
 
           <label style={{ border: '2px dashed #cbd5e1', borderRadius: '0.75rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', background: '#ffffff' }}>

@@ -212,6 +212,28 @@ export async function calculateOpportunityZones(filters?: {
   const storeDevStockMap = new Map<string, Map<string, StockedProductItem>>()
   const storeAllOmsetMap = new Map<string, number>()
 
+  // Pencocokan item invoice → produk fokus. Setiap baris invoice hanya dihitung untuk SATU produk fokus.
+  // 1. Produk fokus ber-kode SKU: cocok jika item_no invoice sama persis (presisi per ukuran kemasan).
+  // 2. Produk fokus tanpa kode: cocok berdasarkan nama (mencakup semua ukuran kemasan satu merek);
+  //    nama terpanjang/terspesifik didahulukan.
+  // Jika item invoice tidak punya item_no, semua produk fokus dicocokkan berdasarkan nama.
+  const devByCode = new Map<string, DevelopmentProduct>()
+  for (const dp of devProducts) {
+    const code = dp.code?.trim().toLowerCase()
+    if (code) devByCode.set(code, dp)
+  }
+  const bySpecificity = (a: DevelopmentProduct, b: DevelopmentProduct) => norm(b.name).length - norm(a.name).length
+  const nameOnlyDev = devProducts.filter((dp) => !dp.code?.trim()).sort(bySpecificity)
+  const allDevByName = [...devProducts].sort(bySpecificity)
+
+  const matchDevProduct = (item: any): DevelopmentProduct | null => {
+    const code = String(item.item_no || '').trim().toLowerCase()
+    if (code) {
+      return devByCode.get(code) ?? nameOnlyDev.find((dp) => productsMatch(dp.name, item.item_name)) ?? null
+    }
+    return allDevByName.find((dp) => productsMatch(dp.name, item.item_name)) ?? null
+  }
+
   for (const inv of invoices) {
     const isRetur = (inv.status || '').toLowerCase().includes('retur')
     const multiplier = isRetur ? -1 : 1
@@ -231,29 +253,28 @@ export async function calculateOpportunityZones(filters?: {
       for (const rawItem of inv.items as any[]) {
         if (!rawItem || !rawItem.item_name) continue
 
-        for (const dp of devProducts) {
-          if (productsMatch(dp.name, rawItem.item_name)) {
-            const itemQty = (Number(rawItem.quantity) || 0) * multiplier
-            const itemOmset = (Number(rawItem.total_price) || 0) * multiplier
+        const dp = matchDevProduct(rawItem)
+        if (dp) {
+          const itemQty = (Number(rawItem.quantity) || 0) * multiplier
+          const itemOmset = (Number(rawItem.total_price) || 0) * multiplier
 
-            for (const k of storeKeys) {
-              if (!storeDevStockMap.has(k)) {
-                storeDevStockMap.set(k, new Map())
-              }
-              const prodMap = storeDevStockMap.get(k)!
-              const existing = prodMap.get(dp.name) || {
-                product_name: dp.name,
-                quantity: 0,
-                omset: 0,
-                unit: rawItem.unit || 'PCS',
-                last_invoice_date: inv.tanggal.toISOString().slice(0, 10),
-                salesman: inv.namaSales || null,
-              }
-
-              existing.quantity += itemQty
-              existing.omset += itemOmset
-              prodMap.set(dp.name, existing)
+          for (const k of storeKeys) {
+            if (!storeDevStockMap.has(k)) {
+              storeDevStockMap.set(k, new Map())
             }
+            const prodMap = storeDevStockMap.get(k)!
+            const existing = prodMap.get(dp.name) || {
+              product_name: dp.name,
+              quantity: 0,
+              omset: 0,
+              unit: rawItem.unit || 'PCS',
+              last_invoice_date: inv.tanggal.toISOString().slice(0, 10),
+              salesman: inv.namaSales || null,
+            }
+
+            existing.quantity += itemQty
+            existing.omset += itemOmset
+            prodMap.set(dp.name, existing)
           }
         }
       }

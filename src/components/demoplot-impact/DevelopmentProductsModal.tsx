@@ -552,7 +552,11 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                 </div>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
+                <span style={{ fontSize: '0.72rem', color: '#64748b', maxWidth: '420px' }}>
+                  💡 Produk dari SKU Accurate dicocokkan ke invoice per <strong>kode SKU</strong> (satu ukuran kemasan).
+                  Nama custom tanpa kode (mis. &quot;Pronate&quot;) dicocokkan per <strong>nama</strong> (semua ukuran).
+                </span>
                 <button
                   type="submit"
                   className="btn btn-secondary"
@@ -677,6 +681,21 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                               }}
                             >
                               {prod.code}
+                            </span>
+                          )}
+                          {!prod.code && (
+                            <span
+                              title="Tanpa kode SKU: dicocokkan ke invoice berdasarkan nama, mencakup semua ukuran kemasan"
+                              style={{
+                                fontSize: '0.7rem',
+                                padding: '0.1rem 0.35rem',
+                                borderRadius: '0.25rem',
+                                background: '#fef3c7',
+                                color: '#92400e',
+                                fontWeight: 600,
+                              }}
+                            >
+                              cocok via nama
                             </span>
                           )}
                           {!prod.isActive && (
