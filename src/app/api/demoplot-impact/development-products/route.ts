@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { requireApiSession } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 
@@ -24,6 +25,9 @@ export interface CandidateProduct {
 const CONFIG_KEY = 'demoplot_development_products'
 
 export async function GET() {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
   try {
     const [config, masterProducts, recentInvoices] = await Promise.all([
       prisma.systemConfig.findUnique({
@@ -109,6 +113,9 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
   try {
     const body = await req.json()
     const { products } = body

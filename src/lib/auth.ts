@@ -1,19 +1,24 @@
 import { SignJWT, jwtVerify } from 'jose'
 
-const secretKey = process.env.JWT_SECRET || 'super-secret-key-gamagronomist-123!'
-const key = new TextEncoder().encode(secretKey)
+// Tidak ada fallback: tanpa JWT_SECRET siapa pun bisa memalsukan token.
+// Dibaca saat dipakai (bukan saat import) agar `next build` tidak gagal.
+function getKey() {
+  const secretKey = process.env.JWT_SECRET
+  if (!secretKey) throw new Error('JWT_SECRET belum diset di environment')
+  return new TextEncoder().encode(secretKey)
+}
 
 export async function encrypt(payload: any) {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('7d')
-    .sign(key)
+    .sign(getKey())
 }
 
 export async function decrypt(input: string): Promise<any> {
   try {
-    const { payload } = await jwtVerify(input, key, {
+    const { payload } = await jwtVerify(input, getKey(), {
       algorithms: ['HS256'],
     })
     return payload

@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
+import { requireApiSession } from '@/lib/session'
 import { calculateOpportunityZones } from '@/lib/demoplot-opportunity'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
   try {
     const url = new URL(req.url)
     const region = url.searchParams.get('region') || undefined

@@ -3,6 +3,7 @@
 import prisma from '@/lib/prisma'
 
 import { revalidatePath } from 'next/cache'
+import { getActionSession } from '@/lib/session'
 
 
 // "?"? Types "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
@@ -52,6 +53,9 @@ export async function setAreaTarget(data: {
   month: number
   year: number
 } & Targets) {
+  if (!(await getActionSession(['ADMIN', 'SPV']))) {
+    return { success: false, error: 'Akses ditolak.' }
+  }
   try {
     const { areaId, month, year, ...targets } = data
     
@@ -81,6 +85,7 @@ export async function setAreaTarget(data: {
 // "?"? Get all areas (for dropdown) "?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?"?
 
 export async function getAreas() {
+  if (!(await getActionSession())) return []
   return prisma.area.findMany({ orderBy: { name: 'asc' }, select: { id: true, name: true } })
 }
 
@@ -217,6 +222,7 @@ export async function getAreaTargetData(
   month: number,
   year: number
 ): Promise<AreaTargetData & { hasTarget: boolean }> {
+  if (!(await getActionSession())) throw new Error('Unauthorized')
 
   if (areaId === null) {
     // ALL areas combined

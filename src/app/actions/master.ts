@@ -4,10 +4,20 @@ import prisma from '@/lib/prisma'
 
 import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
+import { getActionSession } from '@/lib/session'
+
+// Master Data hanya untuk ADMIN & SPV (sesuai menu sidebar).
+// Hanya ADMIN yang boleh membuat, mengubah, atau menghapus akun ADMIN.
+const MASTER_ROLES = ['ADMIN', 'SPV']
+const FORBIDDEN = { error: 'Akses ditolak.' }
+const ADMIN_ONLY = { error: 'Hanya ADMIN yang dapat mengelola akun ADMIN.' }
+
+const requireMaster = () => getActionSession(MASTER_ROLES)
 
 
 // ─── AREA ──────────────────────────────────────
 export async function createArea(formData: FormData) {
+  if (!(await requireMaster())) return FORBIDDEN
   const name = formData.get('name') as string
   if (!name?.trim()) return { error: 'Nama area tidak boleh kosong.' }
   try {
@@ -18,6 +28,7 @@ export async function createArea(formData: FormData) {
 }
 
 export async function deleteArea(id: string) {
+  if (!(await requireMaster())) return FORBIDDEN
   try {
     await prisma.area.delete({ where: { id } })
     revalidatePath('/dashboard/master/areas')
@@ -27,6 +38,7 @@ export async function deleteArea(id: string) {
 
 // ─── FARMER ────────────────────────────────────
 export async function createFarmer(formData: FormData) {
+  if (!(await requireMaster())) return FORBIDDEN
   const name = formData.get('name') as string
   if (!name?.trim()) return { error: 'Nama petani tidak boleh kosong.' }
   try {
@@ -42,6 +54,7 @@ export async function createFarmer(formData: FormData) {
 }
 
 export async function deleteFarmer(id: string) {
+  if (!(await requireMaster())) return FORBIDDEN
   try {
     await prisma.farmer.delete({ where: { id } })
     revalidatePath('/dashboard/master/areas')
@@ -51,6 +64,8 @@ export async function deleteFarmer(id: string) {
 
 // ─── USER ───────────────────────────────────────
 export async function createUser(formData: FormData) {
+  const session = await requireMaster()
+  if (!session) return FORBIDDEN
   const username = (formData.get('username') as string)?.trim()
   const name     = (formData.get('name')     as string)?.trim()
   const password = (formData.get('password') as string)?.trim()
@@ -60,6 +75,7 @@ export async function createUser(formData: FormData) {
   const photo    = (formData.get('photo')    as string) || null
 
   if (!username || !name || !password || !role) return { error: 'Semua field wajib diisi.' }
+  if (role === 'ADMIN' && session.role !== 'ADMIN') return ADMIN_ONLY
   try {
     const hashed = await bcrypt.hash(password, 10)
     await prisma.user.create({ data: { username, name, password: hashed, role, areaId: areaId || null, afaId: afaId || null, photo } })
@@ -72,6 +88,8 @@ export async function createUser(formData: FormData) {
 }
 
 export async function updateUser(id: string, formData: FormData) {
+  const session = await requireMaster()
+  if (!session) return FORBIDDEN
   const name     = (formData.get('name')     as string)?.trim()
   const password = (formData.get('password') as string)?.trim()
   const role     = formData.get('role')     as string
@@ -81,6 +99,11 @@ export async function updateUser(id: string, formData: FormData) {
   const photo    = (formData.get('photo')    as string) || undefined
 
   if (!name || !role) return { error: 'Nama dan role wajib diisi.' }
+  if (session.role !== 'ADMIN') {
+    if (role === 'ADMIN') return ADMIN_ONLY
+    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } })
+    if (target?.role === 'ADMIN') return ADMIN_ONLY
+  }
   try {
     const data: any = { name, role, areaId: areaId || null, afaId: afaId || null }
     if (password) data.password = await bcrypt.hash(password, 10)
@@ -93,6 +116,12 @@ export async function updateUser(id: string, formData: FormData) {
 }
 
 export async function deleteUser(id: string) {
+  const session = await requireMaster()
+  if (!session) return FORBIDDEN
+  if (session.role !== 'ADMIN') {
+    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } })
+    if (target?.role === 'ADMIN') return ADMIN_ONLY
+  }
   try {
     await prisma.user.delete({ where: { id } })
     revalidatePath('/dashboard/master/users')
@@ -102,6 +131,7 @@ export async function deleteUser(id: string) {
 
 // ─── PRODUCT ────────────────────────────────────
 export async function createProduct(formData: FormData) {
+  if (!(await requireMaster())) return FORBIDDEN
   const code          = (formData.get('code')          as string)?.trim()
   const name          = (formData.get('name')          as string)?.trim()
   const description   = (formData.get('description')   as string)?.trim()
@@ -111,7 +141,7 @@ export async function createProduct(formData: FormData) {
   const gramasiPerUnit = gramasiRaw ? parseFloat(gramasiRaw) : null
   if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
   try {
-    await prisma.product.create({ data: { 
+    await prisma.product.create({ data: {
       code: code || null, name, description: description || null, unit,
       unitGramasi: unitGramasi || null,
       gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
@@ -122,6 +152,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
+  if (!(await requireMaster())) return FORBIDDEN
   const code          = (formData.get('code')          as string)?.trim()
   const name          = (formData.get('name')          as string)?.trim()
   const description   = (formData.get('description')   as string)?.trim()
@@ -131,7 +162,7 @@ export async function updateProduct(id: string, formData: FormData) {
   const gramasiPerUnit = gramasiRaw ? parseFloat(gramasiRaw) : null
   if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
   try {
-    await prisma.product.update({ where: { id }, data: { 
+    await prisma.product.update({ where: { id }, data: {
       code: code || null, name, description: description || null, unit,
       unitGramasi: unitGramasi || null,
       gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
@@ -142,6 +173,7 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
+  if (!(await requireMaster())) return FORBIDDEN
   try {
     await prisma.product.delete({ where: { id } })
     revalidatePath('/dashboard/master/products')
@@ -151,6 +183,7 @@ export async function deleteProduct(id: string) {
 
 // ─── BULK DELETE ─────────────────────────────────
 export async function bulkDeleteAreas(ids: string[]) {
+  if (!(await requireMaster())) return FORBIDDEN
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
   try {
     await prisma.area.deleteMany({ where: { id: { in: ids } } })
@@ -160,6 +193,7 @@ export async function bulkDeleteAreas(ids: string[]) {
 }
 
 export async function bulkDeleteFarmers(ids: string[]) {
+  if (!(await requireMaster())) return FORBIDDEN
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
   try {
     await prisma.farmer.deleteMany({ where: { id: { in: ids } } })
@@ -169,7 +203,13 @@ export async function bulkDeleteFarmers(ids: string[]) {
 }
 
 export async function bulkDeleteUsers(ids: string[]) {
+  const session = await requireMaster()
+  if (!session) return FORBIDDEN
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
+  if (session.role !== 'ADMIN') {
+    const adminCount = await prisma.user.count({ where: { id: { in: ids }, role: 'ADMIN' } })
+    if (adminCount > 0) return ADMIN_ONLY
+  }
   try {
     await prisma.user.deleteMany({ where: { id: { in: ids } } })
     revalidatePath('/dashboard/master/users')
@@ -178,6 +218,7 @@ export async function bulkDeleteUsers(ids: string[]) {
 }
 
 export async function bulkDeleteProducts(ids: string[]) {
+  if (!(await requireMaster())) return FORBIDDEN
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
   try {
     // Must delete all related records first (no CASCADE configured in schema)
@@ -203,6 +244,7 @@ export async function bulkDeleteProducts(ids: string[]) {
 
 // ─── STORE (TOKO / PELANGGAN) ────────────────────────────────────
 export async function createStore(formData: FormData) {
+  if (!(await requireMaster())) return FORBIDDEN
   const name      = (formData.get('name')      as string)?.trim()
   const code      = (formData.get('code')      as string)?.trim() || null
   const address   = (formData.get('address')   as string)?.trim() || null
@@ -226,6 +268,7 @@ export async function createStore(formData: FormData) {
 }
 
 export async function updateStore(id: string, formData: FormData) {
+  if (!(await requireMaster())) return FORBIDDEN
   const name      = (formData.get('name')      as string)?.trim()
   const code      = (formData.get('code')      as string)?.trim() || null
   const address   = (formData.get('address')   as string)?.trim() || null
@@ -249,6 +292,7 @@ export async function updateStore(id: string, formData: FormData) {
 }
 
 export async function deleteStore(id: string) {
+  if (!(await requireMaster())) return FORBIDDEN
   try {
     await prisma.store.delete({ where: { id } })
     revalidatePath('/dashboard/master/stores')
@@ -257,6 +301,7 @@ export async function deleteStore(id: string) {
 }
 
 export async function bulkDeleteStores(ids: string[]) {
+  if (!(await requireMaster())) return FORBIDDEN
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
   try {
     await prisma.store.deleteMany({ where: { id: { in: ids } } })

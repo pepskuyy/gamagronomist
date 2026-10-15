@@ -14,6 +14,7 @@
 import { NextResponse } from 'next/server'
 import { createHmac }   from 'crypto'
 import prisma           from '@/lib/prisma'
+import { requireApiSession } from '@/lib/session'
 
 export const dynamic = 'force-dynamic'
 
@@ -100,6 +101,9 @@ async function fetchStockForWarehouse(
 }
 
 export async function GET(request: Request) {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
   const { searchParams } = new URL(request.url)
   let itemNo    = searchParams.get('itemNo')?.trim() ?? null
   const productId = searchParams.get('productId')?.trim() ?? null

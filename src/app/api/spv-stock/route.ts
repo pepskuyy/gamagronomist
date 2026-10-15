@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { requireApiSession } from '@/lib/session'
 
 /**
  * GET /api/spv-stock
@@ -8,6 +9,9 @@ import prisma from '@/lib/prisma'
  * spvStock selalu dalam satuan kemasan.
  */
 export async function GET() {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
   try {
     const products = await (prisma.product as any).findMany({
       select: {

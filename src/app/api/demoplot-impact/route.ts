@@ -1,9 +1,13 @@
 import { NextResponse } from 'next/server'
+import { requireApiSession } from '@/lib/session'
 import { calculateDemoplotImpact } from '@/lib/demoplot-impact'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: Request) {
+  const auth = await requireApiSession()
+  if (auth instanceof NextResponse) return auth
+
   try {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')

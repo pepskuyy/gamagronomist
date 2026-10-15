@@ -2,6 +2,7 @@
 
 import prisma from '@/lib/prisma'
 import type { Targets } from './kpi'
+import { getActionSession } from '@/lib/session'
 
 export type TrendData = {
   monthLabel: string
@@ -33,6 +34,7 @@ export async function getTargetTrendData(
   toMonth: number,
   toYear: number,
 ): Promise<TrendData[]> {
+  if (!(await getActionSession())) return []
   const periods = generatePeriods(fromMonth, fromYear, toMonth, toYear)
   if (periods.length === 0) return []
 
