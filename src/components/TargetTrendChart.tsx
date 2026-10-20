@@ -1,11 +1,18 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
-import {
-  ComposedChart, Line, Bar, XAxis, YAxis,
-  CartesianGrid, Tooltip, Legend, ResponsiveContainer
-} from 'recharts'
+import dynamic from 'next/dynamic'
 import type { TrendData } from '@/app/actions/kpi-trend'
+
+// Recharts di-load lazy (client-only) agar tidak masuk bundle utama /dashboard
+const ChartInner = dynamic<{ data: TrendData[] }>(() => import('@/components/TargetTrendChartInner'), {
+  ssr: false,
+  loading: () => (
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9ca3af', fontSize: '0.9rem' }}>
+      Memuat grafik...
+    </div>
+  ),
+})
 
 interface TargetTrendChartProps {
   areaId: string | null
@@ -176,21 +183,7 @@ export default function TargetTrendChart({ areaId, areaName, allAreas }: TargetT
         <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af', fontSize: '0.9rem' }}>Memuat tren target...</div>
       ) : (
         <div style={{ width: '100%', height: 350 }}>
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e5e7eb" />
-              <XAxis dataKey="monthLabel" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} dy={10} />
-              <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#6b7280' }} />
-              <Tooltip
-                contentStyle={{ borderRadius: '0.5rem', border: '1px solid #e5e7eb', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}
-                cursor={{ fill: '#f3f4f6' }}
-              />
-              <Legend wrapperStyle={{ fontSize: '0.85rem', paddingTop: '10px' }} />
-              <Bar dataKey="target" name="Target" fill="#bae6fd" radius={[4, 4, 0, 0]} maxBarSize={50} />
-              <Line type="monotone" dataKey="actual" name="Realisasi (Aktual)" stroke="#0ea5e9" strokeWidth={3}
-                dot={{ r: 4, fill: '#0ea5e9', strokeWidth: 2, stroke: '#fff' }} activeDot={{ r: 6 }} />
-            </ComposedChart>
-          </ResponsiveContainer>
+          <ChartInner data={data} />
         </div>
       )}
     </div>

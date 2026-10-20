@@ -2,9 +2,11 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import * as XLSX from 'xlsx'
+import dynamic from 'next/dynamic'
 import { createProduct, updateProduct, deleteProduct, bulkDeleteProducts } from '@/app/actions/master'
-import ImportModal from '@/components/ImportModal'
+
+// Modal import hanya dimuat saat dibuka
+const ImportModal = dynamic(() => import('@/components/ImportModal'), { ssr: false })
 
 type Product = { id: string; code: string | null; name: string; description: string | null; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null; spvStock?: number | null }
 
@@ -79,8 +81,9 @@ export default function ProductsMasterPage() {
     })
   }
 
-  function handleExportExcel() {
+  async function handleExportExcel() {
     if (products.length === 0) { alert('Belum ada data produk untuk diekspor.'); return }
+    const XLSX = await import('xlsx') // lazy-load
     const data = [
       ['id_db', 'id_produk', 'nama_produk', 'satuan_kemasan', 'satuan_gramasi', 'gramasi_per_kemasan', 'deskripsi'],
       ...products.map(p => [p.id, p.code || '', p.name, p.unit, p.unitGramasi || '', p.gramasiPerUnit ?? '', p.description || ''])

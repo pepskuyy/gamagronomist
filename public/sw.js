@@ -30,6 +30,11 @@
 // ============================================================
 
 const CACHE_NAME = 'agrolens-v7'
+
+// Cache terpisah untuk batas wilayah GeoJSON (/geojson/**). File statis besar
+// yang jarang berubah → Cache First. WAJIB bump versi ini setiap kali file
+// geojson di-generate ulang (npm run build:geojson).
+const GEO_CACHE_NAME = 'agrolens-geo-v1'
 const DB_NAME    = 'agrolens-offline'
 const DB_VERSION = 1
 const STORE      = 'pending-reports'
@@ -106,7 +111,9 @@ self.addEventListener('activate', (event) => {
     (async () => {
       // Hapus cache versi lama
       const keys = await caches.keys()
-      await Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      await Promise.all(
+        keys.filter((k) => k !== CACHE_NAME && k !== GEO_CACHE_NAME).map((k) => caches.delete(k))
+      )
       // Bersihkan entry HTML basi di cache versi ini
       await pruneStaleHtml()
       await self.clients.claim()
@@ -148,6 +155,13 @@ self.addEventListener('fetch', (event) => {
   // ── 1. Next.js static assets: Cache First (immutable) ─────────
   if (url.pathname.startsWith('/_next/static/')) {
     event.respondWith(cacheFirst(request))
+    return
+  }
+
+  // ── 1b. GeoJSON batas wilayah: Cache First (cache terpisah) ───
+  // Juga membuat layer peta kabupaten/kecamatan tersedia offline.
+  if (url.origin === self.location.origin && url.pathname.startsWith('/geojson/')) {
+    event.respondWith(cacheFirst(request, GEO_CACHE_NAME))
     return
   }
 
@@ -220,8 +234,8 @@ async function pruneStaleHtml() {
 // ── Strategi Cache ─────────────────────────────────────────────────
 
 /** Cache First: serve cache, fetch jika belum ada */
-async function cacheFirst(request) {
-  const cache  = await caches.open(CACHE_NAME)
+async function cacheFirst(request, cacheName = CACHE_NAME) {
+  const cache  = await caches.open(cacheName)
   const cached = await cache.match(request)
   if (cached) return cached
   try {

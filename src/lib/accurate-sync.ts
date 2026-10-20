@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { fetchAccurateItems } from '@/lib/accurate'
 import { startSyncLog, completeSyncLog, failSyncLog } from '@/lib/sync-logger'
+import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
 
 
 export type SyncResult = {
@@ -90,6 +91,10 @@ export async function runAccurateSync(
         inserted++
       }
     }
+
+    // Invalidasi cache master produk. Dari scheduler in-process (tanpa request
+    // context) invalidasi dilewati → cache kedaluwarsa via TTL (maks. 5 menit).
+    invalidateCacheTag(CACHE_TAGS.products)
 
     const duration = Date.now() - startTime
     const processedTotal = updated + inserted

@@ -3,13 +3,18 @@
 import { useEffect, useState, useTransition, useMemo } from 'react'
 import DemoplotImpactMap from '@/components/demoplot-impact/DemoplotImpactMap'
 import DemoplotImpactSidebar from '@/components/demoplot-impact/DemoplotImpactSidebar'
-import StoreHistoryModal from '@/components/demoplot-impact/StoreHistoryModal'
+import dynamic from 'next/dynamic'
 import TopDemoplotProductsChart from '@/components/demoplot-impact/TopDemoplotProductsChart'
 import OpportunityMap from '@/components/demoplot-impact/OpportunityMap'
 import OpportunitySidebar from '@/components/demoplot-impact/OpportunitySidebar'
-import DevelopmentProductsModal from '@/components/demoplot-impact/DevelopmentProductsModal'
-import OpportunityScoringModal from '@/components/demoplot-impact/OpportunityScoringModal'
-import { MapDemoplotItem } from '@/components/demoplot-impact/DemoplotImpactMapInner'
+import type { MapDemoplotItem } from '@/components/demoplot-impact/DemoplotImpactMapInner'
+
+// Modal di-load lazy: chunk (termasuk xlsx di DevelopmentProductsModal) baru
+// diunduh saat modal pertama kali dibuka. Setelah itu tetap ter-mount agar
+// perilaku (state internal modal) sama seperti sebelumnya.
+const StoreHistoryModal = dynamic(() => import('@/components/demoplot-impact/StoreHistoryModal'), { ssr: false })
+const DevelopmentProductsModal = dynamic(() => import('@/components/demoplot-impact/DevelopmentProductsModal'), { ssr: false })
+const OpportunityScoringModal = dynamic(() => import('@/components/demoplot-impact/OpportunityScoringModal'), { ssr: false })
 import { DemoplotImpactDetail, StoreImpactResult } from '@/lib/demoplot-impact'
 import { OpportunityZone, OpportunityFinderResult, ZoneStoreItem } from '@/lib/demoplot-opportunity'
 import { formatDateId } from '@/lib/date-utils'
@@ -25,6 +30,14 @@ export default function DemoplotImpactPage() {
   const [isScoringModalOpen, setIsScoringModalOpen] = useState(false)
   const [selectedStore, setSelectedStore] = useState<StoreImpactResult | null>(null)
   const [isStoreModalOpen, setIsStoreModalOpen] = useState(false)
+
+  // Lazy-mount: modal baru di-mount (dan chunk-nya diunduh) setelah pertama kali dibuka
+  const [devModalUsed, setDevModalUsed] = useState(false)
+  const [scoringModalUsed, setScoringModalUsed] = useState(false)
+  const [storeModalUsed, setStoreModalUsed] = useState(false)
+  useEffect(() => { if (isDevModalOpen) setDevModalUsed(true) }, [isDevModalOpen])
+  useEffect(() => { if (isScoringModalOpen) setScoringModalUsed(true) }, [isScoringModalOpen])
+  useEffect(() => { if (isStoreModalOpen) setStoreModalUsed(true) }, [isStoreModalOpen])
 
   // Sync state
   const [isSyncing, startSync] = useTransition()
@@ -1105,26 +1118,32 @@ export default function DemoplotImpactPage() {
       )}
 
       {/* Modal Kelola Produk Pengembangan */}
-      <DevelopmentProductsModal
-        isOpen={isDevModalOpen}
-        onClose={() => setIsDevModalOpen(false)}
-        onSaved={() => {
-          loadOpportunities(oppRegion, oppSalesman, oppProduct)
-        }}
-      />
+      {(devModalUsed || isDevModalOpen) && (
+        <DevelopmentProductsModal
+          isOpen={isDevModalOpen}
+          onClose={() => setIsDevModalOpen(false)}
+          onSaved={() => {
+            loadOpportunities(oppRegion, oppSalesman, oppProduct)
+          }}
+        />
+      )}
 
       {/* Modal Penjelasan Mekanisme Skoring */}
-      <OpportunityScoringModal
-        isOpen={isScoringModalOpen}
-        onClose={() => setIsScoringModalOpen(false)}
-      />
+      {(scoringModalUsed || isScoringModalOpen) && (
+        <OpportunityScoringModal
+          isOpen={isScoringModalOpen}
+          onClose={() => setIsScoringModalOpen(false)}
+        />
+      )}
 
       {/* Modal Riwayat 12 Bulan Transaksi Toko */}
-      <StoreHistoryModal
-        isOpen={isStoreModalOpen}
-        onClose={() => setIsStoreModalOpen(false)}
-        store={selectedStore}
-      />
+      {(storeModalUsed || isStoreModalOpen) && (
+        <StoreHistoryModal
+          isOpen={isStoreModalOpen}
+          onClose={() => setIsStoreModalOpen(false)}
+          store={selectedStore}
+        />
+      )}
 
       <style jsx>{`
         @media (max-width: 1080px) {

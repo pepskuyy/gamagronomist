@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import * as XLSX from 'xlsx'
 
 type ColumnDef = { key: string; label: string; required?: boolean }
 
@@ -21,7 +20,8 @@ export default function MigrationImportModal({ title, columns, onImport, onClose
   const [loading, setLoading] = useState(false)
   const [step, setStep] = useState<'upload' | 'preview' | 'done'>('upload')
 
-  function downloadTemplate() {
+  async function downloadTemplate() {
+    const XLSX = await import('xlsx') // lazy-load
     const wb = XLSX.utils.book_new()
     const header = columns.map(c => c.label)
     const example = columns.map(() => '')
@@ -36,8 +36,9 @@ export default function MigrationImportModal({ title, columns, onImport, onClose
     if (!file) return
     setFileError(null)
     const reader = new FileReader()
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
+        const XLSX = await import('xlsx')
         const wb = XLSX.read(ev.target?.result, { type: 'binary' })
         const ws = wb.Sheets[wb.SheetNames[0]]
         const raw: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })

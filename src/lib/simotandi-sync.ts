@@ -1,5 +1,6 @@
 import prisma from '@/lib/prisma'
 import { startSyncLog, completeSyncLog, failSyncLog } from '@/lib/sync-logger'
+import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
 import {
   scrapePeriods,
   fetchProvinceData,
@@ -121,6 +122,11 @@ export async function runSimotandiSync(
 
       await simotandiSleep(1000)
     }
+
+    // Invalidasi cache data SIMOTANDI (/api/simotandi/*). Bila dipanggil dari
+    // scheduler in-process (tanpa request context), invalidasi dilewati dan
+    // cache kedaluwarsa via TTL (maks. 1 jam).
+    invalidateCacheTag(CACHE_TAGS.simotandi)
 
     const duration = Date.now() - startTime
     console.log(`[simotandi-sync] periode ${target.kode}: ${totalRows} baris tersimpan`)

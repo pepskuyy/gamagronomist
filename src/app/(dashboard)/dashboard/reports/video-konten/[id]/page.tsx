@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { cldThumb } from '@/lib/cloudinary-url'
 
 
 export default async function VideoKontenDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -76,7 +77,7 @@ export default async function VideoKontenDetailPage({ params }: { params: Promis
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
             {photos.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noopener noreferrer" style={{ display: 'block', borderRadius: 'var(--radius-sm)', overflow: 'hidden', border: '1px solid var(--border)' }}>
-                <img src={url} alt={`Dokumentasi ${i + 1}`} style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }} />
+                <img src={cldThumb(url, 600, 400)} alt={`Dokumentasi ${i + 1}`} loading="lazy" decoding="async" style={{ width: '100%', height: '200px', objectFit: 'cover', display: 'block' }} />
               </a>
             ))}
           </div>

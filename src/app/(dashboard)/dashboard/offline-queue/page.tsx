@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { getAllDrafts, deleteDraft, updateDraftStatus, type PendingDraft } from '@/lib/offline-db'
 import Link from 'next/link'
+import { refreshPendingDraftCount } from '@/hooks/usePendingDraftCount'
 
 const TYPE_LABELS: Record<string, string> = {
   'spot-demplot': '🌿 Spot Demplot',
@@ -29,6 +30,8 @@ export default function OfflineQueuePage() {
   const refresh = async () => {
     const all = await getAllDrafts()
     setDrafts(all)
+    // Sinkronkan badge/banner di header (polling bersama)
+    refreshPendingDraftCount()
   }
 
   useEffect(() => {
@@ -46,12 +49,20 @@ export default function OfflineQueuePage() {
     }
     navigator.serviceWorker?.addEventListener('message', handleSwMessage)
 
-    const timer = setInterval(refresh, 5000)
+    // Polling dilewati saat tab tersembunyi; refresh segera saat tab terlihat lagi
+    const timer = setInterval(() => {
+      if (document.visibilityState !== 'hidden') refresh()
+    }, 5000)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') refresh()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
 
     return () => {
       window.removeEventListener('online', update)
       window.removeEventListener('offline', update)
       navigator.serviceWorker?.removeEventListener('message', handleSwMessage)
+      document.removeEventListener('visibilitychange', onVisibility)
       clearInterval(timer)
     }
   }, [])

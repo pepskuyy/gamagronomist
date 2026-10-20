@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300;0,14..32,400;0,14..32,500;0,14..32,600;0,14..32,700;0,14..32,800&display=swap');
+/* Font Inter di-self-host via next/font (lihat src/app/layout.tsx) → var(--font-inter) */
 
 /* ─── DESIGN TOKENS ─────────────────────────────────── */
 :root {
@@ -45,7 +45,7 @@
 *, *::before, *::after { box-sizing: border-box; padding: 0; margin: 0; }
 
 body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
   background-color: var(--background);
   color: var(--text-main);
   line-height: 1.6;

@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma'
 import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
 import { getActionSession } from '@/lib/session'
+import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
 
 // Master Data hanya untuk ADMIN & SPV (sesuai menu sidebar).
 // Hanya ADMIN yang boleh membuat, mengubah, atau menghapus akun ADMIN.
@@ -149,6 +150,7 @@ export async function createProduct(formData: FormData) {
       gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
     }})
     revalidatePath('/dashboard/master/products')
+    invalidateCacheTag(CACHE_TAGS.products)
     return { success: true }
   } catch { return { error: 'Gagal menyimpan produk.' } }
 }
@@ -170,6 +172,7 @@ export async function updateProduct(id: string, formData: FormData) {
       gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
     }})
     revalidatePath('/dashboard/master/products')
+    invalidateCacheTag(CACHE_TAGS.products)
     return { success: true }
   } catch { return { error: 'Gagal mengupdate produk.' } }
 }
@@ -179,6 +182,7 @@ export async function deleteProduct(id: string) {
   try {
     await prisma.product.delete({ where: { id } })
     revalidatePath('/dashboard/master/products')
+    invalidateCacheTag(CACHE_TAGS.products)
     return { success: true }
   } catch { return { error: 'Gagal menghapus produk. Mungkin ada stok atau request yang terkait.' } }
 }
@@ -237,6 +241,7 @@ export async function bulkDeleteProducts(ids: string[]) {
       prisma.product.deleteMany({ where: { id: { in: ids } } }),
     ])
     revalidatePath('/dashboard/master/products')
+    invalidateCacheTag(CACHE_TAGS.products)
     return { success: true }
   } catch (e: any) {
     console.error('Bulk delete products error:', e)
@@ -265,6 +270,7 @@ export async function createStore(formData: FormData) {
       longitude: longitude && !isNaN(longitude) ? longitude : null,
     }})
     revalidatePath('/dashboard/master/stores')
+    invalidateCacheTag(CACHE_TAGS.stores)
     return { success: true }
   } catch { return { error: 'Gagal menyimpan data toko.' } }
 }
@@ -289,6 +295,7 @@ export async function updateStore(id: string, formData: FormData) {
       longitude: longitude && !isNaN(longitude) ? longitude : null,
     }})
     revalidatePath('/dashboard/master/stores')
+    invalidateCacheTag(CACHE_TAGS.stores)
     return { success: true }
   } catch { return { error: 'Gagal mengupdate data toko.' } }
 }
@@ -298,6 +305,7 @@ export async function deleteStore(id: string) {
   try {
     await prisma.store.delete({ where: { id } })
     revalidatePath('/dashboard/master/stores')
+    invalidateCacheTag(CACHE_TAGS.stores)
     return { success: true }
   } catch { return { error: 'Gagal menghapus toko.' } }
 }
@@ -308,6 +316,7 @@ export async function bulkDeleteStores(ids: string[]) {
   try {
     await prisma.store.deleteMany({ where: { id: { in: ids } } })
     revalidatePath('/dashboard/master/stores')
+    invalidateCacheTag(CACHE_TAGS.stores)
     return { success: true }
   } catch { return { error: 'Gagal menghapus toko.' } }
 }

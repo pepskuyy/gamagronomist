@@ -1,27 +1,9 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import { getLatestSimotandiPeriodeId, getSimotandiData } from '@/lib/data-cache'
 
 export const dynamic = 'force-dynamic'
-
-const SELECT = {
-  level: true,
-  nama: true,
-  kdpr: true,
-  kdkb: true,
-  kdkc: true,
-  bera: true,
-  penyiapanLahan: true,
-  tanam: true,
-  veg1: true,
-  veg2: true,
-  gen1: true,
-  gen2: true,
-  panen: true,
-  standingCrop: true,
-  lsb: true,
-} as const
 
 /**
  * GET /api/simotandi/data?periode=<id>[&kdkb=<kode>]
@@ -29,6 +11,9 @@ const SELECT = {
  * Selalu mengembalikan baris provinsi + kabupaten.
  * Jika `kdkb` diberikan, sekaligus mengembalikan baris kecamatan kabupaten tsb.
  * Hanya untuk provinsi Jawa Tengah (33), DIY (34), Jawa Timur (35).
+ *
+ * Data sinkron harian → query di-cache (tag 'simotandi', di-invalidasi
+ * setelah runSimotandiSync). Auth tetap dicek per request.
  */
 export async function GET(req: Request) {
   try {
@@ -41,38 +26,14 @@ export async function GET(req: Request) {
 
     const periode = periodeParam
       ? parseInt(periodeParam, 10)
-      : (
-          await prisma.simotandiPeriode.findFirst({
-            orderBy: { id: 'desc' },
-            select: { id: true },
-          })
-        )?.id
+      : await getLatestSimotandiPeriodeId()
 
     if (!periode || !Number.isFinite(periode)) {
       return NextResponse.json({ periode: null, provinsi: [], kabupaten: [], kecamatan: [] })
     }
 
-    const [periodeInfo, provinsi, kabupaten, kecamatan] = await Promise.all([
-      prisma.simotandiPeriode.findUnique({
-        where: { id: periode },
-        select: { id: true, kode: true, label: true, startDate: true, endDate: true },
-      }),
-      prisma.simotandiWilayah.findMany({ where: { periodeId: periode, level: 'provinsi' }, select: SELECT }),
-      prisma.simotandiWilayah.findMany({
-        where: { periodeId: periode, level: 'kabupaten' },
-        select: SELECT,
-        orderBy: { kdkb: 'asc' },
-      }),
-      kdkb
-        ? prisma.simotandiWilayah.findMany({
-            where: { periodeId: periode, level: 'kecamatan', kdkb },
-            select: SELECT,
-            orderBy: { kdkc: 'asc' },
-          })
-        : Promise.resolve([]),
-    ])
-
-    return NextResponse.json({ periode: periodeInfo, provinsi, kabupaten, kecamatan })
+    const result = await getSimotandiData(periode, kdkb || null)
+    return NextResponse.json(result)
   } catch (err) {
     console.error('[simotandi/data]', err)
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })

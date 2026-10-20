@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { createHmac } from 'crypto'
 import prisma from '@/lib/prisma'
+import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
 
 export const dynamic = 'force-dynamic'
 // Tambah maxDuration untuk Vercel Pro (60s). Hobby tetap 10s tapi per-page sudah cukup.
@@ -104,6 +105,9 @@ export async function POST(request: Request) {
     }
 
     const done = page >= totalPages || customers.length < pageSize
+
+    // Invalidasi cache master toko (/api/master/stores)
+    invalidateCacheTag(CACHE_TAGS.stores)
 
     return NextResponse.json({
       done,

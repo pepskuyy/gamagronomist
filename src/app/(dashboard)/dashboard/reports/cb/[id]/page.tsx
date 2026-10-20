@@ -1,6 +1,7 @@
 import prisma from '@/lib/prisma'
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { cldThumb } from '@/lib/cloudinary-url'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import ReportAdminActions from '@/components/ReportAdminActions'
@@ -116,7 +117,7 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             {photos.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noreferrer">
-                <img src={url} alt={`Foto ${i + 1}`} style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '0.5rem', border: '1px solid var(--border)' }} />
+                <img src={cldThumb(url, 300)} alt={`Foto ${i + 1}`} loading="lazy" decoding="async" style={{ width: '150px', height: '150px', objectFit: 'cover', borderRadius: '0.5rem', border: '1px solid var(--border)' }} />
               </a>
             ))}
           </div>

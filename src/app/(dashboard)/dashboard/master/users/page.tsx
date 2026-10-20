@@ -2,6 +2,7 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
+import { cldThumb } from '@/lib/cloudinary-url'
 import { createUser, updateUser, deleteUser, bulkDeleteUsers } from '@/app/actions/master'
 import ImageUploader from '@/components/ImageUploader'
 
@@ -218,7 +219,7 @@ export default function UsersMasterPage() {
                   <td style={{ padding: '0.85rem 1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                       <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', flexShrink: 0, overflow: 'hidden' }}>
-                        {u.photo ? <img src={u.photo} alt={u.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : u.name.charAt(0).toUpperCase()}
+                        {u.photo ? <img src={cldThumb(u.photo, 64)} alt={u.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : u.name.charAt(0).toUpperCase()}
                       </div>
                       <span style={{ fontWeight: 600 }}>{u.name}</span>
                     </div>

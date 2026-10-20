@@ -1,14 +1,14 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import * as XLSX from 'xlsx'
 import { bulkImportProducts, BulkProductRow, BulkImportResult } from '@/app/actions/bulk-import'
 
 const VALID_UNITS_KEMASAN = ['PCS', 'Btl', 'Bks', 'Box', 'Sak', 'gl', 'Pack', 'Rol']
 const VALID_UNITS_LEGACY = ['ml', 'gr', 'kg', 'liter', 'pcs', 'sachet', 'botol']
 const ALL_VALID_UNITS = [...VALID_UNITS_KEMASAN, ...VALID_UNITS_LEGACY]
 
-function downloadTemplate() {
+async function downloadTemplate() {
+  const XLSX = await import('xlsx') // lazy-load
   const wb = XLSX.utils.book_new()
   const data = [
     ['id_db', 'id_produk', 'nama_produk', 'satuan_kemasan', 'satuan_gramasi', 'gramasi_per_kemasan', 'deskripsi'],
@@ -40,8 +40,9 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
     if (!file) return
     setFileError(null)
     const reader = new FileReader()
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
+        const XLSX = await import('xlsx')
         const wb = XLSX.read(ev.target?.result, { type: 'binary' })
         const ws = wb.Sheets[wb.SheetNames[0]]
         const raw: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })

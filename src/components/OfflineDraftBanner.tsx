@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import { countPendingDrafts } from '@/lib/offline-db'
+import { usePendingDraftCount } from '@/hooks/usePendingDraftCount'
 
 export default function OfflineDraftBanner() {
-  const [pendingCount, setPendingCount] = useState(0)
+  const pendingCount = usePendingDraftCount()
   const [isOnline, setIsOnline] = useState(true)
   const [dismissed, setDismissed] = useState(false)
 
@@ -20,27 +20,10 @@ export default function OfflineDraftBanner() {
     }
   }, [])
 
+  // Reset dismiss saat antrean kosong (perilaku sama seperti sebelumnya)
   useEffect(() => {
-    const refresh = async () => {
-      const count = await countPendingDrafts()
-      setPendingCount(count)
-      if (count === 0) setDismissed(false)
-    }
-    refresh()
-    const timer = setInterval(refresh, 5000)
-
-    const handleSwMessage = (e: MessageEvent) => {
-      if (e.data?.type === 'SYNC_COMPLETE' || e.data?.type === 'DRAFT_SYNCED') {
-        refresh()
-      }
-    }
-    navigator.serviceWorker?.addEventListener('message', handleSwMessage)
-
-    return () => {
-      clearInterval(timer)
-      navigator.serviceWorker?.removeEventListener('message', handleSwMessage)
-    }
-  }, [])
+    if (pendingCount === 0) setDismissed(false)
+  }, [pendingCount])
 
   const handleManualSync = async () => {
     if ('serviceWorker' in navigator && navigator.serviceWorker.controller) {

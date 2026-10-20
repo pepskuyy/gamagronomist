@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import prisma from '@/lib/prisma'
+import { getSimotandiPeriods } from '@/lib/data-cache'
 
 export const dynamic = 'force-dynamic'
 
@@ -14,10 +14,8 @@ export async function GET() {
     const session = await decrypt((await cookies()).get('session')?.value as string)
     if (!session?.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const periods = await prisma.simotandiPeriode.findMany({
-      orderBy: { id: 'desc' },
-      select: { id: true, kode: true, label: true, startDate: true, endDate: true },
-    })
+    // Data sinkron harian → di-cache (tag 'simotandi', di-invalidasi setelah sync)
+    const periods = await getSimotandiPeriods()
 
     return NextResponse.json(periods)
   } catch (err) {

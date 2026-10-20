@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
 
 
 export type BulkProductRow = {
@@ -161,5 +162,6 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
   }
 
   revalidatePath('/dashboard/master/products')
+  invalidateCacheTag(CACHE_TAGS.products)
   return { success: true, inserted, updated, skipped, errors }
 }

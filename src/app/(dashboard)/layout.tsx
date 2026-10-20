@@ -2,8 +2,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { redirect } from 'next/navigation'
 import DashboardShell from './DashboardShell'
-import prisma from '@/lib/prisma'
-import { withRetry } from '@/lib/retry'
+import { isMaintenanceMode } from '@/lib/maintenance'
 
 export default async function DashboardLayout({
   children,
@@ -26,19 +25,9 @@ export default async function DashboardLayout({
   // --- MAINTENANCE MODE CHECK ---
   // FAIL-OPEN: gangguan DB sesaat (pool timeout, cold start, connection reset)
   // TIDAK boleh mengunci seluruh user. Maintenance hanya aktif jika DB
-  // benar-benar mengembalikan value 'true'.
-  let isMaintenance = false
-  try {
-    const config = await withRetry(
-      () => prisma.systemConfig.findUnique({ where: { key: 'maintenance_mode' } }),
-      { maxAttempts: 2, initialDelayMs: 200, maxDelayMs: 400, label: 'maintenance_mode check' }
-    )
-    isMaintenance = config?.value === 'true'
-  } catch (error) {
-    // Gagal setelah retry — fail open, biarkan user tetap masuk.
-    console.error('[maintenance-check] DB unreachable, fail-open:', error)
-    isMaintenance = false
-  }
+  // benar-benar mengembalikan value 'true'. Hasil di-memo 15 detik
+  // (lihat src/lib/maintenance.ts). ADMIN selalu bypass → tidak perlu query.
+  const isMaintenance = session.role === 'ADMIN' ? false : await isMaintenanceMode()
 
   if (isMaintenance && session.role !== 'ADMIN') {
     return (

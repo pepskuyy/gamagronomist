@@ -74,6 +74,36 @@ const MapView = dynamic(() => import('@/components/MapView'), {
   ),
 })
 
+// ── Cache level-modul (bertahan selama sesi SPA) ─────────────────
+// Master toko tidak bergantung pada filterQuery → tidak perlu di-fetch ulang
+// setiap filter dashboard berubah. TTL 5 menit agar toko baru tetap muncul.
+const STORES_TTL_MS = 5 * 60 * 1000
+let storesPromise: Promise<any[]> | null = null
+let storesFetchedAt = 0
+function loadStores(): Promise<any[]> {
+  if (!storesPromise || Date.now() - storesFetchedAt > STORES_TTL_MS) {
+    storesFetchedAt = Date.now()
+    storesPromise = fetch('/api/master/stores')
+      .then(r => r.json())
+      .catch(err => { storesPromise = null; throw err })
+  }
+  return storesPromise
+}
+
+// GeoJSON statis: memo per URL agar toggle layer / remount tidak re-download.
+const geoCache = new Map<string, Promise<any | null>>()
+function loadGeo(url: string): Promise<any | null> {
+  let p = geoCache.get(url)
+  if (!p) {
+    p = fetch(url)
+      .then(r => (r.ok ? r.json() : null))
+      .then(geo => { if (!geo) geoCache.delete(url); return geo })
+      .catch(() => { geoCache.delete(url); return null })
+    geoCache.set(url, p)
+  }
+  return p
+}
+
 export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string }) {
   const [points, setPoints]         = useState<DemoPlotPoint[]>([])
   const [stores, setStores]         = useState<StorePoint[]>([])
@@ -110,7 +140,7 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
   useEffect(() => {
     Promise.all([
       fetch(`/api/demoplot-map${filterQuery}`).then(r => r.json()),
-      fetch('/api/master/stores').then(r => r.json()),
+      loadStores(),
     ]).then(([demoData, storeData]) => {
       setPoints(demoData ?? [])
       const validStores: StorePoint[] = (storeData ?? [])
@@ -138,10 +168,8 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
     }
 
     if (!kabGeo) {
-      fetch('/geojson/kabupaten.geojson')
-        .then(r => (r.ok ? r.json() : null))
+      loadGeo('/geojson/kabupaten.geojson')
         .then(geo => { if (geo) setKabGeo(geo) })
-        .catch(() => {})
     }
   }, [showFaseTanam, periods.length, kabGeo])
 
@@ -176,7 +204,7 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
 
     Promise.all([
       fetch(`/api/simotandi/data?periode=${periodeId}&kdkb=${selectedKdkb}`).then(r => (r.ok ? r.json() : null)),
-      fetch(`/geojson/kecamatan/${selectedKdkb}.json`).then(r => (r.ok ? r.json() : null)),
+      loadGeo(`/geojson/kecamatan/${selectedKdkb}.json`),
     ])
       .then(([data, geo]) => {
         if (cancelled) return

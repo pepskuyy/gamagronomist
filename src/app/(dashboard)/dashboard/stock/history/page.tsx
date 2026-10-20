@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
-import * as XLSX from 'xlsx'
 
 type LedgerItem = {
   id: string
@@ -114,7 +113,8 @@ export default function LedgerHistoryPage() {
     .reduce((s, l) => s + Math.abs(l.quantity), 0)
 
   // Export to Excel
-  function handleExport() {
+  async function handleExport() {
+    const XLSX = await import('xlsx') // lazy-load
     const rows = ledgers.map(item => {
       const unit = item.product.unitGramasi || item.product.unit
       return {

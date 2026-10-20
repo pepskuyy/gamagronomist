@@ -35,37 +35,48 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
   if (session.role === 'FO' || session.role === 'INTERN') requestFilter.foId = session.userId
   else if (['AFA', 'PLANTATION'].includes(session.role)) requestFilter.afaId = session.userId
 
-  const totalRequests = await prisma.request.count({ where: requestFilter })
-  const approvedRequests = await prisma.request.count({ where: { ...requestFilter, status: 'APPROVED' } })
-  const pendingRequests = await prisma.request.count({ where: { ...requestFilter, status: 'SUBMITTED' } })
-  const completedDemoPlots = await prisma.request.count({ where: { ...requestFilter, status: 'DEMO_PLOT_SELESAI' } })
-  
-  const recentLedgers = await prisma.ledger.findMany({
-    where: isSPV ? {} : { userId: session.userId },
-    include: { product: true, user: true },
-    orderBy: { createdAt: 'desc' },
-    take: 50
-  })
-  
-  const recentRequests = await prisma.request.findMany({
-    where: requestFilter,
-    include: { fo: true, farmer: true, details: { include: { product: true } } },
-    orderBy: { createdAt: 'desc' },
-    take: 50
-  })
-  
-  const allAreas = await getAreas()
-  const areas = await prisma.area.findMany({ orderBy: { name: 'asc' } })
-  
-  const filterSubordinates = await prisma.user.findMany({
-    where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } },
-    select: { id: true, name: true, role: true },
-    orderBy: { name: 'asc' }
-  })
-  
-  const currentUserRecord = isFieldUser
-    ? await prisma.user.findUnique({ where: { id: session.userId }, select: { areaId: true, area: { select: { name: true } } } })
-    : null
+  // Semua query di bawah independen → dijalankan paralel (sebelumnya sequential).
+  // Relasi user/fo memakai `select` agar kolom sensitif (hash password) tidak
+  // ikut ter-serialisasi ke client component.
+  const [
+    totalRequests,
+    approvedRequests,
+    pendingRequests,
+    completedDemoPlots,
+    recentLedgers,
+    recentRequests,
+    allAreas,
+    areas,
+    filterSubordinates,
+    currentUserRecord,
+  ] = await Promise.all([
+    prisma.request.count({ where: requestFilter }),
+    prisma.request.count({ where: { ...requestFilter, status: 'APPROVED' } }),
+    prisma.request.count({ where: { ...requestFilter, status: 'SUBMITTED' } }),
+    prisma.request.count({ where: { ...requestFilter, status: 'DEMO_PLOT_SELESAI' } }),
+    prisma.ledger.findMany({
+      where: isSPV ? {} : { userId: session.userId },
+      include: { product: true, user: { select: { id: true, name: true, role: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    }),
+    prisma.request.findMany({
+      where: requestFilter,
+      include: { fo: { select: { id: true, name: true } }, farmer: true, details: { include: { product: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 50
+    }),
+    getAreas(),
+    prisma.area.findMany({ orderBy: { name: 'asc' } }),
+    prisma.user.findMany({
+      where: { role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] } },
+      select: { id: true, name: true, role: true },
+      orderBy: { name: 'asc' }
+    }),
+    isFieldUser
+      ? prisma.user.findUnique({ where: { id: session.userId }, select: { areaId: true, area: { select: { name: true } } } })
+      : Promise.resolve(null),
+  ])
 
   // ----- TARGET DATA -----
   const now = new Date()

@@ -5,6 +5,7 @@ import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
 
 
 /** SPV menambahkan stok masuk ke Gudang Sampel secara manual */
@@ -47,6 +48,7 @@ export async function addSampleStock(formData: FormData) {
         }
       })
       productId = product.id
+      invalidateCacheTag(CACHE_TAGS.products)
 
     } else {
       // ── Pilih dari produk existing ────────────────────────────────────
@@ -163,6 +165,7 @@ export async function editSampleProduct(
         gramasiPerUnit: gramasiPerUnit ?? null,
       },
     })
+    invalidateCacheTag(CACHE_TAGS.products)
     revalidatePath('/dashboard/stock/sample')
     return { success: true }
   } catch (err: any) {
@@ -209,6 +212,7 @@ export async function removeSampleProduct(productId: string, currentBalance: num
       const usedInLedger  = await prisma.ledger.findFirst({ where: { productId } })
       if (!usedInRequest && !usedInLedger) {
         await prisma.product.delete({ where: { id: productId } })
+        invalidateCacheTag(CACHE_TAGS.products)
       }
     }
 

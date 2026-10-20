@@ -109,9 +109,22 @@ export async function deleteDraft(id: string): Promise<void> {
   await db.delete(STORE, id)
 }
 
-/** Hitung jumlah draft pending */
+/**
+ * Hitung jumlah draft pending (status pending/failed).
+ * Memakai index 'status' + count() agar tidak memuat seluruh record
+ * (termasuk blob foto) ke memori setiap kali polling.
+ */
 export async function countPendingDrafts(): Promise<number> {
   const db = await getDB()
-  const all = await db.getAll(STORE)
-  return all.filter(d => d.status === 'pending' || d.status === 'failed').length
+  try {
+    const [pending, failed] = await Promise.all([
+      db.countFromIndex(STORE, 'status', 'pending'),
+      db.countFromIndex(STORE, 'status', 'failed'),
+    ])
+    return pending + failed
+  } catch {
+    // Fallback bila index tidak tersedia
+    const all = await db.getAll(STORE)
+    return all.filter(d => d.status === 'pending' || d.status === 'failed').length
+  }
 }

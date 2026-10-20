@@ -1,5 +1,15 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import "./globals.css";
+
+// Self-hosted Inter (variable font, termasuk axis opsz) — menggantikan
+// @import Google Fonts yang render-blocking di globals.css.
+const inter = Inter({
+  subsets: ["latin"],
+  display: "swap",
+  axes: ["opsz"],
+  variable: "--font-inter",
+});
 
 export const metadata: Metadata = {
   title: "Agrolens - Tracking Stok & Demo Plot",
@@ -27,7 +37,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id">
+    <html lang="id" className={inter.variable}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="theme-color" content="#1a9b55" />
@@ -87,18 +97,29 @@ export default function RootLayout({
                   if (!bar) bar = document.getElementById('nav-progress-bar');
                   return bar;
                 }
+                // Polling pathname hanya berjalan SELAMA progress aktif
+                // (sebelumnya setInterval 100ms berjalan terus-menerus).
+                var poll = null;
+                var safety = null;
+                function stopPolling() {
+                  if (poll) { clearInterval(poll); poll = null; }
+                  if (safety) { clearTimeout(safety); safety = null; }
+                }
                 function startProgress() {
                   var b = getBar(); if (!b) return;
                   clearTimeout(timer);
                   b.className = 'loading';
+                  stopPolling();
+                  poll = setInterval(checkNavigation, 100);
+                  // Pengaman: jangan biarkan bar menggantung bila navigasi batal
+                  safety = setTimeout(doneProgress, 10000);
                 }
                 function doneProgress() {
+                  stopPolling();
                   var b = getBar(); if (!b) return;
                   b.className = 'done';
                   timer = setTimeout(function() { b.className = ''; b.style.width = ''; }, 700);
                 }
-                // Hook into Next.js App Router via MutationObserver on <html> data attributes
-                // which change during RSC navigation
                 var prevPathname = location.pathname;
                 function checkNavigation() {
                   if (location.pathname !== prevPathname) {
@@ -115,8 +136,6 @@ export default function RootLayout({
                   if (href !== location.pathname) startProgress();
                 }, true);
                 window.addEventListener('popstate', function() { startProgress(); });
-                // Poll to detect when navigation is complete
-                setInterval(checkNavigation, 100);
               })();
 
               // ── Service Worker Registration ───────────────────────
@@ -131,17 +150,28 @@ export default function RootLayout({
                       // SW juga menolak menyimpan response hasil redirect,
                       // sehingga halaman /login tidak pernah tersimpan
                       // sebagai /dashboard saat session expired.
-                      function askPrewarm() {
+                      // Throttle: prewarm maksimal 1x per 30 menit (sama dengan
+                      // TTL cache HTML di sw.js) agar tidak memicu 8 render
+                      // halaman server setiap kali page load.
+                      var PREWARM_KEY = 'agrolens:lastPrewarm';
+                      var PREWARM_INTERVAL = 30 * 60 * 1000;
+                      function askPrewarm(force) {
                         if (!navigator.onLine) return;
                         var sw = reg.active || navigator.serviceWorker.controller;
-                        if (sw) sw.postMessage({ type: 'PREWARM_PAGES' });
+                        if (!sw) return;
+                        try {
+                          var last = Number(localStorage.getItem(PREWARM_KEY) || 0);
+                          if (!force && Date.now() - last < PREWARM_INTERVAL) return;
+                          localStorage.setItem(PREWARM_KEY, String(Date.now()));
+                        } catch (e) { /* localStorage tidak tersedia: tetap prewarm */ }
+                        sw.postMessage({ type: 'PREWARM_PAGES' });
                       }
 
                       if (reg.active) askPrewarm();
                       else reg.addEventListener('updatefound', function() {
                         if (reg.installing) {
                           reg.installing.addEventListener('statechange', function() {
-                            if (this.state === 'activated') askPrewarm();
+                            if (this.state === 'activated') askPrewarm(true);
                           });
                         }
                       });

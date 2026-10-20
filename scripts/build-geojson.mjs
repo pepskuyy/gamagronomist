@@ -12,6 +12,9 @@
  *   public/geojson/kecamatan/<kdkb>.json  -> batas kecamatan per kabupaten (lazy load)
  *   public/geojson/index.json             -> metadata + bbox per kabupaten
  *
+ * PENTING: setelah regenerate, bump GEO_CACHE_NAME di public/sw.js
+ * (mis. agrolens-geo-v1 → agrolens-geo-v2) agar cache peta di klien diperbarui.
+ *
  * Jalankan:  node scripts/build-geojson.mjs
  *
  * Catatan: script ini butuh `mapshaper`, yang TIDAK dipasang sebagai dependency

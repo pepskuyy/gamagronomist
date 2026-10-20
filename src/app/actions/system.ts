@@ -4,6 +4,7 @@ import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
+import { invalidateMaintenanceCache } from '@/lib/maintenance'
 
 export async function toggleMaintenanceMode(isActive: boolean) {
   const cookieStore = await cookies()
@@ -19,6 +20,7 @@ export async function toggleMaintenanceMode(isActive: boolean) {
     update: { value: isActive ? 'true' : 'false' },
     create: { key: 'maintenance_mode', value: isActive ? 'true' : 'false', label: 'Maintenance Mode' }
   })
+  invalidateMaintenanceCache()
 
   // Revalidate entire app to apply maintenance status immediately
   revalidatePath('/', 'layout')

@@ -31,9 +31,19 @@ export default function NotificationBell() {
       }
     }
     fetchNotifs()
-    // Poll every 30s
-    const interval = setInterval(fetchNotifs, 30000)
-    return () => clearInterval(interval)
+    // Poll every 30s — dilewati saat tab tersembunyi (hemat request & query DB),
+    // lalu fetch segera ketika tab kembali terlihat.
+    const interval = setInterval(() => {
+      if (document.visibilityState !== 'hidden') fetchNotifs()
+    }, 30000)
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') fetchNotifs()
+    }
+    document.addEventListener('visibilitychange', onVisibility)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisibility)
+    }
   }, [])
 
   useEffect(() => {

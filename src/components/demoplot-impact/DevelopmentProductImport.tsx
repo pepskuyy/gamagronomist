@@ -1,7 +1,6 @@
 'use client'
 
 import { useMemo, useRef, useState } from 'react'
-import * as XLSX from 'xlsx'
 import { normalizeProductName } from '@/lib/product-name'
 
 export interface ImportCandidate {
@@ -41,7 +40,9 @@ function parseActive(v: unknown): boolean | undefined {
   return undefined
 }
 
-function downloadTemplate(candidates: ImportCandidate[]) {
+async function downloadTemplate(candidates: ImportCandidate[]) {
+  // Lazy-load xlsx (~400KB) hanya saat dibutuhkan
+  const XLSX = await import('xlsx')
   const wb = XLSX.utils.book_new()
   const data = [
     ['kode_sku', 'nama_produk', 'target_komoditas', 'catatan', 'aktif'],
@@ -109,8 +110,9 @@ export default function DevelopmentProductImport({ candidates, existingNames, on
     if (!file) return
     setFileError(null)
     const reader = new FileReader()
-    reader.onload = (ev) => {
+    reader.onload = async (ev) => {
       try {
+        const XLSX = await import('xlsx')
         const wb = XLSX.read(ev.target?.result, { type: 'array' })
         const ws = wb.Sheets[wb.SheetNames[0]]
         const raw: any[] = XLSX.utils.sheet_to_json(ws, { defval: '' })

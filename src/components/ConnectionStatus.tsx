@@ -1,12 +1,12 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { countPendingDrafts } from '@/lib/offline-db'
 import Link from 'next/link'
+import { usePendingDraftCount } from '@/hooks/usePendingDraftCount'
 
 export default function ConnectionStatus() {
   const [isOnline, setIsOnline] = useState(true)
-  const [pendingCount, setPendingCount] = useState(0)
+  const pendingCount = usePendingDraftCount()
   const [justSynced, setJustSynced] = useState(false)
 
   useEffect(() => {
@@ -20,28 +20,22 @@ export default function ConnectionStatus() {
     }
   }, [])
 
+  // Jumlah draft di-poll bersama via usePendingDraftCount (termasuk refresh
+  // saat SW mengirim SYNC_COMPLETE/DRAFT_SYNCED). Di sini cukup tampilkan
+  // indikator "Tersinkronisasi!" sesaat.
   useEffect(() => {
-    const refresh = async () => {
-      const count = await countPendingDrafts()
-      setPendingCount(count)
-    }
-    refresh()
-    const timer = setInterval(refresh, 5000)
-
+    let hideTimer: ReturnType<typeof setTimeout> | null = null
     const handleSwMessage = (e: MessageEvent) => {
       if (e.data?.type === 'SYNC_COMPLETE') {
         setJustSynced(true)
-        setTimeout(() => setJustSynced(false), 4000)
-        refresh()
-      }
-      if (e.data?.type === 'DRAFT_SYNCED') {
-        refresh()
+        if (hideTimer) clearTimeout(hideTimer)
+        hideTimer = setTimeout(() => setJustSynced(false), 4000)
       }
     }
     navigator.serviceWorker?.addEventListener('message', handleSwMessage)
 
     return () => {
-      clearInterval(timer)
+      if (hideTimer) clearTimeout(hideTimer)
       navigator.serviceWorker?.removeEventListener('message', handleSwMessage)
     }
   }, [])

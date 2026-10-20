@@ -2,7 +2,6 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
-import * as XLSX from 'xlsx'
 import { createStore, updateStore, deleteStore, bulkDeleteStores } from '@/app/actions/master'
 
 type Store = {
@@ -89,8 +88,9 @@ export default function StoresMasterPage() {
     })
   }
 
-  function handleExportExcel() {
+  async function handleExportExcel() {
     if (stores.length === 0) { alert('Belum ada data toko.'); return }
+    const XLSX = await import('xlsx') // lazy-load
     const data = [
       ['ID DB', 'Kode Accurate', 'Nama Toko', 'Alamat', 'Latitude', 'Longitude', 'Telepon', 'Catatan'],
       ...filteredStores.map(s => [s.id, s.code || '', s.name, s.address || '', s.latitude ?? '', s.longitude ?? '', s.phone || '', s.notes || ''])

@@ -8,10 +8,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import {
   saveDraft as dbSaveDraft,
-  countPendingDrafts,
   type ReportType,
   type PhotoBlob,
 } from '@/lib/offline-db'
+import { usePendingDraftCount, refreshPendingDraftCount } from '@/hooks/usePendingDraftCount'
 
 interface UseOfflineDraftResult {
   isOnline: boolean
@@ -22,7 +22,8 @@ interface UseOfflineDraftResult {
 
 export function useOfflineDraft(type: ReportType): UseOfflineDraftResult {
   const [isOnline, setIsOnline] = useState(true)
-  const [pendingCount, setPendingCount] = useState(0)
+  // Polling bersama (satu interval untuk seluruh app, pause saat tab hidden)
+  const pendingCount = usePendingDraftCount()
 
   // Deteksi status koneksi real-time
   useEffect(() => {
@@ -33,29 +34,6 @@ export function useOfflineDraft(type: ReportType): UseOfflineDraftResult {
     return () => {
       window.removeEventListener('online', update)
       window.removeEventListener('offline', update)
-    }
-  }, [])
-
-  // Poll pending count setiap 5 detik
-  useEffect(() => {
-    const refresh = async () => {
-      const count = await countPendingDrafts()
-      setPendingCount(count)
-    }
-    refresh()
-    const timer = setInterval(refresh, 5000)
-
-    // Dengarkan message dari Service Worker (saat draft berhasil sync)
-    const handleSwMessage = (e: MessageEvent) => {
-      if (e.data?.type === 'DRAFT_SYNCED' || e.data?.type === 'SYNC_COMPLETE') {
-        refresh()
-      }
-    }
-    navigator.serviceWorker?.addEventListener('message', handleSwMessage)
-
-    return () => {
-      clearInterval(timer)
-      navigator.serviceWorker?.removeEventListener('message', handleSwMessage)
     }
   }, [])
 
@@ -73,9 +51,8 @@ export function useOfflineDraft(type: ReportType): UseOfflineDraftResult {
         }
       }
 
-      // Refresh pending count
-      const count = await countPendingDrafts()
-      setPendingCount(count)
+      // Refresh pending count (semua subscriber ikut ter-update)
+      await refreshPendingDraftCount()
 
       return id
     },

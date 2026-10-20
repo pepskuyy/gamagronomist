@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
+import { cldThumb } from '@/lib/cloudinary-url'
 import { redirect } from 'next/navigation'
 import ReportAdminActions from '@/components/ReportAdminActions'
 import { deleteDemoPlot } from '@/app/actions/demoplot-admin'
@@ -161,8 +162,10 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                         {photoUrls.map((url, i) => (
                           <a key={i} href={url} target="_blank" rel="noopener noreferrer">
                             <img
-                              src={url}
+                              src={cldThumb(url, 240)}
                               alt={`Dokumentasi ${i + 1}`}
+                              loading="lazy"
+                              decoding="async"
                               style={{
                                 width: '120px', height: '120px', objectFit: 'cover',
                                 borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',

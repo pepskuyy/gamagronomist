@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { cldThumb } from '@/lib/cloudinary-url'
 
 type SidebarProps = {
   session: { name: string; role: string; photo?: string | null }
@@ -180,7 +181,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.5rem', marginTop: 'auto', paddingTop: '1rem', borderTop: '1px solid var(--border)', width: '100%' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '38px', height: '38px', borderRadius: 'var(--radius-full)', background: 'var(--primary-light)', color: 'var(--primary)', fontWeight: 700, fontSize: '0.95rem', flexShrink: 0, overflow: 'hidden' }}>
             {session?.photo ? (
-              <img src={session.photo} alt={session.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  <img src={cldThumb(session.photo, 80)} alt={session.name} decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             ) : (
               session?.name?.charAt(0)?.toUpperCase()
             )}
@@ -221,7 +222,7 @@ export default function DashboardShell({ session, children }: SidebarProps) {
               </div>
               <div style={{ width: '36px', height: '36px', borderRadius: 'var(--radius-full)', background: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: '0.9rem', flexShrink: 0, overflow: 'hidden' }}>
                 {session?.photo ? (
-                  <img src={session.photo} alt={session.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              <img src={cldThumb(session.photo, 80)} alt={session.name} decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 ) : (
                   session?.name?.charAt(0)?.toUpperCase()
                 )}

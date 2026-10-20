@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import * as XLSX from 'xlsx'
 
 interface Props {
   type: 'cb' | 'demoplot' | 'kios' | 'gathering' | 'company' | 'spot-demplot'
@@ -34,6 +33,8 @@ export default function ExportExcelButton({ type, search, start, end, label = 'ð
         return
       }
 
+      // Lazy-load xlsx (~400KB) hanya saat tombol export diklik
+      const XLSX = await import('xlsx')
       const wb = XLSX.utils.book_new()
       const ws = XLSX.utils.json_to_sheet(json.data)
       XLSX.utils.book_append_sheet(wb, ws, 'Data')
