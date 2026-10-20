@@ -144,7 +144,7 @@ export default function OpportunityScoringModal({ isOpen, onClose }: Props) {
                 <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.76rem', color: '#7c2d12', lineHeight: 1.5 }}>
                   <li><strong>+35 Poin:</strong> Ada minimal 1 kios yang sudah kulakan produk fokus.</li>
                   <li><strong>+5 Poin / kios:</strong> Dikalikan per jumlah kios berstok (maks +15 poin).</li>
-                  <li><strong>+5 Poin:</strong> Nilai omset stok produk fokus di kios $\ge$ Rp 3.000.000.</li>
+                  <li><strong>+5 Poin:</strong> Nilai omset stok produk fokus di kios ≥ Rp 3.000.000.</li>
                 </ul>
               </div>
 
@@ -222,7 +222,7 @@ export default function OpportunityScoringModal({ isOpen, onClose }: Props) {
                   Daya ungkit (leverage): 1 demplot berdampak serentak ke banyak kios tetangga (spillover):
                 </div>
                 <ul style={{ margin: 0, paddingLeft: '1.1rem', fontSize: '0.76rem', color: '#075985', lineHeight: 1.5 }}>
-                  <li><strong>+15 Poin:</strong> Klaster padat ($\ge$ 6 kios binaan dalam radius 5 km).</li>
+                  <li><strong>+15 Poin:</strong> Klaster padat (≥ 6 kios binaan dalam radius 5 km).</li>
                   <li><strong>+10 Poin:</strong> Klaster sedang (3 – 5 kios binaan).</li>
                   <li><strong>+5 Poin:</strong> Klaster kecil (1 – 2 kios binaan).</li>
                 </ul>
@@ -256,7 +256,7 @@ export default function OpportunityScoringModal({ isOpen, onClose }: Props) {
                       Wajib Segera Demplot (Kawal Sell-Out)
                     </span>
                     <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '0.1rem 0.45rem', borderRadius: '4px', background: '#fee2e2', color: '#b91c1c' }}>
-                      Skor $\ge$ 70
+                      Skor ≥ 70
                     </span>
                   </div>
                   <div style={{ fontSize: '0.78rem', color: '#450a0a', marginTop: '0.2rem', lineHeight: 1.45 }}>
