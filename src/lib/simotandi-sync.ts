@@ -17,6 +17,7 @@ export type SimotandiSyncOptions = {
 
 export type SimotandiSyncResult = {
   success: boolean
+  mode?: string
   periode?: { id: number; kode: string; label: string }
   rowsSaved: number
   remaining: number
@@ -56,7 +57,7 @@ export async function runSimotandiSync(
     } else if (mode === 'backfill') {
       const year2026 = periods
         .filter((p) => p.kode.startsWith('2026'))
-        .sort((a, b) => a.kode.localeCompare(p.kode))
+        .sort((a, b) => a.kode.localeCompare(b.kode))
 
       const synced = await prisma.simotandiPeriode.findMany({
         where: { kode: { in: year2026.map((p) => p.kode) } },

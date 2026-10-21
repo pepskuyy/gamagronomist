@@ -39,7 +39,7 @@ export async function approveRequest(formData: FormData) {
   try {
     const request = await prisma.request.findUnique({
       where: { id: requestId },
-      include: { details: true, fo: true }
+      include: { details: { include: { product: true } }, fo: true }
     })
 
     if (!request || request.status !== 'SUBMITTED') {
@@ -53,12 +53,18 @@ export async function approveRequest(formData: FormData) {
       
       if (qtyToApprove <= 0) continue // skip items with 0 qty
 
-      // Potong stok AFA & Kirim ke FO
+      // Konversi satuan kemasan (PCS/Btl) ke gramasi (ml/gr) untuk dicatat di Ledger
+      const prod = detail.product
+      const qtyGramasi = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
+        ? qtyToApprove * prod.gramasiPerUnit
+        : qtyToApprove
+
+      // Potong stok AFA & Kirim ke FO (dalam satuan gramasi)
       await transferAfaToFo(
         session.userId, 
         request.foId, 
         detail.productId, 
-        qtyToApprove,
+        qtyGramasi,
         request.id,
         session.areaId ?? null
       )
