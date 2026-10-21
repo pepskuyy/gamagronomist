@@ -53,18 +53,13 @@ export async function approveRequest(formData: FormData) {
       
       if (qtyToApprove <= 0) continue // skip items with 0 qty
 
-      // Konversi satuan kemasan (PCS/Btl) ke gramasi (ml/gr) untuk dicatat di Ledger
-      const prod = detail.product
-      const qtyGramasi = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
-        ? qtyToApprove * prod.gramasiPerUnit
-        : qtyToApprove
-
-      // Potong stok AFA & Kirim ke FO (dalam satuan gramasi)
+      // FO mengajukan dalam satuan gramasi (ml/gr), sehingga qtyToApprove sudah berupa gramasi
+      // Potong stok AFA & Kirim ke FO secara langsung tanpa dikalikan ulang
       await transferAfaToFo(
         session.userId, 
         request.foId, 
         detail.productId, 
-        qtyGramasi,
+        qtyToApprove,
         request.id,
         session.areaId ?? null
       )
