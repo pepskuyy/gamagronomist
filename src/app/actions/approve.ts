@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { transferAfaToFo } from '@/lib/ledger/stock'
+import { transferAfaToFo, getStockBalance } from '@/lib/ledger/stock'
 
 
 /**
@@ -46,28 +46,57 @@ export async function approveRequest(formData: FormData) {
        return { error: 'Pengajuan tidak valid atau sudah diproses' }
     }
 
+    // Saldo AFA saat ini (dalam satuan ledger: gramasi bila ada, selain itu kemasan)
+    const afaStocks = await getStockBalance(session.userId)
+    const afaStockMap = new Map(afaStocks.map(s => [s.product.id, s.quantity]))
+    const stockWarnings: string[] = []
+
     // Eksekusi ledger transaction per detail
     for (const detail of request.details) {
       // Use AFA-adjusted qty if provided, otherwise fallback to requested qty
-      const qtyToApprove = approvedQties[detail.id] ?? detail.qtyRequested
+      const qtyInput = approvedQties[detail.id] ?? detail.qtyRequested
       
-      if (qtyToApprove <= 0) continue // skip items with 0 qty
+      if (qtyInput <= 0) continue // skip items with 0 qty
 
-      // FO mengajukan dalam satuan gramasi (ml/gr), sehingga qtyToApprove sudah berupa gramasi
-      // Potong stok AFA & Kirim ke FO secara langsung tanpa dikalikan ulang
+      // Normalisasi ke satuan ledger (gramasi).
+      // FO normalnya mengajukan dalam gramasi (ml/gr). Namun jika requestUnit berisi satuan
+      // kemasan (PCS/Btl) — mis. saat pengajuan dibuat produk belum punya data gramasi —
+      // maka angka harus dikonversi: kemasan × gramasiPerUnit.
+      const prod = detail.product
+      const gramasi = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0 ? prod.gramasiPerUnit : null
+      const reqUnit = (detail.requestUnit || '').trim().toLowerCase()
+      const gramUnit = (prod?.unitGramasi || '').trim().toLowerCase()
+      const isKemasanInput = !!gramasi && !!reqUnit && reqUnit !== gramUnit
+      const qtyLedger = isKemasanInput ? qtyInput * (gramasi as number) : qtyInput
+      const displayUnit = prod?.unitGramasi || prod?.unit || ''
+
+      // Peringatan (tidak memblokir) jika stok AFA tidak mencukupi
+      const available = afaStockMap.get(detail.productId) ?? 0
+      if (available < qtyLedger) {
+        stockWarnings.push(`${prod?.name ?? detail.productId}: tersedia ${available} ${displayUnit}, disetujui ${qtyLedger} ${displayUnit}`)
+      }
+      afaStockMap.set(detail.productId, available - qtyLedger)
+
+      // Potong stok AFA & Kirim ke FO
       await transferAfaToFo(
         session.userId, 
         request.foId, 
         detail.productId, 
-        qtyToApprove,
+        qtyLedger,
         request.id,
         session.areaId ?? null
       )
       
-      // Update approved qty di table RequestDetail
+      // Simpan qty disetujui dalam satuan ledger agar konsisten dengan Ledger
       await prisma.requestDetail.update({
         where: { id: detail.id },
-        data: { qtyApproved: qtyToApprove }
+        data: {
+          qtyApproved: qtyLedger,
+          ...(isKemasanInput ? {
+            requestUnit: prod?.unitGramasi ?? null,
+            qtyRequested: detail.qtyRequested * (gramasi as number),
+          } : {}),
+        }
       })
     }
 
@@ -80,12 +109,17 @@ export async function approveRequest(formData: FormData) {
       }
     })
 
-    // Build detail message for FO
-    const detailLines = request.details.map(d => {
-      const approved = approvedQties[d.id] ?? d.qtyRequested
-      const diff = approved !== d.qtyRequested ? ` (diminta: ${d.qtyRequested})` : ''
-      return `• ${d.productId.slice(0, 6)}… → ${approved}${diff}`
-    }).join('\n')
+    // Notify AFA sendiri jika ada stok yang tidak mencukupi (peringatan, tidak memblokir)
+    if (stockWarnings.length > 0) {
+      await prisma.notification.create({
+        data: {
+          userId: session.userId,
+          title: '⚠️ Approval Melebihi Stok',
+          message: `Pengajuan ${requestId.slice(0,8).toUpperCase()} disetujui melebihi saldo stok Anda:\n${stockWarnings.join('\n')}\nSaldo Anda kini minus untuk produk tersebut. Segera lakukan opname/penyesuaian.`,
+          link: '/dashboard/stock'
+        }
+      })
+    }
 
     // Notify FO
     await prisma.notification.create({
@@ -97,7 +131,7 @@ export async function approveRequest(formData: FormData) {
       }
     })
 
-    return { success: true }
+    return { success: true, warnings: stockWarnings }
   } catch (err: any) {
     console.error('Approve error', err)
     return { error: 'Gagal memproses approval. Pastikan stok cukup.' }

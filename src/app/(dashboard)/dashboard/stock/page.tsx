@@ -146,7 +146,9 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   const stocksMap: Record<string, { product: any, quantity: number }[]> = {}
   await Promise.all(
     teamUsers.map(async (u) => {
-      stocksMap[u.id] = await getStockBalance(u.id)
+      stocksMap[u.id] = await getStockBalance(u.id, {
+        includeNegative: ['ADMIN', 'SPV'].includes(session.role),
+      })
     })
   )
 

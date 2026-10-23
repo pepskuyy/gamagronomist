@@ -33,6 +33,7 @@ function formatType(type: string) {
     DIRECT_USAGE_AFA: { label: 'Pakai Langsung', cls: 'badge-danger' },
     ADJUSTMENT_PLUS: { label: 'Adj (+)', cls: 'badge-success' },
     ADJUSTMENT_MINUS: { label: 'Adj (-)', cls: 'badge-danger' },
+    ROLLBACK_SAMPLE: { label: 'Rollback Sampel', cls: 'badge-neutral' },
   }
   const m = map[type] || { label: type, cls: 'badge-neutral' }
   return <span className={`badge ${m.cls}`}>{m.label}</span>

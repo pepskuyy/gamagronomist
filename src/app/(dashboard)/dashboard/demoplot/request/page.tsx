@@ -163,7 +163,8 @@ export default function FOStockRequestPage() {
                 </div>
                 <div style={{ flex: 1 }}>
                   <label className="form-label">
-                    Jumlah (dalam {afaProducts.find(p => p.id === currentProduct)?.unitGramasi || afaProducts.find(p => p.id === currentProduct)?.unit || 'gramasi'})
+                    Jumlah dalam <strong style={{ color: 'var(--primary)' }}>{selectedAfaProduct?.unitGramasi || selectedAfaProduct?.unit || 'gramasi'}</strong>
+                    {selectedAfaProduct?.unitGramasi && <span style={{ fontWeight: 400 }}> (bukan {selectedAfaProduct.unit})</span>}
                     {selectedAfaProduct && (
                       <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem' }}>
                         (maks: {selectedAfaProduct.balanceKemasan != null
@@ -182,6 +183,17 @@ export default function FOStockRequestPage() {
                     onChange={e => setCurrentQty(e.target.value)}
                     placeholder="0"
                   />
+                  {selectedAfaProduct && selectedAfaProduct.gramasiPerUnit && selectedAfaProduct.gramasiPerUnit > 0 && Number(currentQty) > 0 && (
+                    <div style={{ fontSize: '0.75rem', color: '#0369a1', marginTop: '0.25rem' }}>
+                      = {+(Number(currentQty) / selectedAfaProduct.gramasiPerUnit).toFixed(2)} {selectedAfaProduct.unit}
+                      {' '}({selectedAfaProduct.gramasiPerUnit} {selectedAfaProduct.unitGramasi}/{selectedAfaProduct.unit})
+                    </div>
+                  )}
+                  {selectedAfaProduct && !(selectedAfaProduct.gramasiPerUnit && selectedAfaProduct.gramasiPerUnit > 0) && (
+                    <div style={{ fontSize: '0.75rem', color: '#b45309', marginTop: '0.25rem', background: '#fffbeb', padding: '0.3rem 0.5rem', borderRadius: 4 }}>
+                      ⚠️ Produk ini belum punya data isi per kemasan. Isi jumlah dalam <strong>{selectedAfaProduct.unit}</strong>.
+                    </div>
+                  )}
                 </div>
                 <button type="button" onClick={addProduct} className="btn btn-outline" style={{ height: 42, alignSelf: 'flex-end' }}>Tambah</button>
               </div>

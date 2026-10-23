@@ -9,7 +9,7 @@ type Detail = {
   id: string
   qtyRequested: number
   requestUnit?: string | null
-  product: { name: string; unit: string; unitGramasi?: string | null; id: string }
+  product: { name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null; id: string }
 }
 
 type RequestData = {
@@ -101,6 +101,24 @@ export default function ApprovePageClient({
 
   const isAnyQtyChanged = request.details.some(d => approvedQties[d.id] !== d.qtyRequested)
 
+  // Konversi qty input ke satuan ledger (gramasi) — sama dengan logika server di approve.ts
+  const toLedgerQty = (d: Detail, qty: number) => {
+    const g = d.product.gramasiPerUnit && d.product.gramasiPerUnit > 0 ? d.product.gramasiPerUnit : null
+    const reqUnit = (d.requestUnit || '').trim().toLowerCase()
+    const gramUnit = (d.product.unitGramasi || '').trim().toLowerCase()
+    const isKemasan = !!g && !!reqUnit && reqUnit !== gramUnit
+    return { qty: isKemasan ? qty * (g as number) : qty, isKemasan }
+  }
+
+  const shortages = request.details
+    .map(d => {
+      const { qty } = toLedgerQty(d, approvedQties[d.id] ?? d.qtyRequested)
+      const stock = getStock(d.product.id)
+      const unit = d.product.unitGramasi || d.product.unit
+      return qty > 0 && stock < qty ? `${d.product.name}: stok ${stock} ${unit}, disetujui ${qty} ${unit}` : null
+    })
+    .filter((x): x is string => !!x)
+
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
@@ -149,14 +167,21 @@ export default function ApprovePageClient({
                 const stock = getStock(d.product.id)
                 const approved = approvedQties[d.id] ?? d.qtyRequested
                 const diff = approved - d.qtyRequested
-                const enough = stock >= approved
+                const conv = toLedgerQty(d, approved)
+                const enough = stock >= conv.qty
                 const displayUnit = d.requestUnit || d.product.unitGramasi || d.product.unit
+                const stockUnit = d.product.unitGramasi || d.product.unit
                 return (
                   <tr key={d.id}>
                     <td style={td}><strong>{d.product.name}</strong></td>
-                    <td style={td}>{d.qtyRequested} {displayUnit}</td>
                     <td style={td}>
-                      <span style={{ color: enough ? '#059669' : '#dc2626', fontWeight: 600 }}>{stock}</span> {displayUnit}
+                      {d.qtyRequested} {displayUnit}
+                      {conv.isKemasan && (
+                        <div style={{ fontSize: '0.72rem', color: '#b45309' }}>= {conv.qty} {stockUnit} (dikonversi)</div>
+                      )}
+                    </td>
+                    <td style={td}>
+                      <span style={{ color: enough ? '#059669' : '#dc2626', fontWeight: 600 }}>{stock}</span> {stockUnit}
                     </td>
                     <td style={td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -210,6 +235,18 @@ export default function ApprovePageClient({
         />
       </div>
 
+      {shortages.length > 0 && approveStatus !== 'done' && (
+        <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', background: '#fffbeb', border: '1px solid #fcd34d', color: '#92400e', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+          <strong>⚠️ Stok Anda tidak mencukupi:</strong>
+          <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.2rem' }}>
+            {shortages.map(s => <li key={s}>{s}</li>)}
+          </ul>
+          <div style={{ marginTop: '0.35rem', fontSize: '0.78rem' }}>
+            Approval tetap bisa dilanjutkan, namun saldo Anda akan menjadi minus. Pastikan stok fisik memang tersedia.
+          </div>
+        </div>
+      )}
+
       {error && (
         <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>
       )}
@@ -218,6 +255,11 @@ export default function ApprovePageClient({
       {approveStatus === 'confirming' && (
         <div style={{ marginBottom: '1rem', padding: '1rem 1.25rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', color: '#1e40af' }}>
           <strong>⚠️ Konfirmasi:</strong> Stok akan ditransfer dari akun AFA ke FO{isAnyQtyChanged ? '. Terdapat penyesuaian jumlah dari pengajuan awal.' : ' sesuai jumlah pengajuan.'}
+          {shortages.length > 0 && (
+            <div style={{ marginTop: '0.5rem', fontSize: '0.82rem', color: '#b45309', fontWeight: 600 }}>
+              {shortages.length} produk melebihi stok Anda — saldo akan menjadi minus.
+            </div>
+          )}
           {approveNotes.trim() && (
             <div style={{ marginTop: '0.5rem', fontSize: '0.82rem' }}>Catatan: <em>"{approveNotes.trim()}"</em></div>
           )}

@@ -165,11 +165,49 @@ export async function updateProduct(id: string, formData: FormData) {
   const gramasiRaw    = (formData.get('gramasiPerUnit') as string)?.trim()
   const gramasiPerUnit = gramasiRaw ? parseFloat(gramasiRaw) : null
   if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
+  const newGramasi = gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null
+  const confirmed = formData.get('confirmGramasiChange') === 'true'
   try {
+    // Peringatan: perubahan gramasiPerUnit tidak mengonversi saldo ledger yang sudah ada.
+    // Saldo lama tetap tercatat dalam satuan sebelumnya sehingga bisa terbaca keliru.
+    if (!confirmed) {
+      const current = await prisma.product.findUnique({ where: { id }, select: { gramasiPerUnit: true, unitGramasi: true, unit: true } })
+      const oldGramasi = current?.gramasiPerUnit && current.gramasiPerUnit > 0 ? current.gramasiPerUnit : null
+      if (current && oldGramasi !== newGramasi) {
+        const balances = await prisma.ledger.groupBy({
+          by: ['userId'],
+          where: { productId: id },
+          _sum: { quantity: true },
+        })
+        const holders = balances.filter(b => Math.abs(b._sum.quantity || 0) > 0.0001)
+        if (holders.length > 0) {
+          const users = await prisma.user.findMany({
+            where: { id: { in: holders.map(h => h.userId) } },
+            select: { id: true, name: true },
+          })
+          const nameMap = new Map(users.map(u => [u.id, u.name]))
+          const oldUnit = oldGramasi ? (current.unitGramasi || current.unit) : current.unit
+          const lines = holders
+            .slice(0, 15)
+            .map(h => `• ${nameMap.get(h.userId) ?? h.userId}: ${h._sum.quantity} ${oldUnit}`)
+          if (holders.length > 15) lines.push(`• ... dan ${holders.length - 15} user lainnya`)
+          return {
+            needConfirm: true,
+            warning:
+              `Isi per kemasan berubah (${oldGramasi ?? 'kosong'} → ${newGramasi ?? 'kosong'}).\n` +
+              `${holders.length} user masih memiliki saldo produk ini yang tercatat dalam satuan lama:\n` +
+              `${lines.join('\n')}\n\n` +
+              `Saldo TIDAK dikonversi otomatis. Setelah disimpan, lakukan penyesuaian stok manual bila perlu.\n` +
+              `Lanjutkan simpan?`,
+          }
+        }
+      }
+    }
+
     await prisma.product.update({ where: { id }, data: {
       code: code || null, name, description: description || null, unit,
       unitGramasi: unitGramasi || null,
-      gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
+      gramasiPerUnit: newGramasi,
     }})
     revalidatePath('/dashboard/master/products')
     invalidateCacheTag(CACHE_TAGS.products)

@@ -54,9 +54,14 @@ export default function ProductsMasterPage() {
     const fd = new FormData(e.currentTarget)
     setError(null)
     start(async () => {
-      const res = modal === 'add'
+      let res: any = modal === 'add'
         ? await createProduct(fd)
         : await updateProduct(selected!.id, fd)
+      if (res?.needConfirm) {
+        if (!confirm(`⚠️ ${res.warning}`)) return
+        fd.set('confirmGramasiChange', 'true')
+        res = await updateProduct(selected!.id, fd)
+      }
       if (res?.error) { setError(res.error) }
       else { closeModal(); fetchData() }
     })

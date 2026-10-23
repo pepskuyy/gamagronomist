@@ -254,7 +254,8 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
             productId: u.productId,
             transactionType: 'USAGE_DEMOPLOT',
             quantity: -u.actualUsage,
-            referenceId: req.id,
+            // Rujuk ke sesi demplot (bukan pengajuan) — konsisten dengan execute.ts
+            referenceId: demoPlot.id,
             snapshotAreaId: (req as any).snapshotAreaId ?? null,
             notes: `Sesi lanjutan demo plot: ${req.farmer?.name ?? ''} - ${req.commodity ?? ''}`,
           },

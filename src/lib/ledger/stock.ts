@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
  * Mendapatkan Daftar Saldo (Stock On-Hand) untuk User Tertentu
  * Ini dihitung dengan cara menjumlahkan field "quantity" per product di Ledger
  */
-export async function getStockBalance(userId: string) {
+export async function getStockBalance(userId: string, opts: { includeNegative?: boolean } = {}) {
   const ledgers = await prisma.ledger.groupBy({
     by: ['productId'],
     where: { userId },
@@ -26,7 +26,11 @@ export async function getStockBalance(userId: string) {
       product: productMap.get(l.productId)!,
       quantity: l._sum.quantity || 0
     }))
-    .filter(item => item.quantity > 0 && item.product)
+    .filter(item => item.product && (
+      opts.includeNegative
+        ? Math.abs(item.quantity) > 0.0001   // tampilkan saldo minus (untuk monitoring ADMIN/SPV)
+        : item.quantity > 0
+    ))
 }
 
 /**

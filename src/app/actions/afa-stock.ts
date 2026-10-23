@@ -1158,7 +1158,8 @@ export async function resetRequestToSubmitted(requestId: string) {
                 userId: entry.userId,
                 productId: entry.productId,
                 quantity: -entry.quantity, // reverse
-                transactionType: 'RECEIVE_FROM_AFA',
+                // Tipe khusus agar entri pembalik tidak tertukar dengan penerimaan asli
+                transactionType: 'ROLLBACK_SAMPLE',
                 referenceId: requestId,
                 notes: `[ROLLBACK ADMIN] Reversal dari approval sampel req ${requestId.slice(0, 8).toUpperCase()}`,
               }

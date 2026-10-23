@@ -5,7 +5,7 @@ import StockAdjustmentModal from './StockAdjustmentModal'
 
 type TeamStockTableProps = {
   users: { id: string, name: string, role: string, parentName?: string }[]
-  stocks: { [userId: string]: { product: { id: string, name: string, unit: string, unitGramasi?: string | null }, quantity: number }[] }
+  stocks: { [userId: string]: { product: { id: string, name: string, unit: string, unitGramasi?: string | null, gramasiPerUnit?: number | null }, quantity: number }[] }
   allProducts: { id: string, name: string, unit: string, unitGramasi?: string | null }[]
   role: string // ADMIN, SPV, AFA
 }
@@ -24,9 +24,14 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
     <>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '1rem' }}>
         {users.map((user) => {
-          const userStocks = (stocks[user.id] || []).filter(s => s.quantity > 0)
-          const totalItems = userStocks.length
-          const totalQty = userStocks.reduce((sum, s) => sum + s.quantity, 0)
+          const showNegative = ['ADMIN', 'SPV'].includes(role)
+          const userStocks = (stocks[user.id] || [])
+            .filter(s => showNegative ? Math.abs(s.quantity) > 0.0001 : s.quantity > 0)
+            .sort((a, b) => (a.quantity < 0 ? -1 : 0) - (b.quantity < 0 ? -1 : 0))
+          const positiveStocks = userStocks.filter(s => s.quantity > 0)
+          const negativeCount = userStocks.length - positiveStocks.length
+          const totalItems = positiveStocks.length
+          const totalQty = positiveStocks.reduce((sum, s) => sum + s.quantity, 0)
           const isExpanded = expandedId === user.id
           const badge = roleBadge[user.role] || { bg: '#f1f5f9', text: '#475569' }
 
@@ -64,6 +69,14 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                     }}>
                       {user.role}
                     </span>
+                    {negativeCount > 0 && (
+                      <span title="Ada saldo minus — perlu dicek" style={{
+                        fontSize: '0.65rem', fontWeight: 700, padding: '0.15rem 0.45rem',
+                        borderRadius: '9999px', background: '#fee2e2', color: '#b91c1c', flexShrink: 0
+                      }}>
+                        ⚠ {negativeCount} minus
+                      </span>
+                    )}
                   </div>
                   {!['AFA', 'PLANTATION'].includes(role) && user.parentName && (
                     <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -108,6 +121,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
                       {userStocks.map((s) => {
                         const hasGramasi = s.product.unitGramasi && s.product.gramasiPerUnit && s.product.gramasiPerUnit > 0;
+                        const isNegative = s.quantity < 0;
                         return (
                           <div 
                             key={s.product.id}
@@ -121,14 +135,15 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
                           style={{ 
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                             padding: '0.45rem 0.6rem', borderRadius: 'var(--radius)',
-                            background: 'var(--surface-2)', fontSize: '0.82rem',
+                            background: isNegative ? '#fef2f2' : 'var(--surface-2)', fontSize: '0.82rem',
+                            border: isNegative ? '1px solid #fecaca' : undefined,
                             cursor: ['ADMIN', 'SPV'].includes(role) ? 'pointer' : 'default',
                             transition: 'background 0.15s ease'
                           }}
                         >
                           <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>{s.product.name}</span>
                           <span style={{ 
-                            fontWeight: 700, color: 'var(--primary)', 
+                            fontWeight: 700, color: isNegative ? '#dc2626' : 'var(--primary)', 
                             display: 'flex', alignItems: 'baseline', gap: '0.25rem'
                           }}>
                             {s.quantity.toLocaleString()}
