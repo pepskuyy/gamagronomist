@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Tooltip, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
-import { StoreImpactResult } from '@/lib/demoplot-impact'
+import type { StoreImpactResult, DemoImpactSummary } from '@/lib/demoplot-impact'
+import { formatKm } from '@/lib/impact-tier'
 
 export interface MapDemoplotItem {
   id: string
@@ -17,6 +18,7 @@ export interface MapDemoplotItem {
   has_impact: boolean
   productCount: number
   products: string[]
+  impact?: DemoImpactSummary
 }
 
 interface Props {
@@ -25,6 +27,7 @@ interface Props {
   onSelectDemoplot: (dp: MapDemoplotItem) => void
   storesInRadius?: StoreImpactResult[]
   onSelectStore?: (store: StoreImpactResult) => void
+  radiusKm: number
 }
 
 function MapFlyTo({ center }: { center: [number, number] | null }) {
@@ -45,6 +48,7 @@ export default function DemoplotImpactMapInner({
   onSelectDemoplot,
   storesInRadius = [],
   onSelectStore,
+  radiusKm,
 }: Props) {
   const [mapMode, setMapMode] = useState<'osm' | 'satellite'>('osm')
 
@@ -190,11 +194,11 @@ export default function DemoplotImpactMapInner({
           />
         )}
 
-        {/* 5 km Radius Circle around selected demoplot */}
+        {/* Lingkaran radius coverage aktif di sekitar demplot terpilih */}
         {selectedDp && (
           <Circle
             center={[selectedDp.latitude, selectedDp.longitude]}
-            radius={5000}
+            radius={radiusKm * 1000}
             pathOptions={{
               color: '#9333ea',
               dashArray: '6, 8',
@@ -205,7 +209,7 @@ export default function DemoplotImpactMapInner({
           />
         )}
 
-        {/* Store markers in 5 km radius (rendered when demoplot is selected) */}
+        {/* Store markers dalam radius (rendered when demoplot is selected) */}
         {selectedDp &&
           storesInRadius.map((st) => {
             const isImpacted = st.has_impact
@@ -232,7 +236,7 @@ export default function DemoplotImpactMapInner({
                         ⭐ Terdampak: +{st.impact_total_qty} PCS
                       </span>
                     ) : (
-                      <span style={{ color: '#64748b' }}>Toko dalam radius 5 km</span>
+                      <span style={{ color: '#64748b' }}>Toko dalam radius {formatKm(radiusKm)}</span>
                     )}
                   </div>
                 </Tooltip>

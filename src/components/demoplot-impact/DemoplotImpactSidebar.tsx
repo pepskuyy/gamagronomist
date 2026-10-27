@@ -1,6 +1,8 @@
 'use client'
 
-import { DemoplotImpactDetail, StoreImpactResult } from '@/lib/demoplot-impact'
+import type { DemoplotImpactDetail, StoreImpactResult, DemoImpactSummary } from '@/lib/demoplot-impact'
+import { formatKm } from '@/lib/impact-tier'
+import ImpactPenetrationCard from './ImpactPenetrationCard'
 
 interface Props {
   data: DemoplotImpactDetail | null
@@ -8,9 +10,14 @@ interface Props {
   error?: string | null
   onSelectStore: (store: StoreImpactResult) => void
   onClose?: () => void
+  radiusKm: number
+  /** Ringkasan dari daftar demplot (sumber yang sama dengan tabel). */
+  impact: DemoImpactSummary | null
+  impactLoading: boolean
 }
 
-export default function DemoplotImpactSidebar({ data, loading, error, onSelectStore, onClose }: Props) {
+export default function DemoplotImpactSidebar({ data, loading, error, onSelectStore, onClose, radiusKm, impact, impactLoading }: Props) {
+  const radiusLabel = formatKm(radiusKm)
   if (loading) {
     return (
       <div
@@ -41,7 +48,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
         />
         <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Menghitung Analitik Dampak...</h4>
         <p style={{ margin: '0.35rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-          Mencocokkan toko dalam radius 5 km & komparasi faktur penjualan 60 hari.
+          Mencocokkan toko dalam radius {radiusLabel} & komparasi faktur penjualan 60 hari.
         </p>
       </div>
     )
@@ -84,7 +91,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
         <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📍</div>
         <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800 }}>Pilih Titik Demoplot</h3>
         <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '280px', lineHeight: 1.5 }}>
-          Klik salah satu titik lingkaran pada peta untuk menganalisis dampak penjualan toko di sekitarnya (radius 5 km).
+          Klik salah satu titik lingkaran pada peta untuk menganalisis dampak penjualan toko di sekitarnya (radius {radiusLabel}).
         </p>
       </div>
     )
@@ -234,16 +241,18 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           </div>
         </div>
 
-        {/* 3. Dampak Pembelian (radius 5 km) */}
+        {/* 3. Dampak Pembelian */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
             <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-              📈 Dampak Pembelian (radius 5 km)
+              📈 Dampak Pembelian (radius {radiusLabel})
             </h4>
           </div>
           <p style={{ margin: '0 0 1rem 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-            {summary.total_stores_in_radius} toko dalam 5 km • perbandingan 60 hari sebelum vs sesudah demoplot
+            {summary.total_stores_in_radius} toko dalam {radiusLabel} • perbandingan 60 hari sebelum vs sesudah demoplot
           </p>
+
+          <ImpactPenetrationCard impact={impact} loading={impactLoading} radiusKm={radiusKm} />
 
           {/* Cards Omset Sebelum vs Sesudah */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
@@ -339,11 +348,11 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           </div>
         </div>
 
-        {/* 4. Toko Radius 5 km */}
+        {/* 4. Toko dalam radius */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
             <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-              🏪 Toko Radius 5 km ({stores.length})
+              🏪 Toko Radius {radiusLabel} ({stores.length})
             </h4>
             <span
               style={{
@@ -362,7 +371,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
 
           {stores.length === 0 ? (
             <div style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-              Tidak ada toko berkoordinat dalam radius 5 km dari lokasi kegiatan ini.
+              Tidak ada toko berkoordinat dalam radius {radiusLabel} dari lokasi kegiatan ini.
             </div>
           ) : (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>

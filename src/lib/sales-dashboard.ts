@@ -6,6 +6,8 @@ const API_KEY = process.env.SALES_DASHBOARD_API_KEY || ''
 
 export interface ApiCustomer {
   id: string
+  accurate_id?: string | number | null
+  customer_no?: string | null
   name: string
   city?: string | null
   region?: string | null
@@ -47,6 +49,10 @@ function getHeaders() {
   }
 }
 
+// Kolom pelanggan yang diminta dari Open API. accurate_id & customer_no tidak dikirim
+// secara default, harus diminta lewat parameter `fields`.
+const CUSTOMER_FIELDS = 'id,accurate_id,customer_no,name,city,region,latitude,longitude,default_salesman'
+
 function normName(s?: string | null): string {
   return (s || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').replace(/\s+/g, ' ').trim()
 }
@@ -61,7 +67,7 @@ export async function fetchSalesCustomers(): Promise<ApiCustomer[]> {
 
   // 1. Base query (ambil toko-toko teratas)
   try {
-    const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000`
+    const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000&fields=${CUSTOMER_FIELDS}`
     const res = await fetch(url, { headers, cache: 'no-store' })
     if (res.ok) {
       const json = await res.json()
@@ -77,7 +83,7 @@ export async function fetchSalesCustomers(): Promise<ApiCustomer[]> {
   const regions = ['Jawa Timur', 'NTB', 'Jawa Tengah']
   for (const r of regions) {
     try {
-      const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000&region=${encodeURIComponent(r)}`
+      const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000&fields=${CUSTOMER_FIELDS}&region=${encodeURIComponent(r)}`
       const res = await fetch(url, { headers, cache: 'no-store' })
       if (res.ok) {
         const json = await res.json()
@@ -102,7 +108,7 @@ export async function fetchSalesCustomers(): Promise<ApiCustomer[]> {
         const salesName = u.name || u.username
         if (!salesName) continue
         try {
-          const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000&sales=${encodeURIComponent(salesName)}`
+          const url = `${BASE_URL}/api/v1/customers?with_coords=1&limit=1000&fields=${CUSTOMER_FIELDS}&sales=${encodeURIComponent(salesName)}`
           const res = await fetch(url, { headers, cache: 'no-store' })
           if (res.ok) {
             const json = await res.json()
@@ -155,6 +161,8 @@ export async function syncSalesCustomers(
 
     const formattedData = customers.map((c) => ({
       id: c.id,
+      accurateId: c.accurate_id != null && c.accurate_id !== '' ? String(c.accurate_id) : null,
+      customerNo: c.customer_no || null,
       name: c.name.trim(),
       city: c.city || null,
       region: c.region || null,

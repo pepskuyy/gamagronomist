@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { requireApiSession } from '@/lib/session'
 import { calculateDemoplotImpact } from '@/lib/demoplot-impact'
+import { getDefaultRadiusKm, parseRadius } from '@/lib/demoplot-radius'
 
 export const dynamic = 'force-dynamic'
 
@@ -11,14 +12,13 @@ export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url)
     const id = searchParams.get('id')
-    const radiusKm = Number(searchParams.get('radiusKm')) || 5
-    const windowDays = Number(searchParams.get('windowDays')) || 60
+    const radiusKm = parseRadius(searchParams.get('radiusKm')) ?? (await getDefaultRadiusKm())
 
     if (!id) {
       return NextResponse.json({ error: 'Parameter id kegiatan demoplot wajib disertakan.' }, { status: 400 })
     }
 
-    const impact = await calculateDemoplotImpact(id, radiusKm, windowDays)
+    const impact = await calculateDemoplotImpact(id, radiusKm)
 
     if (!impact) {
       return NextResponse.json({ error: 'Data demoplot tidak ditemukan atau tidak memiliki koordinat GPS.' }, { status: 404 })

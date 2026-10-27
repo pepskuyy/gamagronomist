@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, useTransition, useMemo } from 'react'
+import { useEffect, useState, useTransition, useMemo, useRef } from 'react'
 import DemoplotImpactMap from '@/components/demoplot-impact/DemoplotImpactMap'
 import DemoplotImpactSidebar from '@/components/demoplot-impact/DemoplotImpactSidebar'
 import dynamic from 'next/dynamic'
@@ -8,6 +8,9 @@ import TopDemoplotProductsChart from '@/components/demoplot-impact/TopDemoplotPr
 import OpportunityMap from '@/components/demoplot-impact/OpportunityMap'
 import OpportunitySidebar from '@/components/demoplot-impact/OpportunitySidebar'
 import type { MapDemoplotItem } from '@/components/demoplot-impact/DemoplotImpactMapInner'
+import RadiusCoverageBar from '@/components/demoplot-impact/RadiusCoverageBar'
+import DemoplotImpactTable from '@/components/demoplot-impact/DemoplotImpactTable'
+import type { RadiusSettingsData } from '@/components/demoplot-impact/RadiusSettingsModal'
 
 // Modal di-load lazy: chunk (termasuk xlsx di DevelopmentProductsModal) baru
 // diunduh saat modal pertama kali dibuka. Setelah itu tetap ter-mount agar
@@ -15,6 +18,7 @@ import type { MapDemoplotItem } from '@/components/demoplot-impact/DemoplotImpac
 const StoreHistoryModal = dynamic(() => import('@/components/demoplot-impact/StoreHistoryModal'), { ssr: false })
 const DevelopmentProductsModal = dynamic(() => import('@/components/demoplot-impact/DevelopmentProductsModal'), { ssr: false })
 const OpportunityScoringModal = dynamic(() => import('@/components/demoplot-impact/OpportunityScoringModal'), { ssr: false })
+const RadiusSettingsModal = dynamic(() => import('@/components/demoplot-impact/RadiusSettingsModal'), { ssr: false })
 import { DemoplotImpactDetail, StoreImpactResult } from '@/lib/demoplot-impact'
 import { OpportunityZone, OpportunityFinderResult, ZoneStoreItem } from '@/lib/demoplot-opportunity'
 import { formatDateId } from '@/lib/date-utils'
@@ -51,6 +55,7 @@ export default function DemoplotImpactPage() {
   const [loadingList, setLoadingList] = useState(true)
 
   const [selectedDemoplotId, setSelectedDemoplotId] = useState<string | null>(null)
+  const selectedDemoplotIdRef = useRef<string | null>(null)
   const [impactDetail, setImpactDetail] = useState<DemoplotImpactDetail | null>(null)
   const [loadingDetail, setLoadingDetail] = useState(false)
   const [detailError, setDetailError] = useState<string | null>(null)
@@ -61,12 +66,24 @@ export default function DemoplotImpactPage() {
   const [activePreset, setActivePreset] = useState<string>('all')
   const [topProductType, setTopProductType] = useState<'demoplot' | 'spot-demplot' | 'all'>('demoplot')
 
-  const loadDemoplotList = (from?: string, to?: string, type = topProductType) => {
+  // Radius coverage: default dari server, override hanya di halaman ini (tidak disimpan)
+  const [radiusSettings, setRadiusSettings] = useState<RadiusSettingsData | null>(null)
+  const [radiusOverride, setRadiusOverride] = useState<number | null>(null)
+  const radiusOverrideRef = useRef<number | null>(null)
+  const [isRadiusModalOpen, setIsRadiusModalOpen] = useState(false)
+  const listReqRef = useRef(0)
+  const detailReqRef = useRef(0)
+  const defaultRadius = radiusSettings?.radius_km ?? 2.5
+  const activeRadius = radiusOverride ?? defaultRadius
+
+  const loadDemoplotList = (from?: string, to?: string, type = topProductType, radius = radiusOverrideRef.current) => {
     setLoadingList(true)
+    const reqId = ++listReqRef.current
     const params = new URLSearchParams()
     if (from) params.set('from', from)
     if (to) params.set('to', to)
     if (type) params.set('type', type)
+    if (radius !== null) params.set('radiusKm', String(radius))
 
     fetch(`/api/demoplot-impact/list?${params.toString()}`)
       .then((res) => {
@@ -74,13 +91,14 @@ export default function DemoplotImpactPage() {
         return res.json()
       })
       .then((data) => {
+        if (reqId !== listReqRef.current) return // respons usang (radius/filter sudah berganti)
         const dps: MapDemoplotItem[] = data.demoplots || []
         setDemoplots(dps)
         setTopProducts(data.topProducts || [])
         setLoadingList(false)
 
         if (dps.length > 0) {
-          const stillExists = dps.some((d) => d.id === selectedDemoplotId)
+          const stillExists = dps.some((d) => d.id === selectedDemoplotIdRef.current)
           if (!stillExists) {
             handleSelectDemoplot(dps[0])
           }
@@ -91,16 +109,19 @@ export default function DemoplotImpactPage() {
       })
       .catch((err) => {
         console.error('Error load demoplot list:', err)
-        setLoadingList(false)
+        if (reqId === listReqRef.current) setLoadingList(false)
       })
   }
 
-  const handleSelectDemoplot = (dp: MapDemoplotItem) => {
+  const handleSelectDemoplot = (dp: Pick<MapDemoplotItem, 'id'>, radius = radiusOverrideRef.current) => {
     setSelectedDemoplotId(dp.id)
+    selectedDemoplotIdRef.current = dp.id
     setLoadingDetail(true)
     setDetailError(null)
+    const reqId = ++detailReqRef.current
+    const radiusParam = radius !== null ? `&radiusKm=${radius}` : ''
 
-    fetch(`/api/demoplot-impact?id=${dp.id}&radiusKm=5&windowDays=60`)
+    fetch(`/api/demoplot-impact?id=${dp.id}${radiusParam}`)
       .then(async (res) => {
         if (!res.ok) {
           const errJson = await res.json().catch(() => ({}))
@@ -109,13 +130,32 @@ export default function DemoplotImpactPage() {
         return res.json()
       })
       .then((detail: DemoplotImpactDetail) => {
+        if (reqId !== detailReqRef.current) return
         setImpactDetail(detail)
         setLoadingDetail(false)
       })
       .catch((err: any) => {
+        if (reqId !== detailReqRef.current) return
         setDetailError(err.message || 'Terjadi kesalahan sistem.')
         setLoadingDetail(false)
       })
+  }
+
+  /** Ganti radius tampilan (null = kembali ke default); hitung ulang ringkasan & detail terpilih. */
+  const handleRadiusChange = (radius: number | null) => {
+    radiusOverrideRef.current = radius
+    setRadiusOverride(radius)
+    loadDemoplotList(fromDate, toDate, topProductType, radius)
+    if (selectedDemoplotIdRef.current) handleSelectDemoplot({ id: selectedDemoplotIdRef.current }, radius)
+  }
+
+  const handleRadiusSaved = (next: RadiusSettingsData) => {
+    setRadiusSettings(next)
+    setIsRadiusModalOpen(false)
+    // Default berubah: muat ulang bila user sedang memakai default
+    if (radiusOverrideRef.current === null || radiusOverrideRef.current === next.radius_km) {
+      handleRadiusChange(null)
+    }
   }
 
   const handleTopProductTypeChange = (newType: 'demoplot' | 'spot-demplot' | 'all') => {
@@ -223,6 +263,12 @@ export default function DemoplotImpactPage() {
   useEffect(() => {
     setMounted(true)
     loadDemoplotList()
+    fetch('/api/demoplot-impact/settings')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data: RadiusSettingsData | null) => {
+        if (data) setRadiusSettings(data)
+      })
+      .catch(() => {})
   }, [])
 
   // Lazy load opportunity finder data only when Tab 2 is clicked
@@ -590,6 +636,16 @@ export default function DemoplotImpactPage() {
             </form>
           </div>
 
+          {/* Radius coverage (di atas peta) */}
+          <RadiusCoverageBar
+            defaultRadius={defaultRadius}
+            activeRadius={activeRadius}
+            isOverride={radiusOverride !== null}
+            canEdit={!!radiusSettings?.can_edit}
+            onChange={handleRadiusChange}
+            onOpenSettings={() => setIsRadiusModalOpen(true)}
+          />
+
           {/* Main Container: Map (Left) + Detail Sidebar (Right) */}
           <div
             style={{
@@ -618,6 +674,7 @@ export default function DemoplotImpactPage() {
                 onSelectDemoplot={handleSelectDemoplot}
                 storesInRadius={impactDetail?.stores || []}
                 onSelectStore={handleOpenStoreModal}
+                radiusKm={activeRadius}
               />
             </div>
 
@@ -630,11 +687,25 @@ export default function DemoplotImpactPage() {
                 onSelectStore={handleOpenStoreModal}
                 onClose={() => {
                   setSelectedDemoplotId(null)
+                  selectedDemoplotIdRef.current = null
                   setImpactDetail(null)
                 }}
+                radiusKm={activeRadius}
+                impact={demoplots.find((d) => d.id === selectedDemoplotId)?.impact ?? null}
+                impactLoading={loadingList}
               />
             </div>
           </div>
+
+          {/* Daftar demplot + % terdampak */}
+          <DemoplotImpactTable
+            demoplots={demoplots}
+            loading={loadingList}
+            radiusKm={activeRadius}
+            selectedDemoplotId={selectedDemoplotId}
+            onSelect={(dp) => handleSelectDemoplot(dp)}
+            periodLabel={periodLabel}
+          />
 
           {/* Bottom Section: Top Products Chart */}
           <TopDemoplotProductsChart
@@ -1115,6 +1186,15 @@ export default function DemoplotImpactPage() {
             )}
           </div>
         </>
+      )}
+
+      {/* Modal Radius Coverage Default */}
+      {isRadiusModalOpen && radiusSettings && (
+        <RadiusSettingsModal
+          settings={radiusSettings}
+          onClose={() => setIsRadiusModalOpen(false)}
+          onSaved={handleRadiusSaved}
+        />
       )}
 
       {/* Modal Kelola Produk Pengembangan */}
