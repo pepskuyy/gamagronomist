@@ -11,6 +11,7 @@ export type RecentLedgerItem = {
   product: {
     name: string
     unit: string
+    unitGramasi?: string | null
   }
   user: {
     name: string
@@ -30,6 +31,7 @@ function formatType(type: string) {
     TRANSFER_TO_FO: { label: 'Transfer ke FO', cls: 'badge-warning' },
     RECEIVE_FROM_AFA: { label: 'Terima AFA', cls: 'badge-success' },
     USAGE_DEMOPLOT: { label: 'Pemakaian', cls: 'badge-danger' },
+    USAGE_SPOT_DEMOPLOT: { label: 'Pemakaian Spot', cls: 'badge-danger' },
     DIRECT_USAGE_AFA: { label: 'Pakai Langsung', cls: 'badge-danger' },
     ADJUSTMENT_PLUS: { label: 'Adj (+)', cls: 'badge-success' },
     ADJUSTMENT_MINUS: { label: 'Adj (-)', cls: 'badge-danger' },
@@ -73,7 +75,8 @@ export default function DashboardRecentLedgersTable({ ledgers, isSPV }: Props) {
                   <td>{l.product.name}</td>
                   <td style={{ fontWeight: 700, color: l.quantity > 0 ? 'var(--success)' : 'var(--danger)' }}>
                     {l.quantity > 0 ? '+' : ''}
-                    {l.quantity} {l.product.unit}
+                    {/* Ledger menyimpan qty dalam gramasi (ml/gr) bila produk punya isi per kemasan */}
+                    {l.quantity} {l.product.unitGramasi || l.product.unit}
                   </td>
                 </tr>
               ))}
