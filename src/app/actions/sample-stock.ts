@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { validateGramasiPair, hasGramasi } from '@/lib/stock-units'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -36,6 +37,8 @@ export async function addSampleStock(formData: FormData) {
       const newGramasiPerUnit = formData.get('newGramasiPerUnit') ? parseFloat(formData.get('newGramasiPerUnit') as string) : null
 
       if (!newName) return { error: 'Nama produk baru wajib diisi.' }
+      const pairError = validateGramasiPair(newUnitGramasi, newGramasiPerUnit)
+      if (pairError) return { error: pairError }
 
       const product = await prisma.product.create({
         data: {
@@ -155,8 +158,24 @@ export async function editSampleProduct(
 
   const trimName = name.trim()
   if (!trimName) return { error: 'Nama produk tidak boleh kosong.' }
+  const pairError = validateGramasiPair(unitGramasi, gramasiPerUnit)
+  if (pairError) return { error: pairError }
 
   try {
+    // Saldo Ledger (AFA/FO) produk ini tercatat dalam satuan ledger. Mengubah faktor gramasi di sini
+    // tanpa konversi membuat saldo terbaca salah, jadi arahkan ke Master Produk (yang mengonversi saldo).
+    const current = await prisma.product.findUnique({ where: { id: productId }, select: { unit: true, unitGramasi: true, gramasiPerUnit: true } })
+    if (current) {
+      const oldFactor = hasGramasi(current) ? current.gramasiPerUnit : null
+      const newFactor = hasGramasi({ unit: current.unit, unitGramasi, gramasiPerUnit }) ? gramasiPerUnit : null
+      if (oldFactor !== newFactor) {
+        const sums = await prisma.ledger.groupBy({ by: ['userId'], where: { productId }, _sum: { quantity: true } })
+        if (sums.some(x => Math.abs(x._sum.quantity || 0) > 0.0001)) {
+          return { error: 'Produk ini masih punya saldo di stok AFA/FO. Ubah isi per kemasan lewat Master Produk agar saldo ikut dikonversi.' }
+        }
+      }
+    }
+
     await prisma.product.update({
       where: { id: productId },
       data: {

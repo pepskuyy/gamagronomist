@@ -98,6 +98,11 @@ export async function approveRequest(formData: FormData) {
       })
     }
 
+    // Saldo AFA tidak boleh minus karena transfer. ADMIN tetap bisa memaksa (mis. koreksi data) dengan peringatan.
+    if (stockWarnings.length > 0 && session.role !== 'ADMIN') {
+      return { error: `Stok Anda tidak mencukupi:\n${stockWarnings.join('\n')}\nKurangi jumlah yang disetujui atau ajukan restock terlebih dulu.` }
+    }
+
     const [afaUser, foUser] = await Promise.all([
       prisma.user.findUnique({ where: { id: session.userId }, select: { name: true, areaId: true } }),
       prisma.user.findUnique({ where: { id: request.foId }, select: { name: true } }),

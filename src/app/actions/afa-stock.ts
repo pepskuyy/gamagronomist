@@ -239,6 +239,23 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
           ? `BD ${req.fo?.name || ''}`
           : `AFA ${req.fo?.name || ''}`
 
+        // Stok sampel SPV tidak boleh minus (sama seperti jalur default)
+        const insufficientPartial: string[] = []
+        for (const detail of approvedDetails) {
+          const dec = decisionsMap.get(detail.id)
+          const approvedQty = Number(dec?.qtyApproved) || 0
+          const qtyKemasan = approvedQty > 0 ? approvedQty : (Number(detail.qtyRequested) || 0)
+          const effectiveId = productIdRemap.get(detail.productId) ?? detail.productId
+          const available = balanceMap.get(effectiveId) ?? 0
+          if (available < qtyKemasan) {
+            const prod = (detail as any).product
+            insufficientPartial.push(`• ${prod?.name ?? detail.productId}: tersedia ${available} ${prod?.unit ?? ''}, disetujui ${qtyKemasan} ${prod?.unit ?? ''}`)
+          }
+        }
+        if (insufficientPartial.length > 0) {
+          return { error: `Stok sampel tidak mencukupi untuk produk berikut:\n${insufficientPartial.join('\n')}` }
+        }
+
         await prisma.$transaction(async (tx) => {
           // Update qtyApproved per detail (0 for rejected items)
           for (const detail of req.details) {
@@ -289,7 +306,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
               data: {
                 userId: req.foId,
                 productId: effectiveProductId,
-                transactionType: 'RECEIVE_FROM_AFA',
+                transactionType: 'RECEIVE_FROM_SAMPLE',
                 quantity: qtyGramasi,
                 referenceId: requestId,
                 notes: `Terima sampel dari SPV (${qtyKemasan} ${unit}${gramasiPerUnit ? ` = ${qtyGramasi}${unitGramasi ?? ''}` : ''})`,
@@ -339,7 +356,8 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
       for (const detail of req.details) {
         const effectiveId = productIdRemap.get(detail.productId) ?? detail.productId
         const available = balanceMap.get(effectiveId) ?? 0
-        if (available < detail.qtyRequested) {
+        const qtyNeeded = Number(detail.qtyApproved ?? detail.qtyRequested) || 0
+        if (available < qtyNeeded) {
           const prod = (detail as any).product
           const productName = prod?.name ?? detail.productId
           const unit = prod?.unit ?? ''
@@ -347,7 +365,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             ? ` ${prod.gramasiPerUnit}${prod.unitGramasi}/${unit}`
             : ''
           insufficient.push(
-            `• ${productName}${volumeLabel}: tersedia ${available} ${unit}, diminta ${detail.qtyRequested} ${unit}`
+            `• ${productName}${volumeLabel}: tersedia ${available} ${unit}, diminta ${qtyNeeded} ${unit}`
           )
         }
       }
@@ -366,7 +384,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             data: {
               userId: spvId,
               productId: effectiveProductId,
-              quantity: -(Number(detail.qtyRequested) || 0),
+              quantity: -(Number(detail.qtyApproved ?? detail.qtyRequested) || 0),
               transactionType: 'SAMPLE_OUT',
               referenceId: requestId,
               notes: `Sampel ke ${requesterLabel} (req ${requestId.slice(0, 8).toUpperCase()})`,
@@ -384,7 +402,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             data: {
               userId: req.foId,
               productId: effectiveProductId,
-              transactionType: 'RECEIVE_FROM_AFA',
+              transactionType: 'RECEIVE_FROM_SAMPLE',
               quantity: qtyGramasi,
               referenceId: requestId,
               notes: `Terima sampel dari SPV (${qtyKemasan} ${unit}${gramasiPerUnit ? ` = ${qtyGramasi}${unitGramasi ?? ''}` : ''})`,
@@ -1098,7 +1116,7 @@ export async function resetRequestToSubmitted(requestId: string) {
                 userId: entry.userId,
                 productId: entry.productId,
                 quantity: -entry.quantity, // reverse
-                transactionType: 'SAMPLE_OUT',
+                transactionType: entry.quantity < 0 ? 'SAMPLE_IN' : 'SAMPLE_OUT',
                 referenceId: requestId,
                 notes: `[ROLLBACK ADMIN] Reversal dari approval sampel req ${requestId.slice(0, 8).toUpperCase()}`,
               }

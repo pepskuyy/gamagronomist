@@ -2,6 +2,7 @@ import prisma from '@/lib/prisma'
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
+import { ledgerUnit } from '@/lib/stock-units'
 
 
 // Standarisasi area ke format kabupaten
@@ -262,11 +263,11 @@ export async function GET(req: Request) {
           ...userFilter,
           ...(search ? { districtDesa: { contains: search } } : {})
         },
-        include: { user: { select: { name: true } }, details: { include: { product: { select: { name: true, unit: true } } } } },
+        include: { user: { select: { name: true } }, details: { include: { product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } } },
         orderBy: { createdAt: 'desc' }
       })
       data = spotQ.map(i => {
-        const usageText = i.details.map((d: any) => `${d.product?.name || 'Produk'} (${d.usage} ${d.product?.unit || ''})`).join(', ')
+        const usageText = i.details.map((d: any) => `${d.product?.name || 'Produk'} (${d.usage} ${ledgerUnit(d.product)})`).join(', ')
         return {
           'Tanggal Pelaksanaan': new Date(i.date).toLocaleDateString('id-ID'),
           'Tanggal Submit': new Date(i.createdAt).toLocaleString('id-ID'),

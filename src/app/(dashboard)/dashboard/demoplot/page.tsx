@@ -2,6 +2,26 @@ import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
+import { formatLedgerQty, formatKemasanQty, hasGramasi } from '@/lib/stock-units'
+
+/**
+ * Satuan qty detail pengajuan:
+ *  - restock AFA ke gudang (AFA_STOCK_IN) selalu dalam kemasan;
+ *  - pengajuan FO dalam satuan ledger (gramasi bila ada), kecuali requestUnit-nya kemasan (data lama);
+ *  - qtyApproved pengajuan FO selalu sudah dalam satuan ledger (lihat approve.ts).
+ */
+function describeRequestDetail(req: any, d: any): string {
+  const p = d.product
+  const isRestock = req.commodity === 'AFA_STOCK_IN'
+  const reqUnit = (d.requestUnit || '').trim().toLowerCase()
+  const requestedInKemasan = isRestock || (hasGramasi(p) && !!reqUnit && reqUnit !== (p.unitGramasi || '').toLowerCase())
+  const fmtRequested = (q: number) => (requestedInKemasan ? formatKemasanQty(p, q) : formatLedgerQty(p, q))
+  const fmtApproved = (q: number) => (isRestock ? formatKemasanQty(p, q) : formatLedgerQty(p, q))
+  if (d.qtyApproved != null) {
+    return `${p?.name}: ${fmtApproved(d.qtyApproved)} [diminta: ${fmtRequested(d.qtyRequested)}]`
+  }
+  return `${p?.name}: ${fmtRequested(d.qtyRequested)}`
+}
 
 
 export default async function DemoPlotIndexPage() {
@@ -98,15 +118,7 @@ export default async function DemoPlotIndexPage() {
                       <td style={{ color: 'var(--primary)', fontWeight: 600 }}>{req.fo?.name}</td>
                       <td style={{ color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
                       <td style={{ fontSize: '0.82rem' }}>
-                        {req.details?.map((d: any) => {
-                          const gramasiUnits = ['ml', 'g', 'kg', 'liter', 'cc', 'gr']
-                          const storedUnit = d.requestUnit || d.product?.unit || 'PCS'
-                          const unit = gramasiUnits.includes(storedUnit?.toLowerCase()) ? (d.product?.unit || storedUnit) : storedUnit
-                          const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
-                          const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
-                          const gramasiTotal = hasGramasi ? (qty * d.product.gramasiPerUnit).toLocaleString('id-ID') + d.product.unitGramasi : null
-                          return `${d.product?.name}: ${qty} ${unit}${gramasiTotal ? ` (${gramasiTotal})` : ''}${d.qtyApproved != null ? ` [diminta: ${d.qtyRequested}]` : ''}`
-                        }).join(', ')}
+                        {req.details?.map((d: any) => describeRequestDetail(req, d)).join(', ')}
                       </td>
                       <td>{getStatusBadge(req.status)}</td>
                       <td>
@@ -148,15 +160,7 @@ export default async function DemoPlotIndexPage() {
                       <td style={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
                       <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
                       <td style={{ fontSize: '0.82rem' }}>
-                        {req.details?.map((d: any) => {
-                          const gramasiUnits = ['ml', 'g', 'kg', 'liter', 'cc', 'gr']
-                          const storedUnit = d.requestUnit || d.product?.unit || 'PCS'
-                          const unit = gramasiUnits.includes(storedUnit?.toLowerCase()) ? (d.product?.unit || storedUnit) : storedUnit
-                          const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
-                          const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
-                          const gramasiTotal = hasGramasi ? (qty * d.product.gramasiPerUnit).toLocaleString('id-ID') + d.product.unitGramasi : null
-                          return `${d.product?.name}: ${qty} ${unit}${gramasiTotal ? ` (${gramasiTotal})` : ''}${d.qtyApproved != null ? ` [diminta: ${d.qtyRequested}]` : ''}`
-                        }).join(', ')}
+                        {req.details?.map((d: any) => describeRequestDetail(req, d)).join(', ')}
                       </td>
                       <td>{getStatusBadge(req.status)}</td>
                       <td>

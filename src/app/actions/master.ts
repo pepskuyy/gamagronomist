@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
 import { getActionSession } from '@/lib/session'
 import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
+import { validateGramasiPair, hasGramasi, ledgerUnit } from '@/lib/stock-units'
 
 // Master Data hanya untuk ADMIN & SPV (sesuai menu sidebar).
 // Hanya ADMIN yang boleh membuat, mengubah, atau menghapus akun ADMIN.
@@ -143,6 +144,8 @@ export async function createProduct(formData: FormData) {
   const gramasiRaw    = (formData.get('gramasiPerUnit') as string)?.trim()
   const gramasiPerUnit = gramasiRaw ? parseFloat(gramasiRaw) : null
   if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
+  const pairError = validateGramasiPair(unitGramasi, gramasiPerUnit)
+  if (pairError) return { error: pairError }
   try {
     await prisma.product.create({ data: {
       code: code || null, name, description: description || null, unit,
@@ -166,52 +169,81 @@ export async function updateProduct(id: string, formData: FormData) {
   const gramasiPerUnit = gramasiRaw ? parseFloat(gramasiRaw) : null
   if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
   const newGramasi = gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null
+  const pairError = validateGramasiPair(unitGramasi, gramasiPerUnit)
+  if (pairError) return { error: pairError }
   const confirmed = formData.get('confirmGramasiChange') === 'true'
   try {
-    // Peringatan: perubahan gramasiPerUnit tidak mengonversi saldo ledger yang sudah ada.
-    // Saldo lama tetap tercatat dalam satuan sebelumnya sehingga bisa terbaca keliru.
-    if (!confirmed) {
-      const current = await prisma.product.findUnique({ where: { id }, select: { gramasiPerUnit: true, unitGramasi: true, unit: true } })
-      const oldGramasi = current?.gramasiPerUnit && current.gramasiPerUnit > 0 ? current.gramasiPerUnit : null
-      if (current && oldGramasi !== newGramasi) {
-        const balances = await prisma.ledger.groupBy({
-          by: ['userId'],
-          where: { productId: id },
-          _sum: { quantity: true },
+    // Satuan ledger produk ditentukan oleh pasangan gramasi. Bila faktornya berubah
+    // (mis. kosong → 500 ml/Btl, atau 500 → 1000), saldo setiap user dikonversi otomatis
+    // lewat baris UNIT_CONVERSION supaya angka lama tidak terbaca dengan satuan baru.
+    const current = await prisma.product.findUnique({ where: { id }, select: { gramasiPerUnit: true, unitGramasi: true, unit: true } })
+    if (!current) return { error: 'Produk tidak ditemukan.' }
+    const oldFactor = hasGramasi(current) ? current.gramasiPerUnit! : null
+    const newFactor = hasGramasi({ unit, unitGramasi, gramasiPerUnit: newGramasi }) ? newGramasi! : null
+    const oldUnitLabel = ledgerUnit(current)
+    const newUnitLabel = newFactor ? (unitGramasi as string) : unit
+
+    let holders: Array<{ userId: string; balance: number; converted: number }> = []
+    if (oldFactor !== newFactor) {
+      const balances = await prisma.ledger.groupBy({
+        by: ['userId'],
+        where: { productId: id },
+        _sum: { quantity: true },
+      })
+      holders = balances
+        .map(b => {
+          const balance = b._sum.quantity || 0
+          const kemasan = oldFactor ? balance / oldFactor : balance
+          const converted = Math.round((newFactor ? kemasan * newFactor : kemasan) * 10000) / 10000
+          return { userId: b.userId, balance, converted }
         })
-        const holders = balances.filter(b => Math.abs(b._sum.quantity || 0) > 0.0001)
-        if (holders.length > 0) {
-          const users = await prisma.user.findMany({
-            where: { id: { in: holders.map(h => h.userId) } },
-            select: { id: true, name: true },
-          })
-          const nameMap = new Map(users.map(u => [u.id, u.name]))
-          const oldUnit = oldGramasi ? (current.unitGramasi || current.unit) : current.unit
-          const lines = holders
-            .slice(0, 15)
-            .map(h => `• ${nameMap.get(h.userId) ?? h.userId}: ${h._sum.quantity} ${oldUnit}`)
-          if (holders.length > 15) lines.push(`• ... dan ${holders.length - 15} user lainnya`)
-          return {
-            needConfirm: true,
-            warning:
-              `Isi per kemasan berubah (${oldGramasi ?? 'kosong'} → ${newGramasi ?? 'kosong'}).\n` +
-              `${holders.length} user masih memiliki saldo produk ini yang tercatat dalam satuan lama:\n` +
-              `${lines.join('\n')}\n\n` +
-              `Saldo TIDAK dikonversi otomatis. Setelah disimpan, lakukan penyesuaian stok manual bila perlu.\n` +
-              `Lanjutkan simpan?`,
-          }
+        .filter(h => Math.abs(h.balance) > 0.0001)
+
+      if (holders.length > 0 && !confirmed) {
+        const users = await prisma.user.findMany({
+          where: { id: { in: holders.map(h => h.userId) } },
+          select: { id: true, name: true },
+        })
+        const nameMap = new Map(users.map(u => [u.id, u.name]))
+        const lines = holders
+          .slice(0, 15)
+          .map(h => `• ${nameMap.get(h.userId) ?? h.userId}: ${h.balance} ${oldUnitLabel} → ${h.converted} ${newUnitLabel}`)
+        if (holders.length > 15) lines.push(`• ... dan ${holders.length - 15} user lainnya`)
+        return {
+          needConfirm: true,
+          warning:
+            `Isi per kemasan berubah (${oldFactor ?? 'kosong'} → ${newFactor ?? 'kosong'}).\n` +
+            `${holders.length} user memiliki saldo produk ini. Saldo akan DIKONVERSI otomatis ke satuan baru:\n` +
+            `${lines.join('\n')}\n\n` +
+            `Pengajuan FO yang masih menunggu persetujuan tetap memakai angka lama; periksa sebelum menyetujui.\n` +
+            `Lanjutkan simpan?`,
         }
       }
     }
 
-    await prisma.product.update({ where: { id }, data: {
-      code: code || null, name, description: description || null, unit,
-      unitGramasi: unitGramasi || null,
-      gramasiPerUnit: newGramasi,
-    }})
+    await prisma.$transaction(async (tx) => {
+      await tx.product.update({ where: { id }, data: {
+        code: code || null, name, description: description || null, unit,
+        unitGramasi: unitGramasi || null,
+        gramasiPerUnit: newGramasi,
+      }})
+      for (const h of holders) {
+        const delta = h.converted - h.balance
+        if (Math.abs(delta) < 0.0001) continue
+        await tx.ledger.create({
+          data: {
+            userId: h.userId,
+            productId: id,
+            transactionType: 'UNIT_CONVERSION',
+            quantity: delta,
+            notes: `Konversi satuan: ${h.balance} ${oldUnitLabel} → ${h.converted} ${newUnitLabel} (isi per kemasan ${oldFactor ?? '-'} → ${newFactor ?? '-'})`,
+          },
+        })
+      }
+    }, { maxWait: 5000, timeout: 30000 })
     revalidatePath('/dashboard/master/products')
     invalidateCacheTag(CACHE_TAGS.products)
-    return { success: true }
+    return { success: true, convertedUsers: holders.length }
   } catch { return { error: 'Gagal mengupdate produk.' } }
 }
 
@@ -265,9 +297,26 @@ export async function bulkDeleteProducts(ids: string[]) {
   if (!(await requireMaster())) return { error: FORBIDDEN }
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
   try {
+    // Produk yang sudah punya riwayat stok tidak boleh dihapus: menghapusnya ikut menghapus
+    // seluruh riwayat Ledger semua user dan mengubah saldo tanpa jejak.
+    const withHistory = await prisma.product.findMany({
+      where: {
+        id: { in: ids },
+        OR: [{ ledgers: { some: {} } }, { sampleLedgers: { some: {} } }],
+      },
+      select: { name: true },
+    })
+    if (withHistory.length > 0) {
+      const names = withHistory.slice(0, 10).map(p => p.name).join(', ')
+      return {
+        error: `${withHistory.length} produk tidak dapat dihapus karena sudah punya riwayat stok: ${names}${withHistory.length > 10 ? ', ...' : ''}. ` +
+          'Kosongkan saldonya lewat penyesuaian stok bila produk tidak dipakai lagi.',
+      }
+    }
+
     // Must delete all related records first (no CASCADE configured in schema)
     await prisma.$transaction([
-      // 1. Delete ledger entries (stock transactions)
+      // 1. Ledger produk ini dipastikan kosong (dicek di atas)
       prisma.ledger.deleteMany({ where: { productId: { in: ids } } }),
       // 2. Delete demo plot detail (actual usage)
       prisma.demoPlotDetail.deleteMany({ where: { productId: { in: ids } } }),

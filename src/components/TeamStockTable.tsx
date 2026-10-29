@@ -31,7 +31,6 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
           const positiveStocks = userStocks.filter(s => s.quantity > 0)
           const negativeCount = userStocks.length - positiveStocks.length
           const totalItems = positiveStocks.length
-          const totalQty = positiveStocks.reduce((sum, s) => sum + s.quantity, 0)
           const isExpanded = expandedId === user.id
           const badge = roleBadge[user.role] || { bg: '#f1f5f9', text: '#475569' }
 
@@ -87,12 +86,6 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
 
                 {/* Summary stats */}
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: totalQty > 0 ? 'var(--primary)' : 'var(--text-muted)' }}>
-                      {totalQty > 0 ? totalQty.toLocaleString() : '0'}
-                    </div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Total</div>
-                  </div>
                   <div style={{ textAlign: 'center' }}>
                     <div style={{ fontSize: '1.1rem', fontWeight: 800, color: totalItems > 0 ? '#059669' : 'var(--text-muted)' }}>
                       {totalItems}

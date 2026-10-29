@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { findStockShortages } from '@/lib/ledger/stock'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -48,6 +49,10 @@ export async function submitDemoPlotSession(formData: FormData) {
     }
 
     const transactionType = (session.role === 'FO' || session.role === 'INTERN') ? 'USAGE_DEMOPLOT' : 'DIRECT_USAGE_AFA'
+
+    // Saldo tidak boleh minus karena pemakaian
+    const shortages = await findStockShortages(session.userId, usages.map(u => ({ productId: u.productId, qty: u.actualUsage })))
+    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
 
     // Gunakan transaksi untuk memastikan ledger dan demo plot tersimpan sekaligus
     await prisma.$transaction(async (tx) => {

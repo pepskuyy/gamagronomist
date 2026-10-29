@@ -20,7 +20,10 @@ const TRANSACTION_TYPES = [
   { value: 'STOCK_IN_GUDANG',   label: 'Stok Masuk Gudang' },
   { value: 'TRANSFER_TO_FO',    label: 'Transfer Keluar ke FO' },
   { value: 'RECEIVE_FROM_AFA',  label: 'Terima dari AFA' },
+  { value: 'RECEIVE_FROM_SAMPLE', label: 'Terima dari Gudang Sampel' },
   { value: 'USAGE_DEMOPLOT',    label: 'Pemakaian Demo Plot' },
+  { value: 'USAGE_SPOT_DEMOPLOT', label: 'Pemakaian Spot Demplot' },
+  { value: 'USAGE_REVERSAL',    label: 'Pembatalan Pemakaian' },
   { value: 'DIRECT_USAGE_AFA',  label: 'Pemakaian Langsung (AFA)' },
   { value: 'ADJUSTMENT_PLUS',   label: 'Koreksi Stok (+)' },
   { value: 'ADJUSTMENT_MINUS',  label: 'Koreksi Stok (-)' },
@@ -32,7 +35,10 @@ function TypeBadge({ type }: { type: string }) {
     STOCK_IN_GUDANG:  { label: 'Stok Masuk Gudang',       color: '#166534', bg: '#dcfce7' },
     TRANSFER_TO_FO:   { label: 'Transfer ke FO',           color: '#92400e', bg: '#fef3c7' },
     RECEIVE_FROM_AFA: { label: 'Terima dari AFA',          color: '#1e40af', bg: '#dbeafe' },
+    RECEIVE_FROM_SAMPLE: { label: 'Terima dari Gudang Sampel', color: '#1e40af', bg: '#dbeafe' },
     USAGE_DEMOPLOT:   { label: 'Pemakaian Demo Plot',      color: '#991b1b', bg: '#fee2e2' },
+    USAGE_SPOT_DEMOPLOT: { label: 'Pemakaian Spot Demplot', color: '#991b1b', bg: '#fee2e2' },
+    USAGE_REVERSAL:   { label: 'Pembatalan Pemakaian',     color: '#065f46', bg: '#d1fae5' },
     DIRECT_USAGE_AFA: { label: 'Pemakaian Langsung',       color: '#7c3aed', bg: '#ede9fe' },
     ADJUSTMENT_PLUS:  { label: 'Koreksi Stok (+)',         color: '#065f46', bg: '#d1fae5' },
     ADJUSTMENT_MINUS: { label: 'Koreksi Stok (-)',         color: '#9f1239', bg: '#fce7f3' },
@@ -107,12 +113,15 @@ export default function LedgerHistoryPage() {
     if (list.length > 0) setProducts(list)
   }, [ledgers])
 
-  // Quick stats
+  // Quick stats — jumlah qty hanya bermakna untuk SATU produk (produk lain bisa ml, gr, atau PCS)
+  const singleProduct = !!filterProduct && ledgers.length > 0
+  const statUnit = singleProduct ? (ledgers[0].product.unitGramasi || ledgers[0].product.unit) : ''
   const totalIn  = ledgers.filter(l => l.quantity > 0).reduce((s, l) => s + l.quantity, 0)
   const totalOut = ledgers.filter(l => l.quantity < 0).reduce((s, l) => s + l.quantity, 0)
   const demoplotUsage = ledgers
-    .filter(l => l.transactionType === 'USAGE_DEMOPLOT' || l.transactionType === 'DIRECT_USAGE_AFA')
+    .filter(l => ['USAGE_DEMOPLOT', 'DIRECT_USAGE_AFA', 'USAGE_SPOT_DEMOPLOT'].includes(l.transactionType))
     .reduce((s, l) => s + Math.abs(l.quantity), 0)
+  const fmtStat = (v: number, sign = '') => (singleProduct ? `${sign}${v.toLocaleString('id-ID')} ${statUnit}` : 'Pilih 1 produk')
 
   // Export to Excel
   async function handleExport() {
@@ -167,9 +176,9 @@ export default function LedgerHistoryPage() {
       {/* Quick Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
-          { label: 'Total Masuk', value: `+${totalIn.toLocaleString()}`, color: '#16a34a', icon: '⬆️' },
-          { label: 'Total Keluar', value: totalOut.toLocaleString(), color: '#dc2626', icon: '⬇️' },
-          { label: 'Pemakaian Demo Plot', value: demoplotUsage.toLocaleString(), color: '#7c3aed', icon: '🌾' },
+          { label: 'Total Masuk', value: fmtStat(totalIn, '+'), color: '#16a34a', icon: '⬆️' },
+          { label: 'Total Keluar', value: fmtStat(totalOut), color: '#dc2626', icon: '⬇️' },
+          { label: 'Pemakaian Demo Plot', value: fmtStat(demoplotUsage), color: '#7c3aed', icon: '🌾' },
           { label: 'Total Transaksi', value: ledgers.length.toString(), color: 'var(--primary)', icon: '📄' },
         ].map(s => (
           <div key={s.label} className="card" style={{ padding: '1rem', textAlign: 'center' }}>

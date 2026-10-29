@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { reverseUsageRows, demoPlotUsageRefs, DEMOPLOT_USAGE_TYPES } from '@/lib/ledger/stock'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -19,7 +20,7 @@ async function getAdminSession() {
 
 export async function deleteDemoPlot(id: string) {
   try {
-    await getAdminSession()
+    const session = await getAdminSession()
 
     // Find the DemoPlot first to see if it's attached to a standalone/mock request
     const dp = await prisma.demoPlot.findUnique({
@@ -29,8 +30,12 @@ export async function deleteDemoPlot(id: string) {
 
     if (!dp) return { error: 'Demo Plot tidak ditemukan' }
 
-    // Delete the DemoPlot (Prisma cascades to DemoPlotDetail automatically)
-    await prisma.demoPlot.delete({ where: { id } })
+    // Kembalikan stok yang terpotong oleh sesi ini, lalu hapus DemoPlot (detail ikut ter-cascade)
+    await prisma.$transaction(async (tx) => {
+      const refs = await demoPlotUsageRefs(tx, dp)
+      await reverseUsageRows(tx, refs, DEMOPLOT_USAGE_TYPES, `Laporan demplot dihapus oleh ${session.name ?? 'admin'}`)
+      await tx.demoPlot.delete({ where: { id } })
+    }, { maxWait: 5000, timeout: 30000 })
 
     // If it was a mock request specifically for migrated standalone demo plots, clean it up
     if (dp.requestId && dp.request?.plan === 'Migrated Standalone Demo Plot') {
@@ -103,13 +108,19 @@ export async function updateDemoPlot(id: string, formData: FormData) {
 export async function bulkDeleteDemoPlots(ids: string[]) {
   if (!ids.length) return { error: 'Tidak ada data yang dipilih.' }
   try {
-    await getAdminSession()
+    const session = await getAdminSession()
     // Collect all the requestIds before deleting
     const plots = await prisma.demoPlot.findMany({
       where: { id: { in: ids } },
       select: { id: true, requestId: true, request: { select: { plan: true } } }
     })
-    await prisma.demoPlot.deleteMany({ where: { id: { in: ids } } })
+    // Kembalikan stok tiap sesi sebelum dihapus (referensi dihitung sebelum ada yang terhapus)
+    await prisma.$transaction(async (tx) => {
+      const refs: string[] = []
+      for (const p of plots) refs.push(...(await demoPlotUsageRefs(tx, p)))
+      await reverseUsageRows(tx, refs, DEMOPLOT_USAGE_TYPES, `Laporan demplot dihapus massal oleh ${session.name ?? 'admin'}`)
+      await tx.demoPlot.deleteMany({ where: { id: { in: ids } } })
+    }, { maxWait: 5000, timeout: 60000 })
     // Clean up any mock requests left behind
     const mockRequestIds = plots
       .filter(p => p.requestId && p.request?.plan === 'Migrated Standalone Demo Plot')

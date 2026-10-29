@@ -28,7 +28,8 @@ export async function submitStockOpname(formData: FormData) {
 
   try {
     // 1. Hitung saldo stok sistem saat ini (luar transaksi agar tidak timeout)
-    const currentStocks = await getStockBalance(session.userId)
+    // includeNegative: saldo minus harus ikut, kalau tidak dianggap 0 dan selisih opname salah
+    const currentStocks = await getStockBalance(session.userId, { includeNegative: true })
     
     // 2. Hitung selisih & validasi SEBELUM menulis ke DB
     const details: {

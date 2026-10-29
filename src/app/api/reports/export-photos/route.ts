@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import ExcelJS from 'exceljs'
+import { ledgerUnit } from '@/lib/stock-units'
 
 
 function extractKabupaten(areaStr: string | null | undefined, foAreaName?: string | null): string {
@@ -577,13 +578,13 @@ export async function GET(req: Request) {
           ...userFilter,
           ...(search ? { districtDesa: { contains: search } } : {})
         },
-        include: { user: { select: { name: true } }, details: { include: { product: { select: { name: true, unit: true } } } } },
+        include: { user: { select: { name: true } }, details: { include: { product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } } },
         orderBy: { createdAt: 'desc' }
       })
 
       let rowIndex = 2
       for (const i of spotQ) {
-        const usageText = i.details.map((d: any) => `${d.product?.name || 'Produk'} (${d.usage} ${d.product?.unit || ''})`).join(', ')
+        const usageText = i.details.map((d: any) => `${d.product?.name || 'Produk'} (${d.usage} ${ledgerUnit(d.product)})`).join(', ')
         const row = ws.addRow({
           tanggal: new Date(i.date).toLocaleDateString('id-ID'),
           submit: new Date(i.createdAt).toLocaleString('id-ID'),

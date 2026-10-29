@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { findStockShortages } from '@/lib/ledger/stock'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -55,6 +56,14 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
   }
   if (isNaN(latitude) || isNaN(longitude)) {
     return { error: 'GPS wajib diaktifkan sebelum menyimpan realisasi.' }
+  }
+
+  // Saldo stok sendiri tidak boleh minus (produk milik petani tidak memotong stok)
+  {
+    const shortages = await findStockShortages(session.userId, usages
+      .filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)
+      .map(u => ({ productId: u.productId, qty: u.actualUsage })))
+    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
   }
 
   try {
@@ -206,6 +215,13 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
 
   if (isNaN(latitude) || isNaN(longitude)) {
     return { error: 'GPS wajib diaktifkan sebelum menyimpan sesi.' }
+  }
+
+  {
+    const shortages = await findStockShortages(session.userId, usages
+      .filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)
+      .map(u => ({ productId: u.productId, qty: u.actualUsage })))
+    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
   }
 
   try {

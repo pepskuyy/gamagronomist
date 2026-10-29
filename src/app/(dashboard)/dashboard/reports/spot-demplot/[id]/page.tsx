@@ -6,6 +6,7 @@ import { cldThumb } from '@/lib/cloudinary-url'
 import { redirect } from 'next/navigation'
 import ReportAdminActions from '@/components/ReportAdminActions'
 import { deleteSpotDemplot } from '@/app/actions/spot-demplot'
+import { ledgerUnit } from '@/lib/stock-units'
 
 
 export default async function SpotDemplotDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -23,7 +24,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
     where: { id },
     include: {
       user: { select: { name: true, role: true, area: { select: { name: true } } } },
-      details: { include: { product: { select: { name: true, unit: true } } } },
+      details: { include: { product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
     }
   })
 
@@ -158,7 +159,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
                 {spot.details.map(det => (
                   <tr key={det.id} style={{ borderBottom: '1px solid var(--border)' }}>
                     <td style={{ padding: '0.65rem' }}>{det.product.name}</td>
-                    <td style={{ padding: '0.65rem', fontWeight: 600 }}>{det.usage} {det.product.unit}</td>
+                    <td style={{ padding: '0.65rem', fontWeight: 600 }}>{det.usage} {ledgerUnit(det.product)}</td>
                     <td style={{ padding: '0.65rem' }}>
                       {det.usedFarmerProduct
                         ? <span style={{ background: '#fef3c7', color: '#92400e', padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600 }}>🌾 Petani</span>

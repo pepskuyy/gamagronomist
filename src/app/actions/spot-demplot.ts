@@ -1,6 +1,8 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { findStockShortages } from '@/lib/ledger/stock'
+import { reverseUsageRows } from '@/lib/ledger/stock'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -44,6 +46,13 @@ export async function submitSpotDemplot(formData: FormData) {
 
   if (isNaN(latitude) || isNaN(longitude)) {
     return { error: 'GPS wajib diaktifkan sebelum menyimpan laporan.' }
+  }
+
+  {
+    const shortages = await findStockShortages(session.userId, usages
+      .filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)
+      .map(u => ({ productId: u.productId, qty: u.actualUsage })))
+    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
   }
 
   try {
@@ -115,7 +124,11 @@ export async function deleteSpotDemplot(id: string) {
   }
 
   try {
-    await prisma.spotDemplot.delete({ where: { id } })
+    // Kembalikan stok yang terpotong laporan ini (riwayat asli tetap ada), lalu hapus laporannya
+    await prisma.$transaction(async (tx) => {
+      await reverseUsageRows(tx, [id], ['USAGE_SPOT_DEMOPLOT'], `Laporan spot demplot dihapus oleh ${session.name ?? 'admin'}`)
+      await tx.spotDemplot.delete({ where: { id } })
+    }, { maxWait: 5000, timeout: 30000 })
     return { success: true }
   } catch (err: any) {
     console.error('Delete Spot Demplot Error:', err)

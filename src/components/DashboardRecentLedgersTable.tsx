@@ -32,6 +32,8 @@ function formatType(type: string) {
     RECEIVE_FROM_AFA: { label: 'Terima AFA', cls: 'badge-success' },
     USAGE_DEMOPLOT: { label: 'Pemakaian', cls: 'badge-danger' },
     USAGE_SPOT_DEMOPLOT: { label: 'Pemakaian Spot', cls: 'badge-danger' },
+    RECEIVE_FROM_SAMPLE: { label: 'Terima Sampel', cls: 'badge-success' },
+    USAGE_REVERSAL: { label: 'Batal Pemakaian', cls: 'badge-success' },
     DIRECT_USAGE_AFA: { label: 'Pakai Langsung', cls: 'badge-danger' },
     ADJUSTMENT_PLUS: { label: 'Adj (+)', cls: 'badge-success' },
     ADJUSTMENT_MINUS: { label: 'Adj (-)', cls: 'badge-danger' },

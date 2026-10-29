@@ -227,7 +227,7 @@ export default function OpnameFormClient() {
                   >
                     <option value="">-- Pilih produk dari database --</option>
                     {availableProducts.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} ({p.unit})</option>
+                      <option key={p.id} value={p.id}>{p.name} ({(p as any).unitGramasi || p.unit})</option>
                     ))}
                   </select>
                 </div>

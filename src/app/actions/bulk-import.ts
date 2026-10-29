@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { hasGramasi } from '@/lib/stock-units'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -84,6 +85,28 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
     // ── CASE 1: id provided and matches existing product → UPDATE ──
     if (productId && existingById.has(productId)) {
       try {
+        // Perubahan faktor gramasi pada produk yang masih punya saldo harus lewat form master produk
+        // (saldo dikonversi otomatis di sana). Di import massal, kolom gramasi produk itu tidak diubah.
+        let keepGramasi = false
+        const current = await prisma.product.findUnique({
+          where: { id: productId },
+          select: { unit: true, unitGramasi: true, gramasiPerUnit: true },
+        })
+        if (current) {
+          const oldFactor = hasGramasi(current) ? current.gramasiPerUnit : null
+          const newFactor = hasGramasi({ unit: normalizedUnit, unitGramasi: normalizedGramasi, gramasiPerUnit }) ? gramasiPerUnit : null
+          if (oldFactor !== newFactor) {
+            const sums = await prisma.ledger.groupBy({ by: ['userId'], where: { productId }, _sum: { quantity: true } })
+            if (sums.some(x => Math.abs(x._sum.quantity || 0) > 0.0001)) {
+              keepGramasi = true
+              errors.push({
+                row: rowNum,
+                name: normalizedName,
+                reason: 'Data lain diperbarui, tetapi gramasi TIDAK diubah karena produk masih punya saldo. Ubah gramasi lewat form Master Produk agar saldo dikonversi.',
+              })
+            }
+          }
+        }
         await prisma.product.update({
           where: { id: productId },
           data: {
@@ -91,8 +114,7 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
             name: normalizedName,
             unit: normalizedUnit,
             description: row.description?.trim() || null,
-            unitGramasi: normalizedGramasi,
-            gramasiPerUnit: gramasiPerUnit,
+            ...(keepGramasi ? {} : { unitGramasi: normalizedGramasi, gramasiPerUnit: gramasiPerUnit }),
           } as any
         })
         existingById.set(productId, { id: productId, name: normalizedName })

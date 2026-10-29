@@ -13,7 +13,8 @@ export async function GET(request: Request) {
     const sessionDetail = await decrypt(sessionToken)
     if (!sessionDetail?.userId) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
 
-    const stocks = await getStockBalance(sessionDetail.userId)
+    // Form opname: tampilkan juga saldo minus agar user bisa mengoreksinya
+    const stocks = await getStockBalance(sessionDetail.userId, { includeNegative: true })
     
     // Flat map for simple client consumption — quantity is in gramasi (ml/gr)
     const flatStocks = stocks.map(s => ({
