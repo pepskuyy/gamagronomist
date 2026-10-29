@@ -4,7 +4,8 @@ import prisma from '@/lib/prisma'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { transferAfaToFo, getStockBalance } from '@/lib/ledger/stock'
+import { writeAfaToFoTransfer, getStockBalance } from '@/lib/ledger/stock'
+import { transitionRequest, requestErrorMessage } from '@/lib/request-transition'
 
 
 /**
@@ -45,17 +46,22 @@ export async function approveRequest(formData: FormData) {
     if (!request || request.status !== 'SUBMITTED') {
        return { error: 'Pengajuan tidak valid atau sudah diproses' }
     }
+    // Hanya pengajuan FO → AFA. Pengajuan restock AFA ke gudang punya alur sendiri (afa-stock.ts).
+    if (request.commodity === 'AFA_STOCK_IN') {
+      return { error: 'Pengajuan ini adalah restock gudang dan tidak diproses dari sini.' }
+    }
 
     // Saldo AFA saat ini (dalam satuan ledger: gramasi bila ada, selain itu kemasan)
     const afaStocks = await getStockBalance(session.userId)
     const afaStockMap = new Map(afaStocks.map(s => [s.product.id, s.quantity]))
     const stockWarnings: string[] = []
 
-    // Eksekusi ledger transaction per detail
+    // 1. Hitung qty ledger per detail (belum menulis apa pun)
+    const plan: Array<{ detailId: string; productId: string; qtyLedger: number; detailData: Record<string, unknown> }> = []
     for (const detail of request.details) {
       // Use AFA-adjusted qty if provided, otherwise fallback to requested qty
       const qtyInput = approvedQties[detail.id] ?? detail.qtyRequested
-      
+
       if (qtyInput <= 0) continue // skip items with 0 qty
 
       // Normalisasi ke satuan ledger (gramasi).
@@ -77,37 +83,47 @@ export async function approveRequest(formData: FormData) {
       }
       afaStockMap.set(detail.productId, available - qtyLedger)
 
-      // Potong stok AFA & Kirim ke FO
-      await transferAfaToFo(
-        session.userId, 
-        request.foId, 
-        detail.productId, 
+      plan.push({
+        detailId: detail.id,
+        productId: detail.productId,
         qtyLedger,
-        request.id,
-        session.areaId ?? null
-      )
-      
-      // Simpan qty disetujui dalam satuan ledger agar konsisten dengan Ledger
-      await prisma.requestDetail.update({
-        where: { id: detail.id },
-        data: {
+        // Simpan qty disetujui dalam satuan ledger agar konsisten dengan Ledger
+        detailData: {
           qtyApproved: qtyLedger,
           ...(isKemasanInput ? {
             requestUnit: prod?.unitGramasi ?? null,
             qtyRequested: detail.qtyRequested * (gramasi as number),
           } : {}),
-        }
+        },
       })
     }
 
-    // Update status request + catatan approval
-    await prisma.request.update({
-      where: { id: requestId },
-      data: {
+    const [afaUser, foUser] = await Promise.all([
+      prisma.user.findUnique({ where: { id: session.userId }, select: { name: true, areaId: true } }),
+      prisma.user.findUnique({ where: { id: request.foId }, select: { name: true } }),
+    ])
+
+    // 2. Status kondisional + semua transfer + update detail dalam SATU transaksi.
+    //    Klik ganda / approve bersamaan: transaksi kedua gagal di transitionRequest dan tidak menulis ledger.
+    await prisma.$transaction(async (tx) => {
+      await transitionRequest(tx, requestId, 'SUBMITTED', {
         status: 'APPROVED',
         ...(approveNotes ? { problem: approveNotes } : {}), // reuse 'problem' field as approve notes
+      })
+      for (const item of plan) {
+        await writeAfaToFoTransfer(tx, {
+          afaId: session.userId,
+          foId: request.foId,
+          afaName: afaUser?.name || session.userId,
+          foName: foUser?.name || request.foId,
+          productId: item.productId,
+          qty: item.qtyLedger,
+          requestId: request.id,
+          areaId: session.areaId ?? afaUser?.areaId ?? null,
+        })
+        await tx.requestDetail.update({ where: { id: item.detailId }, data: item.detailData })
       }
-    })
+    }, { maxWait: 5000, timeout: 30000 })
 
     // Notify AFA sendiri jika ada stok yang tidak mencukupi (peringatan, tidak memblokir)
     if (stockWarnings.length > 0) {
@@ -134,7 +150,7 @@ export async function approveRequest(formData: FormData) {
     return { success: true, warnings: stockWarnings }
   } catch (err: any) {
     console.error('Approve error', err)
-    return { error: 'Gagal memproses approval. Pastikan stok cukup.' }
+    return { error: requestErrorMessage(err, 'Gagal memproses approval. Pastikan stok cukup.') }
   }
 }
 
@@ -155,13 +171,17 @@ export async function rejectRequest(formData: FormData) {
   try {
     const request = await prisma.request.findUnique({ where: { id: requestId } })
     if (!request) return { error: 'Request tidak valid' }
+    if (request.commodity === 'AFA_STOCK_IN') {
+      return { error: 'Pengajuan restock gudang ditolak dari halaman stok, bukan dari sini.' }
+    }
+    if (request.status !== 'SUBMITTED') {
+      // Setelah disetujui, stok sudah pindah ke FO; menolak sekarang membuat laporan tidak sesuai ledger.
+      return { error: 'Hanya pengajuan yang belum diproses yang bisa ditolak.' }
+    }
 
-    await prisma.request.update({
-      where: { id: requestId },
-      data: {
-        status: 'REJECTED',
-        rejectReason: reason,
-      }
+    await transitionRequest(prisma, requestId, 'SUBMITTED', {
+      status: 'REJECTED',
+      rejectReason: reason,
     })
 
     // Notify FO
@@ -176,6 +196,6 @@ export async function rejectRequest(formData: FormData) {
 
     return { success: true }
   } catch (err) {
-    return { error: 'Gagal menolak pengajuan' }
+    return { error: requestErrorMessage(err, 'Gagal menolak pengajuan') }
   }
 }

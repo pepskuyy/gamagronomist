@@ -286,17 +286,14 @@ export default function AfaStockRequestTable({
   }
 
   const handleRegenerate = (id: string) => {
-    if (!confirm('Generate ulang invoice Accurate untuk pengajuan ini? Jika ledger stok AFA belum masuk, akan diperbaiki otomatis sekarang.')) return
+    if (!confirm('Generate ulang invoice Accurate untuk pengajuan ini?')) return
     setActionId(id)
     startTransition(async () => {
       const res = await regenerateInvoice(id)
       if (res?.error) {
         alert('❌ ' + res.error)
       } else {
-        const msg = res.ledgerCreated
-          ? `✅ Invoice ${res.invoiceNo} berhasil diterbitkan dan stok AFA sudah diperbaiki.`
-          : `✅ Invoice ${res.invoiceNo} berhasil diterbitkan.`
-        alert(msg)
+        alert(`✅ Invoice ${res.invoiceNo} berhasil diterbitkan.`)
         router.refresh()
       }
       setActionId(null)
@@ -600,7 +597,7 @@ export default function AfaStockRequestTable({
                               className="btn"
                               style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
                               disabled={isPending && actionId === req.id}
-                              title="Terbitkan invoice Accurate & perbaiki stok AFA"
+                              title="Terbitkan ulang invoice Accurate"
                             >
                               {isPending && actionId === req.id ? '⏳ Proses...' : '⚡ Generate Invoice'}
                             </button>

@@ -8,7 +8,7 @@ type StockAdjustmentModalProps = {
   isOpen: boolean
   onClose: () => void
   user: { id: string, name: string, role: string, initialProductId?: string }
-  products: { id: string, name: string, unit: string }[]
+  products: { id: string, name: string, unit: string, unitGramasi?: string | null }[]
   onSuccess: () => void
 }
 
@@ -128,7 +128,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                     <SearchableSelect
                       options={products
                         .filter(p => !usedProductIds.has(p.id) || p.id === row.productId)
-                        .map(p => ({ value: p.id, label: `${p.name} (${p.unit})` }))}
+                        .map(p => ({ value: p.id, label: `${p.name} (${p.unitGramasi || p.unit})` }))}
                       value={row.productId}
                       onChange={val => updateRow(row.id, 'productId', val)}
                       placeholder="-- Cari produk --"
@@ -156,7 +156,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                         className="form-control"
                         value={row.quantity}
                         onChange={e => updateRow(row.id, 'quantity', e.target.value)}
-                        placeholder="Jumlah"
+                        placeholder={`Jumlah${(() => { const p = products.find(x => x.id === row.productId); return p ? ` (${p.unitGramasi || p.unit})` : '' })()}`}
                         style={{ fontSize: '0.85rem' }}
                       />
                     </div>

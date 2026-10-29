@@ -15,7 +15,9 @@ type CbFarmer = { id: string; farmerName: string; phone?: string; district?: str
 
 export default function FoDemoPlotDirectPage() {
   const router = useRouter()
-  const { isOnline, saveDraft } = useOfflineDraft('spot-demplot')
+  // Demplot mandiri belum didukung antrean offline (sync-offline hanya menerima spot-demplot & CB);
+  // hook dipakai hanya untuk mendeteksi status online.
+  const { isOnline } = useOfflineDraft('spot-demplot')
   const [savedOffline, setSavedOffline] = useState(false)
 
   const [products, setProducts]     = useState<Product[]>([])
@@ -128,42 +130,6 @@ export default function FoDemoPlotDirectPage() {
     })
   }
 
-  // ── Simpan Offline ────────────────────────────────────────────
-  async function handleSaveOffline() {
-    if (gpsStatus !== 'success') {
-      setError('GPS wajib diambil dulu. GPS tidak butuh internet — aktifkan lokasi perangkat.')
-      return
-    }
-    if (photoBlobs.length === 0) {
-      setError('Minimal 1 foto dokumentasi diperlukan.')
-      return
-    }
-    if (!farmerName || !commodity) {
-      setError('Nama petani dan komoditas wajib diisi.')
-      return
-    }
-    setError(null)
-
-    const actualUsages = usageList
-      .filter(u => u.productId && parseFloat(u.qty) > 0)
-      .map(u => ({ productId: u.productId, actualUsage: parseFloat(u.qty), usedFarmerProduct: u.usedFarmerProduct }))
-
-    await saveDraft({
-      farmerName, farmerPhone, area, commodity, problem, plan,
-      latitude: String(latitude),
-      longitude: String(longitude),
-      usages: JSON.stringify(actualUsages),
-      // date dan cropAgeDays dari form element — ambil dari DOM
-      date: (document.querySelector('[name="date"]') as HTMLInputElement)?.value || new Date().toISOString().split('T')[0],
-      cropAgeDays: (document.querySelector('[name="cropAgeDays"]') as HTMLInputElement)?.value || '',
-      landSize: (document.querySelector('[name="landSize"]') as HTMLInputElement)?.value || '',
-      landSizeUnit: (document.querySelector('[name="landSizeUnit"]') as HTMLSelectElement)?.value || 'ha',
-      resultNotes: (document.querySelector('[name="resultNotes"]') as HTMLTextAreaElement)?.value || '',
-      isFinalSession: (document.querySelector('[name="isFinalSession"]') as HTMLInputElement)?.checked ? 'true' : '',
-    }, photoBlobs)
-
-    setSavedOffline(true)
-  }
 
   const fc: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.75rem' }
   const gpsColor = { success: 'var(--success)', error: 'var(--danger)', loading: 'var(--warning)', idle: 'var(--border)' }[gpsStatus]
@@ -201,7 +167,7 @@ export default function FoDemoPlotDirectPage() {
           <span>📵</span>
           <div>
             <strong style={{ color: '#92400e' }}>Mode Offline</strong>
-            <div style={{ fontSize: '0.8rem', color: '#92400e' }}>Isi form & ambil foto, lalu klik "Simpan Offline". GPS tidak butuh internet.</div>
+            <div style={{ fontSize: '0.8rem', color: '#92400e' }}>Realisasi demplot mandiri belum bisa disimpan offline. Isi form sekarang, lalu simpan saat koneksi kembali.</div>
           </div>
         </div>
       )}
@@ -476,12 +442,11 @@ export default function FoDemoPlotDirectPage() {
           {!isOnline ? (
             <button
               type="button"
-              onClick={handleSaveOffline}
               className="btn btn-primary"
-              style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap', background: '#f59e0b', borderColor: '#f59e0b' }}
-              disabled={isPending || gpsStatus !== 'success'}
+              style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap', background: '#9ca3af', borderColor: '#9ca3af' }}
+              disabled
             >
-              {gpsStatus !== 'success' ? '📍 Aktifkan GPS Dulu' : '💾 Simpan Offline'}
+              📵 Butuh Internet untuk Menyimpan
             </button>
           ) : (
             <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap' }}

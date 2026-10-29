@@ -61,7 +61,7 @@ export async function adjustStock(formData: FormData) {
         data: {
           userId,
           title: '🔄 Penyesuaian Stok',
-          message: `Stok ${product.name} disesuaikan sebesar ${sign}${quantity} ${product.unit}.\nKeterangan: ${notes}`,
+          message: `Stok ${product.name} disesuaikan sebesar ${sign}${quantity} ${product.unitGramasi || product.unit}.\nKeterangan: ${notes}`,
           link: '/dashboard/stock/history' // link to their history
         }
       })
@@ -113,7 +113,7 @@ export async function adjustStockBatch(data: {
     const productIds = items.map(i => i.productId)
     const productsData = await prisma.product.findMany({
       where: { id: { in: productIds } },
-      select: { id: true, name: true, unit: true }
+      select: { id: true, name: true, unit: true, unitGramasi: true }
     })
     const productMap = new Map(productsData.map(p => [p.id, p]))
 
@@ -140,7 +140,7 @@ export async function adjustStockBatch(data: {
           data: {
             userId,
             title: '🔄 Penyesuaian Stok',
-            message: `Stok ${product.name} disesuaikan sebesar ${sign}${qty} ${product.unit}.\nKeterangan: ${notes}`,
+            message: `Stok ${product.name} disesuaikan sebesar ${sign}${qty} ${product.unitGramasi || product.unit}.\nKeterangan: ${notes}`,
             link: '/dashboard/stock/history'
           }
         })

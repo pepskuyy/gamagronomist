@@ -14,6 +14,7 @@ import { revalidatePath } from 'next/cache'
 import { createSalesInvoice, fetchItemPrices } from '@/lib/accurate'
 import { sendWhatsAppBulk, getRolePhones, getMsgTemplate } from '@/lib/waha'
 import { withRetry } from '@/lib/retry'
+import { transitionRequest, requestErrorMessage } from '@/lib/request-transition'
 
 
 // ─── AFA submits a stock request ──────────────────────────────────
@@ -217,9 +218,8 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
 
         // ── Jika SEMUA item ditolak → REJECTED ────────────────────────
         if (approvedDetails.length === 0) {
-          await prisma.request.update({
-            where: { id: requestId },
-            data: { status: 'REJECTED', rejectReason: 'Semua item ditolak oleh SPV.', afaId: spvId }
+          await transitionRequest(prisma, requestId, 'SUBMITTED', {
+            status: 'REJECTED', rejectReason: 'Semua item ditolak oleh SPV.', afaId: spvId,
           })
           const isBDAllReject = req.fo?.role === 'BD'
           await prisma.notification.create({
@@ -297,10 +297,8 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
             })
           }
 
-          await tx.request.update({
-            where: { id: requestId },
-            data: { status: 'APPROVED', afaId: spvId },
-          })
+          // Status kondisional: bila sudah diproses orang lain, seluruh transaksi (termasuk ledger) dibatalkan
+          await transitionRequest(tx, requestId, 'SUBMITTED', { status: 'APPROVED', afaId: spvId })
         }, { maxWait: 5000, timeout: 20000 })
 
         // Notify requester with detail of approved vs rejected items
@@ -394,10 +392,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
           })
         }
 
-        await tx.request.update({
-          where: { id: requestId },
-          data: { status: 'APPROVED', afaId: session.userId },
-        })
+        await transitionRequest(tx, requestId, 'SUBMITTED', { status: 'APPROVED', afaId: session.userId })
       }, { maxWait: 5000, timeout: 20000 })
 
       // Notify requester (BD or AFA)
@@ -433,9 +428,8 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
 
       // Jika SEMUA ditolak
       if (approvedDetails.length === 0) {
-        await prisma.request.update({
-          where: { id: requestId },
-          data: { status: 'REJECTED', rejectReason: 'Semua item ditolak oleh SPV.', afaId: session.userId }
+        await transitionRequest(prisma, requestId, 'SUBMITTED', {
+          status: 'REJECTED', rejectReason: 'Semua item ditolak oleh SPV.', afaId: session.userId,
         })
         await prisma.notification.create({
           data: {
@@ -466,13 +460,7 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
     }
 
     // Update to APPROVED_SPV — no ledger entry yet
-    await prisma.request.update({
-      where: { id: requestId },
-      data: {
-        status: 'APPROVED_SPV',
-        afaId: session.userId,
-      }
-    })
+    await transitionRequest(prisma, requestId, 'SUBMITTED', { status: 'APPROVED_SPV', afaId: session.userId })
 
     // Notify all FA Managers
     const fams = await prisma.user.findMany({ where: { role: 'FAM', isActive: true } })
@@ -571,10 +559,7 @@ export async function approveFamStockRequest(requestId: string) {
       console.warn('[FAM Approve] Gagal cek stok Accurate (non-blocking):', stockErr)
     }
 
-    await prisma.request.update({
-      where: { id: requestId },
-      data: { status: 'APPROVED_FAM' }
-    })
+    await transitionRequest(prisma, requestId, 'APPROVED_SPV', { status: 'APPROVED_FAM' })
 
     // Notify all WH Managers
     const whms = await prisma.user.findMany({ where: { role: 'WHM', isActive: true } })
@@ -615,7 +600,7 @@ export async function approveFamStockRequest(requestId: string) {
     }
   } catch (err: any) {
     console.error('approveFamStockRequest error:', err)
-    return { error: 'Gagal memproses approval FA Manager.' }
+    return { error: requestErrorMessage(err, 'Gagal memproses approval FA Manager.') }
   }
 }
 
@@ -646,29 +631,24 @@ export async function approveWhmStockRequest(
     }
 
     // ── Simpan qtyApproved per detail jika WHM memberikan qty ──────────────
-    if (qtyApprovedMap && Object.keys(qtyApprovedMap).length > 0) {
-      await Promise.all(
-        req.details.map(d => {
+    // qtyApproved per detail (input WHM) + status APPROVED_WHM dalam satu transaksi
+    await prisma.$transaction(async (tx) => {
+      if (qtyApprovedMap && Object.keys(qtyApprovedMap).length > 0) {
+        for (const d of req.details) {
           const approved = qtyApprovedMap[d.id]
           if (approved !== undefined && approved >= 0) {
-            return prisma.requestDetail.update({
-              where: { id: d.id },
-              data: { qtyApproved: approved },
-            })
+            await tx.requestDetail.update({ where: { id: d.id }, data: { qtyApproved: approved } })
           }
-          return Promise.resolve()
-        })
-      )
+        }
+      }
+      await transitionRequest(tx, requestId, 'APPROVED_FAM', { status: 'APPROVED_WHM' })
+    }, { maxWait: 5000, timeout: 20000 })
+
+    if (qtyApprovedMap && Object.keys(qtyApprovedMap).length > 0) {
       // Re-fetch dengan qtyApproved terbaru
       const updated = await prisma.requestDetail.findMany({ where: { requestId } })
       req.details.splice(0, req.details.length, ...updated)
     }
-
-    // Update to APPROVED_WHM
-    await prisma.request.update({
-      where: { id: requestId },
-      data: { status: 'APPROVED_WHM' }
-    })
 
     // Notify SPV(s) in the same area as AFA + global SPVs (areaId=null)
     const afaUser = await prisma.user.findUnique({ where: { id: req.foId } })
@@ -725,7 +705,7 @@ export async function approveWhmStockRequest(
     return { success: true }
   } catch (err: any) {
     console.error('approveWhmStockRequest error:', err)
-    return { error: 'Gagal memproses approval WH Manager.' }
+    return { error: requestErrorMessage(err, 'Gagal memproses approval WH Manager.') }
   }
 }
 
@@ -788,10 +768,13 @@ export async function receiveSpvStockRequest(requestId: string) {
 
     // 1 + 2: Atomic — status APPROVED + ledger masuk dalam satu transaction
     await prisma.$transaction(async (tx) => {
-      await tx.request.update({
-        where: { id: requestId },
-        data: { status: 'APPROVED' }
+      await transitionRequest(tx, requestId, 'APPROVED_WHM', { status: 'APPROVED' })
+      // Pengaman tambahan: stok masuk untuk pengajuan ini tidak boleh tercatat dua kali
+      const already = await tx.ledger.findFirst({
+        where: { referenceId: requestId, transactionType: 'STOCK_IN_GUDANG' },
+        select: { id: true },
       })
+      if (already) throw new Error('STOCK_IN_EXISTS')
       await tx.ledger.createMany({ data: ledgerData })
     }, { maxWait: 5000, timeout: 20000 })
 
@@ -886,7 +869,10 @@ export async function receiveSpvStockRequest(requestId: string) {
     return { success: true }
   } catch (err: any) {
     console.error('receiveSpvStockRequest error:', err)
-    return { error: 'Gagal memproses penerimaan stok.' }
+    if (err?.message === 'STOCK_IN_EXISTS') {
+      return { error: 'Stok untuk pengajuan ini sudah pernah dicatat masuk. Hubungi admin untuk pengecekan.' }
+    }
+    return { error: requestErrorMessage(err, 'Gagal memproses penerimaan stok.') }
   }
 }
 
@@ -922,12 +908,9 @@ export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV'
       return { error: 'Pengajuan ini tidak dalam status yang sesuai untuk ditolak.' }
     }
 
-    await prisma.request.update({
-      where: { id: requestId },
-      data: {
-        status: 'REJECTED',
-        rejectReason: reason?.trim() || null,
-      }
+    await transitionRequest(prisma, requestId, expectedStatus, {
+      status: 'REJECTED',
+      rejectReason: reason?.trim() || null,
     })
 
     const roleLabels: Record<string, string> = { SPV: 'SPV', FAM: 'FA Manager', WHM: 'WH Manager' }
@@ -958,7 +941,7 @@ export async function rejectAfaStockRequest(requestId: string, rejectRole: 'SPV'
     return { success: true }
   } catch (err: any) {
     console.error('rejectAfaStockRequest error:', err)
-    return { error: 'Gagal menolak pengajuan stok.' }
+    return { error: requestErrorMessage(err, 'Gagal menolak pengajuan stok.') }
   }
 }
 
@@ -981,53 +964,22 @@ export async function regenerateInvoice(requestId: string) {
     if (!req || req.commodity !== 'AFA_STOCK_IN') {
       return { error: 'Pengajuan stok tidak ditemukan.' }
     }
-    if (req.status !== 'APPROVED' && req.status !== 'APPROVED_WHM') {
-      return { error: 'Invoice hanya bisa di-generate ulang untuk pengajuan yang sudah disetujui WHM.' }
+    if (req.status !== 'APPROVED') {
+      return { error: 'Invoice hanya bisa di-generate ulang untuk pengajuan yang stoknya sudah diterima SPV.' }
     }
     if ((req as any).accurateInvoiceNo) {
       return { error: 'Invoice sudah ada: ' + (req as any).accurateInvoiceNo }
     }
 
-    // Cek apakah ledger entry sudah ada untuk request ini
+    // Regenerate HANYA membuat ulang invoice Accurate. Stok masuk (STOCK_IN_GUDANG) dicatat
+    // satu kali oleh receiveSpvStockRequest; jalur ini tidak pernah menulis ledger lagi agar
+    // stok tidak tercatat ganda.
     const existingLedger = await prisma.ledger.findFirst({
       where: { referenceId: requestId, transactionType: 'STOCK_IN_GUDANG' },
+      select: { id: true },
     })
-
-    // Jika ledger belum ada, buat dulu (akibat bug afaUser)
     if (!existingLedger) {
-      const productIds = req.details.map(d => d.productId)
-      const productInfos = await prisma.product.findMany({
-        where: { id: { in: productIds } },
-        select: { id: true, accurateId: true, gramasiPerUnit: true, unitGramasi: true, unit: true },
-      })
-      const productMap = new Map(productInfos.map(p => [p.id, p]))
-
-      const afaUser = await prisma.user.findUnique({
-        where: { id: req.foId },
-        select: { areaId: true },
-      })
-
-      await prisma.ledger.createMany({
-        data: req.details.map(d => {
-          const prod = productMap.get(d.productId)
-          const qtyKemasan = d.qtyApproved ?? d.qtyRequested
-          const qtyToStore = prod?.gramasiPerUnit && prod.gramasiPerUnit > 0
-            ? qtyKemasan * prod.gramasiPerUnit
-            : qtyKemasan
-          return {
-            userId: req.foId,
-            productId: d.productId,
-            transactionType: 'STOCK_IN_GUDANG',
-            quantity: qtyToStore,
-            referenceId: req.id,
-            snapshotAreaId: afaUser?.areaId ?? null,
-            notes: `[REGENERATE] Penerimaan Stok (${qtyKemasan} ${prod?.unit ?? ''}${prod?.gramasiPerUnit ? ` = ${qtyToStore}${prod.unitGramasi ?? ''}` : ''}). Ref: ${req.plan}`,
-          }
-        }),
-        skipDuplicates: true,
-      })
-
-      console.log(`[REGEN] Ledger entries created for request ${requestId}`)
+      return { error: 'Stok pengajuan ini belum tercatat masuk. Selesaikan konfirmasi penerimaan SPV terlebih dulu.' }
     }
 
     // Generate Accurate invoice
@@ -1087,7 +1039,7 @@ export async function regenerateInvoice(requestId: string) {
     }
 
     revalidatePath('/dashboard/stock')
-    return { success: true, invoiceNo, ledgerCreated: !existingLedger }
+    return { success: true, invoiceNo }
   } catch (err: any) {
     console.error('regenerateInvoice error:', err)
     return { error: `Gagal generate invoice: ${err.message}` }
@@ -1165,11 +1117,8 @@ export async function resetRequestToSubmitted(requestId: string) {
               }
             })
           }
-          // Reset qtyApproved on all details
-          await tx.request.update({
-            where: { id: requestId },
-            data: { status: 'SUBMITTED', afaId: null, rejectReason: null }
-          })
+          // Reset status (kondisional) + qtyApproved semua detail
+          await transitionRequest(tx, requestId, 'APPROVED', { status: 'SUBMITTED', afaId: null, rejectReason: null })
           // Reset detail qtyApproved
           for (const detail of req.details) {
             await tx.requestDetail.update({
@@ -1180,23 +1129,25 @@ export async function resetRequestToSubmitted(requestId: string) {
         }, { maxWait: 5000, timeout: 20000 })
       } else {
         // No ledger entries yet — safe to just reset status
-        await prisma.request.update({
-          where: { id: requestId },
-          data: { status: 'SUBMITTED', afaId: null, rejectReason: null }
-        })
+        await transitionRequest(prisma, requestId, req.status, { status: 'SUBMITTED', afaId: null, rejectReason: null })
       }
     } else {
-      // MAIN flow: just reset status (no ledger yet at APPROVED_SPV stage)
-      await prisma.request.update({
-        where: { id: requestId },
-        data: { status: 'SUBMITTED', afaId: null, rejectReason: null }
-      })
+      // Jalur MAIN (gudang utama) dan pengajuan FO: reset hanya aman bila belum ada stok yang dicatat.
+      // Bila ledger sudah ada (mis. MAIN sudah diterima SPV tapi invoice gagal, atau FO sudah ditransfer AFA),
+      // reset akan membuat stok tercatat ganda saat diproses ulang.
+      const ledgerCount = await prisma.ledger.count({ where: { referenceId: requestId } })
+      if (ledgerCount > 0) {
+        return {
+          error: 'Tidak dapat mereset — stok untuk pengajuan ini sudah tercatat. Gunakan penyesuaian stok bila perlu koreksi.',
+        }
+      }
+      await transitionRequest(prisma, requestId, req.status, { status: 'SUBMITTED', afaId: null, rejectReason: null })
     }
 
     revalidatePath('/dashboard/stock')
     return { success: true }
   } catch (err: any) {
     console.error('resetRequestToSubmitted error:', err)
-    return { error: `Gagal mereset pengajuan: ${err.message}` }
+    return { error: requestErrorMessage(err, `Gagal mereset pengajuan: ${err.message}`) }
   }
 }
