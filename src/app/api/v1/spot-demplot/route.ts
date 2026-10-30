@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { verifyOpenApiKey } from '@/lib/open-api-auth'
+import { ledgerUnit } from '@/lib/stock-units'
 
 export const dynamic = 'force-dynamic'
 
@@ -40,7 +41,7 @@ export async function GET(req: NextRequest) {
         user: { select: { id: true, name: true, role: true } },
         details: {
           include: {
-            product: { select: { id: true, name: true, code: true, unit: true } }
+            product: { select: { id: true, name: true, code: true, unit: true, unitGramasi: true, gramasiPerUnit: true } }
           }
         }
       },
@@ -51,8 +52,15 @@ export async function GET(req: NextRequest) {
     prisma.spotDemplot.count({ where }),
   ])
 
+  // usage_unit: satuan angka usage (ml/gr untuk produk bergramasi, selain itu kemasan).
+  // product.unit tetap berarti satuan kemasan; jangan dipakai sebagai label usage.
+  const data = rows.map(r => ({
+    ...r,
+    details: r.details.map(d => ({ ...d, usage_unit: ledgerUnit(d.product) })),
+  }))
+
   return NextResponse.json({
-    data: rows,
+    data,
     meta: { page, limit, total, hasMore: page * limit < total }
   })
 }

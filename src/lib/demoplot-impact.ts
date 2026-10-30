@@ -1,4 +1,5 @@
 import prisma from '@/lib/prisma'
+import { formatLedgerQty } from '@/lib/stock-units'
 
 export interface DemoplotProductUsage {
   name: string
@@ -405,7 +406,7 @@ const demoGroupInclude = {
       id: true,
       commodity: true,
       fo: { select: { name: true } },
-      details: { select: { qtyApproved: true, qtyRequested: true, requestUnit: true, product: { select: { name: true, unit: true } } } },
+      details: { select: { qtyApproved: true, qtyRequested: true, requestUnit: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
     },
   },
 } as const
@@ -423,7 +424,7 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
     select: {
       id: true,
       requestId: true,
-      details: { select: { actualUsage: true, product: { select: { name: true, unit: true } } } },
+      details: { select: { actualUsage: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
     },
     orderBy: { createdAt: 'asc' },
   })
@@ -435,14 +436,16 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
     for (const d of s.details) {
       const pName = d.product?.name
       if (!pName) continue
+      // `unit` tetap satuan kemasan (dipakai untuk qty faktur di product_impacts).
+      // actualUsage tercatat dalam satuan ledger (ml/gr bila produk bergramasi), jadi label memakai formatLedgerQty.
       const unit = d.product?.unit || 'PCS'
       const usage = Number(d.actualUsage) || 0
       const existing = map.get(pName)
       if (existing) {
         existing.actualUsage += usage
-        existing.label = `${pName} (${existing.actualUsage} ${unit})`
+        existing.label = `${pName} (${formatLedgerQty(d.product, existing.actualUsage)})`
       } else {
-        map.set(pName, { name: pName, actualUsage: usage, unit, label: `${pName} (${usage} ${unit})` })
+        map.set(pName, { name: pName, actualUsage: usage, unit, label: `${pName} (${formatLedgerQty(d.product, usage)})` })
       }
     }
     byKey.set(key, map)
@@ -458,8 +461,12 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
         const pName = rd.product?.name
         if (!pName || list.some(p => p.name === pName)) continue
         const qty = Number(rd.qtyApproved ?? rd.qtyRequested) || 0
-        const unit = rd.product?.unit || rd.requestUnit || 'PCS'
-        list.push({ name: pName, actualUsage: qty, unit, label: `${pName} (${qty} ${unit})` })
+        const unit = rd.product?.unit || 'PCS'
+        // qtyApproved pengajuan FO sudah dalam satuan ledger; qtyRequested dalam requestUnit
+        const label = rd.qtyApproved != null || !rd.requestUnit
+          ? formatLedgerQty(rd.product, qty)
+          : `${qty.toLocaleString('id-ID')} ${rd.requestUnit}`
+        list.push({ name: pName, actualUsage: qty, unit, label: `${pName} (${label})` })
       }
     }
     result.set(g.id, list)

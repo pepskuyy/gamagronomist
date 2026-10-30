@@ -41,7 +41,9 @@ const spec = {
     '/demoplot': {
       get: {
         summary: 'Daftar Demo Plot (termasuk koordinat GPS)',
-        description: 'Daftar sesi demo plot lapangan beserta rincian produk. Setiap baris memiliki latitude & longitude di level atas (dapat bernilai null bila belum diisi).',
+        description: 'Daftar sesi demo plot lapangan beserta rincian produk. Setiap baris memiliki latitude & longitude di level atas (dapat bernilai null bila belum diisi). ' +
+          'Satuan pemakaian: `details[].actualUsage` dalam satuan `details[].usage_unit` (ml/gr untuk produk bergramasi, selain itu satuan kemasan). ' +
+          '`details[].product.unit` adalah satuan KEMASAN (PCS/Btl/...), bukan satuan actualUsage. Kemasan = actualUsage ÷ product.gramasiPerUnit bila product.unitGramasi terisi.',
         parameters: [
           { $ref: '#/components/parameters/from' },
           { $ref: '#/components/parameters/to' },
@@ -62,7 +64,9 @@ const spec = {
     '/spot-demplot': {
       get: {
         summary: 'Spot Demplot & Pengamatan',
-        description: 'Data spot demplot, pengamatan gulma/lahan, dan produk yang digunakan.',
+        description: 'Data spot demplot, pengamatan gulma/lahan, dan produk yang digunakan. ' +
+          'Satuan pemakaian: `details[].usage` dalam satuan `details[].usage_unit` (ml/gr untuk produk bergramasi, selain itu satuan kemasan). ' +
+          '`details[].product.unit` adalah satuan KEMASAN, bukan satuan usage.',
         parameters: [
           { $ref: '#/components/parameters/from' },
           { $ref: '#/components/parameters/to' },
