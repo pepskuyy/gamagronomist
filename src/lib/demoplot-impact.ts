@@ -443,9 +443,9 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
       const existing = map.get(pName)
       if (existing) {
         existing.actualUsage += usage
-        existing.label = `${pName} (${formatLedgerQty(d.product, existing.actualUsage)})`
+        existing.label = `${pName} (${formatLedgerQty(d.product, existing.actualUsage, { showKemasan: false })})`
       } else {
-        map.set(pName, { name: pName, actualUsage: usage, unit, label: `${pName} (${formatLedgerQty(d.product, usage)})` })
+        map.set(pName, { name: pName, actualUsage: usage, unit, label: `${pName} (${formatLedgerQty(d.product, usage, { showKemasan: false })})` })
       }
     }
     byKey.set(key, map)
@@ -464,7 +464,7 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
         const unit = rd.product?.unit || 'PCS'
         // qtyApproved pengajuan FO sudah dalam satuan ledger; qtyRequested dalam requestUnit
         const label = rd.qtyApproved != null || !rd.requestUnit
-          ? formatLedgerQty(rd.product, qty)
+          ? formatLedgerQty(rd.product, qty, { showKemasan: false })
           : `${qty.toLocaleString('id-ID')} ${rd.requestUnit}`
         list.push({ name: pName, actualUsage: qty, unit, label: `${pName} (${label})` })
       }
