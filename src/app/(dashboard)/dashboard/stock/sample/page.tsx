@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { addSampleStock, adjustSampleStock, editSampleProduct, removeSampleProduct } from '@/app/actions/sample-stock'
 
 type Balance  = {
-  productId: string; productName: string; unit: string; balance: number
+  productId: string; productName: string; sku?: string | null; unit: string; balance: number
   unitGramasi?: string | null; gramasiPerUnit?: number | null
 }
 type LedgerRow = {
@@ -300,7 +300,7 @@ export default function SampleStockPage() {
 
   // Filtered balances for search
   const filteredBalances = balanceSearch.trim()
-    ? balances.filter(b => b.productName.toLowerCase().includes(balanceSearch.toLowerCase()))
+    ? balances.filter(b => b.productName.toLowerCase().includes(balanceSearch.toLowerCase()) || (b.sku ?? '').toLowerCase().includes(balanceSearch.toLowerCase()))
     : balances
 
   return (
@@ -338,7 +338,7 @@ export default function SampleStockPage() {
               <input
                 type="text"
                 className="form-control"
-                placeholder="🔍 Cari nama produk..."
+                placeholder="🔍 Cari nama produk atau kode SKU..."
                 value={balanceSearch}
                 onChange={e => setBalanceSearch(e.target.value)}
                 style={{ maxWidth: 320 }}
@@ -361,7 +361,7 @@ export default function SampleStockPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  {['Produk', 'Saldo Stok', 'Satuan', 'Aksi'].map(h => <th key={h} style={{ ...thStyle, textAlign: h === 'Aksi' ? 'center' : 'left' }}>{h}</th>)}
+                  {['Produk', 'Kode SKU', 'Saldo Stok', 'Satuan', 'Aksi'].map(h => <th key={h} style={{ ...thStyle, textAlign: h === 'Aksi' ? 'center' : 'left' }}>{h}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -377,6 +377,9 @@ export default function SampleStockPage() {
                           {b.gramasiPerUnit}{b.unitGramasi} / {b.unit}
                         </div>
                       )}
+                    </td>
+                    <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.82rem', color: b.sku ? 'var(--text-main)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      {b.sku || '-'}
                     </td>
                     <td style={tdStyle}>
                       {b.gramasiPerUnit && b.unitGramasi && b.balance > 0 ? (
