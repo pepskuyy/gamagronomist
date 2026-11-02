@@ -8,6 +8,8 @@ type TeamStockTableProps = {
   stocks: { [userId: string]: { product: { id: string, name: string, unit: string, unitGramasi?: string | null, gramasiPerUnit?: number | null }, quantity: number }[] }
   allProducts: { id: string, name: string, unit: string, unitGramasi?: string | null }[]
   role: string // ADMIN, SPV, AFA
+  /** Semua akun pemegang stok (bukan hanya halaman ini) — tujuan "Pindah ke akun lain" */
+  transferTargets?: { id: string, name: string, role: string }[]
 }
 
 const roleBadge: Record<string, { bg: string; text: string }> = {
@@ -16,7 +18,7 @@ const roleBadge: Record<string, { bg: string; text: string }> = {
   INTERN: { bg: '#fef3c7', text: '#92400e' },
 }
 
-export default function TeamStockTable({ users, stocks, allProducts, role }: TeamStockTableProps) {
+export default function TeamStockTable({ users, stocks, allProducts, role, transferTargets = [] }: TeamStockTableProps) {
   const [selectedUser, setSelectedUser] = useState<{ id: string, name: string, role: string, initialProductId?: string } | null>(null)
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
@@ -181,6 +183,8 @@ export default function TeamStockTable({ users, stocks, allProducts, role }: Tea
           onClose={() => setSelectedUser(null)}
           user={selectedUser}
           products={allProducts}
+          balances={(stocks[selectedUser.id] || []).map(s => ({ productId: s.product.id, quantity: s.quantity }))}
+          transferTargets={transferTargets}
           onSuccess={() => setSelectedUser(null)}
         />
       )}

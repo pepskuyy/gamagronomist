@@ -27,6 +27,8 @@ const TRANSACTION_TYPES = [
   { value: 'DIRECT_USAGE_AFA',  label: 'Pemakaian Langsung (AFA)' },
   { value: 'ADJUSTMENT_PLUS',   label: 'Koreksi Stok (+)' },
   { value: 'ADJUSTMENT_MINUS',  label: 'Koreksi Stok (-)' },
+  { value: 'TRANSFER_ACCOUNT_OUT', label: 'Pindah ke Akun Lain' },
+  { value: 'TRANSFER_ACCOUNT_IN',  label: 'Masuk dari Akun Lain' },
   { value: 'ROLLBACK_SAMPLE',   label: 'Rollback Sampel (Reset Admin)' },
 ]
 
@@ -42,6 +44,8 @@ function TypeBadge({ type }: { type: string }) {
     DIRECT_USAGE_AFA: { label: 'Pemakaian Langsung',       color: '#7c3aed', bg: '#ede9fe' },
     ADJUSTMENT_PLUS:  { label: 'Koreksi Stok (+)',         color: '#065f46', bg: '#d1fae5' },
     ADJUSTMENT_MINUS: { label: 'Koreksi Stok (-)',         color: '#9f1239', bg: '#fce7f3' },
+    TRANSFER_ACCOUNT_OUT: { label: 'Pindah ke Akun Lain',  color: '#92400e', bg: '#fef3c7' },
+    TRANSFER_ACCOUNT_IN:  { label: 'Masuk dari Akun Lain', color: '#1e40af', bg: '#dbeafe' },
     ROLLBACK_SAMPLE:  { label: 'Rollback Sampel',          color: '#475569', bg: '#e2e8f0' },
   }
   const m = map[type] || { label: type, color: '#4b5563', bg: '#f3f4f6' }

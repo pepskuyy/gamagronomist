@@ -142,6 +142,15 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
     }))
   }
 
+  // Tujuan "Pindah ke akun lain" di modal penyesuaian: semua akun pemegang stok yang aktif
+  const transferTargets = ['ADMIN', 'SPV'].includes(session.role)
+    ? await prisma.user.findMany({
+        where: { isActive: true, role: { in: ['AFA', 'FO', 'INTERN', 'PLANTATION', 'BD'] } },
+        select: { id: true, name: true, role: true },
+        orderBy: [{ role: 'asc' }, { name: 'asc' }],
+      })
+    : []
+
   // ── Stok tim: jalankan setelah list user diketahui (tetap paralel antar user) ──
   const stocksMap: Record<string, { product: any, quantity: number }[]> = {}
   await Promise.all(
@@ -277,6 +286,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                 stocks={stocksMap}
                 allProducts={allProducts}
                 role={session.role}
+                transferTargets={transferTargets}
               />
               <TablePager prefix="u" currentPage={pu} hasMore={hasMoreUsers} />
             </>

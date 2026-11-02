@@ -139,8 +139,15 @@ export async function findStockShortages(
 
 export class StockShortageError extends Error {}
 
-export function stockShortageMessage(shortages: string[]) {
-  return 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.'
+const DEFAULT_SHORTAGE_HINT = 'Ajukan stok ke AFA atau hubungi admin untuk penyesuaian.'
+
+export function stockShortageMessage(shortages: string[], hint = DEFAULT_SHORTAGE_HINT) {
+  return 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\n' + hint
+}
+
+/** Kunci saldo per user (advisory lock) sampai transaksi selesai. */
+export async function lockUserStock(tx: Prisma.TransactionClient, userId: string) {
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'stock:' + userId}))`
 }
 
 /**
@@ -152,11 +159,12 @@ export async function assertStockAvailable(
   tx: Prisma.TransactionClient,
   userId: string,
   items: Array<{ productId: string; qty: number }>,
+  hint?: string,
 ) {
   if (!items.some(it => it.qty > 0)) return
-  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'stock:' + userId}))`
+  await lockUserStock(tx, userId)
   const shortages = await findStockShortages(userId, items, tx)
-  if (shortages.length > 0) throw new StockShortageError(stockShortageMessage(shortages))
+  if (shortages.length > 0) throw new StockShortageError(stockShortageMessage(shortages, hint))
 }
 
 export const DEMOPLOT_USAGE_TYPES = ['USAGE_DEMOPLOT', 'DIRECT_USAGE_AFA']

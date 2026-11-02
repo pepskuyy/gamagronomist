@@ -37,6 +37,8 @@ function formatType(type: string) {
     DIRECT_USAGE_AFA: { label: 'Pakai Langsung', cls: 'badge-danger' },
     ADJUSTMENT_PLUS: { label: 'Adj (+)', cls: 'badge-success' },
     ADJUSTMENT_MINUS: { label: 'Adj (-)', cls: 'badge-danger' },
+    TRANSFER_ACCOUNT_OUT: { label: 'Pindah Akun (-)', cls: 'badge-warning' },
+    TRANSFER_ACCOUNT_IN: { label: 'Pindah Akun (+)', cls: 'badge-success' },
     ROLLBACK_SAMPLE: { label: 'Rollback Sampel', cls: 'badge-neutral' },
   }
   const m = map[type] || { label: type, cls: 'badge-neutral' }

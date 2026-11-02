@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
-import { adjustStockBatch } from '@/app/actions/stock-admin'
+import { adjustStockBatch, transferStockBetweenUsers } from '@/app/actions/stock-admin'
 import SearchableSelect from '@/components/SearchableSelect'
 
 type StockAdjustmentModalProps = {
@@ -9,6 +9,10 @@ type StockAdjustmentModalProps = {
   onClose: () => void
   user: { id: string, name: string, role: string, initialProductId?: string }
   products: { id: string, name: string, unit: string, unitGramasi?: string | null }[]
+  /** Saldo user saat ini per produk (satuan ledger) */
+  balances?: { productId: string, quantity: number }[]
+  /** Akun tujuan untuk mode "Pindah ke akun lain" */
+  transferTargets?: { id: string, name: string, role: string }[]
   onSuccess: () => void
 }
 
@@ -23,15 +27,22 @@ function newRow(): AdjustmentRow {
   return { id: Math.random().toString(36).substring(2, 9), productId: '', type: 'plus', quantity: '' }
 }
 
-export default function StockAdjustmentModal({ isOpen, onClose, user, products, onSuccess }: StockAdjustmentModalProps) {
+export default function StockAdjustmentModal({ isOpen, onClose, user, products, balances = [], transferTargets = [], onSuccess }: StockAdjustmentModalProps) {
   const [isPending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [rows, setRows] = useState<AdjustmentRow[]>(() => [
     { id: Math.random().toString(36).substring(2, 9), productId: user.initialProductId || '', type: 'plus', quantity: '' }
   ])
   const [notes, setNotes] = useState('')
+  // 'adjust' = koreksi saldo akun ini; 'transfer' = pindahkan stok ke akun lain (dua sisi tercatat sekaligus)
+  const [mode, setMode] = useState<'adjust' | 'transfer'>('adjust')
+  const [toUserId, setToUserId] = useState('')
 
   if (!isOpen) return null
+
+  const balanceMap = new Map(balances.map(b => [b.productId, b.quantity]))
+  const unitOf = (productId: string) => { const p = products.find(x => x.id === productId); return p ? (p.unitGramasi || p.unit) : '' }
+  const fmtQty = (n: number) => n.toLocaleString('id-ID', { maximumFractionDigits: 2 })
 
   function updateRow(id: string, field: keyof AdjustmentRow, value: string) {
     setRows(prev => prev.map(r => r.id === id ? { ...r, [field]: value } : r))
@@ -62,6 +73,18 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
       return
     }
 
+    // Pengurangan / pemindahan tidak boleh melebihi saldo (server juga mengecek ulang)
+    const over = validRows.find(r => (mode === 'transfer' || r.type === 'minus') && parseFloat(r.quantity) > (balanceMap.get(r.productId) ?? 0) + 1e-9)
+    if (over) {
+      const p = products.find(x => x.id === over.productId)
+      setError(`${p?.name ?? 'Produk'}: jumlah melebihi saldo (${fmtQty(Math.max(0, balanceMap.get(over.productId) ?? 0))} ${unitOf(over.productId)}). Periksa apakah SKU yang dipilih sudah benar.`)
+      return
+    }
+    if (mode === 'transfer' && !toUserId) {
+      setError('Pilih akun tujuan.')
+      return
+    }
+
     const items = validRows.map(r => ({
       productId: r.productId,
       type: r.type as 'plus' | 'minus',
@@ -69,12 +92,15 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
     }))
 
     start(async () => {
-      const res = await adjustStockBatch({ userId: user.id, items, notes: notes.trim() })
+      const res = mode === 'transfer'
+        ? await transferStockBetweenUsers({ fromUserId: user.id, toUserId, items: items.map(i => ({ productId: i.productId, quantity: i.quantity })), notes: notes.trim() })
+        : await adjustStockBatch({ userId: user.id, items, notes: notes.trim() })
       if (res?.error) {
         setError(res.error)
       } else {
         setRows([newRow()])
         setNotes('')
+        setToUserId('')
         onSuccess()
       }
     })
@@ -99,7 +125,35 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
             <div style={{ fontWeight: 600 }}>{user.name} <span style={{ fontSize: '0.75rem', fontWeight: 700, background: 'var(--border)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{user.role}</span></div>
           </div>
 
-          {error && <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
+          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+            {([['adjust', '🛠️ Koreksi saldo'], ['transfer', '🔁 Pindah ke akun lain']] as const).map(([key, label]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => { setMode(key); setError(null) }}
+                className={mode === key ? 'btn btn-primary' : 'btn btn-outline'}
+                style={{ flex: 1, fontSize: '0.82rem', padding: '0.45rem' }}
+              >{label}</button>
+            ))}
+          </div>
+
+          {mode === 'transfer' && (
+            <div style={{ marginBottom: '1rem' }}>
+              <label className="form-label">Akun tujuan</label>
+              <SearchableSelect
+                options={transferTargets.filter(t => t.id !== user.id).map(t => ({ value: t.id, label: `${t.name} (${t.role})` }))}
+                value={toUserId}
+                onChange={setToUserId}
+                placeholder="-- Cari akun tujuan --"
+                required
+              />
+              <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                Stok berkurang dari {user.name} dan bertambah di akun tujuan dengan SKU dan jumlah yang sama, tercatat sekaligus.
+              </p>
+            </div>
+          )}
+
+          {error && <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', whiteSpace: 'pre-line' }}>{error}</div>}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* Product rows */}
@@ -128,7 +182,11 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                     <SearchableSelect
                       options={products
                         .filter(p => !usedProductIds.has(p.id) || p.id === row.productId)
-                        .map(p => ({ value: p.id, label: `${p.name} (${p.unitGramasi || p.unit})` }))}
+                        .filter(p => mode !== 'transfer' || (balanceMap.get(p.id) ?? 0) > 0)
+                        .map(p => {
+                          const bal = balanceMap.get(p.id)
+                          return { value: p.id, label: `${p.name} (${p.unitGramasi || p.unit})${bal !== undefined ? ` — saldo ${fmtQty(bal)}` : ''}` }
+                        })}
                       value={row.productId}
                       onChange={val => updateRow(row.id, 'productId', val)}
                       placeholder="-- Cari produk --"
@@ -137,7 +195,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <div style={{ flex: 1 }}>
+                    {mode === 'adjust' && <div style={{ flex: 1 }}>
                       <select
                         className="form-control"
                         value={row.type}
@@ -147,7 +205,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                         <option value="plus">➕ Tambah (+)</option>
                         <option value="minus">➖ Kurangi (-)</option>
                       </select>
-                    </div>
+                    </div>}
                     <div style={{ flex: 1 }}>
                       <input
                         type="number"
@@ -161,6 +219,11 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                       />
                     </div>
                   </div>
+                  {row.productId && (
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
+                      Saldo saat ini: <strong>{fmtQty(balanceMap.get(row.productId) ?? 0)} {unitOf(row.productId)}</strong>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
@@ -197,7 +260,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
               <button type="button" className="btn btn-outline" onClick={onClose} disabled={isPending}>Batal</button>
               <button type="submit" className="btn btn-primary" disabled={isPending}>
-                {isPending ? 'Memproses...' : `Simpan (${rows.filter(r => r.productId && r.quantity).length} produk)`}
+                {isPending ? 'Memproses...' : `${mode === 'transfer' ? 'Pindahkan' : 'Simpan'} (${rows.filter(r => r.productId && r.quantity).length} produk)`}
               </button>
             </div>
           </form>
