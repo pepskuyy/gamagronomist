@@ -106,7 +106,11 @@ export async function transferAfaToFo(afaId: string, foId: string, productId: st
  * Cek kecukupan saldo sebelum stok dikurangi (pemakaian / transfer).
  * Qty dalam satuan ledger. Mengembalikan daftar pesan kekurangan; kosong = cukup.
  */
-export async function findStockShortages(userId: string, items: Array<{ productId: string; qty: number }>): Promise<string[]> {
+export async function findStockShortages(
+  userId: string,
+  items: Array<{ productId: string; qty: number }>,
+  db: Prisma.TransactionClient | typeof prisma = prisma,
+): Promise<string[]> {
   const need = new Map<string, number>()
   for (const it of items) {
     if (it.qty > 0) need.set(it.productId, (need.get(it.productId) ?? 0) + it.qty)
@@ -115,8 +119,8 @@ export async function findStockShortages(userId: string, items: Array<{ productI
 
   const productIds = Array.from(need.keys())
   const [sums, products] = await Promise.all([
-    prisma.ledger.groupBy({ by: ['productId'], where: { userId, productId: { in: productIds } }, _sum: { quantity: true } }),
-    prisma.product.findMany({ where: { id: { in: productIds } }, select: { id: true, name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } }),
+    db.ledger.groupBy({ by: ['productId'], where: { userId, productId: { in: productIds } }, _sum: { quantity: true } }),
+    db.product.findMany({ where: { id: { in: productIds } }, select: { id: true, name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } }),
   ])
   const balance = new Map(sums.map(s => [s.productId, s._sum.quantity ?? 0]))
   const productMap = new Map(products.map(p => [p.id, p]))
@@ -131,6 +135,28 @@ export async function findStockShortages(userId: string, items: Array<{ productI
     }
   }
   return shortages
+}
+
+export class StockShortageError extends Error {}
+
+export function stockShortageMessage(shortages: string[]) {
+  return 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.'
+}
+
+/**
+ * Cek saldo di dalam transaksi yang akan memotong stok. Mengunci per user (advisory lock)
+ * sehingga dua submit bersamaan tidak bisa sama-sama lolos cek lalu membuat saldo minus.
+ * Melempar StockShortageError bila kurang, sehingga transaksi dibatalkan.
+ */
+export async function assertStockAvailable(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  items: Array<{ productId: string; qty: number }>,
+) {
+  if (!items.some(it => it.qty > 0)) return
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${'stock:' + userId}))`
+  const shortages = await findStockShortages(userId, items, tx)
+  if (shortages.length > 0) throw new StockShortageError(stockShortageMessage(shortages))
 }
 
 export const DEMOPLOT_USAGE_TYPES = ['USAGE_DEMOPLOT', 'DIRECT_USAGE_AFA']

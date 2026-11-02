@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { resolveAreaIdFromCoords } from '@/lib/area-resolver'
+import { assertStockAvailable, StockShortageError } from '@/lib/ledger/stock'
 
 
 /**
@@ -48,7 +49,14 @@ export async function POST(req: NextRequest) {
         if (formFields.usages) usages = JSON.parse(formFields.usages)
       } catch { usages = [] }
 
-      const spotDemplot = await prisma.spotDemplot.create({
+      // Sama seperti submit online: stok sendiri tidak boleh minus. Bila kurang, draf ditandai gagal (409)
+      // dan pesannya tampil di Antrian Offline.
+      let spotDemplot
+      try {
+      spotDemplot = await prisma.$transaction(async (tx) => {
+      await assertStockAvailable(tx, session.userId, usages.filter(u => u.actualUsage > 0 && !u.usedFarmerProduct).map(u => ({ productId: u.productId, qty: u.actualUsage })))
+
+      const spotDemplot = await tx.spotDemplot.create({
         data: {
           userId: session.userId,
           districtDesa: formFields.districtDesa || null,
@@ -66,7 +74,7 @@ export async function POST(req: NextRequest) {
 
       const validUsages = usages.filter(u => u.actualUsage > 0)
       if (validUsages.length > 0) {
-        await prisma.spotDemplotDetail.createMany({
+        await tx.spotDemplotDetail.createMany({
           data: validUsages.map(u => ({
             spotDemplotId: spotDemplot.id,
             productId: u.productId,
@@ -76,7 +84,7 @@ export async function POST(req: NextRequest) {
         })
         const ownStockUsages = validUsages.filter(u => !u.usedFarmerProduct)
         for (const u of ownStockUsages) {
-          await prisma.ledger.create({
+          await tx.ledger.create({
             data: {
               userId: session.userId,
               productId: u.productId,
@@ -88,6 +96,12 @@ export async function POST(req: NextRequest) {
             },
           })
         }
+      }
+      return spotDemplot
+      })
+      } catch (err) {
+        if (err instanceof StockShortageError) return NextResponse.json({ error: err.message }, { status: 409 })
+        throw err
       }
 
       return NextResponse.json({ success: true, id: spotDemplot.id, type })

@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { findStockShortages } from '@/lib/ledger/stock'
+import { findStockShortages, assertStockAvailable, stockShortageMessage, StockShortageError } from '@/lib/ledger/stock'
 import { reverseUsageRows } from '@/lib/ledger/stock'
 
 import { cookies } from 'next/headers'
@@ -52,7 +52,7 @@ export async function submitSpotDemplot(formData: FormData) {
     const shortages = await findStockShortages(session.userId, usages
       .filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)
       .map(u => ({ productId: u.productId, qty: u.actualUsage })))
-    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
+    if (shortages.length > 0) return { error: stockShortageMessage(shortages) }
   }
 
   try {
@@ -62,8 +62,12 @@ export async function submitSpotDemplot(formData: FormData) {
       : null
     const resolvedAreaId = geoAreaId ?? session.areaId ?? null
 
+    // Laporan, detail, dan potong stok tersimpan sekaligus; saldo dicek ulang di dalam transaksi
+    const spotDemplot = await prisma.$transaction(async (tx) => {
+    await assertStockAvailable(tx, session.userId, usages.filter(u => u.actualUsage > 0 && !u.usedFarmerProduct).map(u => ({ productId: u.productId, qty: u.actualUsage })))
+
     // 1. Create SpotDemplot record
-    const spotDemplot = await prisma.spotDemplot.create({
+    const spotDemplot = await tx.spotDemplot.create({
       data: {
         userId: session.userId,
         districtDesa,
@@ -83,7 +87,7 @@ export async function submitSpotDemplot(formData: FormData) {
     
     // 2. Save detail records (semua, termasuk produk petani)
     if (validUsages.length > 0) {
-      await prisma.spotDemplotDetail.createMany({
+      await tx.spotDemplotDetail.createMany({
         data: validUsages.map(u => ({
           spotDemplotId: spotDemplot.id,
           productId: u.productId,
@@ -95,7 +99,7 @@ export async function submitSpotDemplot(formData: FormData) {
       // Deduct stock via Ledger — HANYA untuk produk milik user (bukan produk petani)
       const ownStockUsages = validUsages.filter(u => !u.usedFarmerProduct)
       for (const u of ownStockUsages) {
-        await prisma.ledger.create({
+        await tx.ledger.create({
           data: {
             userId: session.userId,
             productId: u.productId,
@@ -108,9 +112,12 @@ export async function submitSpotDemplot(formData: FormData) {
         })
       }
     }
+    return spotDemplot
+    })
 
     return { success: true, id: spotDemplot.id }
   } catch (err: any) {
+    if (err instanceof StockShortageError) return { error: err.message }
     console.error('Submit Spot Demplot Error:', err)
     return { error: 'Gagal menyimpan data Spot Demplot.' }
   }

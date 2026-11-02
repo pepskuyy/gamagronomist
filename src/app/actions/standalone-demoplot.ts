@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { findStockShortages } from '@/lib/ledger/stock'
+import { findStockShortages, assertStockAvailable, stockShortageMessage, StockShortageError } from '@/lib/ledger/stock'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -63,7 +63,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     const shortages = await findStockShortages(session.userId, usages
       .filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)
       .map(u => ({ productId: u.productId, qty: u.actualUsage })))
-    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
+    if (shortages.length > 0) return { error: stockShortageMessage(shortages) }
   }
 
   try {
@@ -80,7 +80,11 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
       : null
     const resolvedAreaId = geoAreaId ?? session.areaId ?? null
 
-    const req = await prisma.request.create({
+    // Request, potong stok, sesi, dan detail tersimpan sekaligus; saldo dicek ulang di dalam transaksi
+    const req = await prisma.$transaction(async (tx) => {
+    await assertStockAvailable(tx, session.userId, usages.filter(u => u.actualUsage > 0 && !u.usedFarmerProduct).map(u => ({ productId: u.productId, qty: u.actualUsage })))
+
+    const req = await tx.request.create({
       data: {
         foId: session.userId,
         afaId: ['AFA', 'PLANTATION'].includes(session.role) ? session.userId : (session as any).afaId ?? null,
@@ -103,7 +107,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
 
     // Deduct stock — HANYA untuk produk milik user (bukan produk petani)
     for (const u of usages.filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)) {
-      await prisma.ledger.create({
+      await tx.ledger.create({
           data: {
             userId: session.userId,
             productId: u.productId,
@@ -117,7 +121,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     }
 
     // ✅ Save demo plot session record with CORRECT field names from schema
-    const demoPlot = await prisma.demoPlot.create({
+    const demoPlot = await tx.demoPlot.create({
       data: {
         requestId: req.id,
         farmerId: farmer.id,
@@ -139,7 +143,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     // ✅ Save DemoPlotDetail entries
     const validUsages = usages.filter(u => u.actualUsage > 0)
     if (validUsages.length > 0) {
-      await prisma.demoPlotDetail.createMany({
+      await tx.demoPlotDetail.createMany({
         data: validUsages.map(u => ({
           demoPlotId: demoPlot.id,
           productId: u.productId,
@@ -148,6 +152,9 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
         })),
       })
     }
+
+    return req
+    })
 
     // Notify SPV/AFA
     if (session.role === 'FO' && session.afaId) {
@@ -179,6 +186,7 @@ export async function submitStandaloneDemoPlot(formData: FormData) {
     revalidatePath('/dashboard/demoplot')
     return { success: true, requestId: req.id }
   } catch (err: any) {
+    if (err instanceof StockShortageError) return { error: err.message }
     console.error('Standalone demo plot error:', err)
     return { error: `Gagal menyimpan realisasi demo plot: ${err.message}` }
   }
@@ -221,7 +229,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
     const shortages = await findStockShortages(session.userId, usages
       .filter(u => u.actualUsage > 0 && !u.usedFarmerProduct)
       .map(u => ({ productId: u.productId, qty: u.actualUsage })))
-    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
+    if (shortages.length > 0) return { error: stockShortageMessage(shortages) }
   }
 
   try {
@@ -231,8 +239,11 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
     })
     if (!req) return { error: 'Data demo plot tidak ditemukan.' }
 
+    await prisma.$transaction(async (tx) => {
+    await assertStockAvailable(tx, session.userId, usages.filter(u => u.actualUsage > 0 && !u.usedFarmerProduct).map(u => ({ productId: u.productId, qty: u.actualUsage })))
+
     // Create new DemoPlot session
-    const demoPlot = await prisma.demoPlot.create({
+    const demoPlot = await tx.demoPlot.create({
       data: {
         requestId,
         farmerId: req.farmerId ?? undefined,
@@ -253,7 +264,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
     // Save DemoPlotDetail entries
     const validUsages = usages.filter(u => u.actualUsage > 0)
     if (validUsages.length > 0) {
-      await prisma.demoPlotDetail.createMany({
+      await tx.demoPlotDetail.createMany({
         data: validUsages.map(u => ({
           demoPlotId: demoPlot.id,
           productId: u.productId,
@@ -264,7 +275,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
 
       // Deduct stock — HANYA untuk produk milik user (bukan produk petani)
       for (const u of validUsages.filter(u => !u.usedFarmerProduct)) {
-        await prisma.ledger.create({
+        await tx.ledger.create({
           data: {
             userId: session.userId,
             productId: u.productId,
@@ -281,11 +292,12 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
 
     // If final — mark request as done
     if (isFinalSession) {
-      await prisma.request.update({
+      await tx.request.update({
         where: { id: requestId },
         data: { status: 'DEMO_PLOT_SELESAI' }
       })
     }
+    })
 
     // Notify SPV/AFA
     if (session.role === 'FO' && session.afaId) {
@@ -317,6 +329,7 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
     revalidatePath('/dashboard/demoplot')
     return { success: true }
   } catch (err: any) {
+    if (err instanceof StockShortageError) return { error: err.message }
     console.error('Continue demo plot error:', err)
     return { error: `Gagal menyimpan sesi lanjutan: ${err.message}` }
   }

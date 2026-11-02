@@ -1,7 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
-import { findStockShortages } from '@/lib/ledger/stock'
+import { findStockShortages, assertStockAvailable, stockShortageMessage, StockShortageError } from '@/lib/ledger/stock'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
@@ -52,10 +52,13 @@ export async function submitDemoPlotSession(formData: FormData) {
 
     // Saldo tidak boleh minus karena pemakaian
     const shortages = await findStockShortages(session.userId, usages.map(u => ({ productId: u.productId, qty: u.actualUsage })))
-    if (shortages.length > 0) return { error: 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\nAjukan stok ke AFA atau hubungi admin untuk penyesuaian.' }
+    if (shortages.length > 0) return { error: stockShortageMessage(shortages) }
 
     // Gunakan transaksi untuk memastikan ledger dan demo plot tersimpan sekaligus
     await prisma.$transaction(async (tx) => {
+      // Cek ulang di dalam transaksi (terkunci per user) agar submit ganda tidak membuat saldo minus
+      await assertStockAvailable(tx, session.userId, usages.map(u => ({ productId: u.productId, qty: u.actualUsage })))
+
       // 1. Buat Header Demo Plot
       const demoPlot = await tx.demoPlot.create({
         data: {
@@ -108,6 +111,7 @@ export async function submitDemoPlotSession(formData: FormData) {
     revalidatePath('/dashboard/demoplot')
     return { success: true }
   } catch (err: any) {
+    if (err instanceof StockShortageError) return { error: err.message }
     console.error('Demo Plot Execution Error:', err)
     return { error: 'Terjadi kesalahan sistem saat merekam aktivitas.' }
   }
