@@ -14,6 +14,7 @@ type LedgerRow = {
   product: { name: string; unit: string }
 }
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
+type Owner = { id: string; name: string; role: string }
 
 // ── Searchable product combobox ───────────────────────────────────────────────
 function ProductCombobox({
@@ -175,16 +176,37 @@ export default function SampleStockPage() {
   const [editLoading, setEditLoading] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
 
-  useEffect(() => { fetchAll() }, [])
+  // ADMIN: pilih Gudang Sampel milik SPV lain (hanya baca). Kosong = gudang sendiri.
+  const [owners, setOwners] = useState<Owner[]>([])
+  const [myId, setMyId] = useState<string | null>(null)
+  const [ownerId, setOwnerId] = useState('')
+  const viewingOther = ownerId !== '' && ownerId !== myId
+  const fetchSeq = useRef(0)
+
+  useEffect(() => {
+    // Endpoint owners hanya untuk ADMIN; SPV mendapat 403 dan pemilih tidak ditampilkan
+    fetch('/api/sample-stock?view=owners')
+      .then(r => (r.ok ? r.json() : null))
+      .then(d => { if (d) { setOwners(d.owners); setMyId(d.me) } })
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    fetchAll()
+    if (viewingOther && tab === 'add') setTab('balance')
+  }, [ownerId])
 
   async function fetchAll() {
+    const seq = ++fetchSeq.current
     setLoading(true)
+    const q = ownerId ? `&userId=${encodeURIComponent(ownerId)}` : ''
     const [balRes, ledRes] = await Promise.all([
-      fetch('/api/sample-stock?view=balance'),
-      fetch('/api/sample-stock?view=ledger'),
+      fetch(`/api/sample-stock?view=balance${q}`),
+      fetch(`/api/sample-stock?view=ledger${q}`),
     ])
-    if (balRes.ok) setBalances(await balRes.json())
-    if (ledRes.ok) setLedger(await ledRes.json())
+    if (seq !== fetchSeq.current) return
+    setBalances(balRes.ok ? await balRes.json() : [])
+    setLedger(ledRes.ok ? await ledRes.json() : [])
     setLoading(false)
   }
 
@@ -316,9 +338,30 @@ export default function SampleStockPage() {
         </div>
       </div>
 
+      {owners.length > 0 && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <label htmlFor="sample-owner" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Lihat gudang milik:</label>
+          <select
+            id="sample-owner"
+            className="form-control"
+            value={ownerId}
+            onChange={e => setOwnerId(e.target.value)}
+            style={{ maxWidth: 320 }}
+          >
+            <option value="">Gudang saya</option>
+            {owners.filter(o => o.id !== myId).map(o => (
+              <option key={o.id} value={o.id}>{o.name}{o.role !== 'SPV' ? ` (${o.role})` : ''}</option>
+            ))}
+          </select>
+          {viewingOther && (
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Mode lihat saja — tambah, edit, hapus, dan opname hanya dari akun pemiliknya.</span>
+          )}
+        </div>
+      )}
+
       {/* Tab Bar */}
       <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--border)', flexWrap: 'wrap' }}>
-        {([['balance', '📦 Saldo Stok'], ['add', '➕ Tambah Stok Masuk'], ['history', '📋 Riwayat']] as const).map(([key, label]) => (
+        {([['balance', '📦 Saldo Stok'], ['add', '➕ Tambah Stok Masuk'], ['history', '📋 Riwayat']] as const).filter(([key]) => !(viewingOther && key === 'add')).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
             padding: '0.6rem 1.2rem', border: 'none', background: 'none', cursor: 'pointer',
             fontWeight: tab === key ? 700 : 400,
@@ -351,7 +394,7 @@ export default function SampleStockPage() {
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
               <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</p>
               <p>Belum ada stok di Gudang Sampel.</p>
-              <button onClick={() => setTab('add')} className="btn btn-primary" style={{ marginTop: '1rem' }}>+ Tambah Stok Masuk</button>
+              {!viewingOther && <button onClick={() => setTab('add')} className="btn btn-primary" style={{ marginTop: '1rem' }}>+ Tambah Stok Masuk</button>}
             </div>
           ) : filteredBalances.length === 0 ? (
             <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
@@ -361,7 +404,7 @@ export default function SampleStockPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  {['Produk', 'Kode SKU', 'Saldo Stok', 'Satuan', 'Aksi'].map(h => <th key={h} style={{ ...thStyle, textAlign: h === 'Aksi' ? 'center' : 'left' }}>{h}</th>)}
+                  {['Produk', 'Kode SKU', 'Saldo Stok', 'Satuan', ...(viewingOther ? [] : ['Aksi'])].map(h => <th key={h} style={{ ...thStyle, textAlign: h === 'Aksi' ? 'center' : 'left' }}>{h}</th>)}
                 </tr>
               </thead>
               <tbody>
@@ -401,7 +444,7 @@ export default function SampleStockPage() {
                       )}
                     </td>
                     <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{b.unit}</td>
-                    <td style={{ ...tdStyle, textAlign: 'center' }}>
+                    {!viewingOther && <td style={{ ...tdStyle, textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
                         <button
                           onClick={() => openEditModal(b)}
@@ -425,7 +468,7 @@ export default function SampleStockPage() {
                           🗑️ Hapus
                         </button>
                       </div>
-                    </td>
+                    </td>}
                   </tr>
                 ))}
               </tbody>

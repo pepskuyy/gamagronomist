@@ -3,7 +3,8 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import prisma from '@/lib/prisma'
 
-// GET /api/sample-stock?view=balance|ledger
+// GET /api/sample-stock?view=balance|ledger|owners[&userId=]
+// ADMIN boleh melihat Gudang Sampel milik SPV lain lewat userId (hanya baca).
 export async function GET(req: Request) {
   try {
     const cookieStore = await cookies()
@@ -14,10 +15,31 @@ export async function GET(req: Request) {
 
     const { searchParams } = new URL(req.url)
     const view = searchParams.get('view') || 'balance'
+    const isAdmin = session.role === 'ADMIN'
+
+    if (view === 'owners') {
+      // Daftar pemilik Gudang Sampel yang bisa dipilih ADMIN: semua SPV aktif + siapa pun yang punya transaksi sampel
+      if (!isAdmin) return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
+      const withLedger = await prisma.sampleLedger.findMany({ distinct: ['userId'], select: { userId: true } })
+      const users = await prisma.user.findMany({
+        where: {
+          OR: [
+            { role: 'SPV', isActive: true },
+            { id: { in: withLedger.map(l => l.userId) } },
+          ],
+        },
+        select: { id: true, name: true, role: true },
+        orderBy: { name: 'asc' },
+      })
+      return NextResponse.json({ me: session.userId, owners: users })
+    }
+
+    const requestedUserId = searchParams.get('userId')
+    const ownerId = isAdmin && requestedUserId ? requestedUserId : session.userId
 
     // Full ledger history
     const ledgers = await prisma.sampleLedger.findMany({
-      where: { userId: session.userId },
+      where: { userId: ownerId },
       include: { product: { select: { id: true, name: true, code: true, accurateId: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } },
       orderBy: { createdAt: 'asc' },
     })
