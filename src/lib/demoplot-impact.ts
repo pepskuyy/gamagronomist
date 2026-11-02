@@ -12,6 +12,8 @@ export interface DemoplotProductUsage {
   sampleUnit: string
   /** sampleQty dalam liter/kg (÷1000); null bila produk tidak bergramasi */
   sampleLiterKg: number | null
+  /** Kode barang Accurate (= item_no di faktur), huruf kecil; null bila belum terhubung */
+  sku: string | null
 }
 
 export interface ProductImpactResult {
@@ -29,8 +31,14 @@ export interface ProductImpactResult {
   sample_qty: number
   sample_unit: string
   sample_liter_kg: number | null
-  /** PCS terjual 60 hari sesudah ÷ sampel (L/kg); null bila sampel L/kg tidak ada */
+  /** PCS (kemasan dasar) SKU yang sama persis dengan produk demplot, 60 hari sesudah; null bila produk tanpa kode SKU */
+  same_sku_after_pcs: number | null
+  /** same_sku_after_pcs ÷ sampel (L/kg); null bila tidak bisa dihitung */
   pcs_per_liter_kg: number | null
+  /** Volume terjual (L/kg) semua ukuran kemasan produk ini, 60 hari sesudah */
+  sold_volume_liter_kg: number
+  /** sold_volume_liter_kg ÷ sampel (L/kg); null bila tidak bisa dihitung */
+  volume_per_liter_kg: number | null
 }
 
 export interface StoreImpactItem {
@@ -72,10 +80,14 @@ export interface DemoImpactSummary {
   after_omset: number
   /** Total sampel (L dan kg dijumlahkan, asumsi 1 L ≈ 1 kg); null bila tidak ada sampel ber-gramasi */
   sample_liter_kg: number | null
-  /** PCS terjual 60 hari sesudah dari produk yang punya sampel L/kg */
+  /** PCS (kemasan dasar) SKU sama yang terjual 60 hari sesudah, dari produk bersampel yang punya kode SKU */
   sold_after_qty_sampled: number
-  /** sold_after_qty_sampled ÷ sample_liter_kg, 1 desimal; null bila sampel tidak ada */
+  /** sold_after_qty_sampled ÷ sampel produk tersebut (L/kg), 1 desimal; null bila tidak bisa dihitung */
   pcs_per_liter_kg: number | null
+  /** Volume terjual (L/kg, semua ukuran kemasan) 60 hari sesudah dari produk bersampel */
+  sold_volume_liter_kg: number
+  /** sold_volume_liter_kg ÷ sample_liter_kg (berapa kali lipat sampel), 1 desimal; null bila tidak bisa dihitung */
+  volume_per_liter_kg: number | null
 }
 
 export interface DemoplotImpactDetail {
@@ -234,7 +246,7 @@ interface StoreRef {
   longitude: number
 }
 
-interface InvItem { name: string; qty: number; omset: number; unit: string }
+interface InvItem { name: string; qty: number; omset: number; unit: string; itemNo: string }
 interface ProcessedInv { id: string; date: string; omset: number; items: InvItem[] }
 
 async function loadStores(): Promise<StoreRef[]> {
@@ -268,9 +280,83 @@ function processInvoice(inv: { id: string; tanggal: Date; status: string | null;
       qty: qty * sign,
       omset: omset * sign,
       unit: String(it?.unit || 'PCS'),
+      itemNo: String(it?.item_no || '').trim().toLowerCase(),
     })
   }
   return { id: inv.id, date: toDateStr(inv.tanggal), omset: (Number(inv.omset) || 0) * sign, items }
+}
+
+// -------------------------------------------------------------
+// Tabel satuan per SKU (kode item faktur)
+// -------------------------------------------------------------
+/**
+ * Faktur Sales Dashboard mencatat qty dalam satuan transaksi (Btl, Bks, Box/karton, Sak, ...),
+ * tanpa rasio karton. Rasio diturunkan dari median harga satuan tiap unit per SKU:
+ * unit termurah = kemasan dasar (rasio 1), unit lain = round(median harga unit ÷ median harga dasar).
+ * Contoh: Abacel 100 ml Btl ≈ Rp26.400, Box ≈ Rp1.362.500 → 1 Box ≈ 52 Btl.
+ * Isi per kemasan dasar (ml/gr) diambil dari master produk lewat Product.accurateId = item_no.
+ */
+interface SkuInfo { ratios: Map<string, number>; gramasiPerUnit: number | null }
+const SKU_CACHE_TTL_MS = 10 * 60_000
+let skuCache: { expires: number; value: Map<string, SkuInfo> } | null = null
+
+async function loadSkuTable(): Promise<Map<string, SkuInfo>> {
+  if (skuCache && skuCache.expires > Date.now()) return skuCache.value
+
+  const [invoices, products] = await Promise.all([
+    prisma.dashboardInvoice.findMany({ select: { items: true } }),
+    prisma.product.findMany({
+      where: { accurateId: { not: null } },
+      select: { accurateId: true, unit: true, unitGramasi: true, gramasiPerUnit: true },
+    }),
+  ])
+
+  const prices = new Map<string, Map<string, number[]>>()
+  for (const inv of invoices) {
+    let raw: unknown = inv.items
+    if (typeof raw === 'string') { try { raw = JSON.parse(raw) } catch { raw = [] } }
+    for (const it of Array.isArray(raw) ? (raw as any[]) : []) {
+      const no = String(it?.item_no || '').trim().toLowerCase()
+      const unit = String(it?.unit || '').trim().toLowerCase()
+      const price = Number(it?.unit_price)
+      if (!no || !unit || !(price > 0)) continue
+      const byUnit = prices.get(no) || new Map<string, number[]>()
+      const list = byUnit.get(unit) || []
+      list.push(price)
+      byUnit.set(unit, list)
+      prices.set(no, byUnit)
+    }
+  }
+
+  const median = (a: number[]) => {
+    const s = [...a].sort((x, y) => x - y)
+    const m = Math.floor(s.length / 2)
+    return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2
+  }
+  const gramBySku = new Map<string, number>()
+  for (const p of products) {
+    if (hasGramasi(p)) gramBySku.set(String(p.accurateId).trim().toLowerCase(), p.gramasiPerUnit as number)
+  }
+
+  const table = new Map<string, SkuInfo>()
+  for (const [no, byUnit] of prices) {
+    const medians = Array.from(byUnit.entries()).map(([u, list]) => [u, median(list)] as const)
+    const base = Math.min(...medians.map(([, m]) => m))
+    const ratios = new Map<string, number>()
+    for (const [u, m] of medians) ratios.set(u, Math.max(1, Math.round(m / base)))
+    table.set(no, { ratios, gramasiPerUnit: gramBySku.get(no) ?? null })
+  }
+  // SKU di master yang belum pernah punya harga di faktur: tetap catat isi per kemasannya (rasio 1)
+  for (const [no, g] of gramBySku) if (!table.has(no)) table.set(no, { ratios: new Map(), gramasiPerUnit: g })
+
+  skuCache = { expires: Date.now() + SKU_CACHE_TTL_MS, value: table }
+  return table
+}
+
+/** Qty faktur → kemasan dasar (mis. 2 Box → 100 Btl). Unit tanpa data harga dianggap kemasan dasar. */
+function toBasePcs(sku: Map<string, SkuInfo>, it: InvItem): number {
+  const ratio = sku.get(it.itemNo)?.ratios.get(it.unit.trim().toLowerCase()) ?? 1
+  return it.qty * ratio
 }
 
 /** Invoice toko-toko terpilih dalam rentang tanggal WIB [fromStr, toStr], dikelompokkan per id toko. */
@@ -324,6 +410,7 @@ interface ComputeInput {
   longitude: number
   products: string[]            // urutan menentukan atribusi item
   sampleLiterKg?: Array<number | null> // sejajar dengan products
+  skus?: Array<string | null>          // kode SKU produk demplot, sejajar dengan products
 }
 
 interface StoreCalc {
@@ -341,12 +428,14 @@ interface ComputeResult {
   inRadius: Array<{ store: StoreRef; distance: number }>
   perStore: Map<string, StoreCalc>
   productTotals: { beforeQty: number[]; afterQty: number[]; beforeOmset: number[]; afterOmset: number[] }
+  /** PCS kemasan dasar SKU sama (sesudah) dan volume terjual L/kg (sesudah), per produk */
+  yieldTotals: { sameSkuPcs: number[]; volumeLiterKg: number[] }
   matcher: (itemName: string) => number
   window: { from: string; to: string } | null
 }
 
-/** PCS terjual per 1 L/kg sampel (1 desimal). Terjual neto bisa negatif karena retur → dibatasi 0. */
-function pcsPerLiterKg(sold: number, sampleLiterKg: number | null | undefined): number | null {
+/** Rasio terhadap sampel (1 desimal). Terjual neto bisa negatif karena retur → dibatasi 0. */
+function perSample(sold: number, sampleLiterKg: number | null | undefined): number | null {
   if (!sampleLiterKg || sampleLiterKg <= 0) return null
   return Math.round((Math.max(0, sold) / sampleLiterKg) * 10) / 10
 }
@@ -355,13 +444,18 @@ function computeDemoImpact(
   demo: ComputeInput,
   stores: StoreRef[],
   invoicesByStore: Map<string, ProcessedInv[]>,
-  radiusKm: number
+  radiusKm: number,
+  sku: Map<string, SkuInfo> = new Map()
 ): ComputeResult {
   const inRadius = storesWithin(stores, demo.latitude, demo.longitude, radiusKm)
   const { analyzed, capped } = selectAnalyzed(inRadius)
   const n = demo.products.length
   const zeros = () => new Array<number>(n).fill(0)
   const productTotals = { beforeQty: zeros(), afterQty: zeros(), beforeOmset: zeros(), afterOmset: zeros() }
+  const yieldTotals = { sameSkuPcs: zeros(), volumeLiterKg: zeros() }
+  // SKU produk demplot → indeks (untuk PCS SKU sama, tidak bergantung pencocokan nama)
+  const skuIndex = new Map<string, number>()
+  demo.skus?.forEach((code, i) => { if (code && !skuIndex.has(code)) skuIndex.set(code, i) })
   const perStore = new Map<string, StoreCalc>()
   const matcher = makeProductMatcher(demo.products)
   let impacted = 0
@@ -379,11 +473,17 @@ function computeDemoImpact(
         const isAfter = inv.date >= demo.date!
         ;(isAfter ? calc.after : calc.before).push(inv)
         for (const it of inv.items) {
+          if (isAfter) {
+            const skuIdx = it.itemNo ? skuIndex.get(it.itemNo) : undefined
+            if (skuIdx !== undefined) yieldTotals.sameSkuPcs[skuIdx] += toBasePcs(sku, it)
+          }
           const idx = matcher(it.name)
           if (idx < 0) continue
           if (isAfter) {
             calc.afterByProduct[idx] += it.qty
             calc.afterOmsetByProduct[idx] += it.omset
+            const g = sku.get(it.itemNo)?.gramasiPerUnit
+            if (g) yieldTotals.volumeLiterKg[idx] += (toBasePcs(sku, it) * g) / 1000
           } else {
             calc.beforeByProduct[idx] += it.qty
             calc.beforeOmsetByProduct[idx] += it.omset
@@ -416,25 +516,36 @@ function computeDemoImpact(
     sample_liter_kg: null,
     sold_after_qty_sampled: 0,
     pcs_per_liter_kg: null,
+    sold_volume_liter_kg: 0,
+    volume_per_liter_kg: null,
   }
-  // Rasio sampel → penjualan: PCS terjual 60 hari sesudah per 1 L/kg sampel (hanya produk bersampel L/kg)
+  // Rasio sampel → penjualan (hanya produk bersampel L/kg).
+  //  - PCS SKU sama: hanya produk yang punya kode SKU; penyebutnya sampel produk-produk itu saja.
+  //  - Volume: semua ukuran kemasan produk yang cocok, dikonversi ke L/kg.
   let sampleTotal = 0
-  let soldSampled = 0
+  let sampleWithSku = 0
+  let pcsSameSku = 0
+  let volume = 0
   demo.sampleLiterKg?.forEach((lk, i) => {
-    if (lk && lk > 0) {
-      sampleTotal += lk
-      soldSampled += productTotals.afterQty[i]
+    if (!lk || lk <= 0) return
+    sampleTotal += lk
+    volume += yieldTotals.volumeLiterKg[i]
+    if (demo.skus?.[i]) {
+      sampleWithSku += lk
+      pcsSameSku += yieldTotals.sameSkuPcs[i]
     }
   })
+  const measurable = analyzed.length > 0 // tanpa toko yang dianalisa, penjualan tidak bisa diukur → "-"
   summary.sample_liter_kg = sampleTotal > 0 ? Math.round(sampleTotal * 1000) / 1000 : null
-  summary.sold_after_qty_sampled = soldSampled
-  // Tanpa toko yang dianalisa, penjualan tidak bisa diukur → rasio "-" (bukan 0)
-  summary.pcs_per_liter_kg = analyzed.length > 0 ? pcsPerLiterKg(soldSampled, sampleTotal) : null
+  summary.sold_after_qty_sampled = Math.round(pcsSameSku * 100) / 100
+  summary.pcs_per_liter_kg = measurable ? perSample(pcsSameSku, sampleWithSku) : null
+  summary.sold_volume_liter_kg = Math.round(volume * 1000) / 1000
+  summary.volume_per_liter_kg = measurable ? perSample(volume, sampleTotal) : null
 
   // Flag "Terdampak" (⭐): ada produk yang total qty sesudah > sebelum dan sesudah > 0.
   const hasImpact = productTotals.afterQty.some((q, i) => q > 0 && q > productTotals.beforeQty[i])
 
-  return { summary, has_impact: hasImpact, inRadius, perStore, productTotals, matcher, window }
+  return { summary, has_impact: hasImpact, inRadius, perStore, productTotals, yieldTotals, matcher, window }
 }
 
 // -------------------------------------------------------------
@@ -447,7 +558,7 @@ const demoGroupInclude = {
       id: true,
       commodity: true,
       fo: { select: { name: true } },
-      details: { select: { qtyApproved: true, qtyRequested: true, requestUnit: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
+      details: { select: { qtyApproved: true, qtyRequested: true, requestUnit: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true, accurateId: true } } } },
     },
   },
 } as const
@@ -465,7 +576,7 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
     select: {
       id: true,
       requestId: true,
-      details: { select: { actualUsage: true, usedFarmerProduct: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
+      details: { select: { actualUsage: true, usedFarmerProduct: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true, accurateId: true } } } },
     },
     orderBy: { createdAt: 'asc' },
   })
@@ -497,6 +608,7 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
           sampleQty: sampleUsage,
           sampleUnit: gram ? (d.product.unitGramasi as string) : unit,
           sampleLiterKg: gram ? sampleUsage / 1000 : null,
+          sku: d.product?.accurateId ? d.product.accurateId.trim().toLowerCase() : null,
         })
       }
     }
@@ -525,6 +637,7 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
           sampleQty: qty,
           sampleUnit: gram ? (rd.product.unitGramasi as string) : (rd.requestUnit || unit),
           sampleLiterKg: gram ? qty / 1000 : null,
+          sku: rd.product?.accurateId ? String(rd.product.accurateId).trim().toLowerCase() : null,
         })
       }
     }
@@ -544,7 +657,7 @@ export async function calculateDemoplotImpact(activityId: string, radiusKm: numb
   const demoplotProducts = productsMap.get(dp.id) || []
   const date = toDateStr(dp.date)
 
-  const stores = await loadStores()
+  const [stores, skuTable] = await Promise.all([loadStores(), loadSkuTable()])
   const inRadius = storesWithin(stores, dp.latitude, dp.longitude, radiusKm)
   const { analyzed } = selectAnalyzed(inRadius)
   const invoicesByStore = await loadInvoicesByStore(
@@ -556,8 +669,9 @@ export async function calculateDemoplotImpact(activityId: string, radiusKm: numb
       date, latitude: dp.latitude, longitude: dp.longitude,
       products: demoplotProducts.map(p => p.name),
       sampleLiterKg: demoplotProducts.map(p => p.sampleLiterKg),
+      skus: demoplotProducts.map(p => p.sku),
     },
-    stores, invoicesByStore, radiusKm
+    stores, invoicesByStore, radiusKm, skuTable
   )
 
   // Per produk
@@ -588,7 +702,10 @@ export async function calculateDemoplotImpact(activityId: string, radiusKm: numb
       sample_qty: p.sampleQty,
       sample_unit: p.sampleUnit,
       sample_liter_kg: p.sampleLiterKg,
-      pcs_per_liter_kg: pcsPerLiterKg(afterQty, p.sampleLiterKg),
+      same_sku_after_pcs: p.sku ? Math.round(calc.yieldTotals.sameSkuPcs[i] * 100) / 100 : null,
+      pcs_per_liter_kg: p.sku && calc.summary.analyzed_store_count > 0 ? perSample(calc.yieldTotals.sameSkuPcs[i], p.sampleLiterKg) : null,
+      sold_volume_liter_kg: Math.round(calc.yieldTotals.volumeLiterKg[i] * 1000) / 1000,
+      volume_per_liter_kg: calc.summary.analyzed_store_count > 0 ? perSample(calc.yieldTotals.volumeLiterKg[i], p.sampleLiterKg) : null,
     }
   })
 
@@ -727,7 +844,7 @@ export async function getDemoplotsWithImpactSummary(fromDate: string | undefined
   )
 
   // Muat toko sekali, lalu invoice sekali untuk semua toko yang dianalisa di demplot mana pun
-  const stores = await loadStores()
+  const [stores, skuTable] = await Promise.all([loadStores(), loadSkuTable()])
   const analyzedIds = new Set<string>()
   let minDate: string | null = null
   let maxDate: string | null = null
@@ -749,8 +866,9 @@ export async function getDemoplotsWithImpactSummary(fromDate: string | undefined
       {
         date: toDateStr(dp.date), latitude: dp.latitude!, longitude: dp.longitude!, products,
         sampleLiterKg: productUsages.map(p => p.sampleLiterKg),
+        skus: productUsages.map(p => p.sku),
       },
-      stores, invoicesByStore, radiusKm
+      stores, invoicesByStore, radiusKm, skuTable
     )
     return {
       id: dp.id,

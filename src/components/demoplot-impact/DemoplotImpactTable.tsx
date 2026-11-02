@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import PaginationBar from '@/components/PaginationBar'
 import type { MapDemoplotItem } from './DemoplotImpactMapInner'
-import { getImpactTier, formatImpactPct, formatKm, HELP_IMPACT_PCT, formatPcsPerLiter, formatLiterKg, HELP_SAMPLE_YIELD } from '@/lib/impact-tier'
+import { getImpactTier, formatImpactPct, formatKm, HELP_IMPACT_PCT, formatPcsPerLiter, formatLiterKg, formatVolumeRatio, HELP_SAMPLE_YIELD } from '@/lib/impact-tier'
 import { formatDateId } from '@/lib/date-utils'
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   periodLabel: string
 }
 
-type SortKey = 'date' | 'pct' | 'yield'
+type SortKey = 'date' | 'pct' | 'yield' | 'volume'
 const PAGE_SIZE = 15
 
 function sortRows(rows: MapDemoplotItem[], key: SortKey) {
@@ -31,11 +31,12 @@ function sortRows(rows: MapDemoplotItem[], key: SortKey) {
       if (pb !== pa) return pb - pa
       return (b.impact?.impacted_store_count ?? 0) - (a.impact?.impacted_store_count ?? 0)
     })
-  } else if (key === 'yield') {
-    // PCS per L/kg sampel menurun; null di paling bawah
+  } else if (key === 'yield' || key === 'volume') {
+    // Rasio menurun; null di paling bawah
+    const pick = (r: MapDemoplotItem) => (key === 'yield' ? r.impact?.pcs_per_liter_kg : r.impact?.volume_per_liter_kg) ?? null
     out.sort((a, b) => {
-      const ya = a.impact?.pcs_per_liter_kg ?? null
-      const yb = b.impact?.pcs_per_liter_kg ?? null
+      const ya = pick(a)
+      const yb = pick(b)
       if (ya === null && yb === null) return 0
       if (ya === null) return 1
       if (yb === null) return -1
@@ -55,10 +56,24 @@ function YieldCell({ dp, loading }: { dp: MapDemoplotItem; loading: boolean }) {
   if (!imp || imp.pcs_per_liter_kg === null || imp.pcs_per_liter_kg === undefined) {
     return <span style={{ color: 'var(--text-muted)' }}>-</span>
   }
-  const tip = `${qtyFmt.format(Math.max(0, imp.sold_after_qty_sampled))} PCS terjual dari ${formatLiterKg(imp.sample_liter_kg)} sampel`
+  const tip = `${qtyFmt.format(Math.max(0, imp.sold_after_qty_sampled))} PCS SKU sama terjual dari ${formatLiterKg(imp.sample_liter_kg)} sampel`
   return (
     <span title={tip} style={{ fontWeight: 800, color: '#0369a1', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
       {formatPcsPerLiter(imp.pcs_per_liter_kg)}
+    </span>
+  )
+}
+
+function VolumeCell({ dp, loading }: { dp: MapDemoplotItem; loading: boolean }) {
+  if (loading) return <span style={{ color: 'var(--text-muted)' }}>…</span>
+  const imp = dp.impact
+  if (!imp || imp.volume_per_liter_kg === null || imp.volume_per_liter_kg === undefined) {
+    return <span style={{ color: 'var(--text-muted)' }}>-</span>
+  }
+  const tip = `${formatLiterKg(Math.max(0, imp.sold_volume_liter_kg))} terjual (semua ukuran) dari ${formatLiterKg(imp.sample_liter_kg)} sampel`
+  return (
+    <span title={tip} style={{ fontWeight: 800, color: '#0f766e', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+      {formatVolumeRatio(imp.volume_per_liter_kg)}
     </span>
   )
 }
@@ -101,7 +116,8 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
         'Tanggal', 'Petani', 'Komoditas', 'Area', 'FO', 'Produk',
         `Jumlah Toko (Radius ${radiusLabel})`, 'Toko Dianalisa', 'Toko Terdampak', '% Toko Terdampak',
         'Terdampak', 'Omset Sebelum (60 hari)', 'Omset Sesudah (60 hari)',
-        'Sampel (L/kg)', 'PCS Terjual 60 Hari Sesudah (produk bersampel)', 'PCS per L/kg Sampel',
+        'Sampel (L/kg)', 'PCS SKU Sama Terjual 60 Hari Sesudah', 'PCS SKU Sama per L/kg Sampel',
+        'Volume Terjual 60 Hari Sesudah (L/kg)', 'Volume Terjual ÷ Volume Sampel',
       ]
       const rows = sorted.map((dp) => {
         const imp = dp.impact
@@ -115,6 +131,8 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
           imp?.sample_liter_kg ?? '-',
           imp?.sample_liter_kg ? Math.max(0, imp.sold_after_qty_sampled) : '-',
           imp?.pcs_per_liter_kg ?? '-',
+          imp?.sample_liter_kg ? Math.max(0, imp.sold_volume_liter_kg) : '-',
+          imp?.volume_per_liter_kg ?? '-',
         ]
       })
       const info = [
@@ -130,10 +148,12 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
       for (let r = 0; r < rows.length; r++) {
         const cell = ws[XLSX.utils.encode_cell({ r: firstDataRow + r, c: 9 })]
         if (cell && cell.t === 'n') cell.z = '0.0'
-        const yieldCell = ws[XLSX.utils.encode_cell({ r: firstDataRow + r, c: 15 })]
-        if (yieldCell && yieldCell.t === 'n') yieldCell.z = '0.0'
+        for (const c of [15, 17]) {
+          const ratioCell = ws[XLSX.utils.encode_cell({ r: firstDataRow + r, c })]
+          if (ratioCell && ratioCell.t === 'n') ratioCell.z = '0.0'
+        }
       }
-      ws['!cols'] = [12, 22, 12, 22, 18, 40, 22, 14, 14, 16, 11, 20, 20, 14, 22, 18].map((wch) => ({ wch }))
+      ws['!cols'] = [12, 22, 12, 22, 18, 40, 22, 14, 14, 16, 11, 20, 20, 14, 22, 18, 22, 18].map((wch) => ({ wch }))
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, ws, 'Dampak Demplot')
       XLSX.writeFile(wb, `dampak_demplot_radius_${String(radiusKm).replace('.', ',')}km_${new Date().toISOString().slice(0, 10)}.xlsx`)
@@ -174,6 +194,7 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
             <option value="date">Urut: tanggal terbaru</option>
             <option value="pct">Urut: % terdampak</option>
             <option value="yield">Urut: PCS per L/kg sampel</option>
+            <option value="volume">Urut: volume terjual ÷ sampel</option>
           </select>
           <button
             type="button"
@@ -213,6 +234,7 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
               <th style={{ textAlign: 'right' }}>
                 PCS / L·kg Sampel <span title={HELP_SAMPLE_YIELD(radiusLabel)} style={{ cursor: 'help', color: '#94a3b8' }}>ⓘ</span>
               </th>
+              <th style={{ textAlign: 'right' }}>Volume Terjual ÷ Sampel</th>
               <th style={{ textAlign: 'center' }}>Terdampak</th>
             </tr>
           </thead>
@@ -236,12 +258,15 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
                 <td style={{ textAlign: 'right' }}>
                   <YieldCell dp={dp} loading={loading} />
                 </td>
+                <td style={{ textAlign: 'right' }}>
+                  <VolumeCell dp={dp} loading={loading} />
+                </td>
                 <td style={{ textAlign: 'center' }}>{dp.has_impact ? '⭐' : ''}</td>
               </tr>
             ))}
             {!loading && demoplots.length === 0 && (
               <tr>
-                <td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan={10} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Tidak ada demplot berkoordinat pada periode ini.
                 </td>
               </tr>
@@ -282,7 +307,7 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
               {loading ? '…' : `${dp.impact?.impacted_store_count ?? 0} dari ${dp.impact?.store_count ?? 0} toko di radius ${radiusLabel}`}
             </div>
             <div style={{ marginTop: '0.2rem', fontSize: '0.75rem', color: '#475569' }}>
-              Sampel → penjualan: <YieldCell dp={dp} loading={loading} />
+              Sampel → penjualan: <YieldCell dp={dp} loading={loading} /> · <VolumeCell dp={dp} loading={loading} />
             </div>
           </button>
         ))}

@@ -65,8 +65,15 @@ export function formatLiterKg(value: number | null | undefined): string {
   return `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 }).format(value)} L/kg`
 }
 
+/** "15,2× sampel" atau "-" bila null */
+export function formatVolumeRatio(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '-'
+  return `${yieldFormat.format(value)}× sampel`
+}
+
 export const HELP_SAMPLE_YIELD = (radiusLabel: string) =>
-  `PCS produk demplot yang terjual di toko radius ${radiusLabel} selama 60 hari sesudah demplot (neto retur), dibagi sampel yang dipakai (liter atau kg). ` +
-  'Hanya sampel dari stok sendiri yang tercatat dalam ml/gr; produk milik petani tidak dihitung. ' +
-  'Total menjumlahkan liter dan kg dengan asumsi 1 L ≈ 1 kg. "PCS" mengikuti satuan faktur Sales Dashboard. ' +
-  'Angka ini korelasi kasar, bukan bukti bahwa penjualan disebabkan demplot.'
+  `Penjualan produk demplot di toko radius ${radiusLabel} selama 60 hari sesudah demplot (neto retur) dibanding sampel yang dipakai (L/kg). ` +
+  'PCS / L·kg: hanya kemasan dengan kode SKU yang sama persis dengan produk demplot, dihitung dalam kemasan dasar (Box/karton dikonversi). ' +
+  'Volume: semua ukuran kemasan produk itu, dikonversi ke L/kg lalu dibanding volume sampel (berapa kali lipat). ' +
+  'Hanya sampel dari stok sendiri yang tercatat dalam ml/gr; produk milik petani tidak dihitung. L dan kg dijumlahkan (1 L ≈ 1 kg). ' +
+  'Rasio Box → kemasan dasar diperkirakan dari harga satuan faktur. Angka ini korelasi kasar, bukan bukti bahwa penjualan disebabkan demplot.'
