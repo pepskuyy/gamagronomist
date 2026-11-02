@@ -6,6 +6,7 @@ import Link from 'next/link'
 import { submitContinueDemoPlot } from '@/app/actions/standalone-demoplot'
 import ImageUploader from '@/components/ImageUploader'
 import GpsCapture from '@/components/GpsCapture'
+import { useStockBalance } from '@/hooks/useStockBalance'
 
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null }
 type RequestData = {
@@ -23,7 +24,7 @@ export default function ContinueDemoPlotPage() {
 
   const [reqData, setReqData]   = useState<RequestData | null>(null)
   const [products, setProducts] = useState<Product[]>([])
-  const [stockBalance, setStock] = useState<Record<string, number>>({})
+  const { balance: stockBalance, reload: reloadStock } = useStockBalance()
   const [usageList, setUsageList] = useState<{ id: string, productId: string, qty: string, usedFarmerProduct: boolean }[]>([])
   const [lat, setLat]           = useState<number | null>(null)
   const [lng, setLng]           = useState<number | null>(null)
@@ -34,11 +35,6 @@ export default function ContinueDemoPlotPage() {
   useEffect(() => {
     fetch(`/api/demoplot-request/${id}`).then(r => r.json()).then(setReqData)
     fetch('/api/products').then(r => r.json()).then(setProducts)
-    fetch('/api/stock/balance').then(r => r.json()).then((data: { productId: string; quantity: number }[]) => {
-      const map: Record<string, number> = {}
-      data.forEach(s => { map[s.productId] = s.quantity })
-      setStock(map)
-    }).catch(() => {})
   }, [id])
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -59,7 +55,7 @@ export default function ContinueDemoPlotPage() {
 
     start(async () => {
       const res = await submitContinueDemoPlot(id, fd)
-      if (res?.error) { setError(res.error) }
+      if (res?.error) { setError(res.error); reloadStock() }
       else router.push('/dashboard/demoplot')
     })
   }

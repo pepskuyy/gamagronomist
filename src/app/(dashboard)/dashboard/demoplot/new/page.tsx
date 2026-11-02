@@ -8,6 +8,7 @@ import ImageUploader from '@/components/ImageUploader'
 import RegionSelect from '@/components/RegionSelect'
 import SearchableSelect from '@/components/SearchableSelect'
 import { useOfflineDraft } from '@/hooks/useOfflineDraft'
+import { useStockBalance } from '@/hooks/useStockBalance'
 import type { PhotoBlob } from '@/lib/offline-db'
 
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
@@ -22,7 +23,7 @@ export default function FoDemoPlotDirectPage() {
 
   const [products, setProducts]     = useState<Product[]>([])
   const [cbFarmers, setCbFarmers]   = useState<CbFarmer[]>([])
-  const [stockBalance, setStock]    = useState<Record<string, number>>({})
+  const { balance: stockBalance, reload: reloadStock } = useStockBalance()
 
   // Farmer state
   const [farmerMode, setFarmerMode] = useState<'cb' | 'manual'>('cb')
@@ -60,17 +61,6 @@ export default function FoDemoPlotDirectPage() {
       .then(data => { setCbFarmers(data); try { localStorage.setItem('cache_cbFarmers', JSON.stringify(data)) } catch{} })
       .catch(() => {
         try { const c = localStorage.getItem('cache_cbFarmers'); if (c) setCbFarmers(JSON.parse(c)) } catch{}
-      })
-    fetch('/api/stock/balance')
-      .then(r => r.json())
-      .then((data: {productId:string; quantity:number}[]) => {
-        const map: Record<string, number> = {}
-        data.forEach(s => { map[s.productId] = s.quantity })
-        setStock(map)
-        try { localStorage.setItem('cache_stockBalance', JSON.stringify(map)) } catch{}
-      })
-      .catch(() => {
-        try { const c = localStorage.getItem('cache_stockBalance'); if (c) setStock(JSON.parse(c)) } catch{}
       })
   }, [])
 
@@ -122,7 +112,7 @@ export default function FoDemoPlotDirectPage() {
 
     start(async () => {
       const res = await submitStandaloneDemoPlot(fd)
-      if (res?.error) setError(res.error)
+      if (res?.error) { setError(res.error); reloadStock() }
       else {
         navigator.serviceWorker?.controller?.postMessage({ type: 'CLEAR_PAGE_CACHE', urls: ['/dashboard/demoplot'] })
         router.push('/dashboard/demoplot')

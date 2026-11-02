@@ -9,6 +9,7 @@ import SearchableSelect from '@/components/SearchableSelect'
 import ImageUploader from '@/components/ImageUploader'
 import { submitSpotDemplot } from '@/app/actions/spot-demplot'
 import { useOfflineDraft } from '@/hooks/useOfflineDraft'
+import { useStockBalance } from '@/hooks/useStockBalance'
 import type { PhotoBlob } from '@/lib/offline-db'
 
 type Product = { id: string; name: string; unit: string }
@@ -24,7 +25,7 @@ export default function NewSpotDemplotPage() {
 
   // Options
   const [products, setProducts] = useState<Product[]>([])
-  const [stockBalance, setStockBalance] = useState<Record<string, number>>({})
+  const { balance: stockBalance, reload: reloadStock } = useStockBalance()
 
   // Form states
   const [latitude, setLatitude] = useState<number | null>(null)
@@ -47,14 +48,6 @@ export default function NewSpotDemplotPage() {
 
   useEffect(() => {
     fetch('/api/products').then(res => res.json()).then(data => setProducts(data || [])).catch(() => {})
-    fetch('/api/stock/balance')
-      .then(r => r.json())
-      .then((data: { productId: string; quantity: number }[]) => {
-        const bal: Record<string, number> = {}
-        data.forEach(s => { bal[s.productId] = s.quantity })
-        setStockBalance(bal)
-      })
-      .catch(() => {})
   }, [])
 
   function toggleWeed(weed: string) {
@@ -91,6 +84,7 @@ export default function NewSpotDemplotPage() {
     const res = await submitSpotDemplot(formData)
     if (res?.error) {
       setError(res.error)
+      reloadStock()
       setLoading(false)
     } else {
       router.push('/dashboard/reports')
