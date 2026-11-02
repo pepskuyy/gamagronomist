@@ -254,7 +254,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           </p>
 
           <ImpactPenetrationCard impact={impact} loading={impactLoading} radiusKm={radiusKm} />
-          <SampleYieldCard impact={impact} loading={impactLoading} radiusKm={radiusKm} products={product_impacts} />
+          <SampleYieldCard impact={impact} loading={impactLoading} radiusKm={radiusKm} />
 
           {/* Cards Omset Sebelum vs Sesudah */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
