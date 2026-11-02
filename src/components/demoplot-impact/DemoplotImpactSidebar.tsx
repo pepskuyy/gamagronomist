@@ -3,6 +3,7 @@
 import type { DemoplotImpactDetail, StoreImpactResult, DemoImpactSummary } from '@/lib/demoplot-impact'
 import { formatKm } from '@/lib/impact-tier'
 import ImpactPenetrationCard from './ImpactPenetrationCard'
+import SampleYieldCard from './SampleYieldCard'
 
 interface Props {
   data: DemoplotImpactDetail | null
@@ -253,6 +254,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           </p>
 
           <ImpactPenetrationCard impact={impact} loading={impactLoading} radiusKm={radiusKm} />
+          <SampleYieldCard impact={impact} loading={impactLoading} radiusKm={radiusKm} products={product_impacts} />
 
           {/* Cards Omset Sebelum vs Sesudah */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>

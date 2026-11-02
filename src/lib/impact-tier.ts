@@ -50,3 +50,23 @@ export const HELP_IMPACT_PCT = (radiusLabel: string) =>
 export const HELP_RADIUS = (radiusLabel: string) =>
   `Toko dianggap berada di sekitar kegiatan bila jarak lurusnya ≤ ${radiusLabel} dari titik GPS demplot. ` +
   'Default ini bisa diubah admin; pilihan di atas peta hanya mengubah tampilan sementara.'
+
+const yieldFormat = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 1 })
+
+/** "133 PCS / L·kg" atau "-" bila null */
+export function formatPcsPerLiter(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '-'
+  return `${yieldFormat.format(value)} PCS / L·kg`
+}
+
+/** "0,27 L/kg" */
+export function formatLiterKg(value: number | null | undefined): string {
+  if (value === null || value === undefined) return '-'
+  return `${new Intl.NumberFormat('id-ID', { maximumFractionDigits: 3 }).format(value)} L/kg`
+}
+
+export const HELP_SAMPLE_YIELD = (radiusLabel: string) =>
+  `PCS produk demplot yang terjual di toko radius ${radiusLabel} selama 60 hari sesudah demplot (neto retur), dibagi sampel yang dipakai (liter atau kg). ` +
+  'Hanya sampel dari stok sendiri yang tercatat dalam ml/gr; produk milik petani tidak dihitung. ' +
+  'Total menjumlahkan liter dan kg dengan asumsi 1 L ≈ 1 kg. "PCS" mengikuti satuan faktur Sales Dashboard. ' +
+  'Angka ini korelasi kasar, bukan bukti bahwa penjualan disebabkan demplot.'

@@ -3,7 +3,7 @@
 import { useMemo, useState } from 'react'
 import PaginationBar from '@/components/PaginationBar'
 import type { MapDemoplotItem } from './DemoplotImpactMapInner'
-import { getImpactTier, formatImpactPct, formatKm, HELP_IMPACT_PCT } from '@/lib/impact-tier'
+import { getImpactTier, formatImpactPct, formatKm, HELP_IMPACT_PCT, formatPcsPerLiter, formatLiterKg, HELP_SAMPLE_YIELD } from '@/lib/impact-tier'
 import { formatDateId } from '@/lib/date-utils'
 
 interface Props {
@@ -15,7 +15,7 @@ interface Props {
   periodLabel: string
 }
 
-type SortKey = 'date' | 'pct'
+type SortKey = 'date' | 'pct' | 'yield'
 const PAGE_SIZE = 15
 
 function sortRows(rows: MapDemoplotItem[], key: SortKey) {
@@ -31,10 +31,36 @@ function sortRows(rows: MapDemoplotItem[], key: SortKey) {
       if (pb !== pa) return pb - pa
       return (b.impact?.impacted_store_count ?? 0) - (a.impact?.impacted_store_count ?? 0)
     })
+  } else if (key === 'yield') {
+    // PCS per L/kg sampel menurun; null di paling bawah
+    out.sort((a, b) => {
+      const ya = a.impact?.pcs_per_liter_kg ?? null
+      const yb = b.impact?.pcs_per_liter_kg ?? null
+      if (ya === null && yb === null) return 0
+      if (ya === null) return 1
+      if (yb === null) return -1
+      return yb - ya
+    })
   } else {
     out.sort((a, b) => (a.date < b.date ? 1 : a.date > b.date ? -1 : 0))
   }
   return out
+}
+
+const qtyFmt = new Intl.NumberFormat('id-ID', { maximumFractionDigits: 2 })
+
+function YieldCell({ dp, loading }: { dp: MapDemoplotItem; loading: boolean }) {
+  if (loading) return <span style={{ color: 'var(--text-muted)' }}>…</span>
+  const imp = dp.impact
+  if (!imp || imp.pcs_per_liter_kg === null || imp.pcs_per_liter_kg === undefined) {
+    return <span style={{ color: 'var(--text-muted)' }}>-</span>
+  }
+  const tip = `${qtyFmt.format(Math.max(0, imp.sold_after_qty_sampled))} PCS terjual dari ${formatLiterKg(imp.sample_liter_kg)} sampel`
+  return (
+    <span title={tip} style={{ fontWeight: 800, color: '#0369a1', fontVariantNumeric: 'tabular-nums', whiteSpace: 'nowrap' }}>
+      {formatPcsPerLiter(imp.pcs_per_liter_kg)}
+    </span>
+  )
 }
 
 function PctCell({ dp, radiusLabel, loading }: { dp: MapDemoplotItem; radiusLabel: string; loading: boolean }) {
@@ -75,6 +101,7 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
         'Tanggal', 'Petani', 'Komoditas', 'Area', 'FO', 'Produk',
         `Jumlah Toko (Radius ${radiusLabel})`, 'Toko Dianalisa', 'Toko Terdampak', '% Toko Terdampak',
         'Terdampak', 'Omset Sebelum (60 hari)', 'Omset Sesudah (60 hari)',
+        'Sampel (L/kg)', 'PCS Terjual 60 Hari Sesudah (produk bersampel)', 'PCS per L/kg Sampel',
       ]
       const rows = sorted.map((dp) => {
         const imp = dp.impact
@@ -85,6 +112,9 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
           pct === null ? '-' : imp?.impact_pct_capped ? `≥${pct}` : pct,
           dp.has_impact ? 'Ya' : 'Tidak',
           Math.round(imp?.before_omset ?? 0), Math.round(imp?.after_omset ?? 0),
+          imp?.sample_liter_kg ?? '-',
+          imp?.sample_liter_kg ? Math.max(0, imp.sold_after_qty_sampled) : '-',
+          imp?.pcs_per_liter_kg ?? '-',
         ]
       })
       const info = [
@@ -100,8 +130,10 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
       for (let r = 0; r < rows.length; r++) {
         const cell = ws[XLSX.utils.encode_cell({ r: firstDataRow + r, c: 9 })]
         if (cell && cell.t === 'n') cell.z = '0.0'
+        const yieldCell = ws[XLSX.utils.encode_cell({ r: firstDataRow + r, c: 15 })]
+        if (yieldCell && yieldCell.t === 'n') yieldCell.z = '0.0'
       }
-      ws['!cols'] = [12, 22, 12, 22, 18, 40, 22, 14, 14, 16, 11, 20, 20].map((wch) => ({ wch }))
+      ws['!cols'] = [12, 22, 12, 22, 18, 40, 22, 14, 14, 16, 11, 20, 20, 14, 22, 18].map((wch) => ({ wch }))
       const wb = XLSX.utils.book_new()
       XLSX.utils.book_append_sheet(wb, ws, 'Dampak Demplot')
       XLSX.writeFile(wb, `dampak_demplot_radius_${String(radiusKm).replace('.', ',')}km_${new Date().toISOString().slice(0, 10)}.xlsx`)
@@ -124,7 +156,7 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
 
       <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: '0.6rem', padding: '1rem 1.1rem 0.75rem' }}>
         <div style={{ minWidth: 0 }}>
-          <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)' }}>📋 Daftar Demplot & Penetrasi Dampak</h3>
+          <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)' }}>📋 Daftar Demplot & Dampak</h3>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             {demoplots.length} demplot • toko dihitung dalam radius {radiusLabel} • window 60 hari sebelum vs sesudah
           </p>
@@ -141,6 +173,7 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
           >
             <option value="date">Urut: tanggal terbaru</option>
             <option value="pct">Urut: % terdampak</option>
+            <option value="yield">Urut: PCS per L/kg sampel</option>
           </select>
           <button
             type="button"
@@ -177,6 +210,9 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
               <th style={{ textAlign: 'right' }}>
                 % Terdampak <span title={HELP_IMPACT_PCT(radiusLabel)} style={{ cursor: 'help', color: '#94a3b8' }}>ⓘ</span>
               </th>
+              <th style={{ textAlign: 'right' }}>
+                PCS / L·kg Sampel <span title={HELP_SAMPLE_YIELD(radiusLabel)} style={{ cursor: 'help', color: '#94a3b8' }}>ⓘ</span>
+              </th>
               <th style={{ textAlign: 'center' }}>Terdampak</th>
             </tr>
           </thead>
@@ -197,12 +233,15 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
                 <td style={{ textAlign: 'right' }}>
                   <PctCell dp={dp} radiusLabel={radiusLabel} loading={loading} />
                 </td>
+                <td style={{ textAlign: 'right' }}>
+                  <YieldCell dp={dp} loading={loading} />
+                </td>
                 <td style={{ textAlign: 'center' }}>{dp.has_impact ? '⭐' : ''}</td>
               </tr>
             ))}
             {!loading && demoplots.length === 0 && (
               <tr>
-                <td colSpan={8} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                <td colSpan={9} style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                   Tidak ada demplot berkoordinat pada periode ini.
                 </td>
               </tr>
@@ -241,6 +280,9 @@ export default function DemoplotImpactTable({ demoplots, loading, radiusKm, sele
             </div>
             <div style={{ marginTop: '0.35rem', fontSize: '0.75rem', color: '#475569', overflowWrap: 'anywhere' }}>
               {loading ? '…' : `${dp.impact?.impacted_store_count ?? 0} dari ${dp.impact?.store_count ?? 0} toko di radius ${radiusLabel}`}
+            </div>
+            <div style={{ marginTop: '0.2rem', fontSize: '0.75rem', color: '#475569' }}>
+              Sampel → penjualan: <YieldCell dp={dp} loading={loading} />
             </div>
           </button>
         ))}

@@ -1,11 +1,17 @@
 import prisma from '@/lib/prisma'
-import { formatLedgerQty } from '@/lib/stock-units'
+import { formatLedgerQty, hasGramasi } from '@/lib/stock-units'
 
 export interface DemoplotProductUsage {
   name: string
   actualUsage: number
   unit: string
-  label: string // e.g. "Biogent 50 SC 1 L (90 PCS)"
+  label: string // e.g. "Biogent 50 SC 1 L (90 ml)"
+  /** Pemakaian dari stok sendiri (sampel), satuan ledger. Produk milik petani tidak dihitung. */
+  sampleQty: number
+  /** Satuan sampleQty: ml/gr untuk produk bergramasi, selain itu kemasan */
+  sampleUnit: string
+  /** sampleQty dalam liter/kg (÷1000); null bila produk tidak bergramasi */
+  sampleLiterKg: number | null
 }
 
 export interface ProductImpactResult {
@@ -20,6 +26,11 @@ export interface ProductImpactResult {
   delta_pct: number
   is_new: boolean
   matched_skus: string[]
+  sample_qty: number
+  sample_unit: string
+  sample_liter_kg: number | null
+  /** PCS terjual 60 hari sesudah ÷ sampel (L/kg); null bila sampel L/kg tidak ada */
+  pcs_per_liter_kg: number | null
 }
 
 export interface StoreImpactItem {
@@ -59,6 +70,12 @@ export interface DemoImpactSummary {
   after_qty: number
   before_omset: number
   after_omset: number
+  /** Total sampel (L dan kg dijumlahkan, asumsi 1 L ≈ 1 kg); null bila tidak ada sampel ber-gramasi */
+  sample_liter_kg: number | null
+  /** PCS terjual 60 hari sesudah dari produk yang punya sampel L/kg */
+  sold_after_qty_sampled: number
+  /** sold_after_qty_sampled ÷ sample_liter_kg, 1 desimal; null bila sampel tidak ada */
+  pcs_per_liter_kg: number | null
 }
 
 export interface DemoplotImpactDetail {
@@ -306,6 +323,7 @@ interface ComputeInput {
   latitude: number
   longitude: number
   products: string[]            // urutan menentukan atribusi item
+  sampleLiterKg?: Array<number | null> // sejajar dengan products
 }
 
 interface StoreCalc {
@@ -325,6 +343,12 @@ interface ComputeResult {
   productTotals: { beforeQty: number[]; afterQty: number[]; beforeOmset: number[]; afterOmset: number[] }
   matcher: (itemName: string) => number
   window: { from: string; to: string } | null
+}
+
+/** PCS terjual per 1 L/kg sampel (1 desimal). Terjual neto bisa negatif karena retur → dibatasi 0. */
+function pcsPerLiterKg(sold: number, sampleLiterKg: number | null | undefined): number | null {
+  if (!sampleLiterKg || sampleLiterKg <= 0) return null
+  return Math.round((Math.max(0, sold) / sampleLiterKg) * 10) / 10
 }
 
 function computeDemoImpact(
@@ -389,7 +413,24 @@ function computeDemoImpact(
     after_qty: sum(productTotals.afterQty),
     before_omset: sum(productTotals.beforeOmset),
     after_omset: sum(productTotals.afterOmset),
+    sample_liter_kg: null,
+    sold_after_qty_sampled: 0,
+    pcs_per_liter_kg: null,
   }
+  // Rasio sampel → penjualan: PCS terjual 60 hari sesudah per 1 L/kg sampel (hanya produk bersampel L/kg)
+  let sampleTotal = 0
+  let soldSampled = 0
+  demo.sampleLiterKg?.forEach((lk, i) => {
+    if (lk && lk > 0) {
+      sampleTotal += lk
+      soldSampled += productTotals.afterQty[i]
+    }
+  })
+  summary.sample_liter_kg = sampleTotal > 0 ? Math.round(sampleTotal * 1000) / 1000 : null
+  summary.sold_after_qty_sampled = soldSampled
+  // Tanpa toko yang dianalisa, penjualan tidak bisa diukur → rasio "-" (bukan 0)
+  summary.pcs_per_liter_kg = analyzed.length > 0 ? pcsPerLiterKg(soldSampled, sampleTotal) : null
+
   // Flag "Terdampak" (⭐): ada produk yang total qty sesudah > sebelum dan sesudah > 0.
   const hasImpact = productTotals.afterQty.some((q, i) => q > 0 && q > productTotals.beforeQty[i])
 
@@ -424,7 +465,7 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
     select: {
       id: true,
       requestId: true,
-      details: { select: { actualUsage: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
+      details: { select: { actualUsage: true, usedFarmerProduct: true, product: { select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true } } } },
     },
     orderBy: { createdAt: 'asc' },
   })
@@ -440,12 +481,23 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
       // actualUsage tercatat dalam satuan ledger (ml/gr bila produk bergramasi), jadi label memakai formatLedgerQty.
       const unit = d.product?.unit || 'PCS'
       const usage = Number(d.actualUsage) || 0
+      // Sampel = pemakaian dari stok sendiri; produk milik petani bukan sampel
+      const sampleUsage = d.usedFarmerProduct ? 0 : usage
+      const gram = hasGramasi(d.product)
       const existing = map.get(pName)
       if (existing) {
         existing.actualUsage += usage
+        existing.sampleQty += sampleUsage
+        existing.sampleLiterKg = gram ? existing.sampleQty / 1000 : null
         existing.label = `${pName} (${formatLedgerQty(d.product, existing.actualUsage, { showKemasan: false })})`
       } else {
-        map.set(pName, { name: pName, actualUsage: usage, unit, label: `${pName} (${formatLedgerQty(d.product, usage, { showKemasan: false })})` })
+        map.set(pName, {
+          name: pName, actualUsage: usage, unit,
+          label: `${pName} (${formatLedgerQty(d.product, usage, { showKemasan: false })})`,
+          sampleQty: sampleUsage,
+          sampleUnit: gram ? (d.product.unitGramasi as string) : unit,
+          sampleLiterKg: gram ? sampleUsage / 1000 : null,
+        })
       }
     }
     byKey.set(key, map)
@@ -466,7 +518,14 @@ async function loadProductsByGroup(groups: Array<{ id: string; requestId: string
         const label = rd.qtyApproved != null || !rd.requestUnit
           ? formatLedgerQty(rd.product, qty, { showKemasan: false })
           : `${qty.toLocaleString('id-ID')} ${rd.requestUnit}`
-        list.push({ name: pName, actualUsage: qty, unit, label: `${pName} (${label})` })
+        // Detail request (jalur cadangan) dalam satuan ledger bila sudah disetujui → dipakai sebagai sampel
+        const gram = hasGramasi(rd.product) && (rd.qtyApproved != null || !rd.requestUnit)
+        list.push({
+          name: pName, actualUsage: qty, unit, label: `${pName} (${label})`,
+          sampleQty: qty,
+          sampleUnit: gram ? (rd.product.unitGramasi as string) : (rd.requestUnit || unit),
+          sampleLiterKg: gram ? qty / 1000 : null,
+        })
       }
     }
     result.set(g.id, list)
@@ -493,7 +552,11 @@ export async function calculateDemoplotImpact(activityId: string, radiusKm: numb
   )
 
   const calc = computeDemoImpact(
-    { date, latitude: dp.latitude, longitude: dp.longitude, products: demoplotProducts.map(p => p.name) },
+    {
+      date, latitude: dp.latitude, longitude: dp.longitude,
+      products: demoplotProducts.map(p => p.name),
+      sampleLiterKg: demoplotProducts.map(p => p.sampleLiterKg),
+    },
     stores, invoicesByStore, radiusKm
   )
 
@@ -522,6 +585,10 @@ export async function calculateDemoplotImpact(activityId: string, radiusKm: numb
       delta_pct: beforeOmset > 0 ? Math.round((deltaOmset / beforeOmset) * 100) : (afterOmset > 0 ? 100 : 0),
       is_new: beforeQty <= 0 && afterQty > 0,
       matched_skus: Array.from(matched),
+      sample_qty: p.sampleQty,
+      sample_unit: p.sampleUnit,
+      sample_liter_kg: p.sampleLiterKg,
+      pcs_per_liter_kg: pcsPerLiterKg(afterQty, p.sampleLiterKg),
     }
   })
 
@@ -676,9 +743,13 @@ export async function getDemoplotsWithImpactSummary(fromDate: string | undefined
     : new Map<string, ProcessedInv[]>()
 
   const results: DemoplotListItem[] = groups.map(dp => {
-    const products = (productsByGroup.get(dp.id) || []).map(p => p.name)
+    const productUsages = productsByGroup.get(dp.id) || []
+    const products = productUsages.map(p => p.name)
     const calc = computeDemoImpact(
-      { date: toDateStr(dp.date), latitude: dp.latitude!, longitude: dp.longitude!, products },
+      {
+        date: toDateStr(dp.date), latitude: dp.latitude!, longitude: dp.longitude!, products,
+        sampleLiterKg: productUsages.map(p => p.sampleLiterKg),
+      },
       stores, invoicesByStore, radiusKm
     )
     return {
