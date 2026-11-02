@@ -98,6 +98,52 @@ export async function fetchAccurateItems(): Promise<AccurateItem[]> {
 }
 
 /**
+ * Satuan barang Accurate: unit1 = satuan dasar (mis. Btl), unit2..5 dengan rasio terhadap unit1
+ * (mis. Box = 12 Btl). Dipakai untuk mengonversi qty faktur (yang bisa per Box) ke kemasan dasar.
+ * Nilai unitN bisa berupa objek { name } atau string, tergantung respons API; keduanya ditangani.
+ */
+export type AccurateItemUnits = { no: string; base: string; units: Array<{ name: string; ratio: number }> }
+
+export async function fetchAccurateItemUnits(): Promise<AccurateItemUnits[]> {
+  const { token, secret, host } = getCredentials()
+  const out: AccurateItemUnits[] = []
+  const nameOf = (v: any): string | null => {
+    if (!v) return null
+    if (typeof v === 'string') return v.trim() || null
+    return typeof v.name === 'string' && v.name.trim() ? v.name.trim() : null
+  }
+  let page = 1
+  const pageSize = 100
+  while (true) {
+    const url = new URL(`${host}/accurate/api/item/list.do`)
+    url.searchParams.set('fields', 'no,unit1,unit2,ratio2,unit3,ratio3,unit4,ratio4,unit5,ratio5')
+    url.searchParams.set('sp.page', String(page))
+    url.searchParams.set('sp.pageSize', String(pageSize))
+    const res = await fetch(url.toString(), { headers: buildAuthHeaders(token, secret), cache: 'no-store' })
+    if (!res.ok) throw new Error(`Gagal fetch satuan barang Accurate hal ${page} (HTTP ${res.status})`)
+    const data = await res.json()
+    if (!data.s) throw new Error(`Accurate item/list.do (satuan) error: ${JSON.stringify(data).slice(0, 300)}`)
+    const items: any[] = data.d ?? []
+    for (const it of items) {
+      const no = String(it.no ?? '').trim()
+      const base = nameOf(it.unit1)
+      if (!no || !base) continue
+      const units = [{ name: base, ratio: 1 }]
+      for (let k = 2; k <= 5; k++) {
+        const name = nameOf(it[`unit${k}`])
+        const ratio = Number(it[`ratio${k}`])
+        if (name && ratio > 0) units.push({ name, ratio })
+      }
+      out.push({ no, base, units })
+    }
+    const totalRows: number = data.sp?.rowCount ?? items.length
+    if (page * pageSize >= totalRows || items.length < pageSize) break
+    page++
+  }
+  return out
+}
+
+/**
  * Fetch stok yang tersedia untuk dijual (availableToSell) dari Accurate
  * untuk daftar item berdasarkan nomor barang (itemNo / SKU).
  *

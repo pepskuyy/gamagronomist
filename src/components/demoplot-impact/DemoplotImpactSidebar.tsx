@@ -300,7 +300,8 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           {/* Per-Product Impact Cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
             {product_impacts.map((pi, idx) => {
-              const deltaTag = pi.delta_qty > 0 ? `▲ ${formatNumber(pi.delta_qty)}` : pi.delta_qty < 0 ? `▼ ${formatNumber(Math.abs(pi.delta_qty))}` : '= 0'
+              // Qty faktur bisa bercampur satuan (Btl, Box, ...), jadi tanda naik/turun tanpa angka
+              const deltaTag = pi.delta_qty > 0 ? '▲ Naik' : pi.delta_qty < 0 ? '▼ Turun' : '= Tetap'
               return (
                 <div
                   key={idx}
@@ -330,7 +331,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
                   </div>
 
                   <div style={{ marginTop: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                    Sebelum: {pi.before_qty} {pi.unit} ({formatRp(pi.before_omset)}) → Sesudah: {pi.after_qty} {pi.unit} ({formatRp(pi.after_omset)})
+                    Sebelum: {pi.before_label} ({formatRp(pi.before_omset)}) → Sesudah: {pi.after_label} ({formatRp(pi.after_omset)})
                   </div>
 
                   {pi.is_new && (
@@ -425,7 +426,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
                   {st.has_impact && (
                     <div style={{ marginTop: '0.6rem', padding: '0.5rem 0.65rem', background: '#ffffff', borderRadius: '0.45rem', border: '1px solid #bbf7d0', fontSize: '0.78rem' }}>
                       <div style={{ fontWeight: 700, color: '#166534', marginBottom: '0.2rem' }}>
-                        🛒 +{formatNumber(st.impact_total_qty)} PCS Penjualan Produk Demplot ({formatRp(st.impact_total_omset)})
+                        🛒 +{st.impact_label} Penjualan Produk Demplot ({formatRp(st.impact_total_omset)})
                       </div>
                       <div style={{ color: '#475569', fontSize: '0.74rem' }}>
                         {st.impact_products.map((ip, i) => (

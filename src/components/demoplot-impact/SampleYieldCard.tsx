@@ -35,7 +35,12 @@ export default function SampleYieldCard({ impact, loading, radiusKm, products }:
   } else if (impact.store_count === 0) {
     body = <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Tidak ada toko di radius {radiusLabel}.</div>
   } else if (impact.sample_liter_kg === null) {
-    body = <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Sampel tidak tercatat dalam ml/gr, rasio tidak dapat dihitung.</div>
+    const reason: Record<string, string> = {
+      farmer_product: 'Demplot ini memakai produk milik petani, bukan sampel dari stok, sehingga rasio sampel tidak dihitung.',
+      no_gramasi: 'Data isi per kemasan (ml/gr) produk demplot belum diisi di Master Produk, sehingga sampel tidak bisa dihitung dalam liter/kg.',
+      no_usage: 'Belum ada pemakaian produk yang tercatat pada demplot ini.',
+    }
+    body = <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{reason[impact.sample_status] ?? 'Rasio sampel tidak dapat dihitung.'}</div>
   } else {
     body = (
       <>

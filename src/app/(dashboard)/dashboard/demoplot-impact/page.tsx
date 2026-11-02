@@ -297,6 +297,7 @@ export default function DemoplotImpactPage() {
       distance_km: store.distance_km || 0,
       has_impact: true,
       impact_total_qty: 0,
+      impact_label: '-',
       impact_total_omset: 0,
       impact_products: [],
       before_total_omset: 0,

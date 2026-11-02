@@ -1,5 +1,5 @@
 import prisma from '@/lib/prisma'
-import { fetchAccurateItems } from '@/lib/accurate'
+import { fetchAccurateItems, fetchAccurateItemUnits } from '@/lib/accurate'
 import { startSyncLog, completeSyncLog, failSyncLog } from '@/lib/sync-logger'
 import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
 
@@ -92,6 +92,10 @@ export async function runAccurateSync(
       }
     }
 
+    // Rasio satuan barang (Box → Btl, dst.) untuk analitik demplot. Langkah terpisah:
+    // bila gagal, sync master barang tetap dianggap berhasil dan alasannya dicatat di log.
+    const unitNote = await syncAccurateUnitRatios()
+
     // Invalidasi cache master produk. Dari scheduler in-process (tanpa request
     // context) invalidasi dilewati → cache kedaluwarsa via TTL (maks. 5 menit).
     invalidateCacheTag(CACHE_TAGS.products)
@@ -100,7 +104,7 @@ export async function runAccurateSync(
     const processedTotal = updated + inserted
     await completeSyncLog(logId, {
       processedCount: processedTotal,
-      message: `Auto-sync data barang selesai: ${processedTotal}/${accurateItems.length} barang berhasil diperbarui (error: ${skipped})`,
+      message: `Auto-sync data barang selesai: ${processedTotal}/${accurateItems.length} barang berhasil diperbarui (error: ${skipped}). ${unitNote}`,
       durationMs: duration,
     })
 
@@ -113,5 +117,33 @@ export async function runAccurateSync(
       durationMs: duration,
     })
     throw err
+  }
+}
+
+const ACCURATE_UNIT_RATIOS_KEY = 'accurate_unit_ratios' // dibaca oleh lib/demoplot-impact.ts
+
+/** Simpan rasio satuan barang Accurate ke SystemConfig. Mengembalikan catatan singkat untuk log sync. */
+async function syncAccurateUnitRatios(): Promise<string> {
+  try {
+    const list = await fetchAccurateItemUnits()
+    const items: Record<string, { base: string; ratios: Record<string, number> }> = {}
+    let multi = 0
+    for (const it of list) {
+      const ratios: Record<string, number> = {}
+      for (const u of it.units) ratios[u.name.toLowerCase()] = u.ratio
+      if (it.units.length > 1) multi++
+      items[it.no.toLowerCase()] = { base: it.base, ratios }
+    }
+    if (list.length === 0) return 'Rasio satuan: tidak ada data satuan dari Accurate.'
+    const value = JSON.stringify({ updatedAt: new Date().toISOString(), items })
+    await prisma.systemConfig.upsert({
+      where: { key: ACCURATE_UNIT_RATIOS_KEY },
+      update: { value },
+      create: { key: ACCURATE_UNIT_RATIOS_KEY, value, label: 'Rasio satuan barang Accurate (otomatis dari sync)' },
+    })
+    return `Rasio satuan: ${list.length} barang, ${multi} punya satuan besar (Box/Dus).`
+  } catch (err: any) {
+    console.warn('[Accurate Sync] Gagal mengambil rasio satuan:', err)
+    return `Rasio satuan gagal diambil: ${String(err?.message || err).slice(0, 150)}`
   }
 }

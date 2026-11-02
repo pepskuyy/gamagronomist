@@ -233,7 +233,7 @@ export default function DemoplotImpactMapInner({
                     <strong>{st.name}</strong> ({st.distance_km} km)<br />
                     {isImpacted ? (
                       <span style={{ color: '#15803d', fontWeight: 700 }}>
-                        ⭐ Terdampak: +{st.impact_total_qty} PCS
+                        ⭐ Terdampak: +{st.impact_label}
                       </span>
                     ) : (
                       <span style={{ color: '#64748b' }}>Toko dalam radius {formatKm(radiusKm)}</span>
