@@ -33,7 +33,7 @@ export default async function DashboardLayout({
     return (
       <div
         data-sw-no-cache="1"
-        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '2rem', textAlign: 'center', backgroundColor: '#f9fafb' }}
+        style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '2rem', textAlign: 'center', backgroundColor: 'var(--background)' }}
       >
         {/*
           Self-cleaning: halaman ini bisa saja ter-cache oleh Service Worker.
@@ -62,15 +62,15 @@ export default async function DashboardLayout({
             `,
           }}
         />
-        <h1 style={{ fontSize: '2.5rem', fontWeight: 800, marginBottom: '1rem', color: '#dc2626' }}>🚧 Mode Maintenance 🚧</h1>
-        <p style={{ fontSize: '1.1rem', color: '#4b5563', maxWidth: '600px', lineHeight: 1.6 }}>
-          Sistem sedang dalam tahap pemeliharaan <em>(maintenance)</em> untuk peningkatan performa atau migrasi database.
+        <h1 style={{ fontSize: '2rem', fontWeight: 500, marginBottom: '1rem', color: 'var(--text-main)' }}>Mode maintenance</h1>
+        <p style={{ fontSize: '1.05rem', color: 'var(--text-secondary)', maxWidth: '600px', lineHeight: 1.6 }}>
+          Sistem sedang dalam tahap pemeliharaan (maintenance) untuk peningkatan performa atau migrasi database.
           Mohon kembali beberapa saat lagi.
         </p>
-        <p style={{ marginTop: '1.5rem', fontSize: '0.875rem', color: '#6b7280' }}>
+        <p style={{ marginTop: '1.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
           Halaman ini akan menyegarkan otomatis setiap 30 detik.
         </p>
-        <p style={{ marginTop: '1.5rem', fontSize: '0.875rem', color: '#9ca3af' }}>
+        <p style={{ marginTop: '0.5rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
           Hanya Administrator yang dapat mengakses sistem saat ini.
         </p>
       </div>

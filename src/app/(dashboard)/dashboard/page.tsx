@@ -192,21 +192,21 @@ export default async function DashboardPage(props: { searchParams?: Promise<{ [k
 
       {/* KPI Cards */}
       <div className="kpi-grid">
-        <div className="card" style={{ borderLeft: '4px solid var(--warning)' }}>
-          <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Pending Approval</p>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--warning)' }}>{pendingRequests}</div>
+        <div className="card">
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Pending Approval</p>
+          <div className="num" style={{ fontSize: '2rem', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-main)' }}>{pendingRequests}</div>
         </div>
-        <div className="card" style={{ borderLeft: '4px solid var(--primary)' }}>
-          <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Total Request</p>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary)' }}>{totalRequests}</div>
+        <div className="card">
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Total Request</p>
+          <div className="num" style={{ fontSize: '2rem', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-main)' }}>{totalRequests}</div>
         </div>
-        <div className="card" style={{ borderLeft: '4px solid var(--success)' }}>
-          <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Approved</p>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--success)' }}>{approvedRequests}</div>
+        <div className="card">
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Approved</p>
+          <div className="num" style={{ fontSize: '2rem', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-main)' }}>{approvedRequests}</div>
         </div>
-        <div className="card" style={{ borderLeft: '4px solid var(--secondary)' }}>
-          <p style={{ fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.05em', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>Demo Plot Selesai</p>
-          <div style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--secondary)' }}>{completedDemoPlots}</div>
+        <div className="card">
+          <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '0.25rem' }}>Demo Plot Selesai</p>
+          <div className="num" style={{ fontSize: '2rem', fontWeight: 600, lineHeight: 1.2, color: 'var(--text-main)' }}>{completedDemoPlots}</div>
         </div>
       </div>
 

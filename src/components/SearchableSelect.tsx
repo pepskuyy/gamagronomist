@@ -69,10 +69,10 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           marginTop: '0.25rem',
           maxHeight: '250px',
           overflowY: 'auto',
-          background: '#fff',
+          background: 'var(--surface)',
           border: '1px solid var(--border)',
           borderRadius: 'var(--radius-sm)',
-          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)'
+          boxShadow: 'var(--shadow-md)'
         }}>
           {filteredOptions.length > 0 ? (
             filteredOptions.map(opt => (
@@ -84,15 +84,15 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                   setSearchTerm('')
                 }}
                 style={{
-                  padding: '9px 12px',
+                  padding: '8px 12px',
                   cursor: 'pointer',
-                  borderBottom: '1px solid #f1f5f9',
-                  background: opt.value === value ? '#eff6ff' : 'transparent',
-                  color: opt.value === value ? '#1e40af' : 'inherit',
+                  borderBottom: '1px solid var(--border-light)',
+                  background: opt.value === value ? 'var(--primary-light)' : 'transparent',
+                  color: opt.value === value ? 'var(--primary)' : 'inherit',
                   fontSize: '0.9rem'
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = '#f8fafc'}
-                onMouseLeave={e => e.currentTarget.style.background = opt.value === value ? '#eff6ff' : 'transparent'}
+                onMouseEnter={e => e.currentTarget.style.background = 'var(--surface-2)'}
+                onMouseLeave={e => e.currentTarget.style.background = opt.value === value ? 'var(--primary-light)' : 'transparent'}
               >
                 {opt.label}
               </div>

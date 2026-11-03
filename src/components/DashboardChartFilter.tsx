@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { Search, X } from 'lucide-react'
 
 interface User {
   id: string
@@ -20,12 +21,12 @@ interface Props {
 }
 
 const selectStyle: React.CSSProperties = {
-  border: '1px solid #d1d5db',
-  borderRadius: '0.5rem',
+  border: '1px solid var(--border)',
+  borderRadius: 'var(--radius-sm)',
   padding: '0.5rem 0.75rem',
   fontSize: '0.875rem',
-  color: '#374151',
-  background: '#fff',
+  color: 'var(--text-secondary)',
+  background: 'var(--surface)',
   cursor: 'pointer',
   outline: 'none',
   minWidth: '150px',
@@ -69,30 +70,32 @@ export default function DashboardChartFilter({ subordinates, areas }: Props) {
   const hasFilter = start || end || userId || areaId
 
   return (
-    <div className="card" style={{ marginBottom: '2.5rem', background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+    <div className="card" style={{ marginBottom: '2.5rem', background: 'var(--surface-2)', boxShadow: 'none' }}>
       <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h3 style={{ margin: 0, fontSize: '1rem', color: '#334155' }}>🔎 Filter Peta & Grafik</h3>
+        <h3 style={{ margin: 0, fontSize: '1rem', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Search size={18} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)' }} />Filter Peta & Grafik</h3>
         {hasFilter && (
           <button
             onClick={resetFilter}
             style={{
-              background: 'transparent', border: 'none', color: 'var(--danger)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 600
+              background: 'transparent', border: 'none', color: 'var(--text-secondary)', fontSize: '0.85rem', cursor: 'pointer', fontWeight: 500,
+              display: 'inline-flex', alignItems: 'center', gap: '0.25rem'
             }}>
-            ✕ Reset Filter
+            <X size={16} strokeWidth={1.75} className="icon-inline" />
+            Reset Filter
           </button>
         )}
       </div>
       <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flex: 1, minWidth: '130px' }}>
-          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Tanggal Mulai</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '130px' }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Tanggal Mulai</label>
           <input type="date" value={start} onChange={e => setStart(e.target.value)} style={selectStyle} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flex: 1, minWidth: '130px' }}>
-          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Tanggal Akhir</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '130px' }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Tanggal Akhir</label>
           <input type="date" value={end} onChange={e => setEnd(e.target.value)} style={selectStyle} />
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flex: 1, minWidth: '150px' }}>
-          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Petugas (User)</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '150px' }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Petugas (User)</label>
           <select value={userId} onChange={e => setUserId(e.target.value)} style={selectStyle}>
             <option value="">-- Semua Petugas --</option>
             {subordinates.map(u => (
@@ -100,8 +103,8 @@ export default function DashboardChartFilter({ subordinates, areas }: Props) {
             ))}
           </select>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.3rem', flex: 1, minWidth: '150px' }}>
-          <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>Area</label>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', flex: 1, minWidth: '150px' }}>
+          <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Area</label>
           <select value={areaId} onChange={e => setAreaId(e.target.value)} style={selectStyle}>
             <option value="">-- Semua Area --</option>
             {areas.map(a => (
@@ -113,8 +116,8 @@ export default function DashboardChartFilter({ subordinates, areas }: Props) {
           <button
             onClick={applyFilter}
             style={{
-              background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '0.5rem',
-              padding: '0.55rem 1.25rem', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer', minWidth: '100px'
+              background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)',
+              padding: '0.5rem 1.25rem', fontSize: '0.875rem', fontWeight: 500, cursor: 'pointer', minWidth: '100px'
             }}>
             Terapkan
           </button>

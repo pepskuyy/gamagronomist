@@ -1,6 +1,7 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 type TablePagerProps = {
   prefix: 'u' | 'a' | 'f'
@@ -26,12 +27,13 @@ export default function TablePager({ prefix, currentPage, hasMore }: TablePagerP
         className="btn btn-outline" 
         onClick={() => handleNavigate(currentPage - 1)}
         disabled={currentPage <= 1}
-        style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem', opacity: currentPage <= 1 ? 0.4 : 1, cursor: currentPage <= 1 ? 'not-allowed' : 'pointer' }}
+        style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', opacity: currentPage <= 1 ? 0.4 : 1, cursor: currentPage <= 1 ? 'not-allowed' : 'pointer' }}
       >
-        ← Prev
+        <ChevronLeft size={16} strokeWidth={1.75} className="icon-inline" />
+        Prev
       </button>
 
-      <span style={{ fontSize: '0.8rem', padding: '0.3rem 0.65rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontWeight: 600 }}>
+      <span style={{ fontSize: '0.8rem', padding: '0.25rem 0.625rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontWeight: 500, fontVariantNumeric: 'tabular-nums' }}>
         Hal {currentPage}
       </span>
 
@@ -39,9 +41,10 @@ export default function TablePager({ prefix, currentPage, hasMore }: TablePagerP
         className="btn btn-outline" 
         onClick={() => handleNavigate(currentPage + 1)}
         disabled={!hasMore}
-        style={{ padding: '0.3rem 0.75rem', fontSize: '0.8rem', opacity: !hasMore ? 0.4 : 1, cursor: !hasMore ? 'not-allowed' : 'pointer' }}
+        style={{ padding: '0.25rem 0.75rem', fontSize: '0.8rem', opacity: !hasMore ? 0.4 : 1, cursor: !hasMore ? 'not-allowed' : 'pointer' }}
       >
-        Next →
+        Next
+        <ChevronRight size={16} strokeWidth={1.75} className="icon-inline" />
       </button>
     </div>
   )

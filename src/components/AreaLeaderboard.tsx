@@ -49,8 +49,8 @@ export default function AreaLeaderboard() {
   }, [selectedMonth, selectedYear, selectedActivity])
 
   const selectStyle: React.CSSProperties = {
-    border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.45rem 0.75rem',
-    fontSize: '0.875rem', color: '#374151', background: '#fff', cursor: 'pointer', outline: 'none'
+    border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.75rem',
+    fontSize: '0.875rem', color: 'var(--text-secondary)', background: 'var(--surface)', cursor: 'pointer', outline: 'none'
   }
 
   return (
@@ -58,8 +58,8 @@ export default function AreaLeaderboard() {
       {/* Header & Filter */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>🏆 Leaderboard Area</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Leaderboard Area</h2>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             Peringkat area berdasarkan jumlah aktivitas
           </p>
         </div>
@@ -84,41 +84,40 @@ export default function AreaLeaderboard() {
 
       {/* Content */}
       {loading ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280' }}>Memuat data...</div>
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat data...</div>
       ) : data.length === 0 ? (
-        <div style={{ padding: '2rem', textAlign: 'center', color: '#6b7280', background: '#f9fafb', borderRadius: '0.5rem' }}>
+        <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)' }}>
           Belum ada aktivitas di periode ini.
         </div>
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
           {data.map((area) => {
-            let rankColor = '#6b7280' // default gray
-            let rankBg = '#f3f4f6'
-            let rankIcon = ''
-            
-            if (area.rank === 1) { rankColor = '#ca8a04'; rankBg = '#fef08a'; rankIcon = '🥇' }
-            else if (area.rank === 2) { rankColor = '#4b5563'; rankBg = '#e5e7eb'; rankIcon = '🥈' }
-            else if (area.rank === 3) { rankColor = '#b45309'; rankBg = '#ffedd5'; rankIcon = '🥉' }
+            let rankColor = 'var(--text-muted)' // default
+            let rankBg = 'transparent'
+
+            if (area.rank === 1) { rankColor = 'var(--primary)'; rankBg = 'var(--primary-light)' }
+            else if (area.rank === 2) { rankColor = 'var(--text-secondary)'; rankBg = 'var(--surface-2)' }
+            else if (area.rank === 3) { rankColor = 'var(--text-secondary)'; rankBg = 'var(--surface-2)' }
 
             return (
               <div key={area.id} style={{ 
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', 
-                padding: '1rem', background: '#fff', border: '1px solid #e5e7eb', borderRadius: '0.75rem',
-                boxShadow: area.rank <= 3 ? '0 2px 4px rgba(0,0,0,0.02)' : 'none'
+                padding: '0.75rem 1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)'
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                   <div style={{ 
-                    width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                    background: rankBg, color: rankColor, borderRadius: '50%', fontWeight: 700, fontSize: '0.9rem' 
+                    width: '28px', height: '28px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: rankBg, color: rankColor, borderRadius: '50%', fontWeight: 500, fontSize: '0.82rem',
+                    fontVariantNumeric: 'tabular-nums'
                   }}>
-                    {rankIcon || area.rank}
+                    {area.rank}
                   </div>
-                  <div style={{ fontSize: '1.05rem', fontWeight: 600, color: '#111827' }}>
+                  <div style={{ fontSize: '0.95rem', fontWeight: 500, color: 'var(--text-main)' }}>
                     {area.name}
                   </div>
                 </div>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: 'var(--primary)' }}>
-                  {area.score} <span style={{ fontSize: '0.8rem', fontWeight: 500, color: '#6b7280' }}>kegiatan</span>
+                <div style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)' }}>
+                  <span className="num">{area.score}</span> <span style={{ fontSize: '0.8rem', fontWeight: 400, color: 'var(--text-muted)' }}>kegiatan</span>
                 </div>
               </div>
             )

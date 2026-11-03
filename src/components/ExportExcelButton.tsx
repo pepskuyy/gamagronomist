@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Download, Loader2 } from 'lucide-react'
 
 interface Props {
   type: 'cb' | 'demoplot' | 'kios' | 'gathering' | 'company' | 'spot-demplot'
@@ -10,7 +11,7 @@ interface Props {
   label?: string
 }
 
-export default function ExportExcelButton({ type, search, start, end, label = '📤 Export Excel' }: Props) {
+export default function ExportExcelButton({ type, search, start, end, label = 'Export Excel' }: Props) {
   const [loading, setLoading] = useState(false)
 
   const handleExport = async () => {
@@ -49,8 +50,8 @@ export default function ExportExcelButton({ type, search, start, end, label = '�
   }
 
   return (
-    <button onClick={handleExport} disabled={loading} className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}>
-      {loading ? '⏳' : ''} {label}
+    <button onClick={handleExport} disabled={loading} className="btn btn-outline" style={{ fontSize: '0.8rem', padding: '0.375rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}>
+      {loading ? <Loader2 size={16} strokeWidth={1.75} className="icon-inline" style={{ animation: 'spin 0.8s linear infinite' }} /> : <Download size={16} strokeWidth={1.75} className="icon-inline" />} {label}
     </button>
   )
 }

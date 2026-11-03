@@ -96,7 +96,7 @@ export default function LoginPage() {
         <div style={{ marginTop: '1.25rem', textAlign: 'center' }}>
           <div style={{ height: '1px', background: 'var(--border)', marginBottom: '1.25rem' }} />
           <p style={{ fontSize: '0.85rem', marginBottom: '0.75rem' }}>Belum punya akun?</p>
-          <a href="/register" className="btn btn-outline" style={{ width: '100%', display: 'flex', justifyContent: 'center', fontSize: '0.9rem', padding: '0.7rem' }}>
+          <a href="/register" className="btn btn-outline" style={{ width: '100%', display: 'flex', justifyContent: 'center', fontSize: '0.9rem', padding: '0.75rem' }}>
             Buat Akun
           </a>
         </div>
@@ -108,13 +108,14 @@ export default function LoginPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+          background: var(--background);
           padding: 1.5rem;
         }
         .login-card {
           background: var(--surface);
           border-radius: var(--radius-lg);
-          box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+          border: 1px solid var(--border);
+          box-shadow: var(--shadow-md);
           padding: 2.5rem;
           width: 100%;
           max-width: 400px;
@@ -128,7 +129,7 @@ export default function LoginPage() {
           display: flex;
           justify-content: center;
           margin-bottom: 1.5rem;
-          background: white;
+          background: var(--surface);
         }
         .login-header p {
           color: var(--text-muted);
@@ -141,10 +142,10 @@ export default function LoginPage() {
           font-size: 1rem;
         }
         .alert-error {
-          background-color: var(--danger);
-          color: white;
+          background-color: var(--danger-bg);
+          color: var(--danger);
           padding: 0.75rem 1rem;
-          border-radius: var(--radius-md);
+          border-radius: var(--radius-sm);
           font-size: 0.875rem;
           margin-bottom: 1.5rem;
           text-align: center;

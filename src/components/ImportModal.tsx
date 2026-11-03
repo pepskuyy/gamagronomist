@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
+import { AlertTriangle, ArrowLeft, Check, Download, FolderOpen, Info, Upload, X } from 'lucide-react'
 import { bulkImportProducts, BulkProductRow, BulkImportResult } from '@/app/actions/bulk-import'
 
 const VALID_UNITS_KEMASAN = ['PCS', 'Btl', 'Bks', 'Box', 'Sak', 'gl', 'Pack', 'Rol']
@@ -94,38 +95,39 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
     if (res.inserted > 0) onSuccess()
   }
 
-  const th: React.CSSProperties = { padding: '0.6rem 0.75rem', textAlign: 'left', fontSize: '0.78rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', background: 'var(--surface-hover)', borderBottom: '1px solid var(--border)' }
-  const td: React.CSSProperties = { padding: '0.6rem 0.75rem', fontSize: '0.85rem', borderBottom: '1px solid var(--border)' }
+  const th: React.CSSProperties = { padding: '0.625rem 0.75rem', textAlign: 'left', fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }
+  const td: React.CSSProperties = { padding: '0.625rem 0.75rem', fontSize: '0.85rem', borderBottom: '1px solid var(--border-light)' }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
       onClick={e => e.target === e.currentTarget && onClose()}>
-      <div style={{ background: '#fff', borderRadius: '1rem', padding: '2rem', width: '100%', maxWidth: step === 'preview' ? '760px' : '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: '0 24px 80px rgba(0,0,0,0.25)' }}>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xl)', padding: '2rem', width: '100%', maxWidth: step === 'preview' ? '760px' : '500px', maxHeight: '90vh', overflowY: 'auto', boxShadow: 'var(--shadow-lg)' }}>
 
         {/* ─── Step 1: Upload ─── */}
         {step === 'upload' && (
           <>
-            <h3 style={{ marginBottom: '0.25rem' }}>📥 Import / Update Produk dari Excel</h3>
+            <h3 style={{ marginBottom: '0.25rem' }}>Import / Update Produk dari Excel</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Upload file .xlsx atau .xls. Gunakan kolom <code>id_db</code> (isi ID dari sistem) untuk <strong>memperbarui</strong> produk yang sudah ada, atau kosongkan untuk <strong>menambah</strong> produk baru.</p>
-            <div style={{ marginBottom: '1rem', padding: '0.6rem 0.9rem', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '0.5rem', fontSize: '0.82rem', color: '#166534' }}>
-              💡 <strong>Tip:</strong> Gunakan tombol &quot;Export Excel&quot; di halaman produk untuk mendapatkan file dengan kolom <code>id_db</code> yang sudah terisi, lalu edit dan re-import kembali.
+            <div style={{ marginBottom: '1rem', padding: '0.625rem 0.875rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+              <Info size={16} strokeWidth={1.75} className="icon-inline" style={{ marginTop: '0.125rem', color: 'var(--text-muted)' }} />
+              <span><strong>Tip:</strong> Gunakan tombol &quot;Export Excel&quot; di halaman produk untuk mendapatkan file dengan kolom <code>id_db</code> yang sudah terisi, lalu edit dan re-import kembali.</span>
             </div>
 
-            <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', fontSize: '0.85rem', color: '#1e40af' }}>
+            <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'var(--info-bg)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', color: 'var(--info)' }}>
               <strong>Satuan kemasan yang valid:</strong> {VALID_UNITS_KEMASAN.join(', ')}
             </div>
 
-            <label style={{ border: '2px dashed var(--border)', borderRadius: '0.75rem', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '0.5rem', background: 'var(--surface-hover)' }}>
-              <span style={{ fontSize: '2.5rem' }}>📂</span>
-              <span style={{ fontWeight: 600 }}>Klik untuk pilih file Excel</span>
+            <label style={{ border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: '2rem', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', gap: '0.5rem', background: 'var(--surface-2)' }}>
+              <FolderOpen size={32} strokeWidth={1.5} style={{ color: 'var(--text-muted)' }} />
+              <span style={{ fontWeight: 500 }}>Klik untuk pilih file Excel</span>
               <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>.xlsx atau .xls</span>
               <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: 'none' }} />
             </label>
 
-            {fileError && <div style={{ marginTop: '0.75rem', padding: '0.65rem 0.9rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '0.5rem', fontSize: '0.85rem' }}>{fileError}</div>}
+            {fileError && <div style={{ marginTop: '0.75rem', padding: '0.625rem 0.875rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>{fileError}</div>}
 
             <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem' }}>
-              <button onClick={downloadTemplate} className="btn btn-outline" style={{ flex: 1 }}>⬇️ Unduh Template</button>
+              <button onClick={downloadTemplate} className="btn btn-outline" style={{ flex: 1 }}><Download size={16} strokeWidth={1.75} className="icon-inline" />Unduh Template</button>
               <button onClick={onClose} className="btn btn-outline" style={{ flex: 1 }}>Batal</button>
             </div>
           </>
@@ -134,10 +136,10 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
         {/* ─── Step 2: Preview ─── */}
         {step === 'preview' && (
           <>
-            <h3 style={{ marginBottom: '0.25rem' }}>🔍 Preview Data ({preview.length} baris)</h3>
+            <h3 style={{ marginBottom: '0.25rem' }}>Preview Data (<span className="num">{preview.length}</span> baris)</h3>
             <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>Pastikan data sudah benar sebelum diimpor. Produk duplikat akan dilewati otomatis.</p>
 
-            <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: '0.5rem', marginBottom: '1.25rem' }}>
+            <div style={{ maxHeight: '400px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '1.25rem' }}>
               <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead style={{ position: 'sticky', top: 0, zIndex: 1 }}>
                   <tr>
@@ -155,20 +157,20 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
                     const unitOk = ALL_VALID_UNITS.includes(row.unit)
                     const ok = nameOk && unitOk
                     return (
-                      <tr key={i} style={{ background: ok ? 'transparent' : '#fff7ed' }}>
-                        <td style={td}>{i + 2}</td>
-                        <td style={{ ...td, color: 'var(--primary)', fontFamily: 'monospace', fontSize: '0.75rem' }}>{row.code || '—'}</td>
-                        <td style={td}><strong>{row.name || <em style={{ color: '#9ca3af' }}>kosong</em>}</strong></td>
+                      <tr key={i} style={{ background: ok ? 'transparent' : 'var(--warning-bg)' }}>
+                        <td className="num" style={{ ...td, color: 'var(--text-muted)' }}>{i + 2}</td>
+                        <td style={{ ...td, color: 'var(--primary)', fontFamily: 'var(--font-mono-stack)', fontSize: '0.75rem' }}>{row.code || '—'}</td>
+                        <td style={td}><strong style={{ fontWeight: 500 }}>{row.name || <em style={{ color: 'var(--text-muted)', fontStyle: 'normal' }}>kosong</em>}</strong></td>
                         <td style={td}>
-                          <span style={{ padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600, background: unitOk ? '#dcfce7' : '#fee2e2', color: unitOk ? '#166534' : '#b91c1c' }}>
+                          <span style={{ padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 500, background: unitOk ? 'var(--success-bg)' : 'var(--danger-bg)', color: unitOk ? 'var(--success)' : 'var(--danger)' }}>
                             {row.unit || '—'}
                           </span>
                         </td>
                         <td style={{ ...td, color: 'var(--text-muted)', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{row.description || '—'}</td>
                         <td style={td}>
                           {ok
-                            ? <span style={{ color: '#16a34a', fontWeight: 600, fontSize: '0.8rem' }}>✓ Siap</span>
-                            : <span style={{ color: '#dc2626', fontWeight: 600, fontSize: '0.8rem' }}>✗ Ada masalah</span>}
+                            ? <span style={{ color: 'var(--success)', fontWeight: 500, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Check size={14} strokeWidth={1.75} />Siap</span>
+                            : <span style={{ color: 'var(--danger)', fontWeight: 500, fontSize: '0.8rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><X size={14} strokeWidth={1.75} />Ada masalah</span>}
                         </td>
                       </tr>
                     )
@@ -178,9 +180,9 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
             </div>
 
             <div style={{ display: 'flex', gap: '0.75rem' }}>
-              <button onClick={() => { setStep('upload'); setPreview([]); if (fileRef.current) fileRef.current.value = '' }} className="btn btn-outline" style={{ flex: 1 }}>← Ganti File</button>
+              <button onClick={() => { setStep('upload'); setPreview([]); if (fileRef.current) fileRef.current.value = '' }} className="btn btn-outline" style={{ flex: 1 }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Ganti File</button>
               <button onClick={handleImport} disabled={loading} className="btn btn-primary" style={{ flex: 2 }}>
-                {loading ? '⏳ Sedang Mengimpor...' : `✅ Import ${preview.length} Produk`}
+                {loading ? 'Sedang Mengimpor...' : <><Upload size={16} strokeWidth={1.75} className="icon-inline" />{`Import ${preview.length} Produk`}</>}
               </button>
             </div>
           </>
@@ -189,29 +191,29 @@ export default function ImportModal({ onClose, onSuccess }: Props) {
         {/* ─── Step 3: Result ─── */}
         {step === 'done' && result && (
           <>
-            <h3 style={{ marginBottom: '0.75rem' }}>🎉 Hasil Import</h3>
+            <h3 style={{ marginBottom: '0.75rem' }}>Hasil Import</h3>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              <div style={{ padding: '1rem', background: '#dcfce7', borderRadius: '0.75rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#16a34a' }}>{result.inserted}</div>
-                <div style={{ fontSize: '0.85rem', color: '#166534' }}>Ditambahkan</div>
+              <div style={{ padding: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Ditambahkan</div>
+                <div className="num" style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--text-main)' }}>{result.inserted}</div>
               </div>
-              <div style={{ padding: '1rem', background: '#eff6ff', borderRadius: '0.75rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: '#2563eb' }}>{(result as any).updated ?? 0}</div>
-                <div style={{ fontSize: '0.85rem', color: '#1e40af' }}>Diperbarui</div>
+              <div style={{ padding: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Diperbarui</div>
+                <div className="num" style={{ fontSize: '1.75rem', fontWeight: 600, color: 'var(--text-main)' }}>{(result as any).updated ?? 0}</div>
               </div>
-              <div style={{ padding: '1rem', background: result.skipped > 0 ? '#fff7ed' : '#f0fdf4', borderRadius: '0.75rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '2rem', fontWeight: 800, color: result.skipped > 0 ? '#ea580c' : '#16a34a' }}>{result.skipped}</div>
-                <div style={{ fontSize: '0.85rem', color: result.skipped > 0 ? '#9a3412' : '#166534' }}>Dilewati</div>
+              <div style={{ padding: '1rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
+                <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Dilewati</div>
+                <div className="num" style={{ fontSize: '1.75rem', fontWeight: 600, color: result.skipped > 0 ? 'var(--warning)' : 'var(--text-main)' }}>{result.skipped}</div>
               </div>
             </div>
 
             {result.errors.length > 0 && (
               <div style={{ marginBottom: '1.25rem' }}>
-                <p style={{ fontWeight: 600, marginBottom: '0.5rem', fontSize: '0.875rem' }}>⚠️ Detail baris yang dilewati:</p>
-                <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid #fde68a', borderRadius: '0.5rem' }}>
+                <p style={{ fontWeight: 500, marginBottom: '0.5rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--text-main)' }}><AlertTriangle size={16} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--warning)' }} />Detail baris yang dilewati:</p>
+                <div style={{ maxHeight: '200px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
                   {result.errors.map((e, i) => (
-                    <div key={i} style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid #fde68a', fontSize: '0.82rem', background: '#fffbeb' }}>
-                      <strong>Baris {e.row}:</strong> {e.name} — <span style={{ color: '#92400e' }}>{e.reason}</span>
+                    <div key={i} style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.82rem', background: 'var(--surface)' }}>
+                      <strong style={{ fontWeight: 500 }}>Baris <span className="num">{e.row}</span>:</strong> {e.name} — <span style={{ color: 'var(--warning)' }}>{e.reason}</span>
                     </div>
                   ))}
                 </div>

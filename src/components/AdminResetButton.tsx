@@ -2,6 +2,7 @@
 
 import { useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { RotateCcw } from 'lucide-react'
 import { resetRequestToSubmitted } from '@/app/actions/afa-stock'
 
 export function AdminResetButton({ requestId }: { requestId: string }) {
@@ -9,13 +10,13 @@ export function AdminResetButton({ requestId }: { requestId: string }) {
   const router = useRouter()
 
   const handleReset = () => {
-    if (!confirm('⚠️ Reset pengajuan ini ke status SUBMITTED?\n\nJika pengajuan SAMPEL sudah APPROVED, entri ledger akan di-reverse otomatis.\n\nLanjutkan?')) return
+    if (!confirm('Reset pengajuan ini ke status SUBMITTED?\n\nJika pengajuan SAMPEL sudah APPROVED, entri ledger akan di-reverse otomatis.\n\nLanjutkan?')) return
     startTransition(async () => {
       const res = await resetRequestToSubmitted(requestId)
       if (res?.error) {
-        alert('❌ ' + res.error)
+        alert(res.error)
       } else {
-        alert('✅ Pengajuan berhasil di-reset ke SUBMITTED. SPV sekarang bisa memproses ulang.')
+        alert('Pengajuan berhasil di-reset ke SUBMITTED. SPV sekarang bisa memproses ulang.')
         router.refresh()
       }
     })
@@ -26,17 +27,17 @@ export function AdminResetButton({ requestId }: { requestId: string }) {
       onClick={handleReset}
       className="btn"
       style={{
-        padding: '0.4rem 0.8rem',
+        padding: '0.375rem 0.75rem',
         fontSize: '0.8rem',
-        background: '#fef3c7',
-        color: '#92400e',
-        border: '1px solid #fde68a',
+        background: 'var(--warning-bg)',
+        color: 'var(--warning)',
+        border: '1px solid var(--border)',
         cursor: 'pointer',
       }}
       disabled={isPending}
       title="Reset ke SUBMITTED — hanya untuk ADMIN"
     >
-      {isPending ? '⏳...' : '↩️ Reset ke SPV'}
+      {isPending ? 'Memproses...' : <><RotateCcw size={16} strokeWidth={1.75} className="icon-inline" />Reset ke SPV</>}
     </button>
   )
 }

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
+import { ArrowLeft, CheckCircle2, KeyRound } from 'lucide-react'
 import { resetPasswordWithEmail } from '../actions/auth'
 
 export default function ForgotPasswordPage() {
@@ -31,14 +32,17 @@ export default function ForgotPasswordPage() {
     <div className="login-container">
       <div className="login-card">
         <div className="login-header">
-          <div className="logo">🌱 Agrolens</div>
+          <div className="logo">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/agrolens-logo.png" alt="Agrolens" style={{ width: '180px', height: 'auto', objectFit: 'contain', mixBlendMode: 'multiply' }} />
+          </div>
           <p>Reset Password</p>
         </div>
 
         {step === 'done' ? (
           <div>
-            <div style={{ background: '#dcfce7', color: '#166534', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center' }}>
-              <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>✅</div>
+            <div style={{ background: 'var(--success-bg)', color: 'var(--success)', padding: '1rem 1.25rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', marginBottom: '1.5rem', textAlign: 'center' }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0.5rem' }}><CheckCircle2 size={28} strokeWidth={1.75} /></div>
               <strong>Password berhasil direset!</strong>
               <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem' }}>
                 Silakan masuk dengan password baru Anda.
@@ -48,13 +52,14 @@ export default function ForgotPasswordPage() {
               onClick={() => router.push('/login')}
               className="btn btn-primary btn-block"
             >
-              ← Kembali ke Login
+              <ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />
+              Kembali ke Login
             </button>
           </div>
         ) : (
           <>
             {/* Info */}
-            <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)', padding: '0.85rem 1rem', marginBottom: '1.5rem', fontSize: '0.82rem', color: '#1e40af' }}>
+            <div style={{ background: 'var(--info-bg)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', marginBottom: '1.5rem', fontSize: '0.82rem', color: 'var(--info)' }}>
               <strong>Cara Reset:</strong> Masukkan username dan email yang terdaftar pada akun Anda, lalu buat password baru.
             </div>
 
@@ -116,13 +121,14 @@ export default function ForgotPasswordPage() {
                 className="btn btn-primary btn-block" 
                 disabled={isPending}
               >
-                {isPending ? 'Memproses...' : '🔓 Reset Password'}
+                {isPending ? 'Memproses...' : <><KeyRound size={16} strokeWidth={1.75} className="icon-inline" />Reset Password</>}
               </button>
             </form>
 
             <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
-              <a href="/login" style={{ color: 'var(--primary)', fontSize: '0.875rem', textDecoration: 'none' }}>
-                ← Kembali ke halaman login
+              <a href="/login" style={{ color: 'var(--primary)', fontSize: '0.875rem', textDecoration: 'none', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                <ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />
+                Kembali ke halaman login
               </a>
             </div>
           </>
@@ -135,13 +141,14 @@ export default function ForgotPasswordPage() {
           display: flex;
           align-items: center;
           justify-content: center;
-          background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+          background: var(--background);
           padding: 1.5rem;
         }
         .login-card {
           background: var(--surface);
           border-radius: var(--radius-lg);
-          box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+          border: 1px solid var(--border);
+          box-shadow: var(--shadow-md);
           padding: 2.5rem;
           width: 100%;
           max-width: 420px;
@@ -152,10 +159,9 @@ export default function ForgotPasswordPage() {
           margin-bottom: 2rem;
         }
         .logo {
-          font-size: 1.75rem;
-          font-weight: 700;
-          color: var(--primary);
-          margin-bottom: 0.5rem;
+          display: flex;
+          justify-content: center;
+          margin-bottom: 0.75rem;
         }
         .login-header p {
           color: var(--text-muted);
@@ -168,10 +174,10 @@ export default function ForgotPasswordPage() {
           font-size: 1rem;
         }
         .alert-error {
-          background-color: var(--danger);
-          color: white;
+          background-color: var(--danger-bg);
+          color: var(--danger);
           padding: 0.75rem 1rem;
-          border-radius: var(--radius-md);
+          border-radius: var(--radius-sm);
           font-size: 0.875rem;
           margin-bottom: 1.5rem;
           text-align: center;

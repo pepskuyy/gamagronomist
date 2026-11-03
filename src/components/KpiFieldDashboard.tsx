@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { AlertTriangle } from 'lucide-react'
 import type { AreaTargetData, Targets } from '@/app/actions/kpi'
 
 interface KpiFieldDashboardProps {
@@ -23,8 +24,8 @@ const INDICATORS: { key: keyof AreaTargetData['actuals']; targetKey: keyof Targe
 
 const MONTHS = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember']
 
-function pctColor(pct: number) { return pct >= 91 ? '#16a34a' : pct >= 71 ? '#d97706' : '#dc2626' }
-function pctBg(pct: number)    { return pct >= 91 ? '#dcfce7' : pct >= 71 ? '#fef3c7' : '#fee2e2' }
+function pctColor(pct: number) { return pct >= 91 ? 'var(--success)' : pct >= 71 ? 'var(--warning)' : 'var(--danger)' }
+function pctBg(pct: number)    { return pct >= 91 ? 'var(--success-bg)' : pct >= 71 ? 'var(--warning-bg)' : 'var(--danger-bg)' }
 
 const EMPTY_DATA: AreaTargetData = {
   targets: { targetDemoPlot: 0, targetVisitKios: 0, targetGathering: 0, targetCompany: 0, targetBehavior: 0 },
@@ -60,8 +61,8 @@ export default function KpiFieldDashboard({
   useEffect(() => { fetchData() }, [selectedAreaId, month, year])
 
   const selectStyle: React.CSSProperties = {
-    border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.4rem 0.65rem',
-    fontSize: '0.85rem', color: '#374151', background: '#fff', cursor: 'pointer', outline: 'none',
+    border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.375rem 0.625rem',
+    fontSize: '0.85rem', color: 'var(--text-secondary)', background: 'var(--surface)', cursor: 'pointer', outline: 'none',
   }
 
   const totalActual = Object.values(data.actuals).reduce((a, b) => a + b, 0)
@@ -72,16 +73,16 @@ export default function KpiFieldDashboard({
     <div>
       {/* Header */}
       <div style={{ marginBottom: '1.25rem' }}>
-        <h2 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 700 }}>🎯 Target Aktivitas</h2>
-        <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+        <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Target Aktivitas</h2>
+        <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
           Progres capaian aktivitas vs target area · bisa pilih area lain
         </p>
       </div>
 
       {/* Filters */}
-      <div style={{ display: 'flex', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Area:</span>
+      <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Area:</span>
           <select style={selectStyle} value={selectedAreaId} onChange={e => setSelectedAreaId(e.target.value)}>
             <option value="all">— Semua Area —</option>
             <option value="none">Tanpa Area</option>
@@ -92,14 +93,14 @@ export default function KpiFieldDashboard({
             ))}
           </select>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Bulan:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Bulan:</span>
           <select style={selectStyle} value={month} onChange={e => setMonth(Number(e.target.value))}>
             {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-          <span style={{ fontSize: '0.8rem', color: '#6b7280', fontWeight: 500 }}>Tahun:</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Tahun:</span>
           <select style={selectStyle} value={year} onChange={e => setYear(Number(e.target.value))}>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -107,27 +108,27 @@ export default function KpiFieldDashboard({
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '2rem', color: '#9ca3af', fontSize: '0.9rem' }}>Memuat data target...</div>
+        <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>Memuat data target...</div>
       ) : (
         <>
           {/* Overall */}
           <div style={{
-            background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
-            borderRadius: '0.875rem', border: '2px solid #bbf7d0', padding: '1.25rem',
+            background: 'var(--surface)',
+            borderRadius: 'var(--radius-lg)', border: '1px solid var(--border)', padding: '1.25rem',
             display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem',
             marginBottom: '1rem',
           }}>
             <div>
-              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.05em' }}>📊 Total Capaian — {selectedAreaLabel}</div>
-              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.4rem', marginTop: '0.4rem' }}>
-                <span style={{ fontSize: '2.5rem', fontWeight: 900, color: totalTarget === 0 ? '#9ca3af' : pctColor(totalPct), lineHeight: 1 }}>{totalActual}</span>
-                <span style={{ fontSize: '0.9rem', color: '#6b7280' }}>dari {totalTarget === 0 ? '?' : totalTarget}</span>
+              <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>Total capaian — {selectedAreaLabel}</div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.375rem', marginTop: '0.375rem' }}>
+                <span className="num" style={{ fontSize: '2.5rem', fontWeight: 600, color: totalTarget === 0 ? 'var(--text-muted)' : 'var(--text-main)', lineHeight: 1 }}>{totalActual}</span>
+                <span className="num" style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>dari {totalTarget === 0 ? '?' : totalTarget}</span>
               </div>
             </div>
-            <div style={{
-              fontSize: '1.25rem', fontWeight: 800, padding: '0.5rem 1.25rem', borderRadius: '999px',
-              background: totalTarget === 0 ? '#f3f4f6' : pctBg(totalPct),
-              color: totalTarget === 0 ? '#9ca3af' : pctColor(totalPct),
+            <div className="num" style={{
+              fontSize: '1rem', fontWeight: 500, padding: '0.25rem 0.75rem', borderRadius: 'var(--radius-xs)',
+              background: totalTarget === 0 ? 'var(--surface-2)' : pctBg(totalPct),
+              color: totalTarget === 0 ? 'var(--text-muted)' : pctColor(totalPct),
             }}>
               {totalTarget === 0 ? '–' : `${totalPct}%`}
             </div>
@@ -139,22 +140,22 @@ export default function KpiFieldDashboard({
               const actual = data.actuals[c.key]
               const target = data.targets[c.targetKey]
               const pct    = target > 0 ? Math.min(Math.round((actual / target) * 100), 100) : 0
-              const color  = target === 0 ? '#9ca3af' : pctColor(pct)
-              const badge  = target === 0 ? { color: '#6b7280', background: '#f3f4f6' } : { color: pctColor(pct), background: pctBg(pct) }
+              const color  = target === 0 ? 'var(--text-muted)' : pctColor(pct)
+              const badge  = target === 0 ? { color: 'var(--text-muted)', background: 'var(--surface-2)' } : { color: pctColor(pct), background: pctBg(pct) }
               return (
-                <div key={c.key} style={{ background: '#fff', borderRadius: '0.75rem', border: '1px solid #e5e7eb', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                <div key={c.key} style={{ background: 'var(--surface)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)', padding: '1rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 600, color: '#6b7280' }}>{c.icon} {c.label}</span>
-                    <span style={{ ...badge, fontSize: '0.72rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '999px' }}>
+                    <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)' }}>{c.label}</span>
+                    <span className="num" style={{ ...badge, fontSize: '0.72rem', fontWeight: 500, padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)' }}>
                       {target === 0 ? '–' : `${pct}%`}
                     </span>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.3rem' }}>
-                    <span style={{ fontSize: '1.75rem', fontWeight: 800, color, lineHeight: 1 }}>{actual}</span>
-                    <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>/ {target === 0 ? '?' : target}</span>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.25rem' }}>
+                    <span className="num" style={{ fontSize: '1.75rem', fontWeight: 600, color: target === 0 ? color : 'var(--text-main)', lineHeight: 1 }}>{actual}</span>
+                    <span className="num" style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>/ {target === 0 ? '?' : target}</span>
                   </div>
-                  <div style={{ height: '4px', background: '#f3f4f6', borderRadius: '999px', overflow: 'hidden' }}>
-                    <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: color, borderRadius: '999px', transition: 'width 0.7s ease' }} />
+                  <div style={{ height: '4px', background: 'var(--surface-2)', borderRadius: '999px', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${Math.min(pct, 100)}%`, background: color, borderRadius: '999px', transition: 'width 0.7s var(--ease)' }} />
                   </div>
                 </div>
               )
@@ -162,11 +163,12 @@ export default function KpiFieldDashboard({
           </div>
 
           {totalTarget === 0 && (
-            <p style={{ fontSize: '0.8rem', color: '#92400e', background: '#fef9c3', padding: '0.65rem 1rem', borderRadius: '0.5rem', margin: 0 }}>
-              ⚠️ SPV belum menetapkan target untuk area <strong>{selectedAreaLabel}</strong> di periode ini.
+            <p style={{ fontSize: '0.8rem', color: 'var(--warning)', background: 'var(--warning-bg)', padding: '0.625rem 1rem', borderRadius: 'var(--radius-sm)', margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+              <AlertTriangle size={16} strokeWidth={1.75} className="icon-inline" />
+              SPV belum menetapkan target untuk area <strong>{selectedAreaLabel}</strong> di periode ini.
             </p>
           )}
-          <div style={{ fontSize: '0.72rem', color: '#9ca3af', textAlign: 'right', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', textAlign: 'right', marginTop: '0.5rem' }}>
             {selectedAreaLabel} · {MONTHS[month - 1]} {year}
           </div>
         </>

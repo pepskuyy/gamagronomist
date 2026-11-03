@@ -36,18 +36,18 @@ export default function UpdateProfilePhotoForm({ currentPhoto }: { currentPhoto:
 
   return (
     <div>
-      {error && <div className="alert alert-danger" style={{ marginBottom: '1rem' }}>{error}</div>}
-      {success && <div className="alert alert-success" style={{ marginBottom: '1rem' }}>{success}</div>}
+      {error && <div className="alert alert-danger" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', background: 'var(--danger-bg)', color: 'var(--danger)', fontSize: '0.875rem' }}>{error}</div>}
+      {success && <div className="alert alert-success" style={{ marginBottom: '1rem', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', background: 'var(--success-bg)', color: 'var(--success)', fontSize: '0.875rem' }}>{success}</div>}
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem', marginBottom: '1.5rem' }}>
         <div style={{ 
-          width: '80px', height: '80px', borderRadius: '50%', background: 'var(--surface-hover)', 
+          width: '80px', height: '80px', borderRadius: '50%', background: 'var(--surface-2)', 
           border: '1px solid var(--border)', overflow: 'hidden', flexShrink: 0 
         }}>
           {photoUrl ? (
             <img src={photoUrl} alt="Preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
           ) : (
-            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)' }}>
+            <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
               Tidak ada
             </div>
           )}
@@ -77,7 +77,7 @@ export default function UpdateProfilePhotoForm({ currentPhoto }: { currentPhoto:
           <button 
             type="button" 
             className="btn btn-outline" 
-            style={{ color: 'var(--danger)', borderColor: 'var(--danger)' }}
+            style={{ color: 'var(--danger)' }}
             onClick={() => { setPhotoUrl(null) }}
             disabled={isPending}
           >

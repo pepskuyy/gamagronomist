@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { Clock, WifiOff, X } from 'lucide-react'
 import { usePendingDraftCount } from '@/hooks/usePendingDraftCount'
 
 export default function OfflineDraftBanner() {
@@ -35,8 +36,7 @@ export default function OfflineDraftBanner() {
 
   return (
     <div style={{
-      background: isOnline ? '#eff6ff' : '#fef3c7',
-      border: `1px solid ${isOnline ? '#bfdbfe' : '#fde68a'}`,
+      background: isOnline ? 'var(--info-bg)' : 'var(--warning-bg)',
       borderRadius: 'var(--radius-sm)',
       padding: '0.75rem 1rem',
       marginBottom: '1rem',
@@ -47,14 +47,14 @@ export default function OfflineDraftBanner() {
       flexWrap: 'wrap'
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        <span style={{ fontSize: '1.1rem' }}>{isOnline ? '⏳' : '📵'}</span>
+        <span style={{ display: 'inline-flex', color: isOnline ? 'var(--info)' : 'var(--warning)' }}>{isOnline ? <Clock size={18} strokeWidth={1.75} /> : <WifiOff size={18} strokeWidth={1.75} />}</span>
         <div>
-          <strong style={{ color: isOnline ? '#1d4ed8' : '#92400e', fontSize: '0.88rem' }}>
+          <strong style={{ color: isOnline ? 'var(--info)' : 'var(--warning)', fontSize: '0.875rem', fontWeight: 500 }}>
             {isOnline
               ? `${pendingCount} laporan offline sedang disinkronisasi...`
               : `${pendingCount} laporan tersimpan offline, menunggu sinyal`}
           </strong>
-          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
+          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
             {isOnline
               ? 'Service Worker akan otomatis mengirim data ke server.'
               : 'Data aman di perangkat. Akan otomatis dikirim saat koneksi tersedia.'}
@@ -67,8 +67,8 @@ export default function OfflineDraftBanner() {
           <button
             onClick={handleManualSync}
             style={{
-              padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600,
-              background: '#3b82f6', color: 'white',
+              padding: '0.375rem 0.75rem', fontSize: '0.8rem', fontWeight: 500,
+              background: 'var(--info)', color: '#fff',
               border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer'
             }}
           >
@@ -78,9 +78,9 @@ export default function OfflineDraftBanner() {
         <Link
           href="/dashboard/offline-queue"
           style={{
-            padding: '0.35rem 0.75rem', fontSize: '0.8rem', fontWeight: 600,
-            background: 'transparent', color: isOnline ? '#1d4ed8' : '#92400e',
-            border: `1px solid ${isOnline ? '#bfdbfe' : '#fde68a'}`,
+            padding: '0.375rem 0.75rem', fontSize: '0.8rem', fontWeight: 500,
+            background: 'var(--surface)', color: 'var(--text-main)',
+            border: '1px solid var(--border)',
             borderRadius: 'var(--radius-sm)', textDecoration: 'none'
           }}
         >
@@ -90,11 +90,12 @@ export default function OfflineDraftBanner() {
           onClick={() => setDismissed(true)}
           style={{
             background: 'none', border: 'none', cursor: 'pointer',
-            color: 'var(--text-muted)', fontSize: '1rem', padding: '0.2rem'
+            color: 'var(--text-muted)', fontSize: '1rem', padding: '0.25rem',
+            display: 'inline-flex'
           }}
           title="Tutup"
         >
-          ✕
+          <X size={16} strokeWidth={1.75} />
         </button>
       </div>
     </div>

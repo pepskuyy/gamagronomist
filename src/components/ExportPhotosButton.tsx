@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Image as ImageIcon, Loader2 } from 'lucide-react'
 
 interface Props {
   type: 'cb' | 'demoplot' | 'kios' | 'gathering' | 'company' | 'spot-demplot'
@@ -51,10 +52,10 @@ export default function ExportPhotosButton({ type, search, start, end }: Props) 
       onClick={handleExport}
       disabled={loading}
       className="btn btn-outline"
-      style={{ fontSize: '0.8rem', padding: '0.35rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.4rem' }}
+      style={{ fontSize: '0.8rem', padding: '0.375rem 0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }}
       title="Export Excel dengan foto dokumentasi ter-embed (max 3 foto per baris)"
     >
-      {loading ? '⏳' : '🖼️'} {loading ? 'Memuat foto...' : 'Export + Foto'}
+      {loading ? <Loader2 size={16} strokeWidth={1.75} className="icon-inline" style={{ animation: 'spin 0.8s linear infinite' }} /> : <ImageIcon size={16} strokeWidth={1.75} className="icon-inline" />} {loading ? 'Memuat foto...' : 'Export + Foto'}
     </button>
   )
 }

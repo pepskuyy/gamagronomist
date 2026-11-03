@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { Bell } from 'lucide-react'
 
 type Notification = {
   id: string
@@ -103,17 +104,15 @@ export default function NotificationBell() {
         onClick={handleOpen}
         style={{ 
           background: 'none', border: 'none', cursor: 'pointer', position: 'relative',
-          padding: '0.5rem', borderRadius: '50%', color: 'var(--text-muted)'
+          padding: '0.5rem', borderRadius: 'var(--radius-sm)', color: 'var(--text-muted)'
         }}
       >
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-          <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-        </svg>
+        <Bell size={20} strokeWidth={1.75} style={{ display: 'block' }} />
         {unreadCount > 0 && (
           <span style={{
-            position: 'absolute', top: '2px', right: '4px', background: 'var(--danger)', color: 'white',
-            fontSize: '0.65rem', fontWeight: 700, padding: '0.1rem 0.35rem', borderRadius: '9999px', lineHeight: 1
+            position: 'absolute', top: '2px', right: '2px', background: 'var(--danger)', color: '#fff',
+            fontSize: '0.65rem', fontWeight: 600, padding: '0.125rem 0.375rem', borderRadius: '9999px', lineHeight: 1,
+            fontVariantNumeric: 'tabular-nums'
           }}>
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
@@ -124,10 +123,10 @@ export default function NotificationBell() {
         <div style={{
           position: 'absolute', top: '100%', right: 0, marginTop: '0.5rem', width: '320px', 
           background: 'var(--surface)', borderRadius: 'var(--radius-lg)', 
-          boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)', 
+          boxShadow: 'var(--shadow-lg)',
           zIndex: 50, overflow: 'hidden', border: '1px solid var(--border)'
         }}>
-          <div style={{ padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', background: 'var(--surface-hover)' }}>
+          <div style={{ padding: '0.75rem 1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid var(--border)', background: 'var(--surface)' }}>
             <h4 style={{ margin: 0, fontSize: '0.9rem', fontWeight: 600 }}>Notifikasi</h4>
             {unreadCount > 0 && (
               <button onClick={markAllAsRead} style={{ 
@@ -149,20 +148,20 @@ export default function NotificationBell() {
                     if (n.link) window.location.href = n.link
                   }}
                   style={{ 
-                    padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', 
+                    padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)',
                     background: n.isRead ? 'var(--surface)' : 'var(--primary-light)', 
                     cursor: n.link ? 'pointer' : 'default',
-                    transition: 'background 0.2s',
+                    transition: 'var(--transition)',
                     position: 'relative'
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.25rem' }}>
-                    <div style={{ fontSize: '0.85rem', fontWeight: n.isRead ? 500 : 700, color: 'var(--text-main)', paddingRight: '1rem' }}>{n.title}</div>
+                    <div style={{ fontSize: '0.85rem', fontWeight: n.isRead ? 400 : 600, color: 'var(--text-main)', paddingRight: '1rem' }}>{n.title}</div>
                     <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{formatDate(n.createdAt)}</div>
                   </div>
-                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.4 }}>{n.message}</div>
+                  <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>{n.message}</div>
                   {!n.isRead && (
-                    <div style={{ position: 'absolute', top: '0.85rem', right: '0.75rem', width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%' }} />
+                    <div style={{ position: 'absolute', top: '0.875rem', right: '0.75rem', width: '8px', height: '8px', background: 'var(--primary)', borderRadius: '50%' }} />
                   )}
                 </div>
               ))

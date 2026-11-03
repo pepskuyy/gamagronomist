@@ -59,7 +59,7 @@ export default function TableFilter({ prefix, showDateRange }: TableFilterProps)
         name="q" 
         defaultValue={currentQ} 
         placeholder="Cari nama..." 
-        style={{ padding: '0.4rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', outline: 'none', background: 'var(--surface-2)' }} 
+        style={{ padding: '0.375rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', outline: 'none', background: 'var(--surface)', color: 'var(--text-main)' }} 
       />
       {showDateRange && (
         <>
@@ -67,7 +67,7 @@ export default function TableFilter({ prefix, showDateRange }: TableFilterProps)
             type="date" 
             name="start" 
             defaultValue={currentStart} 
-            style={{ padding: '0.4rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', outline: 'none', background: 'var(--surface-2)' }} 
+            style={{ padding: '0.375rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', outline: 'none', background: 'var(--surface)', color: 'var(--text-main)' }} 
             title="Dari Tanggal"
           />
           <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>-</span>
@@ -75,14 +75,14 @@ export default function TableFilter({ prefix, showDateRange }: TableFilterProps)
             type="date" 
             name="end" 
             defaultValue={currentEnd} 
-            style={{ padding: '0.4rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', outline: 'none', background: 'var(--surface-2)' }} 
+            style={{ padding: '0.375rem 0.75rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem', outline: 'none', background: 'var(--surface)', color: 'var(--text-main)' }} 
             title="Sampai Tanggal"
           />
         </>
       )}
-      <button type="submit" className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>Cari</button>
+      <button type="submit" className="btn btn-primary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.85rem' }}>Cari</button>
       {(currentQ || currentStart || currentEnd) && (
-        <button type="button" onClick={handleReset} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>Clear</button>
+        <button type="button" onClick={handleReset} className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.85rem' }}>Clear</button>
       )}
     </form>
   )

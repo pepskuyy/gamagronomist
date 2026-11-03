@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { CheckCircle2, Save } from 'lucide-react'
 import { updateEmail } from '@/app/actions/auth'
 
 export default function UpdateEmailForm({ currentEmail }: { currentEmail: string | null }) {
@@ -25,13 +26,14 @@ export default function UpdateEmailForm({ currentEmail }: { currentEmail: string
   return (
     <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
       {error && (
-        <div style={{ background: '#fee2e2', color: '#991b1b', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>
+        <div style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>
           {error}
         </div>
       )}
       {success && (
-        <div style={{ background: '#dcfce7', color: '#166534', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>
-          ✅ Email berhasil diperbarui!
+        <div style={{ background: 'var(--success-bg)', color: 'var(--success)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <CheckCircle2 size={16} strokeWidth={1.75} className="icon-inline" />
+          Email berhasil diperbarui!
         </div>
       )}
 
@@ -46,13 +48,13 @@ export default function UpdateEmailForm({ currentEmail }: { currentEmail: string
           placeholder="contoh@email.com"
           required
         />
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.4rem' }}>
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.375rem' }}>
           Email ini akan digunakan untuk verifikasi saat lupa password.
         </p>
       </div>
 
-      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ alignSelf: 'flex-start', padding: '0.65rem 1.5rem' }}>
-        {isPending ? 'Menyimpan...' : '💾 Simpan Email'}
+      <button type="submit" className="btn btn-primary" disabled={isPending} style={{ alignSelf: 'flex-start', padding: '0.625rem 1.5rem' }}>
+        {isPending ? 'Menyimpan...' : <><Save size={16} strokeWidth={1.75} className="icon-inline" />Simpan Email</>}
       </button>
     </form>
   )

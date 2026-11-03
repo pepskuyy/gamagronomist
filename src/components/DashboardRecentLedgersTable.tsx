@@ -53,7 +53,7 @@ export default function DashboardRecentLedgersTable({ ledgers, isSPV }: Props) {
 
   return (
     <div>
-      <h2 style={{ marginBottom: '1rem' }}>🕒 Aktivitas Stok Terbaru</h2>
+      <h2 style={{ marginBottom: '1rem' }}>Aktivitas Stok Terbaru</h2>
       <div className="table-card">
         <div className="table-responsive">
           <table>
@@ -69,7 +69,7 @@ export default function DashboardRecentLedgersTable({ ledgers, isSPV }: Props) {
             <tbody>
               {paginated.map((l) => (
                 <tr key={l.id}>
-                  <td style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>
+                  <td className="num" style={{ whiteSpace: 'nowrap', fontSize: '0.85rem', color: 'var(--text-secondary)' }}>
                     {new Intl.DateTimeFormat('id-ID', { dateStyle: 'short', timeStyle: 'short' }).format(
                       new Date(l.createdAt)
                     )}
@@ -77,10 +77,10 @@ export default function DashboardRecentLedgersTable({ ledgers, isSPV }: Props) {
                   {isSPV && <td style={{ fontWeight: 500 }}>{l.user.name}</td>}
                   <td>{formatType(l.transactionType)}</td>
                   <td>{l.product.name}</td>
-                  <td style={{ fontWeight: 700, color: l.quantity > 0 ? 'var(--success)' : 'var(--danger)' }}>
+                  <td className="qty" style={{ fontWeight: 500, color: l.quantity > 0 ? 'var(--success)' : 'var(--danger)' }}>
                     {l.quantity > 0 ? '+' : ''}
                     {/* Ledger menyimpan qty dalam gramasi (ml/gr) bila produk punya isi per kemasan */}
-                    {l.quantity} {l.product.unitGramasi || l.product.unit}
+                    <span className="num">{l.quantity}</span><span className="unit">{l.product.unitGramasi || l.product.unit}</span>
                   </td>
                 </tr>
               ))}

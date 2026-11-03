@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
+import { Calendar, FlaskConical } from 'lucide-react'
 import { PALETTE } from './CommodityChart'
 import { getDateRangeLabel } from '@/lib/date-utils'
 
@@ -30,14 +31,14 @@ export default function CbProductChart({ filterQuery = '' }: { filterQuery?: str
 
   if (loading) return (
     <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-      <div style={{ width: 32, height: 32, border: '3px solid #e2e8f0', borderTop: '3px solid #3b82f6', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginRight: '0.75rem' }} />
+      <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', marginRight: '0.75rem' }} />
       Memuat statistik preferensi...
     </div>
   )
 
   if (!data || data.total === 0) return (
     <div style={{ textAlign: 'center', padding: '2.5rem', color: 'var(--text-muted)', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
-      <div style={{ fontSize: '2.5rem' }}>🧪</div>
+      <div style={{ display: 'flex', justifyContent: 'center' }}><FlaskConical size={32} strokeWidth={1.5} /></div>
       <p style={{ marginTop: '0.5rem', fontWeight: 500 }}>Belum ada data preferensi produk dari Customer Behavior.</p>
     </div>
   )
@@ -49,19 +50,20 @@ export default function CbProductChart({ filterQuery = '' }: { filterQuery?: str
     <div>
       <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.2rem' }}>🧪 Produk Preferensi Petani (Customer Behavior)</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-            Berdasarkan <strong>{data.total}</strong> input preferensi produk
+          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>Produk Preferensi Petani (Customer Behavior)</h2>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            Berdasarkan <strong className="num">{data.total}</strong> input preferensi produk
           </p>
         </div>
         <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-          fontSize: '0.78rem', fontWeight: 600,
-          color: '#475569', background: '#f1f5f9',
-          border: '1px solid #e2e8f0', borderRadius: '9999px',
-          padding: '0.25rem 0.75rem', whiteSpace: 'nowrap'
+          display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
+          fontSize: '0.78rem', fontWeight: 500,
+          color: 'var(--text-secondary)', background: 'var(--surface-2)',
+          border: '1px solid var(--border-light)', borderRadius: 'var(--radius-xs)',
+          padding: '0.25rem 0.625rem', whiteSpace: 'nowrap'
         }}>
-          📅 Periode: <span style={{ color: '#0f172a' }}>{dateRangeLabel}</span>
+          <Calendar size={14} strokeWidth={1.75} className="icon-inline" />
+          Periode: <span style={{ color: 'var(--text-main)' }}>{dateRangeLabel}</span>
         </div>
       </div>
 
@@ -72,21 +74,21 @@ export default function CbProductChart({ filterQuery = '' }: { filterQuery?: str
         </div>
 
         {/* Right: Ranked list */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.625rem' }}>
           {topItems.map((item, i) => (
             <div key={item.name} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               {/* Rank + color dot */}
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: PALETTE[i % PALETTE.length], display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.7rem', fontWeight: 700, color: '#fff', flexShrink: 0 }}>
+              <div className="num" style={{ width: 24, height: 24, borderRadius: '50%', background: 'var(--surface-2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.72rem', fontWeight: 500, color: 'var(--text-muted)', flexShrink: 0 }}>
                 {i + 1}
               </div>
               {/* Name + bar */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.2rem' }}>
-                  <span style={{ fontSize: '0.85rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
-                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '0.5rem', flexShrink: 0 }}>{item.count}× ({item.pct}%)</span>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.25rem' }}>
+                  <span style={{ fontSize: '0.85rem', fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.name}</span>
+                  <span className="num" style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginLeft: '0.5rem', flexShrink: 0 }}>{item.count}× ({item.pct}%)</span>
                 </div>
-                <div style={{ height: 6, background: 'var(--border)', borderRadius: '999px', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', width: `${item.pct}%`, background: PALETTE[i % PALETTE.length], borderRadius: '999px', transition: 'width 0.5s ease' }} />
+                <div style={{ height: 4, background: 'var(--surface-2)', borderRadius: '999px', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', width: `${item.pct}%`, background: PALETTE[i % PALETTE.length], borderRadius: '999px', transition: 'width 0.5s var(--ease)' }} />
                 </div>
               </div>
             </div>

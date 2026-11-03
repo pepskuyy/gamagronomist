@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { CheckCircle2, Lock } from 'lucide-react'
 import { changePassword } from '@/app/actions/auth'
 
 export default function ChangePasswordForm() {
@@ -32,18 +33,18 @@ export default function ChangePasswordForm() {
       <div className="form-group">
         <label className="form-label">Password Baru <span style={{ color: 'var(--danger)' }}>*</span></label>
         <input name="newPassword" type="password" className="form-control" required autoComplete="new-password" minLength={6} />
-        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.3rem' }}>Minimal 6 karakter.</p>
+        <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Minimal 6 karakter.</p>
       </div>
       <div className="form-group">
         <label className="form-label">Konfirmasi Password Baru <span style={{ color: 'var(--danger)' }}>*</span></label>
         <input name="confirmPassword" type="password" className="form-control" required autoComplete="new-password" />
       </div>
 
-      {error   && <div style={{ color: 'var(--danger)',  background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '0.5rem', padding: '0.6rem 0.9rem', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
-      {success && <div style={{ color: '#166534',        background: '#dcfce7', border: '1px solid #86efac', borderRadius: '0.5rem', padding: '0.6rem 0.9rem', marginBottom: '1rem', fontSize: '0.875rem' }}>✅ Password berhasil diubah! Gunakan password baru saat login berikutnya.</div>}
+      {error   && <div style={{ color: 'var(--danger)',  background: 'var(--danger-bg)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 0.875rem', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
+      {success && <div style={{ color: 'var(--success)', background: 'var(--success-bg)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 0.875rem', marginBottom: '1rem', fontSize: '0.875rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><CheckCircle2 size={16} strokeWidth={1.75} className="icon-inline" />Password berhasil diubah! Gunakan password baru saat login berikutnya.</div>}
 
       <button type="submit" className="btn btn-primary" disabled={isPending} style={{ minWidth: '180px' }}>
-        {isPending ? 'Menyimpan...' : '🔐 Ubah Password'}
+        {isPending ? 'Menyimpan...' : <><Lock size={16} strokeWidth={1.75} className="icon-inline" />Ubah Password</>}
       </button>
     </form>
   )

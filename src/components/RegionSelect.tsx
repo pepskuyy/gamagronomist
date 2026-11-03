@@ -13,6 +13,7 @@
 import { useState, useEffect } from 'react'
 import { getRegencies, getDistricts, getVillages } from '@/app/actions/region'
 import SearchableSelect from './SearchableSelect'
+import { WifiOff } from 'lucide-react'
 
 type Region = { id: string; name: string }
 
@@ -241,17 +242,19 @@ export default function RegionSelect({
       {/* Indikator offline dengan cache kosong */}
       {isOffline && !loadingKab && kabupatens.length === 0 && (
         <div style={{
-          fontSize: '0.78rem', color: '#92400e',
-          background: '#fef3c7', border: '1px solid #fde68a',
+          fontSize: '0.78rem', color: 'var(--warning)',
+          background: 'var(--warning-bg)',
           borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.75rem',
-          marginBottom: '0.5rem'
+          marginBottom: '0.5rem', display: 'flex', alignItems: 'flex-start', gap: '0.5rem'
         }}>
-          📵 Offline — Data wilayah belum ter-cache. Buka halaman ini sekali saat ada sinyal agar tersimpan untuk penggunaan offline.
+          <WifiOff size={14} strokeWidth={1.75} style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+          Offline — Data wilayah belum ter-cache. Buka halaman ini sekali saat ada sinyal agar tersimpan untuk penggunaan offline.
         </div>
       )}
       {isOffline && kabupatens.length > 0 && (
-        <div style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.4rem' }}>
-          📵 Menggunakan data wilayah dari cache lokal
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.375rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+          <WifiOff size={14} strokeWidth={1.75} />
+          Menggunakan data wilayah dari cache lokal
         </div>
       )}
 
@@ -270,7 +273,7 @@ export default function RegionSelect({
             value={selectedKabId}
             onChange={handleKabChange}
             required={required}
-            placeholder={loadingKab ? '⏳ Memuat...' : '-- Pilih Kabupaten --'}
+            placeholder={loadingKab ? 'Memuat...' : '-- Pilih Kabupaten --'}
           />
         </div>
 
@@ -285,7 +288,7 @@ export default function RegionSelect({
               value={selectedKecId}
               onChange={handleKecChange}
               required={required}
-              placeholder={loadingKec ? '⏳ Memuat...' : kecamatans.length === 0 ? '(Tidak ada data)' : '-- Pilih Kecamatan --'}
+              placeholder={loadingKec ? 'Memuat...' : kecamatans.length === 0 ? '(Tidak ada data)' : '-- Pilih Kecamatan --'}
             />
           ) : (
             <select className="form-control" disabled required={required}>
@@ -305,7 +308,7 @@ export default function RegionSelect({
               value={selectedDesaId}
               onChange={handleDesaChange}
               required={required}
-              placeholder={loadingDesa ? '⏳ Memuat...' : desas.length === 0 ? '(Tidak ada data)' : '-- Pilih Desa --'}
+              placeholder={loadingDesa ? 'Memuat...' : desas.length === 0 ? '(Tidak ada data)' : '-- Pilih Desa --'}
             />
           ) : (
             <select className="form-control" disabled required={required}>

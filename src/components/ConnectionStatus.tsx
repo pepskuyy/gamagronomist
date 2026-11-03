@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { CheckCircle2, RefreshCw, WifiOff } from 'lucide-react'
 import { usePendingDraftCount } from '@/hooks/usePendingDraftCount'
 
 export default function ConnectionStatus() {
@@ -43,14 +44,14 @@ export default function ConnectionStatus() {
   if (justSynced) {
     return (
       <div style={{
-        display: 'flex', alignItems: 'center', gap: '0.4rem',
-        padding: '0.3rem 0.75rem', borderRadius: '999px',
-        background: '#dcfce7', color: '#15803d',
-        fontSize: '0.78rem', fontWeight: 600,
-        border: '1px solid #86efac',
+        display: 'flex', alignItems: 'center', gap: '0.375rem',
+        padding: '0.25rem 0.625rem', borderRadius: 'var(--radius-xs)',
+        background: 'var(--success-bg)', color: 'var(--success)',
+        fontSize: '0.78rem', fontWeight: 500,
         animation: 'fadeIn 0.3s ease'
       }}>
-        ✅ Tersinkronisasi!
+        <CheckCircle2 size={14} strokeWidth={1.75} />
+        Tersinkronisasi!
       </div>
     )
   }
@@ -59,18 +60,19 @@ export default function ConnectionStatus() {
     return (
       <Link href="/dashboard/offline-queue" style={{ textDecoration: 'none' }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.4rem',
-          padding: '0.3rem 0.75rem', borderRadius: '999px',
-          background: '#fef3c7', color: '#92400e',
-          fontSize: '0.78rem', fontWeight: 600,
-          border: '1px solid #fde68a', cursor: 'pointer'
+          display: 'flex', alignItems: 'center', gap: '0.375rem',
+          padding: '0.25rem 0.625rem', borderRadius: 'var(--radius-xs)',
+          background: 'var(--warning-bg)', color: 'var(--warning)',
+          fontSize: '0.78rem', fontWeight: 500,
+          cursor: 'pointer'
         }}>
-          📵 Offline
+          <WifiOff size={14} strokeWidth={1.75} />
+          Offline
           {pendingCount > 0 && (
             <span style={{
-              background: '#f59e0b', color: 'white',
-              borderRadius: '999px', padding: '0 0.4rem',
-              fontSize: '0.7rem', fontWeight: 700
+              background: 'var(--warning)', color: '#fff',
+              borderRadius: '999px', padding: '0 0.375rem',
+              fontSize: '0.7rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums'
             }}>
               {pendingCount}
             </span>
@@ -84,17 +86,18 @@ export default function ConnectionStatus() {
     return (
       <Link href="/dashboard/offline-queue" style={{ textDecoration: 'none' }}>
         <div style={{
-          display: 'flex', alignItems: 'center', gap: '0.4rem',
-          padding: '0.3rem 0.75rem', borderRadius: '999px',
-          background: '#eff6ff', color: '#1d4ed8',
-          fontSize: '0.78rem', fontWeight: 600,
-          border: '1px solid #bfdbfe', cursor: 'pointer'
+          display: 'flex', alignItems: 'center', gap: '0.375rem',
+          padding: '0.25rem 0.625rem', borderRadius: 'var(--radius-xs)',
+          background: 'var(--info-bg)', color: 'var(--info)',
+          fontSize: '0.78rem', fontWeight: 500,
+          cursor: 'pointer'
         }}>
-          ⏳ Sinkronisasi...
+          <RefreshCw size={14} strokeWidth={1.75} />
+          Sinkronisasi...
           <span style={{
-            background: '#3b82f6', color: 'white',
-            borderRadius: '999px', padding: '0 0.4rem',
-            fontSize: '0.7rem', fontWeight: 700
+            background: 'var(--info)', color: '#fff',
+            borderRadius: '999px', padding: '0 0.375rem',
+            fontSize: '0.7rem', fontWeight: 600, fontVariantNumeric: 'tabular-nums'
           }}>
             {pendingCount}
           </span>
@@ -105,10 +108,10 @@ export default function ConnectionStatus() {
 
   return (
     <div style={{
-      display: 'flex', alignItems: 'center', gap: '0.3rem',
+      display: 'flex', alignItems: 'center', gap: '0.375rem',
       fontSize: '0.75rem', color: 'var(--text-muted)'
     }}>
-      <span style={{ color: '#22c55e', fontSize: '0.6rem' }}>●</span>
+      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} />
       Online
     </div>
   )

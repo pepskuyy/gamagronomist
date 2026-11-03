@@ -15,6 +15,7 @@
 
 import { useState, useEffect } from 'react'
 import type { PhotoBlob } from '@/lib/offline-db'
+import { Camera, Plus, WifiOff, X } from 'lucide-react'
 
 interface ImageUploaderProps {
   onUploadSuccess: (urls: string[]) => void
@@ -150,11 +151,13 @@ export default function ImageUploader({
         {label} {photos.length}/{maxFiles}
         {isOfflineMode && (
           <span style={{
-            marginLeft: '0.5rem', fontSize: '0.75rem', fontWeight: 600,
-            background: '#fef3c7', color: '#92400e',
-            padding: '0.15rem 0.5rem', borderRadius: '999px', border: '1px solid #fde68a'
+            marginLeft: '0.5rem', fontSize: '0.75rem', fontWeight: 500,
+            background: 'var(--warning-bg)', color: 'var(--warning)',
+            padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)',
+            display: 'inline-flex', alignItems: 'center', gap: '0.25rem', verticalAlign: 'middle'
           }}>
-            📵 Tersimpan Lokal
+            <WifiOff size={12} strokeWidth={1.75} />
+            Tersimpan Lokal
           </span>
         )}
       </label>
@@ -167,11 +170,13 @@ export default function ImageUploader({
 
       {isOfflineMode && (
         <div style={{
-          fontSize: '0.8rem', color: '#92400e', background: '#fffbeb',
-          border: '1px solid #fde68a', borderRadius: 'var(--radius-sm)',
-          padding: '0.5rem 0.75rem', marginBottom: '0.75rem'
+          fontSize: '0.8rem', color: 'var(--warning)', background: 'var(--warning-bg)',
+          borderRadius: 'var(--radius-sm)',
+          padding: '0.5rem 0.75rem', marginBottom: '0.75rem',
+          display: 'flex', alignItems: 'flex-start', gap: '0.5rem'
         }}>
-          📵 Mode Offline — Foto akan tersimpan di perangkat dan otomatis diupload saat sinyal tersedia.
+          <WifiOff size={14} strokeWidth={1.75} style={{ flexShrink: 0, marginTop: '0.125rem' }} />
+          Mode Offline — Foto akan tersimpan di perangkat dan otomatis diupload saat sinyal tersedia.
         </div>
       )}
 
@@ -180,16 +185,16 @@ export default function ImageUploader({
           <div key={idx} style={{
             position: 'relative', width: '100px', height: '100px',
             borderRadius: 'var(--radius-md)', overflow: 'hidden',
-            border: photo.isOffline ? '2px solid #f59e0b' : '1px solid var(--border)'
+            border: photo.isOffline ? '1px solid var(--warning)' : '1px solid var(--border)'
           }}>
             <img src={photo.src} alt={`Preview ${idx}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             {photo.isOffline && (
               <div style={{
                 position: 'absolute', bottom: 0, left: 0, right: 0,
-                background: 'rgba(245,158,11,0.85)', color: 'white',
-                fontSize: '9px', textAlign: 'center', padding: '2px'
+                background: 'rgba(180,83,9,0.85)', color: '#fff',
+                fontSize: '10px', fontWeight: 500, textAlign: 'center', padding: '2px'
               }}>
-                📵 LOKAL
+                Lokal
               </div>
             )}
             <button
@@ -197,13 +202,14 @@ export default function ImageUploader({
               onClick={() => removePhoto(idx)}
               style={{
                 position: 'absolute', top: '4px', right: '4px',
-                background: 'rgba(255,0,0,0.8)', color: 'white',
+                background: 'rgba(23,23,23,0.7)', color: '#fff',
                 border: 'none', borderRadius: '50%', width: '20px', height: '20px',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 cursor: 'pointer', fontSize: '10px'
               }}
+              aria-label="Hapus foto"
             >
-              ✕
+              <X size={12} strokeWidth={2} />
             </button>
           </div>
         ))}
@@ -212,15 +218,15 @@ export default function ImageUploader({
           <label style={{
             width: '100px', height: '100px',
             borderRadius: 'var(--radius-md)',
-            border: `2px dashed ${isOfflineMode ? '#f59e0b' : 'var(--border)'}`,
+            border: `1px dashed ${isOfflineMode ? 'var(--warning)' : 'var(--border)'}`,
             display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
             cursor: uploading ? 'not-allowed' : 'pointer',
-            background: isOfflineMode ? '#fffbeb' : 'var(--surface-hover)',
-            color: isOfflineMode ? '#92400e' : 'var(--text-muted)',
+            background: isOfflineMode ? 'var(--warning-bg)' : 'var(--surface-2)',
+            color: isOfflineMode ? 'var(--warning)' : 'var(--text-muted)',
             fontSize: '0.8rem', textAlign: 'center', padding: '0.5rem'
           }}>
-            <span style={{ fontSize: '1.5rem', marginBottom: '0.2rem' }}>
-              {isOfflineMode ? '📸' : '+'}
+            <span style={{ display: 'inline-flex', marginBottom: '0.25rem' }}>
+              {isOfflineMode ? <Camera size={20} strokeWidth={1.75} /> : <Plus size={20} strokeWidth={1.75} />}
             </span>
             {uploading ? 'Uploading...' : isOfflineMode ? 'Ambil Foto' : 'Tambah'}
             <input

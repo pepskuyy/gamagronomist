@@ -18,7 +18,7 @@ const renderCustomLabel = ({ cx, cy, midAngle, innerRadius, outerRadius, pct }: 
   const x = cx + radius * Math.cos(-midAngle * RADIAN)
   const y = cy + radius * Math.sin(-midAngle * RADIAN)
   return (
-    <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={700}>
+    <text x={x} y={y} fill="#fff" textAnchor="middle" dominantBaseline="central" fontSize={11} fontWeight={600}>
       {pct}%
     </text>
   )
@@ -28,9 +28,9 @@ const CustomTooltip = ({ active, payload }: any) => {
   if (active && payload?.length) {
     const d = payload[0].payload
     return (
-      <div style={{ background: '#fff', border: '1px solid #e2e8f0', borderRadius: '0.5rem', padding: '0.6rem 0.9rem', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', fontSize: '0.82rem' }}>
-        <div style={{ fontWeight: 700, marginBottom: '0.2rem' }}>{d.name}</div>
-        <div style={{ color: '#6b7280' }}>{d.count} data · {d.pct}%</div>
+      <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.75rem', boxShadow: 'var(--shadow-md)', fontSize: '0.82rem' }}>
+        <div style={{ fontWeight: 500, marginBottom: '0.125rem', color: 'var(--text-main)' }}>{d.name}</div>
+        <div className="num" style={{ color: 'var(--text-muted)' }}>{d.count} data · {d.pct}%</div>
       </div>
     )
   }
@@ -67,8 +67,8 @@ export default function CommodityChartInner({ items, palette, total, label = 'Cu
         transform: 'translate(-50%, -50%)',
         textAlign: 'center', pointerEvents: 'none'
       }}>
-        <div style={{ fontSize: '2rem', fontWeight: 800, lineHeight: 1, color: '#1e293b' }}>{total}</div>
-        <div style={{ fontSize: '0.7rem', color: '#94a3b8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</div>
+        <div className="num" style={{ fontSize: '2rem', fontWeight: 600, lineHeight: 1, color: 'var(--text-main)' }}>{total}</div>
+        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>{label}</div>
       </div>
     </div>
   )

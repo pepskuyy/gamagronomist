@@ -37,9 +37,9 @@ export default function MaintenanceToggle({ initialStatus }: { initialStatus: bo
           height: '26px',
           borderRadius: '9999px',
           border: 'none',
-          backgroundColor: isActive ? '#dc2626' : '#d1d5db',
+          backgroundColor: isActive ? 'var(--danger)' : 'var(--surface-3)',
           cursor: isPending ? 'not-allowed' : 'pointer',
-          transition: 'background-color 0.2s',
+          transition: 'var(--transition)',
           display: 'flex',
           alignItems: 'center',
           padding: '2px'
@@ -49,16 +49,16 @@ export default function MaintenanceToggle({ initialStatus }: { initialStatus: bo
           style={{
             width: '22px',
             height: '22px',
-            backgroundColor: 'white',
+            backgroundColor: '#fff',
             borderRadius: '50%',
-            transition: 'transform 0.2s',
+            transition: 'transform var(--dur-fast) var(--ease)',
             transform: isActive ? 'translateX(24px)' : 'translateX(0)',
-            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+            boxShadow: 'var(--shadow-sm)'
           }}
         />
       </button>
       <div>
-        <span style={{ fontWeight: 600, color: isActive ? '#dc2626' : 'var(--text)' }}>
+        <span style={{ fontWeight: 500, color: isActive ? 'var(--danger)' : 'var(--text-main)' }}>
           {isActive ? 'Mode Maintenance Aktif' : 'Mode Maintenance Nonaktif'}
         </span>
         <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>

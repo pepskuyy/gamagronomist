@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Pencil, Trash2 } from 'lucide-react'
 
 interface Props {
   type: 'cb' | 'demoplot'
@@ -29,11 +30,13 @@ export default function ReportAdminActions({ type, id, deleteAction }: Props) {
 
   return (
     <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-      <Link href={`/dashboard/reports/${type}/${id}/edit`} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-        ✏️ Edit
+      <Link href={`/dashboard/reports/${type}/${id}/edit`} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.75rem', fontSize: '0.85rem' }}>
+        <Pencil size={16} strokeWidth={1.75} className="icon-inline" />
+        Edit
       </Link>
-      <button onClick={handleDelete} disabled={loading} className="btn" style={{ background: 'var(--danger)', color: '#fff', display: 'flex', alignItems: 'center', gap: '0.4rem', padding: '0.4rem 0.8rem', fontSize: '0.85rem' }}>
-        {loading ? '🗑️ Menghapus...' : '🗑️ Hapus'}
+      <button onClick={handleDelete} disabled={loading} className="btn btn-danger" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.375rem 0.75rem', fontSize: '0.85rem' }}>
+        <Trash2 size={16} strokeWidth={1.75} className="icon-inline" />
+        {loading ? 'Menghapus...' : 'Hapus'}
       </button>
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useTransition } from 'react'
+import { Pencil } from 'lucide-react'
 import { getKpiData, setKpiTarget } from '@/app/actions/kpi'
 
 interface User {
@@ -46,19 +47,19 @@ const ACTIVITY_CARDS: {
 ]
 
 function pctColor(pct: number): string {
-  if (pct >= 91) return '#16a34a'   // green-600
-  if (pct >= 71) return '#d97706'   // amber-600
-  return '#dc2626'                   // red-600
+  if (pct >= 91) return 'var(--success)'   // green-600
+  if (pct >= 71) return 'var(--warning)'   // amber-600
+  return 'var(--danger)'                   // red-600
 }
 
 function pctBg(pct: number): string {
-  if (pct >= 91) return '#dcfce7'
-  if (pct >= 71) return '#fef3c7'
-  return '#fee2e2'
+  if (pct >= 91) return 'var(--success-bg)'
+  if (pct >= 71) return 'var(--warning-bg)'
+  return 'var(--danger-bg)'
 }
 
 function pctBadgeStyle(pct: number, target: number) {
-  if (target === 0) return { color: '#6b7280', background: '#f3f4f6' }
+  if (target === 0) return { color: 'var(--text-muted)', background: 'var(--surface-2)' }
   return { color: pctColor(pct), background: pctBg(pct) }
 }
 
@@ -67,36 +68,35 @@ function KpiCard({ label, icon, desc, actual, target }: {
 }) {
   const pct = target > 0 ? Math.round((actual / target) * 100) : 0
   const barPct = Math.min(pct, 100)
-  const barColor = target === 0 ? '#9ca3af' : pctColor(pct)
+  const barColor = target === 0 ? 'var(--text-muted)' : pctColor(pct)
   const badge = pctBadgeStyle(pct, target)
 
   return (
     <div style={{
-      background: '#fff',
-      borderRadius: '0.875rem',
-      border: '1px solid #e5e7eb',
-      padding: '1.5rem',
-      boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
+      background: 'var(--surface)',
+      borderRadius: 'var(--radius-lg)',
+      border: '1px solid var(--border)',
+      padding: '1.25rem',
       display: 'flex',
       flexDirection: 'column',
       gap: '0.75rem',
-      transition: 'box-shadow 0.2s',
     }}>
       {/* Header */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
         <div>
-          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#6b7280', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.2rem' }}>
-            {icon} {label}
+          <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.125rem' }}>
+            {label}
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{desc}</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{desc}</div>
         </div>
         {/* Percentage Badge */}
-        <div style={{
+        <div className="num" style={{
           ...badge,
-          fontSize: '0.8rem',
-          fontWeight: 700,
-          padding: '0.25rem 0.6rem',
-          borderRadius: '999px',
+          fontSize: '0.75rem',
+          fontWeight: 500,
+          padding: '0.125rem 0.5rem',
+          borderRadius: 'var(--radius-xs)',
+          whiteSpace: 'nowrap',
         }}>
           {target === 0 ? '–' : `${pct}%`}
         </div>
@@ -104,29 +104,29 @@ function KpiCard({ label, icon, desc, actual, target }: {
 
       {/* Big Number */}
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-        <span style={{
-          fontSize: '2.5rem',
-          fontWeight: 800,
-          color: target === 0 ? '#9ca3af' : pctColor(pct),
+        <span className="num" style={{
+          fontSize: '2.25rem',
+          fontWeight: 600,
+          color: target === 0 ? 'var(--text-muted)' : 'var(--text-main)',
           lineHeight: 1.1,
         }}>
           {actual}
         </span>
-        <span style={{ fontSize: '1rem', color: '#9ca3af', fontWeight: 500 }}>
+        <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
           aktivitas
         </span>
       </div>
 
       {/* Goal Label */}
-      <div style={{ fontSize: '0.78rem', color: '#6b7280' }}>
-        Target: <strong style={{ color: '#374151' }}>{target === 0 ? 'Belum diset' : target}</strong>
+      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+        Target: <strong className="num" style={{ color: 'var(--text-secondary)', fontWeight: 500 }}>{target === 0 ? 'Belum diset' : target}</strong>
       </div>
 
       {/* Progress Bar */}
       <div>
         <div style={{
-          height: '6px',
-          background: '#f3f4f6',
+          height: '4px',
+          background: 'var(--surface-2)',
           borderRadius: '999px',
           overflow: 'hidden',
         }}>
@@ -135,12 +135,12 @@ function KpiCard({ label, icon, desc, actual, target }: {
             width: `${barPct}%`,
             background: barColor,
             borderRadius: '999px',
-            transition: 'width 0.7s ease',
+            transition: 'width 0.7s var(--ease)',
           }} />
         </div>
         {/* Goal marker pct text */}
         <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '0.25rem' }}>
-          <span style={{ fontSize: '0.72rem', color: barColor, fontWeight: 600 }}>
+          <span className="num" style={{ fontSize: '0.72rem', color: 'var(--text-muted)', fontWeight: 500 }}>
             {target > 0 ? `${barPct}%` : ''}
           </span>
         </div>
@@ -155,50 +155,49 @@ function OverallCard({ actuals, targets }: { actuals: Actuals; targets: Targets 
   const totalTarget = targets.targetDemoPlot + targets.targetVisitKios + targets.targetGathering + targets.targetCompany + targets.targetBehavior
   const pct = totalTarget > 0 ? Math.round((totalActual / totalTarget) * 100) : 0
   const barPct = Math.min(pct, 100)
-  const barColor = totalTarget === 0 ? '#9ca3af' : pctColor(pct)
+  const barColor = totalTarget === 0 ? 'var(--text-muted)' : pctColor(pct)
   
   return (
     <div style={{
-      background: `linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)`,
-      borderRadius: '0.875rem',
-      border: '2px solid #bbf7d0',
-      padding: '1.5rem',
-      boxShadow: '0 1px 4px rgba(16,185,129,0.1)',
+      background: 'var(--surface)',
+      borderRadius: 'var(--radius-lg)',
+      border: '1px solid var(--border)',
+      padding: '1.25rem',
       display: 'flex',
       flexDirection: 'column',
       gap: '0.75rem',
       gridColumn: 'span 2',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.5rem' }}>
         <div>
-          <div style={{ fontSize: '0.8rem', fontWeight: 700, color: '#065f46', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-            📊 Total Capaian
+          <div style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
+            Total capaian
           </div>
-          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.1rem' }}>Semua aktivitas bulan ini</div>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>Semua aktivitas bulan ini</div>
         </div>
-        <div style={{
-          fontSize: '1rem',
-          fontWeight: 800,
-          padding: '0.35rem 0.9rem',
-          borderRadius: '999px',
-          background: totalTarget === 0 ? '#f3f4f6' : pctBg(pct),
-          color: totalTarget === 0 ? '#9ca3af' : pctColor(pct),
+        <div className="num" style={{
+          fontSize: '0.875rem',
+          fontWeight: 500,
+          padding: '0.25rem 0.625rem',
+          borderRadius: 'var(--radius-xs)',
+          background: totalTarget === 0 ? 'var(--surface-2)' : pctBg(pct),
+          color: totalTarget === 0 ? 'var(--text-muted)' : pctColor(pct),
         }}>
           {totalTarget === 0 ? '–' : `${pct}%`}
         </div>
       </div>
       <div style={{ display: 'flex', alignItems: 'baseline', gap: '0.5rem' }}>
-        <span style={{ fontSize: '3rem', fontWeight: 900, color: barColor, lineHeight: 1.1 }}>{totalActual}</span>
-        <span style={{ fontSize: '1rem', color: '#6b7280' }}>dari {totalTarget} aktivitas</span>
+        <span className="num" style={{ fontSize: '2.75rem', fontWeight: 600, color: totalTarget === 0 ? 'var(--text-muted)' : 'var(--text-main)', lineHeight: 1.1 }}>{totalActual}</span>
+        <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>dari <span className="num">{totalTarget}</span> aktivitas</span>
       </div>
       <div>
-        <div style={{ height: '10px', background: '#d1fae5', borderRadius: '999px', overflow: 'hidden' }}>
+        <div style={{ height: '6px', background: 'var(--surface-2)', borderRadius: '999px', overflow: 'hidden' }}>
           <div style={{
             height: '100%',
             width: `${barPct}%`,
             background: barColor,
             borderRadius: '999px',
-            transition: 'width 0.7s ease',
+            transition: 'width 0.7s var(--ease)',
           }} />
         </div>
       </div>
@@ -248,18 +247,18 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
 
   // Legend items
   const legendItems = [
-    { color: '#16a34a', label: '≥ 91% (On Track)' },
-    { color: '#d97706', label: '71–90% (Warning)' },
-    { color: '#dc2626', label: '≤ 70% (Critical)' },
+    { color: 'var(--success)', label: '≥ 91% (On Track)' },
+    { color: 'var(--warning)', label: '71–90% (Warning)' },
+    { color: 'var(--danger)', label: '≤ 70% (Critical)' },
   ]
 
   const selectStyle: React.CSSProperties = {
-    border: '1px solid #d1d5db',
-    borderRadius: '0.5rem',
-    padding: '0.45rem 0.75rem',
+    border: '1px solid var(--border)',
+    borderRadius: 'var(--radius-sm)',
+    padding: '0.5rem 0.75rem',
     fontSize: '0.875rem',
-    color: '#374151',
-    background: '#fff',
+    color: 'var(--text-secondary)',
+    background: 'var(--surface)',
     cursor: 'pointer',
     outline: 'none',
     minWidth: '130px',
@@ -270,8 +269,8 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
       {/* Section Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.25rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700 }}>📊 KPI Aktivitas Lapangan</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600 }}>KPI Aktivitas Lapangan</h2>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
             Capaian aktivitas vs target · Data diperbarui secara real-time
           </p>
         </div>
@@ -281,21 +280,25 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
             background: 'var(--primary)',
             color: '#fff',
             border: 'none',
-            borderRadius: '0.5rem',
+            borderRadius: 'var(--radius-sm)',
             padding: '0.5rem 1rem',
-            fontWeight: 600,
+            fontWeight: 500,
             fontSize: '0.85rem',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}
         >
-          ✏️ Set Target
+          <Pencil size={16} strokeWidth={1.75} className="icon-inline" />
+          Set Target
         </button>
       </div>
 
       {/* Filters Row */}
       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1.25rem', alignItems: 'center' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: 500 }}>Pengguna:</span>
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>Pengguna:</span>
           <select style={selectStyle} value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)}>
             <option value={ownerUserId}>— Total (Semua) —</option>
             {subordinates.map(u => (
@@ -304,13 +307,13 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
           </select>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: 500 }}>Bulan:</span>
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>Bulan:</span>
           <select style={selectStyle} value={selectedMonth} onChange={e => setSelectedMonth(Number(e.target.value))}>
             {MONTHS.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontSize: '0.82rem', color: '#6b7280', fontWeight: 500 }}>Tahun:</span>
+          <span style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontWeight: 500 }}>Tahun:</span>
           <select style={selectStyle} value={selectedYear} onChange={e => setSelectedYear(Number(e.target.value))}>
             {years.map(y => <option key={y} value={y}>{y}</option>)}
           </select>
@@ -319,8 +322,8 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
         {/* Legend */}
         <div style={{ display: 'flex', gap: '0.75rem', marginLeft: 'auto', flexWrap: 'wrap' }}>
           {legendItems.map(l => (
-            <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', fontSize: '0.75rem', color: '#6b7280' }}>
-              <div style={{ width: '10px', height: '10px', borderRadius: '50%', background: l.color, flexShrink: 0 }} />
+            <div key={l.label} style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
+              <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: l.color, flexShrink: 0 }} />
               {l.label}
             </div>
           ))}
@@ -330,20 +333,20 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
       {/* Target Setting Form */}
       {showTargetForm && (
         <div style={{
-          background: '#f0fdf4',
-          border: '1px solid #bbf7d0',
-          borderRadius: '0.875rem',
+          background: 'var(--surface-2)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-md)',
           padding: '1.25rem',
           marginBottom: '1.5rem',
         }}>
-          <div style={{ fontWeight: 700, marginBottom: '1rem', color: '#065f46', fontSize: '0.9rem' }}>
-            🎯 Set Target untuk <span style={{ textDecoration: 'underline' }}>{selectedUserName}</span> · {MONTHS[selectedMonth - 1]} {selectedYear}
+          <div style={{ fontWeight: 600, marginBottom: '1rem', color: 'var(--text-main)', fontSize: '0.9rem' }}>
+            Set Target untuk <span style={{ textDecoration: 'underline' }}>{selectedUserName}</span> · {MONTHS[selectedMonth - 1]} {selectedYear}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem', marginBottom: '1rem' }}>
             {ACTIVITY_CARDS.map(c => (
               <div key={c.key}>
-                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: '#374151', marginBottom: '0.25rem' }}>
-                  {c.icon} {c.label}
+                <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                  {c.label}
                 </label>
                 <input
                   type="number"
@@ -352,11 +355,13 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
                   onChange={e => setTargetInputs(prev => ({ ...prev, [c.targetKey]: Number(e.target.value) }))}
                   style={{
                     width: '100%',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    padding: '0.4rem 0.6rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.375rem 0.625rem',
                     fontSize: '0.9rem',
-                    fontWeight: 600,
+                    fontWeight: 500,
+                    fontVariantNumeric: 'tabular-nums',
+                    background: 'var(--surface)',
                     outline: 'none',
                     boxSizing: 'border-box',
                   }}
@@ -368,13 +373,13 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
             <button
               onClick={handleSaveTargets}
               disabled={isPending}
-              style={{ background: '#16a34a', color: '#fff', border: 'none', borderRadius: '0.5rem', padding: '0.5rem 1.25rem', fontWeight: 700, fontSize: '0.85rem', cursor: 'pointer', opacity: isPending ? 0.7 : 1 }}
+              style={{ background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', padding: '0.5rem 1.25rem', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer', opacity: isPending ? 0.7 : 1 }}
             >
               {isPending ? 'Menyimpan...' : 'Simpan Target'}
             </button>
             <button
               onClick={() => setShowTargetForm(false)}
-              style={{ background: '#fff', color: '#374151', border: '1px solid #d1d5db', borderRadius: '0.5rem', padding: '0.5rem 1.25rem', fontWeight: 600, fontSize: '0.85rem', cursor: 'pointer' }}
+              style={{ background: 'var(--surface)', color: 'var(--text-secondary)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 1.25rem', fontWeight: 500, fontSize: '0.85rem', cursor: 'pointer' }}
             >
               Batal
             </button>
@@ -384,7 +389,7 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
 
       {/* Loading */}
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '3rem', color: '#9ca3af', fontSize: '0.9rem' }}>
+        <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
           Memuat data KPI...
         </div>
       ) : (
@@ -406,7 +411,7 @@ export default function KpiDashboard({ ownerUserId, subordinates }: KpiDashboard
           </div>
 
           {/* Footer note */}
-          <div style={{ fontSize: '0.75rem', color: '#9ca3af', textAlign: 'right', marginTop: '0.5rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'right', marginTop: '0.5rem' }}>
             Data untuk {selectedUserName} · {MONTHS[selectedMonth - 1]} {selectedYear}
           </div>
         </>

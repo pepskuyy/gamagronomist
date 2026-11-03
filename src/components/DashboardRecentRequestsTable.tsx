@@ -41,7 +41,7 @@ export default function DashboardRecentRequestsTable({ requests }: Props) {
 
   return (
     <div style={{ marginBottom: '2.5rem' }}>
-      <h2 style={{ marginBottom: '1rem' }}>🌾 Request Terbaru</h2>
+      <h2 style={{ marginBottom: '1rem' }}>Request Terbaru</h2>
       <div className="table-card">
         <div className="table-responsive">
           <table>
@@ -57,7 +57,7 @@ export default function DashboardRecentRequestsTable({ requests }: Props) {
             <tbody>
               {paginated.map((req) => (
                 <tr key={req.id}>
-                  <td style={{ whiteSpace: 'nowrap' }}>
+                  <td className="num" style={{ whiteSpace: 'nowrap', color: 'var(--text-secondary)' }}>
                     {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(req.createdAt))}
                   </td>
                   <td>{req.fo?.name || '-'}</td>
