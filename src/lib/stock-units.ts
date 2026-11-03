@@ -50,6 +50,51 @@ export function formatKemasanQty(p: UnitProduct | null | undefined, qtyKemasan: 
   return hasGramasi(p) ? `${base} (${nf().format(kemasanToLedger(p, qtyKemasan))} ${p!.unitGramasi})` : base
 }
 
+// ── Satuan stok produk ──────────────────────────────────────────────────
+// "Gramasi kosong" bisa berarti dua hal: produk memang dihitung per kemasan utuh, atau
+// isi per kemasan BELUM diinput admin. Yang kedua membuat PCS terbaca sebagai ml/gr,
+// jadi stok masuk untuk produk yang satuannya belum ditentukan ditahan dulu.
+
+export type StockUnitMode = 'GRAMASI' | 'KEMASAN'
+
+export interface ModeProduct extends UnitProduct {
+  stockUnitMode?: string | null
+}
+
+/** GRAMASI bila isi per kemasan terisi; KEMASAN bila dipilih eksplisit; null = belum ditentukan. */
+export function stockUnitMode(p: ModeProduct | null | undefined): StockUnitMode | null {
+  if (!p) return null
+  if (hasGramasi(p)) return 'GRAMASI'
+  return p.stockUnitMode === 'KEMASAN' ? 'KEMASAN' : null
+}
+
+/** Nilai kolom stockUnitMode yang disimpan saat produk dibuat/diubah. */
+export function resolveStockUnitMode(
+  p: UnitProduct,
+  chosen: string | null | undefined,
+): StockUnitMode | null {
+  if (hasGramasi(p)) return 'GRAMASI'
+  return chosen === 'KEMASAN' ? 'KEMASAN' : null
+}
+
+/**
+ * Tebak isi per kemasan dari nama produk, mis. "Ziflo 76 WG 800 gr" → 800 gr,
+ * "Biogent 50 SC 1 L" → 1000 ml. Hanya saran untuk admin, tidak pernah disimpan otomatis.
+ */
+export function suggestGramasiFromName(name: string): { unitGramasi: 'ml' | 'gr'; gramasiPerUnit: number } | null {
+  const re = /(\d+(?:[.,]\d+)?)\s*(ml|cc|lt|liter|l|gram|gr|g|kg)(?![a-z])/gi
+  let last: RegExpExecArray | null = null
+  for (let m = re.exec(name); m; m = re.exec(name)) last = m
+  if (!last) return null
+  const n = parseFloat(last[1].replace(',', '.'))
+  if (!(n > 0)) return null
+  const u = last[2].toLowerCase()
+  if (u === 'ml' || u === 'cc') return { unitGramasi: 'ml', gramasiPerUnit: n }
+  if (u === 'l' || u === 'lt' || u === 'liter') return { unitGramasi: 'ml', gramasiPerUnit: n * 1000 }
+  if (u === 'kg') return { unitGramasi: 'gr', gramasiPerUnit: n * 1000 }
+  return { unitGramasi: 'gr', gramasiPerUnit: n }
+}
+
 /** Validasi pasangan gramasi di master produk. Mengembalikan pesan error atau null. */
 export function validateGramasiPair(unitGramasi: string | null | undefined, gramasiPerUnit: number | null | undefined): string | null {
   const hasUnit = !!unitGramasi && unitGramasi.trim() !== ''

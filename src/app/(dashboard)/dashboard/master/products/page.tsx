@@ -4,11 +4,12 @@ import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createProduct, updateProduct, deleteProduct, bulkDeleteProducts } from '@/app/actions/master'
+import { stockUnitMode, suggestGramasiFromName } from '@/lib/stock-units'
 
 // Modal import hanya dimuat saat dibuka
 const ImportModal = dynamic(() => import('@/components/ImportModal'), { ssr: false })
 
-type Product = { id: string; code: string | null; name: string; description: string | null; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null; spvStock?: number | null }
+type Product = { id: string; code: string | null; name: string; description: string | null; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null; stockUnitMode?: string | null; spvStock?: number | null }
 
 const overlayStyle: React.CSSProperties = {
   position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000,
@@ -33,6 +34,17 @@ export default function ProductsMasterPage() {
   const [selectedProducts, setSelectedProducts] = useState<Set<string>>(new Set())
   const [syncing, setSyncing]   = useState(false)
   const [syncResult, setSyncResult] = useState<{ ok: boolean; msg: string; detail?: string } | null>(null)
+  // Satuan stok: produk "belum ditentukan" menahan stok masuk sampai admin memutuskan
+  const [onlyUndecided, setOnlyUndecided] = useState(false)
+  const [formName, setFormName] = useState('')
+  const [formUnitGramasi, setFormUnitGramasi] = useState('')
+  const [formGramasi, setFormGramasi] = useState('')
+  const [formMode, setFormMode] = useState('')
+
+  useEffect(() => {
+    // Tautan dari notifikasi admin: /dashboard/master/products?satuan=belum
+    if (new URLSearchParams(window.location.search).get('satuan') === 'belum') setOnlyUndecided(true)
+  }, [])
 
   const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
   const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
@@ -45,8 +57,14 @@ export default function ProductsMasterPage() {
 
   useEffect(() => { fetchData() }, [])
 
-  function openAdd()        { setSelected(null); setError(null); setModal('add') }
-  function openEdit(p: Product) { setSelected(p); setError(null); setModal('edit') }
+  function fillForm(p: Product | null) {
+    setFormName(p?.name ?? '')
+    setFormUnitGramasi(p?.unitGramasi ?? '')
+    setFormGramasi(p?.gramasiPerUnit != null ? String(p.gramasiPerUnit) : '')
+    setFormMode(p?.stockUnitMode === 'KEMASAN' ? 'KEMASAN' : '')
+  }
+  function openAdd()        { setSelected(null); fillForm(null); setError(null); setModal('add') }
+  function openEdit(p: Product) { setSelected(p); fillForm(p); setError(null); setModal('edit') }
   function closeModal()     { setModal(null) }
 
   function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -133,10 +151,16 @@ export default function ProductsMasterPage() {
 
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Memuat data...</div>
 
-  const filteredProducts = products.filter(p => 
-    p.name.toLowerCase().includes(search.toLowerCase()) || 
-    p.code?.toLowerCase().includes(search.toLowerCase())
+  const isUndecided = (p: Product) => stockUnitMode(p) === null
+  const undecidedCount = products.filter(isUndecided).length
+  const filteredProducts = products.filter(p =>
+    (!onlyUndecided || isUndecided(p)) && (
+      p.name.toLowerCase().includes(search.toLowerCase()) ||
+      p.code?.toLowerCase().includes(search.toLowerCase())
+    )
   )
+  const formHasGramasi = !!formUnitGramasi && Number(formGramasi) > 0
+  const nameSuggestion = suggestGramasiFromName(formName)
 
   return (
     <div>
@@ -158,7 +182,7 @@ export default function ProductsMasterPage() {
               </div>
               <div>
                 <label style={labelStyle}>Nama Produk <span style={{ color: 'red' }}>*</span></label>
-                <input name="name" style={inputStyle} required defaultValue={selected?.name} placeholder="contoh: Fungisida Bintang" />
+                <input name="name" style={inputStyle} required value={formName} onChange={e => setFormName(e.target.value)} placeholder="contoh: Fungisida Bintang" />
               </div>
               <div>
                 <label style={labelStyle}>Satuan Kemasan <span style={{ color: 'red' }}>*</span></label>
@@ -178,7 +202,7 @@ export default function ProductsMasterPage() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div>
                   <label style={labelStyle}>Satuan Gramasi</label>
-                  <select name="unitGramasi" style={inputStyle} defaultValue={selected?.unitGramasi || ''}>
+                  <select name="unitGramasi" style={inputStyle} value={formUnitGramasi} onChange={e => setFormUnitGramasi(e.target.value)}>
                     <option value="">-- Tidak Ada --</option>
                     <option value="ml">ml (liquid)</option>
                     <option value="gr">gr (non-liquid)</option>
@@ -186,10 +210,33 @@ export default function ProductsMasterPage() {
                 </div>
                 <div>
                   <label style={labelStyle}>Isi per Kemasan</label>
-                  <input name="gramasiPerUnit" type="number" step="0.01" min="0" style={inputStyle} defaultValue={selected?.gramasiPerUnit ?? ''} placeholder="misal: 500" />
+                  <input name="gramasiPerUnit" type="number" step="0.01" min="0" style={inputStyle} value={formGramasi} onChange={e => setFormGramasi(e.target.value)} placeholder="misal: 500" />
                 </div>
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '-0.5rem' }}>Contoh: Fungisida 500ml/Btl → pilih ml, isi 500. Digunakan FO saat request eceran.</p>
+              {!formHasGramasi && nameSuggestion && (
+                <div style={{ marginTop: '-0.5rem', fontSize: '0.8rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                  <span>Saran dari nama: <strong>{nameSuggestion.gramasiPerUnit} {nameSuggestion.unitGramasi}</strong> per kemasan</span>
+                  <button type="button" className="btn btn-outline" style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                    onClick={() => { setFormUnitGramasi(nameSuggestion.unitGramasi); setFormGramasi(String(nameSuggestion.gramasiPerUnit)) }}>
+                    Pakai saran
+                  </button>
+                </div>
+              )}
+              <div>
+                <label style={labelStyle}>Satuan Stok</label>
+                {formHasGramasi ? (
+                  <div style={{ fontSize: '0.82rem', color: '#166534' }}>✓ Stok dihitung dalam {formUnitGramasi} (isi per kemasan terisi)</div>
+                ) : (
+                  <select name="stockUnitMode" style={inputStyle} value={formMode} onChange={e => setFormMode(e.target.value)}>
+                    <option value="">⏸ Belum ditentukan (stok masuk ditahan)</option>
+                    <option value="KEMASAN">Kemasan utuh (tanpa gramasi, dihitung per kemasan)</option>
+                  </select>
+                )}
+                <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.25rem', marginBottom: 0 }}>
+                  Isi gramasi untuk produk cair/bubuk. Pilih &quot;Kemasan utuh&quot; hanya untuk barang yang selalu keluar utuh (mis. alat, benih per pak).
+                </p>
+              </div>
               <div>
                 <label style={labelStyle}>Deskripsi</label>
                 <textarea name="description" style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} defaultValue={selected?.description || ''} placeholder="Keterangan singkat tentang produk..." />
@@ -232,6 +279,13 @@ export default function ProductsMasterPage() {
           </button>
           <button onClick={handleExportExcel} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📤 Export Excel</button>
           <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📥 Import Excel</button>
+          <button
+            onClick={() => setOnlyUndecided(v => !v)}
+            className={onlyUndecided ? 'btn btn-primary' : 'btn btn-outline'}
+            title="Produk yang isi per kemasannya belum diisi. Stok masuk untuk produk ini ditahan."
+          >
+            ⏸ Satuan belum ditentukan ({undecidedCount})
+          </button>
           <button onClick={openAdd} className="btn btn-primary">➕ Tambah Produk</button>
         </div>
       </div>
@@ -294,11 +348,17 @@ export default function ProductsMasterPage() {
                   <td style={{...tdStyle, fontWeight: 600, color: 'var(--primary)'}}>{p.name}</td>
                   <td style={{...tdStyle}}><span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>{p.unit}</span></td>
                   <td style={{...tdStyle}}>
-                    {p.unitGramasi && p.gramasiPerUnit ? (
+                    {stockUnitMode(p) === 'GRAMASI' ? (
                       <span className="badge" style={{ fontSize: '0.75rem', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
                         {p.gramasiPerUnit}{p.unitGramasi}/{p.unit}
                       </span>
-                    ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>}
+                    ) : stockUnitMode(p) === 'KEMASAN' ? (
+                      <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Kemasan utuh</span>
+                    ) : (
+                      <span title="Stok masuk ditahan sampai isi per kemasan diisi atau ditandai Kemasan utuh" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#92400e', background: '#fef3c7', padding: '0.1rem 0.45rem', borderRadius: '9999px', whiteSpace: 'nowrap' }}>
+                        ⏸ Belum ditentukan{(() => { const sg = suggestGramasiFromName(p.name); return sg ? ` · saran ${sg.gramasiPerUnit}${sg.unitGramasi}` : '' })()}
+                      </span>
+                    )}
                   </td>
                   <td style={{...tdStyle, textAlign: 'right'}}>
                     {p.spvStock != null ? (

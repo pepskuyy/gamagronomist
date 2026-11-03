@@ -70,7 +70,11 @@ export default function FOStockRequestPage() {
     start(async () => {
       const res = await submitRequestDemoPlot(fd)
       if (res?.error) setError(res.error)
-      else router.push('/dashboard/demoplot')
+      else {
+        // Produk tanpa isi per kemasan: pengajuan tersimpan, tapi stoknya tertahan sampai admin melengkapi
+        if (res && 'warning' in res && res.warning) alert('⏸ ' + res.warning)
+        router.push('/dashboard/demoplot')
+      }
     })
   }
 

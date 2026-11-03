@@ -317,7 +317,11 @@ export default function StockInPage() {
     startTransition(async () => {
       const res = await submitAfaStockRequest(formData)
       if (res?.error) setError(res.error)
-      else router.push('/dashboard/stock')
+      else {
+        // Produk tanpa isi per kemasan: pengajuan tersimpan, tapi stoknya tertahan sampai admin melengkapi
+        if (res && 'warning' in res && res.warning) alert('⏸ ' + res.warning)
+        router.push('/dashboard/stock')
+      }
     })
   }
 

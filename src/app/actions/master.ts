@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
 import { getActionSession } from '@/lib/session'
 import { invalidateCacheTag, CACHE_TAGS } from '@/lib/data-cache'
-import { validateGramasiPair, hasGramasi, ledgerUnit } from '@/lib/stock-units'
+import { validateGramasiPair, hasGramasi, ledgerUnit, resolveStockUnitMode } from '@/lib/stock-units'
 
 // Master Data hanya untuk ADMIN & SPV (sesuai menu sidebar).
 // Hanya ADMIN yang boleh membuat, mengubah, atau menghapus akun ADMIN.
@@ -146,11 +146,13 @@ export async function createProduct(formData: FormData) {
   if (!name || !unit) return { error: 'Nama dan satuan kemasan wajib diisi.' }
   const pairError = validateGramasiPair(unitGramasi, gramasiPerUnit)
   if (pairError) return { error: pairError }
+  const cleanGramasi = gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null
   try {
     await prisma.product.create({ data: {
       code: code || null, name, description: description || null, unit,
       unitGramasi: unitGramasi || null,
-      gramasiPerUnit: gramasiPerUnit && !isNaN(gramasiPerUnit) ? gramasiPerUnit : null,
+      gramasiPerUnit: cleanGramasi,
+      stockUnitMode: resolveStockUnitMode({ unit, unitGramasi, gramasiPerUnit: cleanGramasi }, formData.get('stockUnitMode') as string),
     }})
     revalidatePath('/dashboard/master/products')
     invalidateCacheTag(CACHE_TAGS.products)
@@ -226,6 +228,7 @@ export async function updateProduct(id: string, formData: FormData) {
         code: code || null, name, description: description || null, unit,
         unitGramasi: unitGramasi || null,
         gramasiPerUnit: newGramasi,
+        stockUnitMode: resolveStockUnitMode({ unit, unitGramasi, gramasiPerUnit: newGramasi }, formData.get('stockUnitMode') as string),
       }})
       for (const h of holders) {
         const delta = h.converted - h.balance

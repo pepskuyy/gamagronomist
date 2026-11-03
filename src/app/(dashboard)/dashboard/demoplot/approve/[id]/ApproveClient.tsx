@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { approveRequest, rejectRequest } from '@/app/actions/approve'
+import UnitHoldBadge from '@/components/UnitHoldBadge'
 
 type Detail = {
   id: string
@@ -173,7 +174,7 @@ export default function ApprovePageClient({
                 const stockUnit = d.product.unitGramasi || d.product.unit
                 return (
                   <tr key={d.id}>
-                    <td style={td}><strong>{d.product.name}</strong></td>
+                    <td style={td}><strong>{d.product.name}</strong><UnitHoldBadge product={d.product} /></td>
                     <td style={td}>
                       {d.qtyRequested} {displayUnit}
                       {conv.isKemasan && (

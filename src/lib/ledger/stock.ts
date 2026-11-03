@@ -1,6 +1,6 @@
 import prisma from '@/lib/prisma'
 import type { Prisma } from '@prisma/client'
-import { ledgerUnit } from '@/lib/stock-units'
+import { ledgerUnit, stockUnitMode } from '@/lib/stock-units'
 
 /**
  * Mendapatkan Daftar Saldo (Stock On-Hand) untuk User Tertentu
@@ -143,6 +143,57 @@ const DEFAULT_SHORTAGE_HINT = 'Ajukan stok ke AFA atau hubungi admin untuk penye
 
 export function stockShortageMessage(shortages: string[], hint = DEFAULT_SHORTAGE_HINT) {
   return 'Stok tidak mencukupi:\n' + shortages.join('\n') + '\n' + hint
+}
+
+// ── Hold satuan stok ────────────────────────────────────────────────────
+// Stok masuk untuk produk yang satuan stoknya belum ditentukan ditahan: tanpa isi per kemasan,
+// qty kemasan (PCS) akan tercatat apa adanya lalu terbaca sebagai ml/gr setelah gramasi diisi.
+
+export class UnitHoldError extends Error {}
+
+export function unitHoldMessage(names: string[]) {
+  return `Menunggu data gramasi: ${names.join(', ')}.\n` +
+    'Isi per kemasan (ml/gr) produk ini belum diisi di Master Produk, sehingga stok belum bisa dicatat. ' +
+    'Minta admin melengkapinya (atau menandai "Kemasan utuh"), lalu proses ulang.'
+}
+
+/** Nama produk (dari daftar id) yang satuan stoknya belum ditentukan. */
+export async function findUndecidedUnitProducts(db: LedgerDb, productIds: string[]): Promise<string[]> {
+  if (productIds.length === 0) return []
+  const products = await db.product.findMany({
+    where: { id: { in: Array.from(new Set(productIds)) } },
+    select: { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true, stockUnitMode: true },
+  })
+  return products.filter(p => stockUnitMode(p) === null).map(p => p.name)
+}
+
+/** Lempar UnitHoldError bila ada produk yang satuan stoknya belum ditentukan. */
+export async function assertUnitsDecided(db: LedgerDb, productIds: string[]) {
+  const names = await findUndecidedUnitProducts(db, productIds)
+  if (names.length > 0) throw new UnitHoldError(unitHoldMessage(names))
+}
+
+/**
+ * Kabari ADMIN bahwa pengajuan memuat produk tanpa satuan stok, supaya bisa dilengkapi
+ * sebelum pengajuan sampai di tahap approval/penerimaan. Tidak pernah melempar error.
+ */
+export async function notifyUnitHold(names: string[], requesterName: string) {
+  if (names.length === 0) return
+  try {
+    const admins = await prisma.user.findMany({ where: { role: 'ADMIN', isActive: true }, select: { id: true } })
+    if (admins.length === 0) return
+    await prisma.notification.createMany({
+      data: admins.map(a => ({
+        userId: a.id,
+        title: '⏸ Lengkapi Gramasi Produk',
+        message: `Pengajuan dari ${requesterName} memuat produk tanpa isi per kemasan: ${names.join(', ')}. ` +
+          'Stok tertahan sampai gramasi diisi (atau ditandai "Kemasan utuh").',
+        link: '/dashboard/master/products?satuan=belum',
+      })),
+    })
+  } catch (e) {
+    console.error('notifyUnitHold error:', e)
+  }
 }
 
 /** Kunci saldo per user (advisory lock) sampai transaksi selesai. */

@@ -2,7 +2,8 @@
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { insertStockInGudang } from '@/lib/ledger/stock'
+import { insertStockInGudang, findUndecidedUnitProducts, unitHoldMessage } from '@/lib/ledger/stock'
+import prisma from '@/lib/prisma'
 
 export async function submitStockIn(formData: FormData) {
   const cookieStore = await cookies()
@@ -20,6 +21,9 @@ export async function submitStockIn(formData: FormData) {
   if (!productId || quantity <= 0) {
     return { error: 'Produk dan kuantitas wajib diisi dengan benar!' }
   }
+
+  const held = await findUndecidedUnitProducts(prisma, [productId])
+  if (held.length > 0) return { error: unitHoldMessage(held) }
 
   try {
     await insertStockInGudang(session.userId, productId, quantity, notes)

@@ -216,6 +216,8 @@ export default function BdStockRequestPage() {
       const res = await submitAfaStockRequest(formData)
       if (res?.error) setError(res.error)
       else {
+        // Produk tanpa isi per kemasan: pengajuan tersimpan, tapi stoknya tertahan sampai admin melengkapi
+        if (res && 'warning' in res && res.warning) alert('⏸ ' + res.warning)
         setSelectedProducts([]); setCurrentProduct(''); setCurrentQty('')
         setNotes(''); setDestinationCustomer(''); setError(null)
         fetch('/api/bd-requests').then(r => r.json()).then(data => setRequests(Array.isArray(data) ? data : []))

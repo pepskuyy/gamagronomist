@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { randomUUID } from 'crypto'
-import { assertStockAvailable, StockShortageError } from '@/lib/ledger/stock'
+import { assertStockAvailable, StockShortageError, findUndecidedUnitProducts, unitHoldMessage } from '@/lib/ledger/stock'
 
 // Pengurangan tidak boleh melebihi saldo produk itu. Saldo minus akibat penyesuaian
 // biasanya berarti SKU yang dipilih keliru (ada produk kembar) atau angka salah ketik.
@@ -46,6 +46,8 @@ export async function adjustStock(formData: FormData) {
 
     const product = await prisma.product.findUnique({ where: { id: productId } })
     if (!product) return { error: 'Produk tidak ditemukan.' }
+    const held = await findUndecidedUnitProducts(prisma, [productId])
+    if (held.length > 0) return { error: unitHoldMessage(held) }
 
     // Admin/SPV adjustment — lookup target user's area for snapshot
     const targetUser = await prisma.user.findUnique({ where: { id: userId }, select: { areaId: true } })
@@ -119,6 +121,9 @@ export async function adjustStockBatch(data: {
         return { error: 'Semua produk harus memiliki jumlah > 0.' }
       }
     }
+
+    const held = await findUndecidedUnitProducts(prisma, items.map(i => i.productId))
+    if (held.length > 0) return { error: unitHoldMessage(held) }
 
     const targetUser = await prisma.user.findUnique({ where: { id: userId }, select: { areaId: true } })
     const productIds = items.map(i => i.productId)
@@ -213,6 +218,9 @@ export async function transferStockBetweenUsers(data: {
     })
     const productMap = new Map(products.map(p => [p.id, p]))
     if (productMap.size !== items.length) return { error: 'Produk tidak ditemukan.' }
+
+    const held = await findUndecidedUnitProducts(prisma, items.map(i => i.productId))
+    if (held.length > 0) return { error: unitHoldMessage(held) }
 
     const transferId = randomUUID()
     const note = notes.trim()

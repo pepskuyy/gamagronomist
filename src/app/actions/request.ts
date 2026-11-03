@@ -3,6 +3,7 @@
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import prisma from '@/lib/prisma'
+import { findUndecidedUnitProducts, notifyUnitHold, unitHoldMessage } from '@/lib/ledger/stock'
 
 /**
  * FO submits a stock pickup request to their AFA.
@@ -49,6 +50,9 @@ export async function submitRequestDemoPlot(formData: FormData) {
     }
   }
 
+  // Produk tanpa satuan stok tetap boleh diajukan, tapi approval AFA ditahan sampai admin melengkapi
+  const heldNames = await findUndecidedUnitProducts(prisma, productsToRequest.map(p => p.productId))
+
   try {
     const newReq = await prisma.request.create({
       data: {
@@ -82,7 +86,8 @@ export async function submitRequestDemoPlot(formData: FormData) {
       })
     }
 
-    return { success: true, requestId: newReq.id }
+    await notifyUnitHold(heldNames, session.name ?? 'FO')
+    return { success: true, requestId: newReq.id, ...(heldNames.length > 0 ? { warning: unitHoldMessage(heldNames) } : {}) }
   } catch (err: any) {
     console.error('Submit request error', err)
     return { error: 'Gagal membuat pengajuan. Coba lagi.' }

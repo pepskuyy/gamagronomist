@@ -115,6 +115,7 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
             unit: normalizedUnit,
             description: row.description?.trim() || null,
             ...(keepGramasi ? {} : { unitGramasi: normalizedGramasi, gramasiPerUnit: gramasiPerUnit }),
+            ...(!keepGramasi && normalizedGramasi && gramasiPerUnit ? { stockUnitMode: 'GRAMASI' } : {}),
           } as any
         })
         existingById.set(productId, { id: productId, name: normalizedName })
@@ -144,6 +145,7 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
             description: row.description?.trim() || null,
             unitGramasi: normalizedGramasi,
             gramasiPerUnit: gramasiPerUnit,
+            stockUnitMode: normalizedGramasi && gramasiPerUnit ? 'GRAMASI' : null,
           } as any
         })
         existingById.set(productId, { id: productId, name: normalizedName })
@@ -172,6 +174,7 @@ export async function bulkImportProducts(rows: BulkProductRow[]): Promise<BulkIm
           description: row.description?.trim() || null,
           unitGramasi: normalizedGramasi,
           gramasiPerUnit: gramasiPerUnit,
+          stockUnitMode: normalizedGramasi && gramasiPerUnit ? 'GRAMASI' : null,
         } as any
       })
       existingById.set(created.id, { id: created.id, name: normalizedName })

@@ -4,7 +4,7 @@ import prisma from '@/lib/prisma'
 
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
-import { writeAfaToFoTransfer, getStockBalance } from '@/lib/ledger/stock'
+import { writeAfaToFoTransfer, getStockBalance, findUndecidedUnitProducts, unitHoldMessage } from '@/lib/ledger/stock'
 import { transitionRequest, requestErrorMessage } from '@/lib/request-transition'
 
 
@@ -50,6 +50,12 @@ export async function approveRequest(formData: FormData) {
     if (request.commodity === 'AFA_STOCK_IN') {
       return { error: 'Pengajuan ini adalah restock gudang dan tidak diproses dari sini.' }
     }
+
+    // Angka pengajuan bisa kemasan atau ml/gr; tanpa isi per kemasan tidak bisa dibaca dengan benar
+    const held = await findUndecidedUnitProducts(prisma, request.details
+      .filter(d => (approvedQties[d.id] ?? d.qtyRequested) > 0)
+      .map(d => d.productId))
+    if (held.length > 0) return { error: unitHoldMessage(held) }
 
     // Saldo AFA saat ini (dalam satuan ledger: gramasi bila ada, selain itu kemasan)
     const afaStocks = await getStockBalance(session.userId)

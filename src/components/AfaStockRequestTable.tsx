@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { approveAfaStockRequest, approveFamStockRequest, approveWhmStockRequest, receiveSpvStockRequest, rejectAfaStockRequest, regenerateInvoice, resetRequestToSubmitted } from '@/app/actions/afa-stock'
+import UnitHoldBadge from './UnitHoldBadge'
 
 type DetailItem = {
   id: string
@@ -655,7 +656,7 @@ export default function AfaStockRequestTable({
 
                                 return (
                                   <tr key={d.id} style={{ borderTop: idx > 0 ? '1px solid var(--border)' : undefined, background: 'white' }}>
-                                    <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{d.product.name}</td>
+                                    <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{d.product.name}<UnitHoldBadge product={d.product} /></td>
                                     <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
                                       <strong>{d.qtyRequested}</strong>
                                     </td>
@@ -798,7 +799,7 @@ export default function AfaStockRequestTable({
                     const hasConflict = avail && avail.availableToSell !== null && avail.availableToSell < d.qtyRequested
                     return (
                       <tr key={d.id} style={{ borderTop: idx > 0 ? '1px solid var(--border)' : undefined }}>
-                        <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{d.product.name}</td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{d.product.name}<UnitHoldBadge product={d.product} /></td>
                         <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{d.qtyRequested} {d.product.unit}</td>
                         <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
                           {isLoadingAvail ? <span style={{ color: 'var(--text-muted)' }}>⏳</span>

@@ -47,6 +47,8 @@ export async function addSampleStock(formData: FormData) {
           unit: newUnit,
           unitGramasi: newUnitGramasi,
           gramasiPerUnit: newGramasiPerUnit,
+          // SPV membuat produk sampel sendiri: tanpa isi per kemasan berarti memang dihitung per kemasan utuh
+          stockUnitMode: hasGramasi({ unit: newUnit, unitGramasi: newUnitGramasi, gramasiPerUnit: newGramasiPerUnit }) ? 'GRAMASI' : 'KEMASAN',
           // accurateId sengaja dikosongkan — produk sampel tidak terdaftar di Accurate
         }
       })
@@ -182,6 +184,7 @@ export async function editSampleProduct(
         name: trimName,
         unitGramasi: unitGramasi?.trim() || null,
         gramasiPerUnit: gramasiPerUnit ?? null,
+        ...(unitGramasi?.trim() && gramasiPerUnit && gramasiPerUnit > 0 ? { stockUnitMode: 'GRAMASI' } : {}),
       },
     })
     invalidateCacheTag(CACHE_TAGS.products)

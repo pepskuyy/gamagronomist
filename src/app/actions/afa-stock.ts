@@ -7,6 +7,8 @@
  */
 'use server'
 
+import { findUndecidedUnitProducts, unitHoldMessage, notifyUnitHold } from '@/lib/ledger/stock'
+
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import prisma from '@/lib/prisma'
@@ -42,6 +44,9 @@ export async function submitAfaStockRequest(formData: FormData) {
   if (validProducts.length === 0) {
     return { error: 'Pilih minimal 1 produk dan masukkan jumlah yang valid.' }
   }
+
+  // Produk tanpa satuan stok tetap boleh diajukan, tapi stoknya baru bisa diterima setelah admin melengkapi
+  const heldNames = await findUndecidedUnitProducts(prisma, validProducts.map(p => p.productId))
 
   try {
     const req = await prisma.request.create({
@@ -107,8 +112,9 @@ export async function submitAfaStockRequest(formData: FormData) {
       console.warn('[AFA Stock] Failed to send SPV notification:', notifErr)
     }
 
+    await notifyUnitHold(heldNames, session.name ?? 'AFA')
     revalidatePath('/dashboard/stock')
-    return { success: true }
+    return { success: true, ...(heldNames.length > 0 ? { warning: unitHoldMessage(heldNames) } : {}) }
   } catch (err: any) {
     console.error('submitAfaStockRequest error:', err)
     return { error: 'Gagal mengirim pengajuan stok.' }
@@ -202,6 +208,16 @@ export async function approveAfaStockRequest(requestId: string, itemDecisions?: 
           }
         }
         productIdRemap.set(detail.productId, effectiveId)
+      }
+
+      // Stok sampel masuk ke ledger AFA dalam ml/gr → isi per kemasan harus sudah jelas
+      {
+        const willApprove = req.details.filter(d => {
+          const dec = decisionsMap.get(d.id)
+          return dec === undefined || dec.approved
+        })
+        const held = await findUndecidedUnitProducts(prisma, willApprove.map(d => productIdRemap.get(d.productId) ?? d.productId))
+        if (held.length > 0) return { error: unitHoldMessage(held) }
       }
 
       // ── If itemDecisions provided (partial approval mode) ─────────────
@@ -749,6 +765,10 @@ export async function receiveSpvStockRequest(requestId: string) {
     if (req.status !== 'APPROVED_WHM') {
       return { error: 'Pengajuan ini tidak dalam status menunggu penerimaan SPV.' }
     }
+
+    // qty kemasan dikonversi ke ml/gr saat diterima → tahan bila isi per kemasan belum diisi
+    const held = await findUndecidedUnitProducts(prisma, req.details.filter(d => (d.qtyApproved ?? d.qtyRequested) > 0).map(d => d.productId))
+    if (held.length > 0) return { error: unitHoldMessage(held) }
 
     // Pre-fetch data sebelum transaction agar tidak ada query di dalam transaction
     const productIds = req.details.map(d => d.productId)
