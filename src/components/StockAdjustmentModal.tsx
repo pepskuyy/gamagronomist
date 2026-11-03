@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { adjustStockBatch, transferStockBetweenUsers } from '@/app/actions/stock-admin'
 import SearchableSelect from '@/components/SearchableSelect'
+import { Wrench, Repeat, X, Plus } from 'lucide-react'
 
 type StockAdjustmentModalProps = {
   isOpen: boolean
@@ -114,26 +115,26 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
       <div className="modal-content" style={{ maxWidth: '600px' }}>
         <div className="modal-header">
           <h3 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            🛠️ Sesuaikan Stok
+            <Wrench size={18} strokeWidth={1.75} />Sesuaikan Stok
           </h3>
-          <button className="close-btn" onClick={onClose}>✕</button>
+          <button className="close-btn" onClick={onClose} aria-label="Tutup"><X size={18} strokeWidth={1.75} /></button>
         </div>
         
         <div className="modal-body">
           <div style={{ marginBottom: '1.25rem', padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)' }}>
             <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Target User:</div>
-            <div style={{ fontWeight: 600 }}>{user.name} <span style={{ fontSize: '0.75rem', fontWeight: 700, background: 'var(--border)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{user.role}</span></div>
+            <div style={{ fontWeight: 600 }}>{user.name} <span style={{ fontSize: '0.75rem', fontWeight: 500, background: 'var(--surface-3)', color: 'var(--text-secondary)', padding: '0.125rem 0.375rem', borderRadius: 'var(--radius-xs)' }}>{user.role}</span></div>
           </div>
 
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
-            {([['adjust', '🛠️ Koreksi saldo'], ['transfer', '🔁 Pindah ke akun lain']] as const).map(([key, label]) => (
+            {([['adjust', 'Koreksi saldo'], ['transfer', 'Pindah ke akun lain']] as const).map(([key, label]) => (
               <button
                 key={key}
                 type="button"
                 onClick={() => { setMode(key); setError(null) }}
                 className={mode === key ? 'btn btn-primary' : 'btn btn-outline'}
-                style={{ flex: 1, fontSize: '0.82rem', padding: '0.45rem' }}
-              >{label}</button>
+                style={{ flex: 1, fontSize: '0.8rem', padding: '0.5rem' }}
+              >{key === 'adjust' ? <Wrench size={16} strokeWidth={1.75} /> : <Repeat size={16} strokeWidth={1.75} />}{label}</button>
             ))}
           </div>
 
@@ -153,28 +154,28 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
             </div>
           )}
 
-          {error && <div style={{ marginBottom: '1rem', padding: '0.75rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', whiteSpace: 'pre-line' }}>{error}</div>}
+          {error && <div style={{ marginBottom: '1rem', padding: '0.75rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', whiteSpace: 'pre-line' }}>{error}</div>}
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {/* Product rows */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {rows.map((row, idx) => (
                 <div key={row.id} style={{
-                  padding: '0.85rem',
+                  padding: '0.75rem',
                   background: 'var(--surface-2)',
                   borderRadius: 'var(--radius-sm)',
                   border: '1px solid var(--border)',
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.5rem' }}>
-                    <span style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                    <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>
                       Produk #{idx + 1}
                     </span>
                     {rows.length > 1 && (
                       <button
                         type="button"
                         onClick={() => removeRow(row.id)}
-                        style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600 }}
-                      >✕ Hapus</button>
+                        style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
+                      ><X size={14} strokeWidth={1.75} />Hapus</button>
                     )}
                   </div>
 
@@ -200,10 +201,10 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                         className="form-control"
                         value={row.type}
                         onChange={e => updateRow(row.id, 'type', e.target.value)}
-                        style={{ fontSize: '0.85rem' }}
+                        style={{ fontSize: '0.875rem' }}
                       >
-                        <option value="plus">➕ Tambah (+)</option>
-                        <option value="minus">➖ Kurangi (-)</option>
+                        <option value="plus">Tambah (+)</option>
+                        <option value="minus">Kurangi (-)</option>
                       </select>
                     </div>}
                     <div style={{ flex: 1 }}>
@@ -215,13 +216,13 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                         value={row.quantity}
                         onChange={e => updateRow(row.id, 'quantity', e.target.value)}
                         placeholder={`Jumlah${(() => { const p = products.find(x => x.id === row.productId); return p ? ` (${p.unitGramasi || p.unit})` : '' })()}`}
-                        style={{ fontSize: '0.85rem' }}
+                        style={{ fontSize: '0.875rem' }}
                       />
                     </div>
                   </div>
                   {row.productId && (
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.35rem' }}>
-                      Saldo saat ini: <strong>{fmtQty(balanceMap.get(row.productId) ?? 0)} {unitOf(row.productId)}</strong>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.375rem' }}>
+                      Saldo saat ini: <strong className="num" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{fmtQty(balanceMap.get(row.productId) ?? 0)}</strong><span className="unit">{unitOf(row.productId)}</span>
                     </div>
                   )}
                 </div>
@@ -233,13 +234,13 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
               type="button"
               onClick={() => setRows(prev => [...prev, newRow()])}
               style={{
-                padding: '0.6rem', borderRadius: 'var(--radius-sm)',
-                border: '2px dashed var(--border)', background: 'transparent',
-                color: 'var(--primary)', fontWeight: 600, fontSize: '0.85rem',
-                cursor: 'pointer',
+                padding: '0.625rem', borderRadius: 'var(--radius-sm)',
+                border: '1px dashed var(--border)', background: 'transparent',
+                color: 'var(--primary)', fontWeight: 500, fontSize: '0.875rem',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
               }}
             >
-              + Tambah Produk Lain
+              <Plus size={16} strokeWidth={1.75} />Tambah Produk Lain
             </button>
 
             {/* Notes */}
@@ -252,7 +253,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                 onChange={e => setNotes(e.target.value)}
                 required
                 placeholder="Jelaskan alasan penyesuaian stok ini..."
-                style={{ fontSize: '0.85rem' }}
+                style={{ fontSize: '0.875rem' }}
               />
               <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Berlaku untuk semua produk di atas. Notifikasi akan dikirim otomatis.</p>
             </div>
@@ -270,7 +271,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
       <style jsx>{`
         .modal-backdrop {
           position: fixed; top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.5); backdrop-filter: blur(2px);
+          background: rgba(0,0,0,0.4);
           display: flex; align-items: center; justify-content: center;
           z-index: 100;
         }
@@ -278,8 +279,8 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
           background: var(--surface);
           width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;
           border-radius: var(--radius-lg);
-          box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1);
-          animation: slideUp 0.3s ease-out;
+          box-shadow: var(--shadow-lg);
+          animation: slideUp var(--dur-menu) var(--ease);
         }
         .modal-header {
           padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border);
@@ -287,9 +288,9 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
           position: sticky; top: 0; background: var(--surface); z-index: 1;
         }
         .modal-body { padding: 1.5rem; }
-        .close-btn { background: none; border: none; font-size: 1.2rem; cursor: pointer; color: var(--text-muted); }
+        .close-btn { background: none; border: none; cursor: pointer; color: var(--text-muted); display: inline-flex; padding: 0.25rem; border-radius: var(--radius-xs); }
         .close-btn:hover { color: var(--text-main); }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   )

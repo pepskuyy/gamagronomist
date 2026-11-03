@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import Link from 'next/link'
+import { ArrowUp, ArrowDown, Sprout, FileText, Download, AlertTriangle, ArrowLeft } from 'lucide-react'
 
 type LedgerItem = {
   id: string
@@ -34,25 +35,25 @@ const TRANSACTION_TYPES = [
 
 function TypeBadge({ type }: { type: string }) {
   const map: Record<string, { label: string; color: string; bg: string }> = {
-    STOCK_IN_GUDANG:  { label: 'Stok Masuk Gudang',       color: '#166534', bg: '#dcfce7' },
-    TRANSFER_TO_FO:   { label: 'Transfer ke FO',           color: '#92400e', bg: '#fef3c7' },
-    RECEIVE_FROM_AFA: { label: 'Terima dari AFA',          color: '#1e40af', bg: '#dbeafe' },
-    RECEIVE_FROM_SAMPLE: { label: 'Terima dari Gudang Sampel', color: '#1e40af', bg: '#dbeafe' },
-    USAGE_DEMOPLOT:   { label: 'Pemakaian Demo Plot',      color: '#991b1b', bg: '#fee2e2' },
-    USAGE_SPOT_DEMOPLOT: { label: 'Pemakaian Spot Demplot', color: '#991b1b', bg: '#fee2e2' },
-    USAGE_REVERSAL:   { label: 'Pembatalan Pemakaian',     color: '#065f46', bg: '#d1fae5' },
-    DIRECT_USAGE_AFA: { label: 'Pemakaian Langsung',       color: '#7c3aed', bg: '#ede9fe' },
-    ADJUSTMENT_PLUS:  { label: 'Koreksi Stok (+)',         color: '#065f46', bg: '#d1fae5' },
-    ADJUSTMENT_MINUS: { label: 'Koreksi Stok (-)',         color: '#9f1239', bg: '#fce7f3' },
-    TRANSFER_ACCOUNT_OUT: { label: 'Pindah ke Akun Lain',  color: '#92400e', bg: '#fef3c7' },
-    TRANSFER_ACCOUNT_IN:  { label: 'Masuk dari Akun Lain', color: '#1e40af', bg: '#dbeafe' },
-    ROLLBACK_SAMPLE:  { label: 'Rollback Sampel',          color: '#475569', bg: '#e2e8f0' },
+    STOCK_IN_GUDANG:  { label: 'Stok Masuk Gudang',       color: 'var(--success)', bg: 'var(--success-bg)' },
+    TRANSFER_TO_FO:   { label: 'Transfer ke FO',           color: 'var(--warning)', bg: 'var(--warning-bg)' },
+    RECEIVE_FROM_AFA: { label: 'Terima dari AFA',          color: 'var(--info)', bg: 'var(--info-bg)' },
+    RECEIVE_FROM_SAMPLE: { label: 'Terima dari Gudang Sampel', color: 'var(--info)', bg: 'var(--info-bg)' },
+    USAGE_DEMOPLOT:   { label: 'Pemakaian Demo Plot',      color: 'var(--danger)', bg: 'var(--danger-bg)' },
+    USAGE_SPOT_DEMOPLOT: { label: 'Pemakaian Spot Demplot', color: 'var(--danger)', bg: 'var(--danger-bg)' },
+    USAGE_REVERSAL:   { label: 'Pembatalan Pemakaian',     color: 'var(--success)', bg: 'var(--success-bg)' },
+    DIRECT_USAGE_AFA: { label: 'Pemakaian Langsung',       color: 'var(--danger)', bg: 'var(--danger-bg)' },
+    ADJUSTMENT_PLUS:  { label: 'Koreksi Stok (+)',         color: 'var(--success)', bg: 'var(--success-bg)' },
+    ADJUSTMENT_MINUS: { label: 'Koreksi Stok (-)',         color: 'var(--danger)', bg: 'var(--danger-bg)' },
+    TRANSFER_ACCOUNT_OUT: { label: 'Pindah ke Akun Lain',  color: 'var(--warning)', bg: 'var(--warning-bg)' },
+    TRANSFER_ACCOUNT_IN:  { label: 'Masuk dari Akun Lain', color: 'var(--info)', bg: 'var(--info-bg)' },
+    ROLLBACK_SAMPLE:  { label: 'Rollback Sampel',          color: 'var(--text-secondary)', bg: 'var(--surface-2)' },
   }
-  const m = map[type] || { label: type, color: '#4b5563', bg: '#f3f4f6' }
+  const m = map[type] || { label: type, color: 'var(--text-secondary)', bg: 'var(--surface-2)' }
   return (
     <span style={{
-      padding: '0.2rem 0.65rem', borderRadius: '9999px', fontSize: '0.72rem',
-      fontWeight: 700, color: m.color, background: m.bg, whiteSpace: 'nowrap',
+      padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem',
+      fontWeight: 500, color: m.color, background: m.bg, whiteSpace: 'nowrap',
     }}>
       {m.label}
     </span>
@@ -161,17 +162,17 @@ export default function LedgerHistoryPage() {
   }
 
   const tdStyle: React.CSSProperties = {
-    padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem', verticalAlign: 'middle'
+    padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.875rem', verticalAlign: 'middle', fontVariantNumeric: 'tabular-nums'
   }
 
   return (
     <div>
       {/* Header */}
       <div className="back-header" style={{ marginBottom: '1.5rem' }}>
-        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Kembali</Link>
         <div>
-          <h2 style={{ margin: 0 }}>📋 Histori Transaksi &amp; Pemakaian Stok</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
+          <h2 style={{ margin: 0 }}>Histori Transaksi &amp; Pemakaian Stok</h2>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Semua transaksi stok termasuk penerimaan, transfer, dan pemakaian demo plot
           </p>
         </div>
@@ -180,15 +181,14 @@ export default function LedgerHistoryPage() {
       {/* Quick Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '1rem', marginBottom: '1.5rem' }}>
         {[
-          { label: 'Total Masuk', value: fmtStat(totalIn, '+'), color: '#16a34a', icon: '⬆️' },
-          { label: 'Total Keluar', value: fmtStat(totalOut), color: '#dc2626', icon: '⬇️' },
-          { label: 'Pemakaian Demo Plot', value: fmtStat(demoplotUsage), color: '#7c3aed', icon: '🌾' },
-          { label: 'Total Transaksi', value: ledgers.length.toString(), color: 'var(--primary)', icon: '📄' },
+          { label: 'Total Masuk', value: fmtStat(totalIn, '+'), color: 'var(--success)', icon: <ArrowUp size={16} strokeWidth={1.75} /> },
+          { label: 'Total Keluar', value: fmtStat(totalOut), color: 'var(--danger)', icon: <ArrowDown size={16} strokeWidth={1.75} /> },
+          { label: 'Pemakaian Demo Plot', value: fmtStat(demoplotUsage), color: 'var(--text-main)', icon: <Sprout size={16} strokeWidth={1.75} /> },
+          { label: 'Total Transaksi', value: ledgers.length.toString(), color: 'var(--text-main)', icon: <FileText size={16} strokeWidth={1.75} /> },
         ].map(s => (
-          <div key={s.label} className="card" style={{ padding: '1rem', textAlign: 'center' }}>
-            <div style={{ fontSize: '1.5rem', marginBottom: '0.25rem' }}>{s.icon}</div>
-            <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color, lineHeight: 1 }}>{s.value}</div>
-            <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{s.label}</div>
+          <div key={s.label} className="card" style={{ padding: '1rem' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, marginBottom: '0.5rem' }}>{s.icon}{s.label}</div>
+            <div className="num" style={{ fontSize: '1.5rem', fontWeight: 600, color: s.color, lineHeight: 1 }}>{s.value}</div>
           </div>
         ))}
       </div>
@@ -199,7 +199,7 @@ export default function LedgerHistoryPage() {
           {/* User Filter (For AFA/ADMIN) */}
           {subordinates.length > 0 && (
             <div>
-              <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Akun</label>
+              <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Akun</label>
               <select className="form-control" value={filterUserId} onChange={e => setFilterUserId(e.target.value)}>
                 <option value="">Stok Sendiri</option>
                 {subordinates.map(u => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
@@ -208,24 +208,24 @@ export default function LedgerHistoryPage() {
           )}
           {/* Date From */}
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Dari</label>
+            <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Dari</label>
             <input type="date" className="form-control" value={filterFrom} onChange={e => setFilterFrom(e.target.value)} />
           </div>
           {/* Date To */}
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Sampai</label>
+            <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Sampai</label>
             <input type="date" className="form-control" value={filterTo} onChange={e => setFilterTo(e.target.value)} />
           </div>
           {/* Type Filter */}
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Jenis</label>
+            <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Jenis</label>
             <select className="form-control" value={filterType} onChange={e => setFilterType(e.target.value)}>
               {TRANSACTION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
             </select>
           </div>
           {/* Product Filter */}
           <div>
-            <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', display: 'block', marginBottom: '0.3rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Produk</label>
+            <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Produk</label>
             <select className="form-control" value={filterProduct} onChange={e => setFilterProduct(e.target.value)}>
               <option value="">Semua Produk</option>
               {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
@@ -242,7 +242,7 @@ export default function LedgerHistoryPage() {
               onClick={handleExport}
               disabled={ledgers.length === 0}
             >
-              📥 Excel
+              <Download size={16} strokeWidth={1.75} className="icon-inline" />Excel
             </button>
           </div>
         </div>
@@ -252,11 +252,11 @@ export default function LedgerHistoryPage() {
       <div className="table-card">
         <div style={{ padding: '0.75rem 1.25rem', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
           <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-            Menampilkan <strong>{ledgers.length}</strong> transaksi
+            Menampilkan <strong className="num" style={{ fontWeight: 600 }}>{ledgers.length}</strong> transaksi
           </span>
           {ledgers.length === 1000 && (
-            <span style={{ fontSize: '0.78rem', color: '#f59e0b', fontWeight: 600 }}>
-              ⚠️ Hasil dibatasi 1.000 baris — gunakan filter tanggal untuk mempersempit
+            <span style={{ fontSize: '0.8rem', color: 'var(--warning)', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+              <AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" />Hasil dibatasi 1.000 baris — gunakan filter tanggal untuk mempersempit
             </span>
           )}
         </div>
@@ -265,7 +265,7 @@ export default function LedgerHistoryPage() {
             <thead>
               <tr style={{ background: 'var(--surface-2)' }}>
                 {['Tanggal', 'Jenis Transaksi', 'Produk', 'Stok Awal', 'Kuantitas', 'Stok Akhir', 'Catatan'].map(h => (
-                  <th key={h} style={{ padding: '0.7rem 1rem', fontSize: '0.73rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
+                  <th key={h} style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', textAlign: 'left', borderBottom: '1px solid var(--border)' }}>
                     {h}
                   </th>
                 ))}
@@ -291,44 +291,44 @@ export default function LedgerHistoryPage() {
                   const unit  = item.product.unitGramasi || item.product.unit
 
                   const balanceTdStyle: React.CSSProperties = {
-                    ...tdStyle, fontFamily: 'monospace', fontSize: '0.82rem',
+                    ...tdStyle, fontSize: '0.8rem',
                     color: 'var(--text-muted)', textAlign: 'right', whiteSpace: 'nowrap'
                   }
 
                   return (
-                    <tr key={item.id} style={{ transition: 'background 0.1s' }}
+                    <tr key={item.id} style={{ transition: 'var(--transition)' }}
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
                       onMouseLeave={e => (e.currentTarget.style.background = '')}
                     >
-                      <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontFamily: 'monospace', fontSize: '0.83rem' }}>
+                      <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.createdAt))}
                       </td>
                       <td style={tdStyle}>
                         <TypeBadge type={item.transactionType} />
                       </td>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>
+                      <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }}>
                         {item.product.name}
                       </td>
                       {/* Stok Awal */}
                       <td style={balanceTdStyle}>
-                        {item.stockBefore !== null ? `${item.stockBefore} ${unit}` : '–'}
+                        {item.stockBefore !== null ? <><span className="num">{item.stockBefore}</span><span className="unit">{unit}</span></> : '–'}
                       </td>
                       {/* Kuantitas */}
                       <td style={tdStyle}>
                         <span style={{
-                          color: isOut ? '#dc2626' : '#16a34a',
-                          fontWeight: 700,
-                          fontSize: '0.95rem',
-                          display: 'inline-flex', alignItems: 'baseline', gap: '0.2rem'
+                          color: isOut ? 'var(--danger)' : 'var(--success)',
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
+                          display: 'inline-flex', alignItems: 'baseline', gap: '0.25rem'
                         }}>
-                          <span>{isOut ? '▼' : '▲'}</span>
-                          <span>{isOut ? '' : '+'}{item.quantity}</span>
-                          <span style={{ fontSize: '0.72rem', fontWeight: 500, color: 'var(--text-muted)' }}>{unit}</span>
+                          <span style={{ alignSelf: 'center', display: 'inline-flex' }}>{isOut ? <ArrowDown size={14} strokeWidth={1.75} /> : <ArrowUp size={14} strokeWidth={1.75} />}</span>
+                          <span className="num">{isOut ? '' : '+'}{item.quantity}</span>
+                          <span className="unit" style={{ marginLeft: 0 }}>{unit}</span>
                         </span>
                       </td>
                       {/* Stok Akhir */}
-                      <td style={{ ...balanceTdStyle, fontWeight: 700, color: isOut ? '#dc2626' : '#16a34a' }}>
-                        {item.stockAfter !== null ? `${item.stockAfter} ${unit}` : '–'}
+                      <td style={{ ...balanceTdStyle, fontWeight: 600, color: 'var(--text-main)' }}>
+                        {item.stockAfter !== null ? <><span className="num">{item.stockAfter}</span><span className="unit">{unit}</span></> : '–'}
                       </td>
                       <td style={{ ...tdStyle, color: 'var(--text-muted)', maxWidth: 260, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {item.notes || '-'}

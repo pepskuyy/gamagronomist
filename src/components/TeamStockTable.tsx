@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import StockAdjustmentModal from './StockAdjustmentModal'
+import { AlertTriangle, ChevronDown, Wrench } from 'lucide-react'
 
 type TeamStockTableProps = {
   users: { id: string, name: string, role: string, parentName?: string }[]
@@ -13,9 +14,9 @@ type TeamStockTableProps = {
 }
 
 const roleBadge: Record<string, { bg: string; text: string }> = {
-  AFA: { bg: '#dbeafe', text: '#1d4ed8' },
-  FO: { bg: '#dcfce7', text: '#166534' },
-  INTERN: { bg: '#fef3c7', text: '#92400e' },
+  AFA: { bg: 'var(--info-bg)', text: 'var(--info)' },
+  FO: { bg: 'var(--success-bg)', text: 'var(--success)' },
+  INTERN: { bg: 'var(--warning-bg)', text: 'var(--warning)' },
 }
 
 export default function TeamStockTable({ users, stocks, allProducts, role, transferTargets = [] }: TeamStockTableProps) {
@@ -34,7 +35,7 @@ export default function TeamStockTable({ users, stocks, allProducts, role, trans
           const negativeCount = userStocks.length - positiveStocks.length
           const totalItems = positiveStocks.length
           const isExpanded = expandedId === user.id
-          const badge = roleBadge[user.role] || { bg: '#f1f5f9', text: '#475569' }
+          const badge = roleBadge[user.role] || { bg: 'var(--surface-2)', text: 'var(--text-secondary)' }
 
           return (
             <div 
@@ -44,14 +45,14 @@ export default function TeamStockTable({ users, stocks, allProducts, role, trans
                 padding: 0, 
                 overflow: 'hidden',
                 border: '1px solid var(--border)',
-                transition: 'box-shadow 0.2s, transform 0.2s',
+                transition: 'var(--transition)',
                 cursor: 'pointer',
               }}
               onClick={() => setExpandedId(isExpanded ? null : user.id)}
             >
               {/* Header */}
               <div style={{ 
-                padding: '0.85rem 1rem', 
+                padding: '0.75rem 1rem', 
                 display: 'flex', 
                 alignItems: 'center', 
                 justifyContent: 'space-between',
@@ -59,23 +60,24 @@ export default function TeamStockTable({ users, stocks, allProducts, role, trans
                 borderBottom: isExpanded ? '1px solid var(--border)' : 'none',
               }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.2rem' }}>
-                    <span style={{ fontWeight: 700, fontSize: '0.92rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
+                    <span style={{ fontWeight: 600, fontSize: '0.875rem', color: 'var(--text-main)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                       {user.name}
                     </span>
                     <span style={{ 
-                      fontSize: '0.65rem', fontWeight: 700, padding: '0.15rem 0.45rem', 
-                      borderRadius: '9999px', background: badge.bg, color: badge.text,
+                      fontSize: '0.75rem', fontWeight: 500, padding: '0 0.375rem', 
+                      borderRadius: 'var(--radius-xs)', background: badge.bg, color: badge.text,
                       flexShrink: 0
                     }}>
                       {user.role}
                     </span>
                     {negativeCount > 0 && (
                       <span title="Ada saldo minus — perlu dicek" style={{
-                        fontSize: '0.65rem', fontWeight: 700, padding: '0.15rem 0.45rem',
-                        borderRadius: '9999px', background: '#fee2e2', color: '#b91c1c', flexShrink: 0
+                        fontSize: '0.75rem', fontWeight: 500, padding: '0 0.375rem',
+                        borderRadius: 'var(--radius-xs)', background: 'var(--danger-bg)', color: 'var(--danger)', flexShrink: 0,
+                        display: 'inline-flex', alignItems: 'center', gap: '0.25rem'
                       }}>
-                        ⚠ {negativeCount} minus
+                        <AlertTriangle size={12} strokeWidth={1.75} /><span className="num">{negativeCount}</span> minus
                       </span>
                     )}
                   </div>
@@ -89,31 +91,31 @@ export default function TeamStockTable({ users, stocks, allProducts, role, trans
                 {/* Summary stats */}
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexShrink: 0 }}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontSize: '1.1rem', fontWeight: 800, color: totalItems > 0 ? '#059669' : 'var(--text-muted)' }}>
+                    <div className="num" style={{ fontSize: '1.125rem', fontWeight: 600, lineHeight: 1.2, color: totalItems > 0 ? 'var(--text-main)' : 'var(--text-muted)' }}>
                       {totalItems}
                     </div>
-                    <div style={{ fontSize: '0.6rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Jenis</div>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Jenis</div>
                   </div>
                   {/* Expand chevron */}
                   <span style={{ 
-                    fontSize: '0.8rem', color: 'var(--text-muted)', 
+                    display: 'inline-flex', color: 'var(--text-muted)', 
                     transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)',
-                    transition: 'transform 0.2s'
+                    transition: 'var(--transition)'
                   }}>
-                    ▼
+                    <ChevronDown size={16} strokeWidth={1.75} />
                   </span>
                 </div>
               </div>
 
               {/* Expanded detail */}
               {isExpanded && (
-                <div style={{ padding: '0.6rem 1rem 0.85rem' }}>
+                <div style={{ padding: '0.5rem 1rem 0.75rem' }}>
                   {userStocks.length === 0 ? (
-                    <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.82rem', padding: '0.5rem 0' }}>
+                    <div style={{ textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', padding: '0.5rem 0' }}>
                       Tidak ada stok
                     </div>
                   ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem' }}>
                       {userStocks.map((s) => {
                         const hasGramasi = s.product.unitGramasi && s.product.gramasiPerUnit && s.product.gramasiPerUnit > 0;
                         const isNegative = s.quantity < 0;
@@ -129,22 +131,21 @@ export default function TeamStockTable({ users, stocks, allProducts, role, trans
                             }}
                           style={{ 
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            padding: '0.45rem 0.6rem', borderRadius: 'var(--radius)',
-                            background: isNegative ? '#fef2f2' : 'var(--surface-2)', fontSize: '0.82rem',
-                            border: isNegative ? '1px solid #fecaca' : undefined,
+                            padding: '0.5rem 0.625rem', borderRadius: 'var(--radius-sm)',
+                            background: isNegative ? 'var(--danger-bg)' : 'var(--surface-2)', fontSize: '0.8rem',
                             cursor: ['ADMIN', 'SPV'].includes(role) ? 'pointer' : 'default',
-                            transition: 'background 0.15s ease'
+                            transition: 'var(--transition)'
                           }}
                         >
                           <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>{s.product.name}</span>
                           <span style={{ 
-                            fontWeight: 700, color: isNegative ? '#dc2626' : 'var(--primary)', 
-                            display: 'flex', alignItems: 'baseline', gap: '0.25rem'
+                            fontWeight: 600, color: isNegative ? 'var(--danger)' : 'var(--text-main)', 
+                            display: 'flex', alignItems: 'baseline', gap: '0.25rem', whiteSpace: 'nowrap'
                           }}>
-                            {s.quantity.toLocaleString()}
-                            <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-muted)' }}>{s.product.unitGramasi || s.product.unit}</span>
+                            <span className="num">{s.quantity.toLocaleString()}</span>
+                            <span className="unit" style={{ marginLeft: 0 }}>{s.product.unitGramasi || s.product.unit}</span>
                             {hasGramasi && (
-                              <span style={{ fontSize: '0.7rem', fontWeight: 400, color: 'var(--text-muted)' }}>
+                              <span className="num" style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>
                                 (= {Number.isInteger(s.quantity / (s.product.gramasiPerUnit || 1)) ? s.quantity / (s.product.gramasiPerUnit || 1) : (s.quantity / (s.product.gramasiPerUnit || 1)).toFixed(1)} {s.product.unit})
                               </span>
                             )}
@@ -158,10 +159,10 @@ export default function TeamStockTable({ users, stocks, allProducts, role, trans
                   {['ADMIN', 'SPV'].includes(role) && (
                     <button
                       className="btn btn-outline"
-                      style={{ width: '100%', marginTop: '0.65rem', padding: '0.4rem', fontSize: '0.78rem' }}
+                      style={{ width: '100%', marginTop: '0.75rem', padding: '0.375rem', fontSize: '0.8rem' }}
                       onClick={(e) => { e.stopPropagation(); setSelectedUser(user) }}
                     >
-                      🛠️ Sesuaikan Stok
+                      <Wrench size={14} strokeWidth={1.75} className="icon-inline" />Sesuaikan Stok
                     </button>
                   )}
                 </div>
@@ -190,8 +191,8 @@ export default function TeamStockTable({ users, stocks, allProducts, role, trans
       )}
 
       <style jsx>{`
-        .card:hover { box-shadow: 0 2px 8px rgb(0 0 0 / 0.08); transform: translateY(-1px); }
-        .stock-row-clickable:hover { background: var(--surface-3) !important; filter: brightness(0.95); }
+        .card:hover { box-shadow: var(--shadow-md); }
+        .stock-row-clickable:hover { background: var(--surface-3) !important; }
       `}</style>
     </>
   )

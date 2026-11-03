@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { submitStockOpname } from '@/app/actions/opname'
 import Link from 'next/link'
+import { ArrowLeft, CheckCircle2, Plus } from 'lucide-react'
 
 type ProductStock = {
   id: string
@@ -130,28 +131,28 @@ export default function OpnameFormClient() {
   return (
     <div style={{ maxWidth: '900px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)' }}>⬅️ Kembali</Link>
-        <h2 style={{ margin: 0 }}>📝 Validasi Stock Opname</h2>
+        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Kembali</Link>
+        <h2 style={{ margin: 0 }}>Validasi Stock Opname</h2>
       </div>
 
       <div className="card">
         <p style={{ marginBottom: '1.5rem', color: 'var(--text-muted)' }}>
-          Hitung stok fisik Anda dan masukkan pada kolom <strong>Fisik Aktual</strong>. Pengajuan penyesuaian jika ada selisih memerlukan persetujuan SPV. Anda juga dapat menambahkan barang (misal dari Gudang Utama/Sampel) yang fisiknya ada namun belum tercatat di sistem dengan mengklik tombol "Tambah Produk Lain". Keterangan wajib diisi pada baris yang memiliki selisih stok.
+          Hitung stok fisik Anda dan masukkan pada kolom <strong style={{ fontWeight: 500, color: 'var(--text-main)' }}>Fisik Aktual</strong>. Pengajuan penyesuaian jika ada selisih memerlukan persetujuan SPV. Anda juga dapat menambahkan barang (misal dari Gudang Utama/Sampel) yang fisiknya ada namun belum tercatat di sistem dengan mengklik tombol "Tambah Produk Lain". Keterangan wajib diisi pada baris yang memiliki selisih stok.
         </p>
 
-        {error && <div className="alert-error" style={{ marginBottom: '1rem', color: 'red' }}>{error}</div>}
-        {success && <div className="badge badge-success" style={{ marginBottom: '1rem', display: 'block', textAlign: 'center', padding: '1rem' }}>✅ Pengajuan opname berhasil dikirim ke SPV! Mengalihkan...</div>}
+        {error && <div className="alert-error" style={{ marginBottom: '1rem', color: 'var(--danger)', background: 'var(--danger-bg)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
+        {success && <div className="badge badge-success" style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'center', gap: '0.5rem', padding: '1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', whiteSpace: 'normal' }}><CheckCircle2 size={16} strokeWidth={1.75} />Pengajuan opname berhasil dikirim ke SPV! Mengalihkan...</div>}
 
         <form onSubmit={handleSubmit}>
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', minWidth: '600px', borderCollapse: 'collapse', textAlign: 'left', marginBottom: '1rem' }}>
-             <thead style={{ background: 'var(--surface-hover)' }}>
+             <thead style={{ background: 'var(--surface-2)' }}>
                <tr>
-                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Produk</th>
-                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Stok Sistem (Ledger)</th>
-                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', minWidth: '120px' }}>Fisik Aktual</th>
-                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '120px' }}>Selisih</th>
-                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', width: '250px' }}>Keterangan / Alasan</th>
+                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Produk</th>
+                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Stok Sistem (Ledger)</th>
+                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', minWidth: '120px' }}>Fisik Aktual</th>
+                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', width: '120px' }}>Selisih</th>
+                 <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', width: '250px' }}>Keterangan / Alasan</th>
                </tr>
              </thead>
              <tbody>
@@ -159,42 +160,43 @@ export default function OpnameFormClient() {
                  const diff = counts[p.id] - p.systemStock
                  const isAdded = addedProductIds.includes(p.id)
                  return (
-                 <tr key={p.id} style={{ background: isAdded ? '#f0fdf4' : undefined }}>
-                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 500 }}>
+                 <tr key={p.id} style={{ background: isAdded ? 'var(--success-bg)' : undefined }}>
+                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', fontWeight: 500 }}>
                      {p.name}
-                     {isAdded && <span style={{ display: 'block', fontSize: '0.7rem', color: '#16a34a', fontWeight: 600 }}>+ Ditambahkan Manual</span>}
+                     {isAdded && <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--success)', fontWeight: 500 }}>+ Ditambahkan Manual</span>}
                    </td>
-                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)' }}>
-                      {p.systemStock} {p.unit}
+                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                      <span className="num">{p.systemStock}</span><span className="unit">{p.unit}</span>
                    </td>
-                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                         <input 
                           type="number" 
                           min="0"
                           step="0.01" 
                           className="form-control" 
-                          style={{ padding: '0.4rem', margin: 0, minWidth: '80px', borderColor: isAdded ? '#16a34a' : undefined }}
+                          style={{ padding: '0.375rem 0.5rem', margin: 0, minWidth: '80px', borderColor: isAdded ? 'var(--success)' : undefined }}
                           value={counts[p.id] ?? ''}
                           onChange={(e) => handleCountChange(p.id, e.target.value)}
                         />
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>{p.unit}</span>
+                        <span className="unit" style={{ marginLeft: 0 }}>{p.unit}</span>
                       </div>
                    </td>
-                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                       <span style={{ 
                         fontWeight: 600, 
-                        color: diff > 0 ? 'var(--success)' : diff < 0 ? 'var(--danger)' : 'var(--text-muted)'
+                        color: diff > 0 ? 'var(--success)' : diff < 0 ? 'var(--danger)' : 'var(--text-muted)',
+                        whiteSpace: 'nowrap'
                       }}>
-                        {diff > 0 ? '+' : ''}{diff} {p.unit}
+                        <span className="num">{diff > 0 ? '+' : ''}{diff}</span><span className="unit">{p.unit}</span>
                       </span>
                    </td>
-                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                   <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                       <input 
                           type="text" 
                           className="form-control" 
                           placeholder={diff !== 0 ? "Wajib diisi..." : "-"}
-                          style={{ padding: '0.4rem', margin: 0, borderColor: diff !== 0 && !notes[p.id] ? 'var(--danger)' : undefined }}
+                          style={{ padding: '0.375rem 0.5rem', margin: 0, borderColor: diff !== 0 && !notes[p.id] ? 'var(--danger)' : undefined }}
                           value={notes[p.id] || ''}
                           onChange={(e) => handleNoteChange(p.id, e.target.value)}
                           required={diff !== 0}
@@ -207,19 +209,19 @@ export default function OpnameFormClient() {
             </table>
           </div>
 
-          <div style={{ marginBottom: '2rem', background: 'var(--surface)', padding: '1rem', borderRadius: '0.5rem', border: '1px dashed var(--border)' }}>
+          <div style={{ marginBottom: '2rem', background: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border)' }}>
             {!showAddRow ? (
               <button 
                 type="button" 
                 onClick={() => setShowAddRow(true)}
-                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 600, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
+                style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
-                <span style={{ fontSize: '1.2rem' }}>+</span> Tambah Produk Lain (Barang Belum Tercatat)
+                <Plus size={16} strokeWidth={1.75} />Tambah Produk Lain (Barang Belum Tercatat)
               </button>
             ) : (
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: '250px' }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 600, marginBottom: '0.4rem' }}>Pilih Produk</label>
+                  <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Pilih Produk</label>
                   <select 
                     className="form-control" 
                     value={selectedNewProduct} 
@@ -234,14 +236,14 @@ export default function OpnameFormClient() {
                 <button type="button" onClick={handleAddNewProduct} className="btn btn-primary" disabled={!selectedNewProduct}>
                   Tambahkan ke List
                 </button>
-                <button type="button" onClick={() => setShowAddRow(false)} className="btn btn-secondary">
+                <button type="button" onClick={() => setShowAddRow(false)} className="btn btn-outline">
                   Batal
                 </button>
               </div>
             )}
           </div>
 
-          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.125rem' }} disabled={submitting}>
+          <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.75rem 1rem', fontSize: '1rem' }} disabled={submitting}>
              {submitting ? 'Mengirim Pengajuan...' : 'Ajukan Penyesuaian ke SPV'}
           </button>
         </form>

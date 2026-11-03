@@ -4,6 +4,7 @@ import { useState, useTransition, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { approveAfaStockRequest, approveFamStockRequest, approveWhmStockRequest, receiveSpvStockRequest, rejectAfaStockRequest, regenerateInvoice, resetRequestToSubmitted } from '@/app/actions/afa-stock'
 import UnitHoldBadge from './UnitHoldBadge'
+import { ChevronRight, FlaskConical, Warehouse, CheckCircle2, AlertTriangle, Check, X, Zap, Package, RotateCcw, Clock, Download, XCircle } from 'lucide-react'
 
 type DetailItem = {
   id: string
@@ -180,8 +181,8 @@ export default function AfaStockRequestTable({
         if (role === 'FAM' && (res as any)?.stockWarnings?.length > 0) {
           const warnings = (res as any).stockWarnings as string[]
           alert(
-            '✅ Pengajuan disetujui FA Manager.\n\n' +
-            '⚠️ PERINGATAN KONFLIK STOK:\n' +
+            'Pengajuan disetujui FA Manager.\n\n' +
+            'PERINGATAN KONFLIK STOK:\n' +
             'Stok Accurate tidak mencukupi setelah memperhitungkan Sales Order yang ada:\n\n' +
             warnings.join('\n') +
             '\n\nHarap koordinasi dengan tim Sales / WH Manager sebelum melanjutkan ke tahap posting invoice.'
@@ -226,12 +227,12 @@ export default function AfaStockRequestTable({
     startTransition(async () => {
       const res = await approveAfaStockRequest(requestId, itemDecisions)
       if (res?.error) {
-        alert('❌ ' + res.error)
+        alert(res.error)
       } else if ((res as any)?.allRejected) {
-        alert('✅ Semua item telah ditolak. Pengajuan berstatus Ditolak.')
+        alert('Semua item telah ditolak. Pengajuan berstatus Ditolak.')
         router.refresh()
       } else if ((res as any)?.partialReject) {
-        alert('✅ Pengajuan disetujui sebagian. Item yang ditolak tidak akan masuk stok AFA.')
+        alert('Pengajuan disetujui sebagian. Item yang ditolak tidak akan masuk stok AFA.')
         router.refresh()
       } else {
         router.refresh()
@@ -264,7 +265,7 @@ export default function AfaStockRequestTable({
     startTransition(async () => {
       const res = await approveWhmStockRequest(requestId, qtyApprovedMap)
       if (res?.error) {
-        alert('❌ ' + res.error)
+        alert(res.error)
       } else {
         router.refresh()
       }
@@ -292,9 +293,9 @@ export default function AfaStockRequestTable({
     startTransition(async () => {
       const res = await regenerateInvoice(id)
       if (res?.error) {
-        alert('❌ ' + res.error)
+        alert(res.error)
       } else {
-        alert(`✅ Invoice ${res.invoiceNo} berhasil diterbitkan.`)
+        alert(`Invoice ${res.invoiceNo} berhasil diterbitkan.`)
         router.refresh()
       }
       setActionId(null)
@@ -334,14 +335,14 @@ export default function AfaStockRequestTable({
 
   // ADMIN only: rollback request to SUBMITTED
   const handleReset = (id: string) => {
-    if (!confirm('⚠️ Reset pengajuan ini ke status SUBMITTED?\n\nJika pengajuan SAMPEL sudah APPROVED, entri ledger akan di-reverse otomatis.\n\nLanjutkan?')) return
+    if (!confirm('Reset pengajuan ini ke status SUBMITTED?\n\nJika pengajuan SAMPEL sudah APPROVED, entri ledger akan di-reverse otomatis.\n\nLanjutkan?')) return
     setActionId(id)
     startTransition(async () => {
       const res = await resetRequestToSubmitted(id)
       if (res?.error) {
-        alert('❌ ' + res.error)
+        alert(res.error)
       } else {
-        alert('✅ Pengajuan berhasil di-reset ke SUBMITTED. SPV sekarang bisa memproses ulang.')
+        alert('Pengajuan berhasil di-reset ke SUBMITTED. SPV sekarang bisa memproses ulang.')
         router.refresh()
       }
       setActionId(null)
@@ -418,9 +419,9 @@ export default function AfaStockRequestTable({
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'SUBMITTED':     return <span className="badge badge-warning">Menunggu SPV</span>
-      case 'APPROVED_SPV':  return <span className="badge" style={{ background: '#dbeafe', color: '#1d4ed8' }}>Menunggu FA Manager</span>
-      case 'APPROVED_FAM':  return <span className="badge" style={{ background: '#ede9fe', color: '#7c3aed' }}>Menunggu WH Manager</span>
-      case 'APPROVED_WHM':  return <span className="badge" style={{ background: '#fef3c7', color: '#92400e' }}>Menunggu Penerimaan SPV</span>
+      case 'APPROVED_SPV':  return <span className="badge" style={{ background: 'var(--info-bg)', color: 'var(--info)' }}>Menunggu FA Manager</span>
+      case 'APPROVED_FAM':  return <span className="badge" style={{ background: 'var(--info-bg)', color: 'var(--info)' }}>Menunggu WH Manager</span>
+      case 'APPROVED_WHM':  return <span className="badge" style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>Menunggu Penerimaan SPV</span>
       case 'APPROVED':      return <span className="badge badge-success">Selesai</span>
       case 'REJECTED':      return <span className="badge badge-danger">Ditolak</span>
       default:              return <span className="badge badge-neutral">{status}</span>
@@ -440,9 +441,9 @@ export default function AfaStockRequestTable({
 
   if (requests.length === 0) return null
 
-  const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
-  const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
-  const tdExpandStyle: React.CSSProperties = { padding: '0.75rem 1rem 1rem', fontSize: '0.85rem', background: '#f8fafc', borderBottom: '1px solid var(--border)' }
+  const thStyle: React.CSSProperties = { padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap' }
+  const tdStyle: React.CSSProperties = { padding: '0.75rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border-light)', fontVariantNumeric: 'tabular-nums' }
+  const tdExpandStyle: React.CSSProperties = { padding: '0.75rem 1rem 1rem', fontSize: '0.875rem', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }
 
   const roleLabel: Record<string, string> = { SPV: 'dari AFA', FAM: '(FA Manager)', WHM: '(WH Manager)', AFA: 'Saya', ADMIN: '(Admin)' }
   const isWHM = role === 'WHM'
@@ -453,7 +454,7 @@ export default function AfaStockRequestTable({
   return (
     <div style={{ marginBottom: '2.5rem' }}>
       <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-        📨 Pengajuan Stok {roleLabel[role] || ''}
+        Pengajuan Stok {roleLabel[role] || ''}
       </h3>
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
@@ -484,22 +485,22 @@ export default function AfaStockRequestTable({
                     <tr key={req.id} style={{ cursor: 'pointer' }} onClick={() => handleRowExpand(req)}>
                       {/* Expand toggle */}
                       <td style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.8rem', width: 32, paddingRight: 0 }}>
-                        <span style={{ transition: 'transform 0.2s', display: 'inline-block', transform: isExpanded ? 'rotate(90deg)' : 'none' }}>▶</span>
+                        <span style={{ transition: 'var(--transition)', display: 'inline-flex', transform: isExpanded ? 'rotate(90deg)' : 'none' }}><ChevronRight size={16} strokeWidth={1.75} /></span>
                       </td>
-                      <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
+                      <td style={{ ...tdStyle, fontFamily: 'var(--font-mono-stack)', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
                       <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(req.createdAt))}</td>
-                      {!['AFA', 'PLANTATION'].includes(role) && <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }} onClick={e => e.stopPropagation()}>{req.fo?.name}</td>}
+                      {!['AFA', 'PLANTATION'].includes(role) && <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }} onClick={e => e.stopPropagation()}>{req.fo?.name}</td>}
 
                       {/* Produk ringkasan */}
-                      <td style={{ ...tdStyle, fontSize: '0.82rem', maxWidth: 260 }}>
+                      <td style={{ ...tdStyle, fontSize: '0.8rem', maxWidth: 260 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <span style={{
-                            padding: '0.15rem 0.65rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
-                            background: '#eff6ff', color: '#1d4ed8', whiteSpace: 'nowrap'
+                            padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500,
+                            background: 'var(--surface-2)', color: 'var(--text-secondary)', whiteSpace: 'nowrap'
                           }}>
-                            {req.details.length} produk
+                            <span className="num">{req.details.length}</span> produk
                           </span>
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                             {req.details.slice(0, 2).map(d => d.product.name).join(', ')}
                             {req.details.length > 2 && ` +${req.details.length - 2} lagi`}
                           </span>
@@ -507,10 +508,10 @@ export default function AfaStockRequestTable({
                       </td>
 
                       {/* Catatan AFA */}
-                      <td style={{ ...tdStyle, fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: 180, fontStyle: req.plan && req.plan !== '-' ? 'normal' : 'italic' }} onClick={e => e.stopPropagation()}>
+                      <td style={{ ...tdStyle, fontSize: '0.8rem', color: 'var(--text-muted)', maxWidth: 180 }} onClick={e => e.stopPropagation()}>
                         {req.plan && req.plan !== '-' ? (
                           <span title={req.plan} style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                            💬 {req.plan}
+                            {req.plan}
                           </span>
                         ) : <span>—</span>}
                       </td>
@@ -519,52 +520,52 @@ export default function AfaStockRequestTable({
                       <td style={{ ...tdStyle, textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                         {getStatusBadge(req.status)}
                         {req.warehouseSource === 'SAMPLE' ? (
-                          <div style={{ marginTop: '0.3rem' }}>
-                            <span style={{ padding: '0.15rem 0.55rem', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 700, background: '#ede9fe', color: '#7c3aed', whiteSpace: 'nowrap' }}>🧪 Sampel</span>
+                          <div style={{ marginTop: '0.25rem' }}>
+                            <span style={{ padding: '0 0.375rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500, background: 'var(--surface-2)', color: 'var(--text-secondary)', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><FlaskConical size={12} strokeWidth={1.75} />Sampel</span>
                           </div>
                         ) : (
-                          <div style={{ marginTop: '0.3rem' }}>
-                            <span style={{ padding: '0.15rem 0.55rem', borderRadius: '9999px', fontSize: '0.68rem', fontWeight: 600, background: '#dbeafe', color: '#1d4ed8', whiteSpace: 'nowrap' }}>🏭 Utama</span>
+                          <div style={{ marginTop: '0.25rem' }}>
+                            <span style={{ padding: '0 0.375rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500, background: 'var(--surface-2)', color: 'var(--text-secondary)', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Warehouse size={12} strokeWidth={1.75} />Utama</span>
                           </div>
                         )}
                         {req.status === 'REJECTED' && req.rejectReason && (
-                          <div style={{ marginTop: '0.35rem', fontSize: '0.75rem', color: '#b91c1c', fontStyle: 'italic', maxWidth: 220 }}>💬 {req.rejectReason}</div>
+                          <div style={{ marginTop: '0.375rem', fontSize: '0.75rem', color: 'var(--danger)', maxWidth: 220 }}>{req.rejectReason}</div>
                         )}
                       </td>
 
                       {/* Invoice */}
                       <td style={{ ...tdStyle, textAlign: 'center' }} onClick={e => e.stopPropagation()}>
                         {req.warehouseSource !== 'SAMPLE' && req.accurateInvoiceNo ? (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#dcfce7', color: '#166534' }}>
-                            ✅ {req.accurateInvoiceNo}
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500, background: 'var(--success-bg)', color: 'var(--success)', fontFamily: 'var(--font-mono-stack)' }}>
+                            <CheckCircle2 size={12} strokeWidth={1.75} />{req.accurateInvoiceNo}
                           </span>
                         ) : req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && (req.status === 'APPROVED_WHM' || req.status === 'APPROVED') ? (
-                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.3rem', padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 600, background: '#fef3c7', color: '#92400e' }}>⚠️ Tidak Terbit</span>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500, background: 'var(--warning-bg)', color: 'var(--warning)' }}><AlertTriangle size={12} strokeWidth={1.75} />Tidak Terbit</span>
                         ) : (
-                          <span style={{ color: 'var(--text-muted)', fontSize: '0.78rem' }}>—</span>
+                          <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>
                         )}
                       </td>
 
                       {/* Aksi */}
                       <td style={{ ...tdStyle, textAlign: 'center' }} onClick={e => e.stopPropagation()}>
-                        <div className="action-row" style={{ justifyContent: 'center', gap: '0.4rem' }}>
+                        <div className="action-row" style={{ justifyContent: 'center', gap: '0.5rem' }}>
                           {canApprove(req.status) && (
                             <>
                               <button
                                 onClick={() => handleApprove(req.id)}
                                 className="btn btn-primary"
-                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}
+                                style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}
                                 disabled={isPending && actionId === req.id}
                               >
-                                {isPending && actionId === req.id ? 'Memproses...' : isWHM ? '⚡ Set & Approve' : '✓ Approve'}
+                                {isPending && actionId === req.id ? 'Memproses...' : isWHM ? <><Zap size={14} strokeWidth={1.75} className="icon-inline" />Set & Approve</> : <><Check size={14} strokeWidth={1.75} className="icon-inline" />Approve</>}
                               </button>
                               <button
                                 onClick={() => openRejectModal(req.id)}
-                                className="btn"
-                                style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca' }}
+                                className="btn btn-outline"
+                                style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem', color: 'var(--danger)' }}
                                 disabled={isPending && actionId === req.id}
                               >
-                                ✕ Reject
+                                <X size={14} strokeWidth={1.75} className="icon-inline" />Reject
                               </button>
                             </>
                           )}
@@ -572,35 +573,35 @@ export default function AfaStockRequestTable({
                           {canReceive(req.status) && (
                             <button
                               onClick={() => handleReceive(req.id)}
-                              className="btn"
-                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#dcfce7', color: '#166534', border: '1px solid #bbf7d0' }}
+                              className="btn btn-primary"
+                              style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}
                               disabled={isPending && actionId === req.id}
                             >
-                              {isPending && actionId === req.id ? 'Memproses...' : '📦 Terima Stok'}
+                              {isPending && actionId === req.id ? 'Memproses...' : <><Package size={14} strokeWidth={1.75} className="icon-inline" />Terima Stok</>}
                             </button>
                           )}
 
                           {role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED'].includes(req.status) && !(req as any).accurateInvoiceNo && (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleReset(req.id) }}
-                              className="btn"
-                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
+                              className="btn btn-outline"
+                              style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem', color: 'var(--warning)' }}
                               disabled={isPending && actionId === req.id}
                               title="Reset ke SUBMITTED — hanya untuk ADMIN"
                             >
-                              {isPending && actionId === req.id ? '⏳...' : '↩️ Reset ke SPV'}
+                              {isPending && actionId === req.id ? <><Clock size={14} strokeWidth={1.75} className="icon-inline" />...</> : <><RotateCcw size={14} strokeWidth={1.75} className="icon-inline" />Reset ke SPV</>}
                             </button>
                           )}
 
                           {req.warehouseSource !== 'SAMPLE' && !req.accurateInvoiceNo && req.status === 'APPROVED' && (role === 'SPV' || role === 'ADMIN' || role === 'WHM') && (
                             <button
                               onClick={() => handleRegenerate(req.id)}
-                              className="btn"
-                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', background: '#fef3c7', color: '#92400e', border: '1px solid #fde68a' }}
+                              className="btn btn-outline"
+                              style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem', color: 'var(--warning)' }}
                               disabled={isPending && actionId === req.id}
                               title="Terbitkan ulang invoice Accurate"
                             >
-                              {isPending && actionId === req.id ? '⏳ Proses...' : '⚡ Generate Invoice'}
+                              {isPending && actionId === req.id ? <><Clock size={14} strokeWidth={1.75} className="icon-inline" />Proses...</> : <><Zap size={14} strokeWidth={1.75} className="icon-inline" />Generate Invoice</>}
                             </button>
                           )}
 
@@ -608,9 +609,9 @@ export default function AfaStockRequestTable({
                             <button
                               onClick={() => handleDownloadPdf(req)}
                               className="btn btn-outline"
-                              style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: '#0ea5e9', borderColor: '#e0f2fe' }}
+                              style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}
                             >
-                              📄 Download PDF
+                              <Download size={14} strokeWidth={1.75} className="icon-inline" />Download PDF
                             </button>
                           )}
                         </div>
@@ -623,29 +624,29 @@ export default function AfaStockRequestTable({
                         <td colSpan={colCount + 3} style={tdExpandStyle}>
                           {/* Catatan AFA (full) */}
                           {req.plan && req.plan !== '-' && (
-                            <div style={{ marginBottom: '0.85rem', padding: '0.6rem 0.9rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '0.4rem', fontSize: '0.82rem', color: '#92400e' }}>
-                              <strong>💬 Catatan AFA:</strong> {req.plan}
+                            <div style={{ marginBottom: '0.75rem', padding: '0.625rem 0.875rem', background: 'var(--warning-bg)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--warning)' }}>
+                              <strong style={{ fontWeight: 500 }}>Catatan AFA:</strong> {req.plan}
                             </div>
                           )}
 
                           {/* Product detail table */}
-                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem' }}>
+                          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.8rem' }}>
                             <thead>
-                              <tr style={{ background: '#f1f5f9' }}>
-                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Nama Produk</th>
-                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Diajukan</th>
+                              <tr style={{ background: 'var(--surface-3)' }}>
+                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 500, color: 'var(--text-muted)', fontSize: '0.75rem' }}>Nama Produk</th>
+                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, color: 'var(--text-muted)', fontSize: '0.75rem' }}>Diajukan</th>
                                 {isWHM && req.status === 'APPROVED_FAM' && (
                                   <>
-                                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, color: '#7c3aed', fontSize: '0.72rem', textTransform: 'uppercase' }}>Tersedia (Accurate)</th>
-                                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, color: '#059669', fontSize: '0.72rem', textTransform: 'uppercase' }}>Qty Final (WHM)</th>
+                                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, color: 'var(--text-muted)', fontSize: '0.75rem' }}>Tersedia (Accurate)</th>
+                                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, color: 'var(--text-main)', fontSize: '0.75rem' }}>Qty Final (WHM)</th>
                                   </>
                                 )}
                                 {!isWHM && (
-                                  <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Disetujui</th>
+                                  <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, color: 'var(--text-muted)', fontSize: '0.75rem' }}>Disetujui</th>
                                 )}
-                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Satuan</th>
-                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700, color: '#1d4ed8', fontSize: '0.72rem', textTransform: 'uppercase' }}>Gudang Accurate</th>
-                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, color: 'var(--text-muted)', fontSize: '0.72rem', textTransform: 'uppercase' }}>Gramasi</th>
+                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 500, color: 'var(--text-muted)', fontSize: '0.75rem' }}>Satuan</th>
+                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 500, color: 'var(--text-muted)', fontSize: '0.75rem' }}>Gudang Accurate</th>
+                                <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, color: 'var(--text-muted)', fontSize: '0.75rem' }}>Gramasi</th>
                               </tr>
                             </thead>
                             <tbody>
@@ -655,10 +656,10 @@ export default function AfaStockRequestTable({
                                 const hasConflict = avail && avail.availableToSell !== null && avail.availableToSell < d.qtyRequested
 
                                 return (
-                                  <tr key={d.id} style={{ borderTop: idx > 0 ? '1px solid var(--border)' : undefined, background: 'white' }}>
+                                  <tr key={d.id} style={{ borderTop: idx > 0 ? '1px solid var(--border-light)' : undefined, background: 'var(--surface)' }}>
                                     <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{d.product.name}<UnitHoldBadge product={d.product} /></td>
                                     <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
-                                      <strong>{d.qtyRequested}</strong>
+                                      <strong className="num" style={{ fontWeight: 600 }}>{d.qtyRequested}</strong>
                                     </td>
 
                                     {/* WHM: show availableToSell + input */}
@@ -666,14 +667,15 @@ export default function AfaStockRequestTable({
                                       <>
                                         <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
                                           {isLoadingAvail ? (
-                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>⏳ memuat...</span>
+                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={12} strokeWidth={1.75} />memuat...</span>
                                           ) : avail?.availableToSell !== null && avail?.availableToSell !== undefined ? (
                                             <span style={{
-                                              fontWeight: 700,
-                                              color: hasConflict ? '#dc2626' : '#059669',
+                                              fontWeight: 600,
+                                              color: hasConflict ? 'var(--danger)' : 'var(--success)',
+                                              display: 'inline-flex', alignItems: 'baseline', whiteSpace: 'nowrap',
                                             }}>
-                                              {avail.availableToSell} {d.product.unit}
-                                              {hasConflict && <span style={{ fontSize: '0.7rem', marginLeft: '0.3rem' }}>⚠️</span>}
+                                              <span className="num">{avail.availableToSell}</span><span className="unit">{d.product.unit}</span>
+                                              {hasConflict && <span style={{ marginLeft: '0.25rem', alignSelf: 'center', display: 'inline-flex' }}><AlertTriangle size={12} strokeWidth={1.75} /></span>}
                                             </span>
                                           ) : (
                                             <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>N/A</span>
@@ -692,9 +694,9 @@ export default function AfaStockRequestTable({
                                             }))}
                                             onClick={e => e.stopPropagation()}
                                             style={{
-                                              width: 90, padding: '0.3rem 0.5rem', fontSize: '0.85rem',
-                                              border: `1px solid ${hasConflict ? '#fca5a5' : 'var(--border)'}`,
-                                              borderRadius: '0.35rem', textAlign: 'right', fontWeight: 600,
+                                              width: 90, padding: '0.25rem 0.5rem', fontSize: '0.875rem',
+                                              border: `1px solid ${hasConflict ? 'var(--danger)' : 'var(--border)'}`,
+                                              borderRadius: 'var(--radius-sm)', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums',
                                             }}
                                           />
                                         </td>
@@ -704,24 +706,24 @@ export default function AfaStockRequestTable({
                                     {/* Non-WHM: show approved qty */}
                                     {!isWHM && (
                                       <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
-                                        <span style={{ fontWeight: 700, color: qtyFinal !== d.qtyRequested ? '#7c3aed' : undefined }}>
+                                        <span className="num" style={{ fontWeight: 600, color: qtyFinal !== d.qtyRequested ? 'var(--warning)' : undefined }}>
                                           {qtyFinal}
-                                          {qtyFinal !== d.qtyRequested && <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginLeft: '0.3rem' }}>(diminta {d.qtyRequested})</span>}
+                                          {qtyFinal !== d.qtyRequested && <span style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.25rem' }}>(diminta {d.qtyRequested})</span>}
                                         </span>
                                       </td>
                                     )}
 
-                                    <td style={{ padding: '0.5rem 0.75rem', color: 'var(--text-muted)' }}>{d.product.unit}</td>
+                                    <td style={{ padding: '0.5rem 0.75rem', color: 'var(--text-muted)' }}><span className="mono" style={{ fontSize: '0.85em' }}>{d.product.unit}</span></td>
                                     <td style={{ padding: '0.5rem 0.75rem', fontSize: '0.8rem' }}>
                                       {d.accurateWarehouse ? (
-                                        <span style={{ color: '#1d4ed8', fontWeight: 600 }}>🏭 {d.accurateWarehouse}</span>
+                                        <span style={{ color: 'var(--text-secondary)', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Warehouse size={12} strokeWidth={1.75} />{d.accurateWarehouse}</span>
                                       ) : req.warehouseSource !== 'SAMPLE' ? (
-                                        <span style={{ color: 'var(--text-muted)', fontStyle: 'italic' }}>Gudang Baik</span>
+                                        <span style={{ color: 'var(--text-muted)' }}>Gudang Baik</span>
                                       ) : (
                                         <span style={{ color: 'var(--text-muted)' }}>—</span>
                                       )}
                                     </td>
-                                    <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', color: '#2563eb', fontSize: '0.8rem' }}>
+                                    <td className="num" style={{ padding: '0.5rem 0.75rem', textAlign: 'right', color: 'var(--text-secondary)', fontSize: '0.8rem' }}>
                                       {d.product.gramasiPerUnit && d.product.unitGramasi
                                         ? `${(d.qtyRequested * d.product.gramasiPerUnit).toLocaleString('id-ID')}${d.product.unitGramasi}`
                                         : '—'}
@@ -734,8 +736,8 @@ export default function AfaStockRequestTable({
 
                           {/* WHM: conflict warning summary */}
                           {isWHM && req.status === 'APPROVED_FAM' && availItems && availItems.some(a => a.availableToSell !== null && a.availableToSell < a.qtyRequested) && (
-                            <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.9rem', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: '0.4rem', fontSize: '0.78rem', color: '#b91c1c' }}>
-                              ⚠️ Beberapa produk memiliki stok di bawah jumlah yang diminta AFA (setelah dikurangi SO). Sesuaikan Qty Final sebelum menyetujui.
+                            <div style={{ marginTop: '0.75rem', padding: '0.625rem 0.875rem', background: 'var(--danger-bg)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--danger)', display: 'flex', alignItems: 'flex-start', gap: '0.375rem' }}>
+                              <AlertTriangle size={14} strokeWidth={1.75} style={{ flexShrink: 0, marginTop: '0.125rem' }} />Beberapa produk memiliki stok di bawah jumlah yang diminta AFA (setelah dikurangi SO). Sesuaikan Qty Final sebelum menyetujui.
                             </div>
                           )}
                         </td>
@@ -760,7 +762,7 @@ export default function AfaStockRequestTable({
         return (
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 9999, padding: '1rem',
           }}
             onClick={() => setWhmModalId(null)}
@@ -770,27 +772,27 @@ export default function AfaStockRequestTable({
               style={{ width: '100%', maxWidth: 580, padding: '1.75rem', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}
               onClick={e => e.stopPropagation()}
             >
-              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 700 }}>
-                ⚡ Konfirmasi Kuantitas Final — WH Manager
+              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 600 }}>
+                Konfirmasi Kuantitas Final — WH Manager
               </h3>
-              <p style={{ margin: '0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                Periksa ketersediaan stok Accurate dan tentukan kuantitas final yang akan diberikan ke AFA <strong>{req.fo?.name}</strong>.
+              <p style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+                Periksa ketersediaan stok Accurate dan tentukan kuantitas final yang akan diberikan ke AFA <strong style={{ fontWeight: 500, color: 'var(--text-main)' }}>{req.fo?.name}</strong>.
                 Invoice akan dibuat otomatis berdasarkan kuantitas ini.
               </p>
 
               {req.plan && req.plan !== '-' && (
-                <div style={{ marginBottom: '1rem', padding: '0.6rem 0.9rem', background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '0.4rem', fontSize: '0.82rem', color: '#92400e' }}>
-                  <strong>💬 Catatan AFA:</strong> {req.plan}
+                <div style={{ marginBottom: '1rem', padding: '0.625rem 0.875rem', background: 'var(--warning-bg)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--warning)' }}>
+                  <strong style={{ fontWeight: 500 }}>Catatan AFA:</strong> {req.plan}
                 </div>
               )}
 
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85rem', marginBottom: '1rem' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', marginBottom: '1rem' }}>
                 <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Produk</th>
-                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, fontSize: '0.72rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>Diminta</th>
-                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, fontSize: '0.72rem', color: '#7c3aed', textTransform: 'uppercase' }}>Tersedia</th>
-                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 700, fontSize: '0.72rem', color: '#059669', textTransform: 'uppercase' }}>Qty Final</th>
+                  <tr style={{ background: 'var(--surface-2)' }}>
+                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Produk</th>
+                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Diminta</th>
+                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Tersedia</th>
+                    <th style={{ padding: '0.5rem 0.75rem', textAlign: 'right', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-main)' }}>Qty Final</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -798,13 +800,13 @@ export default function AfaStockRequestTable({
                     const avail = availItems?.find(a => a.detailId === d.id)
                     const hasConflict = avail && avail.availableToSell !== null && avail.availableToSell < d.qtyRequested
                     return (
-                      <tr key={d.id} style={{ borderTop: idx > 0 ? '1px solid var(--border)' : undefined }}>
+                      <tr key={d.id} style={{ borderTop: idx > 0 ? '1px solid var(--border-light)' : undefined }}>
                         <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{d.product.name}<UnitHoldBadge product={d.product} /></td>
-                        <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>{d.qtyRequested} {d.product.unit}</td>
+                        <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', whiteSpace: 'nowrap' }}><span className="num">{d.qtyRequested}</span><span className="unit">{d.product.unit}</span></td>
                         <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
-                          {isLoadingAvail ? <span style={{ color: 'var(--text-muted)' }}>⏳</span>
+                          {isLoadingAvail ? <span style={{ color: 'var(--text-muted)', display: 'inline-flex' }}><Clock size={14} strokeWidth={1.75} /></span>
                             : avail?.availableToSell !== null && avail?.availableToSell !== undefined
-                              ? <span style={{ fontWeight: 700, color: hasConflict ? '#dc2626' : '#059669' }}>{avail.availableToSell} {d.product.unit}{hasConflict ? ' ⚠️' : ''}</span>
+                              ? <span style={{ fontWeight: 600, color: hasConflict ? 'var(--danger)' : 'var(--success)', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'baseline' }}><span className="num">{avail.availableToSell}</span><span className="unit">{d.product.unit}</span>{hasConflict ? <span style={{ marginLeft: '0.25rem', alignSelf: 'center', display: 'inline-flex' }}><AlertTriangle size={12} strokeWidth={1.75} /></span> : ''}</span>
                               : <span style={{ color: 'var(--text-muted)' }}>N/A</span>
                           }
                         </td>
@@ -819,13 +821,13 @@ export default function AfaStockRequestTable({
                               [req.id]: { ...(prev[req.id] ?? {}), [d.id]: e.target.value }
                             }))}
                             style={{
-                              width: 90, padding: '0.35rem 0.5rem', fontSize: '0.88rem',
-                              border: `1.5px solid ${hasConflict ? '#fca5a5' : '#d1fae5'}`,
-                              borderRadius: '0.35rem', textAlign: 'right', fontWeight: 700,
-                              background: hasConflict ? '#fff1f2' : '#f0fdf4',
+                              width: 90, padding: '0.375rem 0.5rem', fontSize: '0.875rem',
+                              border: `1px solid ${hasConflict ? 'var(--danger)' : 'var(--border)'}`,
+                              borderRadius: 'var(--radius-sm)', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums',
+                              background: hasConflict ? 'var(--danger-bg)' : 'var(--surface)',
                             }}
                           />
-                          <span style={{ marginLeft: '0.4rem', color: 'var(--text-muted)', fontSize: '0.8rem' }}>{d.product.unit}</span>
+                          <span className="unit" style={{ marginLeft: '0.375rem' }}>{d.product.unit}</span>
                         </td>
                       </tr>
                     )
@@ -833,21 +835,21 @@ export default function AfaStockRequestTable({
                 </tbody>
               </table>
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <button
                   onClick={() => setWhmModalId(null)}
-                  className="btn"
-                  style={{ padding: '0.55rem 1.25rem', fontSize: '0.85rem' }}
+                  className="btn btn-outline"
+                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}
                 >
                   Batal
                 </button>
                 <button
                   onClick={() => handleWhmConfirm(whmModalId)}
                   className="btn btn-primary"
-                  style={{ padding: '0.55rem 1.5rem', fontSize: '0.85rem', fontWeight: 700 }}
+                  style={{ padding: '0.5rem 1.5rem', fontSize: '0.875rem' }}
                   disabled={isPending && actionId === whmModalId}
                 >
-                  {isPending && actionId === whmModalId ? '⏳ Memproses...' : '✅ Setujui & Post Invoice'}
+                  {isPending && actionId === whmModalId ? 'Memproses...' : <><Check size={16} strokeWidth={1.75} className="icon-inline" />Setujui & Post Invoice</>}
                 </button>
               </div>
             </div>
@@ -866,7 +868,7 @@ export default function AfaStockRequestTable({
         return (
           <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(0,0,0,0.50)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 9999, padding: '1rem',
           }}
             onClick={() => setSampleModalId(null)}
@@ -876,26 +878,26 @@ export default function AfaStockRequestTable({
               style={{ width: '100%', maxWidth: 700, padding: '1.75rem', position: 'relative', maxHeight: '90vh', overflowY: 'auto' }}
               onClick={e => e.stopPropagation()}
             >
-              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                {req.warehouseSource === 'SAMPLE' ? '🧪 Konfirmasi Pengiriman Sampel' : '📦 Konfirmasi Pengajuan Stok'}
+              <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                {req.warehouseSource === 'SAMPLE' ? 'Konfirmasi Pengiriman Sampel' : 'Konfirmasi Pengajuan Stok'}
               </h3>
-              <p style={{ margin: '0 0 1.25rem', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
+              <p style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
                 Atur jumlah dan keputusan per item. Item yang ditolak tidak akan diproses lebih lanjut.
               </p>
 
               {isLoading ? (
-                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)' }}>⏳ Memuat saldo stok sampel...</div>
+                <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '0.5rem' }}><Clock size={16} strokeWidth={1.75} />Memuat saldo stok sampel...</div>
               ) : (
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84rem', marginBottom: '1rem' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.875rem', marginBottom: '1rem' }}>
                   <thead>
-                    <tr style={{ background: 'var(--surface-2, #f8fafc)', borderBottom: '2px solid var(--border)' }}>
-                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 700 }}>Produk</th>
-                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Diminta</th>
+                    <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'left', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Produk</th>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Diminta</th>
                       {req.warehouseSource === 'SAMPLE' && (
-                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Stok Tersedia</th>
+                        <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok Tersedia</th>
                       )}
-                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Disetujui</th>
-                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 700 }}>Tindakan</th>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Disetujui</th>
+                      <th style={{ padding: '0.5rem 0.75rem', textAlign: 'center', fontWeight: 500, fontSize: '0.75rem', color: 'var(--text-muted)' }}>Tindakan</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -907,31 +909,32 @@ export default function AfaStockRequestTable({
                       const qtyExceeds = req.warehouseSource === 'SAMPLE' && isApproved && inputQty > item.available
                       return (
                         <tr key={item.detailId} style={{
-                          borderBottom: '1px solid var(--border)',
-                          background: !isApproved ? '#fff5f5' : isInsufficient ? '#fffbeb' : 'transparent',
+                          borderBottom: '1px solid var(--border-light)',
+                          background: !isApproved ? 'var(--danger-bg)' : isInsufficient ? 'var(--warning-bg)' : 'transparent',
                           opacity: !isApproved ? 0.7 : 1,
-                          transition: 'background 0.15s',
+                          transition: 'var(--transition)',
                         }}>
-                          <td style={{ padding: '0.6rem 0.75rem', fontWeight: 600 }}>
+                          <td style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>
                             {item.productName}
                           </td>
-                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-                            {item.qtyRequested} {item.unit}
+                          <td style={{ padding: '0.625rem 0.75rem', textAlign: 'center', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                            <span className="num">{item.qtyRequested}</span><span className="unit">{item.unit}</span>
                           </td>
                           {req.warehouseSource === 'SAMPLE' && (
-                            <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                            <td style={{ padding: '0.625rem 0.75rem', textAlign: 'center' }}>
                               <span style={{
-                                fontWeight: 700,
-                                color: item.available >= item.qtyRequested ? '#166534' : '#b45309',
+                                fontWeight: 600,
+                                color: item.available >= item.qtyRequested ? 'var(--success)' : 'var(--warning)',
+                                whiteSpace: 'nowrap',
                               }}>
-                                {item.available} {item.unit}
+                                <span className="num">{item.available}</span><span className="unit">{item.unit}</span>
                               </span>
                               {isInsufficient && (
-                                <div style={{ fontSize: '0.7rem', color: '#b45309' }}>⚠️ Kurang</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--warning)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.25rem' }}><AlertTriangle size={12} strokeWidth={1.75} />Kurang</div>
                               )}
                             </td>
                           )}
-                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                          <td style={{ padding: '0.625rem 0.75rem', textAlign: 'center' }}>
                             <input
                               type="number"
                               min={1}
@@ -946,19 +949,19 @@ export default function AfaStockRequestTable({
                                 }
                               }))}
                               style={{
-                                width: 80, padding: '0.35rem 0.5rem', fontSize: '0.88rem', textAlign: 'right', fontWeight: 700,
-                                border: `1.5px solid ${qtyExceeds ? '#fca5a5' : isApproved ? '#d1fae5' : '#e5e7eb'}`,
-                                borderRadius: '0.35rem',
-                                background: !isApproved ? '#f3f4f6' : qtyExceeds ? '#fff1f2' : '#f0fdf4',
-                                color: !isApproved ? '#9ca3af' : 'inherit',
+                                width: 80, padding: '0.375rem 0.5rem', fontSize: '0.875rem', textAlign: 'right', fontWeight: 500, fontVariantNumeric: 'tabular-nums',
+                                border: `1px solid ${qtyExceeds ? 'var(--danger)' : 'var(--border)'}`,
+                                borderRadius: 'var(--radius-sm)',
+                                background: !isApproved ? 'var(--surface-2)' : qtyExceeds ? 'var(--danger-bg)' : 'var(--surface)',
+                                color: !isApproved ? 'var(--text-light)' : 'inherit',
                               }}
                             />
-                            <span style={{ marginLeft: '0.3rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>{item.unit}</span>
+                            <span className="unit">{item.unit}</span>
                             {qtyExceeds && (
-                              <div style={{ fontSize: '0.7rem', color: '#dc2626', marginTop: '0.15rem' }}>Melebihi stok!</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--danger)', marginTop: '0.125rem' }}>Melebihi stok!</div>
                             )}
                           </td>
-                          <td style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>
+                          <td style={{ padding: '0.625rem 0.75rem', textAlign: 'center' }}>
                             <button
                               onClick={() => setSampleDecisions(prev => ({
                                 ...prev,
@@ -968,15 +971,15 @@ export default function AfaStockRequestTable({
                                 }
                               }))}
                               style={{
-                                padding: '0.3rem 0.7rem', fontSize: '0.78rem', fontWeight: 700, borderRadius: '0.4rem', cursor: 'pointer',
-                                border: '1.5px solid',
-                                borderColor: isApproved ? '#bbf7d0' : '#fecaca',
-                                background: isApproved ? '#dcfce7' : '#fee2e2',
-                                color: isApproved ? '#166534' : '#b91c1c',
-                                transition: 'all 0.15s',
+                                padding: '0.25rem 0.75rem', fontSize: '0.8rem', fontWeight: 500, borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                                border: '1px solid var(--border)',
+                                background: isApproved ? 'var(--success-bg)' : 'var(--danger-bg)',
+                                color: isApproved ? 'var(--success)' : 'var(--danger)',
+                                transition: 'var(--transition)',
+                                display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
                               }}
                             >
-                              {isApproved ? '✅ Setujui' : '❌ Ditolak'}
+                              {isApproved ? <><CheckCircle2 size={14} strokeWidth={1.75} />Setujui</> : <><XCircle size={14} strokeWidth={1.75} />Ditolak</>}
                             </button>
                           </td>
                         </tr>
@@ -987,27 +990,27 @@ export default function AfaStockRequestTable({
               )}
 
               {!isLoading && items.length > 0 && (
-                <div style={{ marginBottom: '1rem', padding: '0.65rem 0.85rem', borderRadius: '0.5rem', background: '#f0fdf4', border: '1px solid #bbf7d0', fontSize: '0.82rem', color: '#166534' }}>
-                  <strong>{approvedCount}</strong> dari <strong>{items.length}</strong> item akan disetujui.
-                  {approvedCount === 0 && <span style={{ color: '#b91c1c', marginLeft: '0.5rem' }}>⚠️ Semua item ditolak — pengajuan akan berstatus DITOLAK.</span>}
+                <div style={{ marginBottom: '1rem', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+                  <strong className="num" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{approvedCount}</strong> dari <strong className="num" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{items.length}</strong> item akan disetujui.
+                  {approvedCount === 0 && <span style={{ color: 'var(--danger)', marginLeft: '0.5rem', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle size={14} strokeWidth={1.75} />Semua item ditolak — pengajuan akan berstatus DITOLAK.</span>}
                 </div>
               )}
 
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem', marginTop: '0.5rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem', marginTop: '0.5rem' }}>
                 <button
                   onClick={() => setSampleModalId(null)}
-                  className="btn"
-                  style={{ padding: '0.55rem 1.25rem', fontSize: '0.85rem' }}
+                  className="btn btn-outline"
+                  style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}
                 >
                   Batal
                 </button>
                 <button
                   onClick={() => handleSampleConfirm(sampleModalId)}
                   className="btn btn-primary"
-                  style={{ padding: '0.55rem 1.5rem', fontSize: '0.85rem', fontWeight: 700 }}
+                  style={{ padding: '0.5rem 1.5rem', fontSize: '0.875rem' }}
                   disabled={isPending && actionId === sampleModalId || isLoading}
                 >
-                  {isPending && actionId === sampleModalId ? '⏳ Memproses...' : '✅ Proses Approval'}
+                  {isPending && actionId === sampleModalId ? 'Memproses...' : <><Check size={16} strokeWidth={1.75} className="icon-inline" />Proses Approval</>}
                 </button>
               </div>
             </div>
@@ -1029,34 +1032,34 @@ export default function AfaStockRequestTable({
             style={{ width: '100%', maxWidth: 480, padding: '1.75rem', position: 'relative' }}
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.1rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              ❌ Tolak Pengajuan
+            <h3 style={{ margin: '0 0 0.375rem', fontSize: '1.1rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <XCircle size={18} strokeWidth={1.75} style={{ color: 'var(--danger)' }} />Tolak Pengajuan
             </h3>
-            <p style={{ margin: '0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <p style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
               Silakan isi keterangan alasan penolakan agar AFA mengetahui penyebab pengajuan ditolak.
             </p>
 
-            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Keterangan Penolakan <span style={{ color: '#dc2626' }}>*</span>
+            <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
+              Keterangan Penolakan <span style={{ color: 'var(--danger)' }}>*</span>
             </label>
             <textarea
-              className="input"
+              className="form-control"
               rows={4}
               value={rejectReason}
               onChange={e => setRejectReason(e.target.value)}
               placeholder="Contoh: Stok produk X sedang kosong di gudang..."
-              style={{ width: '100%', resize: 'vertical', fontSize: '0.875rem', padding: '0.65rem 0.85rem', marginBottom: '1.25rem' }}
+              style={{ width: '100%', resize: 'vertical', fontSize: '0.875rem', padding: '0.625rem 0.75rem', marginBottom: '1.25rem' }}
               autoFocus
             />
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
-              <button onClick={closeRejectModal} className="btn" style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button onClick={closeRejectModal} className="btn btn-outline" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
                 Batal
               </button>
               <button
                 onClick={submitReject}
-                className="btn"
-                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', background: '#dc2626', color: '#fff', border: 'none', fontWeight: 600 }}
+                className="btn btn-danger"
+                style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}
               >
                 Konfirmasi Tolak
               </button>

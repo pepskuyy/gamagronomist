@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { submitAfaStockRequest } from '@/app/actions/afa-stock'
 import SearchableSelect from '@/components/SearchableSelect'
+import { X, AlertTriangle, Warehouse, FlaskConical, RefreshCw, Check, Clock, Ban, Lightbulb, CheckCircle2, Search, ArrowLeft } from 'lucide-react'
 
 type SpvProduct = {
   id:             string
@@ -319,22 +320,22 @@ export default function StockInPage() {
       if (res?.error) setError(res.error)
       else {
         // Produk tanpa isi per kemasan: pengajuan tersimpan, tapi stoknya tertahan sampai admin melengkapi
-        if (res && 'warning' in res && res.warning) alert('⏸ ' + res.warning)
+        if (res && 'warning' in res && res.warning) alert(res.warning)
         router.push('/dashboard/stock')
       }
     })
   }
 
-  const thStyle: React.CSSProperties = { padding: '0.65rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }
-  const tdStyle: React.CSSProperties = { padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem' }
+  const thStyle: React.CSSProperties = { padding: '0.625rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }
+  const tdStyle: React.CSSProperties = { padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.875rem', fontVariantNumeric: 'tabular-nums' }
 
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Kembali</Link>
         <div>
           <h2 style={{ margin: 0 }}>Ajukan Stok Masuk (Ke SPV)</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Minta persetujuan tambahan stok dari SPV area Anda. Pengajuan dalam satuan kemasan utuh.
           </p>
         </div>
@@ -342,23 +343,23 @@ export default function StockInPage() {
 
       {/* Warehouse Source Toggle */}
       <div className="card" style={{ marginBottom: '1rem', padding: '1rem 1.25rem' }}>
-        <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.75rem' }}>🏭 Ambil Stok dari:</p>
+        <p style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>Ambil Stok dari:</p>
         <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
-          {([['MAIN', '🏭 Gudang Utama (Accurate)', 'Alur persetujuan: SPV → FA Manager → WH Manager → SPV', '#dbeafe', '#1d4ed8'],
-             ['SAMPLE', '🧪 Gudang Sampel', 'Alur persetujuan: SPV saja — lebih cepat', '#ede9fe', '#7c3aed']] as const).map(([val, label, desc, bg, color]) => (
+          {([['MAIN', 'Gudang Utama (Accurate)', 'Alur persetujuan: SPV → FA Manager → WH Manager → SPV', 'var(--primary-light)', 'var(--primary)'],
+             ['SAMPLE', 'Gudang Sampel', 'Alur persetujuan: SPV saja — lebih cepat', 'var(--primary-light)', 'var(--primary)']] as const).map(([val, label, desc, bg, color]) => (
             <label key={val} onClick={() => setWarehouseSource(val)}
               style={{
-                flex: 1, minWidth: 220, cursor: 'pointer', padding: '0.85rem 1rem',
-                border: `2px solid ${warehouseSource === val ? color : 'var(--border)'}`,
-                borderRadius: 'var(--radius-sm)', background: warehouseSource === val ? bg : 'white',
-                transition: 'all 0.15s',
+                flex: 1, minWidth: 220, cursor: 'pointer', padding: '0.75rem 1rem',
+                border: `1px solid ${warehouseSource === val ? color : 'var(--border)'}`,
+                borderRadius: 'var(--radius-sm)', background: warehouseSource === val ? bg : 'var(--surface)',
+                transition: 'var(--transition)',
               }}
             >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.25rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                 <input type="radio" name="warehouseSource" value={val} checked={warehouseSource === val} onChange={() => setWarehouseSource(val)} />
-                <span style={{ fontWeight: 700, color }}>{label}</span>
+                <span style={{ fontWeight: 500, color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>{val === 'MAIN' ? <Warehouse size={16} strokeWidth={1.75} /> : <FlaskConical size={16} strokeWidth={1.75} />}{label}</span>
               </div>
-              <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', paddingLeft: '1.4rem' }}>{desc}</p>
+              <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', paddingLeft: '1.5rem' }}>{desc}</p>
             </label>
           ))}
         </div>
@@ -366,15 +367,15 @@ export default function StockInPage() {
 
       {/* Info sync freshness — only shown for MAIN warehouse */}
       {!isSample && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.5rem 0.9rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          <span>🔄 Data stok SPV dari Accurate</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem', padding: '0.5rem 0.875rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}><RefreshCw size={14} strokeWidth={1.75} />Data stok SPV dari Accurate</span>
           {lastSyncedAt ? (
-            <span style={{ color: new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? '#d97706' : '#166534', fontWeight: 500 }}>
+            <span style={{ color: new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? 'var(--warning)' : 'var(--success)', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
               Terakhir disinkron: {new Date(lastSyncedAt).toLocaleString('id-ID', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })}
-              {new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? ' ⚠️ (lebih dari 1 jam lalu)' : ' ✓'}
+              {new Date().getTime() - new Date(lastSyncedAt).getTime() > 3600000 ? <><AlertTriangle size={14} strokeWidth={1.75} /> (lebih dari 1 jam lalu)</> : <Check size={14} strokeWidth={1.75} />}
             </span>
           ) : (
-            <span style={{ color: '#d97706' }}>⚠️ Belum pernah disinkron — hubungi admin</span>
+            <span style={{ color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle size={14} strokeWidth={1.75} />Belum pernah disinkron — hubungi admin</span>
           )}
           <span style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>• Auto-sync setiap 30 menit</span>
         </div>
@@ -382,22 +383,22 @@ export default function StockInPage() {
 
       {/* Sample warehouse info bar */}
       {isSample && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1rem', padding: '0.5rem 0.9rem', background: '#ede9fe', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: '#5b21b6' }}>
-          <span>🧪 Mode Permintaan Sampel</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap', marginBottom: '1rem', padding: '0.5rem 0.875rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', fontWeight: 500, color: 'var(--text-main)' }}><FlaskConical size={14} strokeWidth={1.75} />Mode Permintaan Sampel</span>
           <span>Pilih produk yang dibutuhkan — SPV akan melakukan pengadaan. Stok akan ditransfer ke gudang Anda setelah sampel tersedia.</span>
         </div>
       )}
 
       <div className="card">
         {error && (
-          <div style={{ marginBottom: '1rem', color: 'var(--danger)', background: '#fee2e2', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
+          <div style={{ marginBottom: '1rem', color: 'var(--danger)', background: 'var(--danger-bg)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>
             {error}
           </div>
         )}
 
         <form onSubmit={handleSubmit}>
           <div style={{ marginBottom: '2rem' }}>
-            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>📦 Kebutuhan Produk</h3>
+            <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Kebutuhan Produk</h3>
 
             <div className="picker-row">
               <div style={{ flex: 2 }}>
@@ -408,8 +409,8 @@ export default function StockInPage() {
                     ? sampleProducts.map(p => ({
                         value: p.productId,
                         label: p.gramasiPerUnit && p.unitGramasi
-                          ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • 🧪 Stok: ${p.balance} ${p.unit}`
-                          : `${p.productName} (${p.unit}) • 🧪 Stok: ${p.balance} ${p.unit}`,
+                          ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • Stok: ${p.balance} ${p.unit}`
+                          : `${p.productName} (${p.unit}) • Stok: ${p.balance} ${p.unit}`,
                       }))
                     : products.map(p => {
                         return {
@@ -433,12 +434,12 @@ export default function StockInPage() {
                   Kuantitas ({(isSample ? sampleDetail?.unit : selectedDetail?.unit) || 'kemasan'})
                   {!isSample && selectedDetail?.spvStock != null && (
                     <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
-                      maks {selectedDetail.spvStock} {selectedDetail.unit}
+                      maks <span className="num">{selectedDetail.spvStock}</span><span className="unit">{selectedDetail.unit}</span>
                     </span>
                   )}
                   {isSample && currentSampleBalance != null && currentSampleBalance > 0 && (
-                    <span style={{ fontWeight: 400, color: '#7c3aed', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
-                      {currentSampleBalance} {sampleDetail?.unit} tersedia di sampel
+                    <span style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.5rem', fontSize: '0.8rem' }}>
+                      <span className="num">{currentSampleBalance}</span><span className="unit">{sampleDetail?.unit}</span> tersedia di sampel
                     </span>
                   )}
                 </label>
@@ -458,60 +459,60 @@ export default function StockInPage() {
                 style={{ height: '42px', padding: '0 1.5rem', minWidth: 100 }}
                 disabled={isScanning}
               >
-                {isScanning ? '🔍 Cek...' : 'Tambah'}
+                {isScanning ? <><Search size={16} strokeWidth={1.75} className="icon-inline" />Cek...</> : 'Tambah'}
               </button>
             </div>
 
             {/* Info produk terpilih — SAMPLE mode */}
             {isSample && sampleDetail && (
-              <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: '#ede9fe', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+              <div style={{ marginTop: '0.75rem', padding: '0.625rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                 {sampleDetail.unitGramasi && sampleDetail.gramasiPerUnit && (
-                  <span>📐 <strong>{sampleDetail.gramasiPerUnit}{sampleDetail.unitGramasi}</strong> per {sampleDetail.unit}</span>
+                  <span><strong className="num" style={{ fontWeight: 600 }}>{sampleDetail.gramasiPerUnit}{sampleDetail.unitGramasi}</strong> per {sampleDetail.unit}</span>
                 )}
                 {currentSampleBalance != null && currentSampleBalance > 0 ? (
-                  <span style={{ color: '#5b21b6' }}>
-                    🧪 Stok Sampel SPV: <strong>{currentSampleBalance} {sampleDetail.unit}</strong> (tersedia)
+                  <span style={{ color: 'var(--success)' }}>
+                    Stok Sampel SPV: <strong className="num" style={{ fontWeight: 600 }}>{currentSampleBalance}</strong><span className="unit">{sampleDetail.unit}</span> (tersedia)
                   </span>
                 ) : (
-                  <span style={{ color: '#b45309' }}>
-                    🧪 Belum ada di gudang sampel — SPV akan melakukan pengadaan
+                  <span style={{ color: 'var(--warning)' }}>
+                    Belum ada di gudang sampel — SPV akan melakukan pengadaan
                   </span>
                 )}
-                <span style={{ color: '#92400e' }}>⚠️ Pengajuan hanya dalam kemasan utuh</span>
+                <span style={{ color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" />Pengajuan hanya dalam kemasan utuh</span>
               </div>
             )}
 
             {/* Info produk terpilih — MAIN mode */}
             {!isSample && selectedDetail && (
-              <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+              <div style={{ marginTop: '0.75rem', padding: '0.625rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                 <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                   {selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
-                    <span>📐 <strong>{selectedDetail.gramasiPerUnit}{selectedDetail.unitGramasi}</strong> per {selectedDetail.unit}</span>
+                    <span><strong className="num" style={{ fontWeight: 600 }}>{selectedDetail.gramasiPerUnit}{selectedDetail.unitGramasi}</strong> per {selectedDetail.unit}</span>
                   )}
-                  <span style={{ color: selectedDetail.spvStock ? '#166534' : '#6b7280' }}>
-                    🏪 Stok SPV: <strong>{formatSpvStock(selectedDetail.spvStock, selectedDetail.unit) ?? 'Belum tersinkron dari Accurate'}</strong>
+                  <span style={{ color: selectedDetail.spvStock ? 'var(--success)' : 'var(--text-muted)' }}>
+                    Stok SPV: <strong className="num" style={{ fontWeight: 600 }}>{formatSpvStock(selectedDetail.spvStock, selectedDetail.unit) ?? 'Belum tersinkron dari Accurate'}</strong>
                   </span>
                   {selectedDetail.spvStock != null && selectedDetail.unitGramasi && selectedDetail.gramasiPerUnit && (
-                    <span style={{ color: 'var(--text-muted)' }}>
+                    <span className="num" style={{ color: 'var(--text-muted)' }}>
                       = {(selectedDetail.spvStock * selectedDetail.gramasiPerUnit).toLocaleString('id-ID')}{selectedDetail.unitGramasi} total
                     </span>
                   )}
-                  <span style={{ color: '#92400e' }}>⚠️ Pengajuan hanya dalam kemasan utuh</span>
+                  <span style={{ color: 'var(--warning)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" />Pengajuan hanya dalam kemasan utuh</span>
                 </div>
 
                 {/* ── Pilih Gudang Accurate per SKU ── */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                  <span style={{ fontWeight: 600, fontSize: '0.8rem', color: '#1d4ed8' }}>🏭 Sumber Gudang Accurate:</span>
+                  <span style={{ fontWeight: 500, fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}><Warehouse size={14} strokeWidth={1.75} />Sumber Gudang Accurate:</span>
                   {loadingWarehouses[currentProduct] ? (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⏳ Memuat daftar gudang...</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} strokeWidth={1.75} />Memuat daftar gudang...</span>
                   ) : warehouseOptions[currentProduct] ? (
                     <select
                       value={selectedWarehouses[currentProduct] ?? ''}
                       onChange={e => setSelectedWarehouses(prev => ({ ...prev, [currentProduct]: e.target.value }))}
                       style={{
-                        padding: '0.3rem 0.6rem', fontSize: '0.82rem',
-                        border: '1.5px solid #bfdbfe', borderRadius: '0.35rem',
-                        background: '#eff6ff', color: '#1d4ed8', fontWeight: 600, cursor: 'pointer',
+                        padding: '0.25rem 0.5rem', fontSize: '0.8rem',
+                        border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                        background: 'var(--surface)', color: 'var(--text-main)', fontWeight: 500, cursor: 'pointer',
                       }}
                     >
                       {warehouseOptions[currentProduct].map(wh => (
@@ -521,7 +522,7 @@ export default function StockInPage() {
                       ))}
                     </select>
                   ) : (
-                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Pilih produk untuk melihat gudang tersedia</span>
+                    <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pilih produk untuk melihat gudang tersedia</span>
                   )}
                 </div>
               </div>
@@ -531,24 +532,24 @@ export default function StockInPage() {
             {!isSample && conflictInfo?.conflict === true && (
               <div style={{
                 marginTop: '0.75rem',
-                padding: '0.85rem 1.1rem',
-                background: '#fef2f2',
-                border: '1.5px solid #fca5a5',
+                padding: '0.75rem 1rem',
+                background: 'var(--danger-bg)',
+                border: '1px solid var(--border)',
                 borderRadius: 'var(--radius-sm)',
-                fontSize: '0.85rem',
+                fontSize: '0.875rem',
               }}>
-                <div style={{ fontWeight: 700, color: '#b91c1c', marginBottom: '0.4rem' }}>
-                  🚫 Pengajuan Tidak Dapat Dilanjutkan — Konflik dengan Sales Order
+                <div style={{ fontWeight: 600, color: 'var(--danger)', marginBottom: '0.375rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                  <Ban size={16} strokeWidth={1.75} />Pengajuan Tidak Dapat Dilanjutkan — Konflik dengan Sales Order
                 </div>
-                <div style={{ color: '#7f1d1d', lineHeight: 1.6 }}>
+                <div style={{ color: 'var(--text-secondary)', lineHeight: 1.6 }}>
                   Stok <strong>{conflictInfo.productName}</strong> yang tersedia di Accurate
                   setelah diperhitungkan Sales Order yang sudah ada hanya{' '}
-                  <strong style={{ color: '#dc2626' }}>{conflictInfo.available} {conflictInfo.unit}</strong>,
+                  <strong className="num" style={{ color: 'var(--danger)', fontWeight: 600 }}>{conflictInfo.available}<span className="unit">{conflictInfo.unit}</span></strong>,
                   sedangkan Anda meminta{' '}
-                  <strong>{conflictInfo.requested} {conflictInfo.unit}</strong>.
+                  <strong className="num" style={{ fontWeight: 600 }}>{conflictInfo.requested}<span className="unit">{conflictInfo.unit}</span></strong>.
                 </div>
-                <div style={{ marginTop: '0.5rem', color: '#92400e', fontSize: '0.78rem' }}>
-                  💡 Kurangi jumlah permintaan atau hubungi SPV / Sales untuk koordinasi alokasi stok.
+                <div style={{ marginTop: '0.5rem', color: 'var(--warning)', fontSize: '0.8rem', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                  <Lightbulb size={14} strokeWidth={1.75} />Kurangi jumlah permintaan atau hubungi SPV / Sales untuk koordinasi alokasi stok.
                 </div>
               </div>
             )}
@@ -557,14 +558,14 @@ export default function StockInPage() {
             {!isSample && conflictInfo?.conflict === false && (
               <div style={{
                 marginTop: '0.5rem',
-                padding: '0.5rem 0.9rem',
-                background: '#f0fdf4',
-                border: '1px solid #86efac',
+                padding: '0.5rem 0.875rem',
+                background: 'var(--success-bg)',
                 borderRadius: 'var(--radius-sm)',
                 fontSize: '0.8rem',
-                color: '#166534',
+                color: 'var(--success)',
+                display: 'flex', alignItems: 'center', gap: '0.375rem',
               }}>
-                ✅ Stok tersedia mencukupi — tidak ada konflik dengan Sales Order ({conflictInfo.available} {conflictInfo.unit} dapat dijual).
+                <CheckCircle2 size={14} strokeWidth={1.75} style={{ flexShrink: 0 }} /><span>Stok tersedia mencukupi — tidak ada konflik dengan Sales Order (<span className="num">{conflictInfo.available}</span><span className="unit">{conflictInfo.unit}</span> dapat dijual).</span>
               </div>
             )}
 
@@ -586,28 +587,28 @@ export default function StockInPage() {
                           <div style={{ fontWeight: 500 }}>{p.name}</div>
                           {isSample ? (
                             p.spvStock != null && p.spvStock > 0 ? (
-                              <div style={{ fontSize: '0.75rem', color: '#5b21b6' }}>🧪 Stok sampel: {p.spvStock} {p.unit}</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok sampel: <span className="num">{p.spvStock}</span><span className="unit">{p.unit}</span></div>
                             ) : (
-                              <div style={{ fontSize: '0.75rem', color: '#b45309' }}>🧪 Belum ada di sampel — pengadaan oleh SPV</div>
+                              <div style={{ fontSize: '0.75rem', color: 'var(--warning)' }}>Belum ada di sampel — pengadaan oleh SPV</div>
                             )
                           ) : (
                             <>
                               {p.spvStock != null && (
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok SPV: {p.spvStock} {p.unit}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok SPV: <span className="num">{p.spvStock}</span><span className="unit">{p.unit}</span></div>
                               )}
                               {p.accurateWarehouse && (
-                                <div style={{ fontSize: '0.75rem', color: '#1d4ed8', fontWeight: 600 }}>🏭 {p.accurateWarehouse}</div>
+                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.25rem' }}><Warehouse size={12} strokeWidth={1.75} />{p.accurateWarehouse}</div>
                               )}
                             </>
                           )}
                         </td>
                         <td style={tdStyle}>
-                          <span style={{ fontWeight: 700, fontSize: '1.05rem' }}>{p.qtyRequested}</span>
-                          <span style={{ color: 'var(--text-muted)', marginLeft: '0.4rem' }}>{p.unit}</span>
+                          <span className="num" style={{ fontWeight: 600, fontSize: '1rem' }}>{p.qtyRequested}</span>
+                          <span className="unit">{p.unit}</span>
                         </td>
                         <td style={tdStyle}>
                           {p.unitGramasi && p.gramasiPerUnit ? (
-                            <span style={{ color: '#2563eb', fontSize: '0.85rem' }}>
+                            <span className="num" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                               {(p.qtyRequested * p.gramasiPerUnit).toLocaleString('id-ID')}{p.unitGramasi}
                             </span>
                           ) : (
@@ -615,7 +616,7 @@ export default function StockInPage() {
                           )}
                         </td>
                         <td style={{ ...tdStyle, textAlign: 'center' }}>
-                          <button type="button" onClick={() => removeProduct(p.productId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                          <button type="button" onClick={() => removeProduct(p.productId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'inline-flex', padding: '0.25rem' }} aria-label="Hapus"><X size={16} strokeWidth={1.75} /></button>
                         </td>
                       </tr>
                     ))}
@@ -632,9 +633,9 @@ export default function StockInPage() {
           {/* ── Custom / Non-SKU Product Section (SAMPLE mode only) ──────────── */}
           {isSample && (
             <div style={{ marginBottom: '2rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '1rem' }}>
-                <h3 style={{ fontSize: '1.1rem', margin: 0 }}>🆕 Produk Di Luar SKU</h3>
-                <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                <h3 style={{ fontSize: '1.1rem', margin: 0 }}>Produk Di Luar SKU</h3>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   Untuk produk yang belum terdaftar di sistem — isi detailnya secara manual
                 </span>
               </div>
@@ -694,28 +695,28 @@ export default function StockInPage() {
 
               {/* Custom product list */}
               {customProducts.length > 0 ? (
-                <div style={{ border: '1px solid #c4b5fd', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
+                <div style={{ border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', overflow: 'hidden' }}>
                   <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
                     <thead>
                       <tr>
-                        <th style={{ ...thStyle, background: '#ede9fe' }}>Nama Produk</th>
-                        <th style={{ ...thStyle, background: '#ede9fe' }}>Satuan</th>
-                        <th style={{ ...thStyle, background: '#ede9fe' }}>Jumlah</th>
-                        <th style={{ ...thStyle, background: '#ede9fe' }}>Keterangan</th>
-                        <th style={{ ...thStyle, background: '#ede9fe', width: '50px', textAlign: 'center' }}>✕</th>
+                        <th style={{ ...thStyle, background: 'var(--surface-2)' }}>Nama Produk</th>
+                        <th style={{ ...thStyle, background: 'var(--surface-2)' }}>Satuan</th>
+                        <th style={{ ...thStyle, background: 'var(--surface-2)' }}>Jumlah</th>
+                        <th style={{ ...thStyle, background: 'var(--surface-2)' }}>Keterangan</th>
+                        <th style={{ ...thStyle, background: 'var(--surface-2)', width: '50px', textAlign: 'center' }}></th>
                       </tr>
                     </thead>
                     <tbody>
                       {customProducts.map(c => (
                         <tr key={c.tempId}>
                           <td style={tdStyle}>
-                            <span style={{ fontWeight: 600, color: '#5b21b6' }}>🆕 {c.name}</span>
+                            <span style={{ fontWeight: 500, color: 'var(--text-main)' }}>{c.name}</span>
                           </td>
                           <td style={tdStyle}>{c.unit}</td>
-                          <td style={tdStyle}><strong>{c.qty}</strong></td>
-                          <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '0.82rem' }}>{c.notes || '—'}</td>
+                          <td style={tdStyle}><strong className="num" style={{ fontWeight: 600 }}>{c.qty}</strong></td>
+                          <td style={{ ...tdStyle, color: 'var(--text-muted)', fontSize: '0.8rem' }}>{c.notes || '—'}</td>
                           <td style={{ ...tdStyle, textAlign: 'center' }}>
-                            <button type="button" onClick={() => removeCustomProduct(c.tempId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                            <button type="button" onClick={() => removeCustomProduct(c.tempId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'inline-flex', padding: '0.25rem' }} aria-label="Hapus"><X size={16} strokeWidth={1.75} /></button>
                           </td>
                         </tr>
                       ))}
@@ -723,7 +724,7 @@ export default function StockInPage() {
                   </table>
                 </div>
               ) : (
-                <div style={{ textAlign: 'center', padding: '1.25rem', border: '1px dashed #c4b5fd', borderRadius: 'var(--radius-md)', color: '#7c3aed', fontSize: '0.85rem' }}>
+                <div style={{ textAlign: 'center', padding: '1.25rem', border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
                   Belum ada produk di luar SKU yang ditambahkan.
                 </div>
               )}
@@ -746,7 +747,7 @@ export default function StockInPage() {
           <button
             type="submit"
             className="btn btn-primary"
-            style={{ width: '100%', padding: '0.8rem', fontSize: '1rem' }}
+            style={{ width: '100%', padding: '0.75rem', fontSize: '1rem' }}
             disabled={isPending || selectedProducts.length === 0}
           >
             {isPending ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Stok ke SPV'}

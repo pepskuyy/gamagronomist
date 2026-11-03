@@ -48,18 +48,18 @@ export default async function OpnameApproveListPage() {
       </div>
 
       <div className="card">
-        <h3>Menunggu Persetujuan ({opnames.length})</h3>
+        <h3>Menunggu Persetujuan (<span className="num">{opnames.length}</span>)</h3>
         {opnames.length === 0 ? (
           <div className="alert alert-info mt-4">Tidak ada pengajuan Stock Opname saat ini.</div>
         ) : (
           <table className="mt-4" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead style={{ background: 'var(--surface-hover)' }}>
+            <thead style={{ background: 'var(--surface-2)' }}>
               <tr>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Tanggal</th>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Diajukan Oleh</th>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Jumlah Item</th>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Item Selisih</th>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>Aksi</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Tanggal</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Diajukan Oleh</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Jumlah Item</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Item Selisih</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', textAlign: 'center' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
@@ -67,22 +67,22 @@ export default async function OpnameApproveListPage() {
                 const diffCount = op.details.filter(d => d.variance !== 0).length
                 return (
                   <tr key={op.id}>
-                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                       {new Date(op.createdAt).toLocaleString('id-ID')}
                     </td>
-                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
-                      <strong>{op.user.name}</strong> <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>({op.user.role})</span>
+                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
+                      <strong style={{ fontWeight: 500 }}>{op.user.name}</strong> <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>({op.user.role})</span>
                     </td>
-                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
-                      {op.details.length} produk
+                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
+                      <span className="num">{op.details.length}</span> produk
                     </td>
-                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                       <span className={diffCount > 0 ? "badge badge-warning" : "badge badge-neutral"}>
-                        {diffCount} produk selisih
+                        <span className="num">{diffCount}</span> produk selisih
                       </span>
                     </td>
-                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
-                      <Link href={`/dashboard/opname/approve/${op.id}`} className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.875rem' }}>
+                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', textAlign: 'center' }}>
+                      <Link href={`/dashboard/opname/approve/${op.id}`} className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.875rem' }}>
                         Review
                       </Link>
                     </td>
@@ -98,29 +98,29 @@ export default async function OpnameApproveListPage() {
         <div className="card">
           <h3>Riwayat Persetujuan (Terbaru)</h3>
           <table className="mt-4" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead style={{ background: 'var(--surface-hover)' }}>
+            <thead style={{ background: 'var(--surface-2)' }}>
               <tr>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Waktu Update</th>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>User (AFA/FO)</th>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Status</th>
-                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>Aksi</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Waktu Update</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>User (AFA/FO)</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Status</th>
+                <th style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)' }}>Aksi</th>
               </tr>
             </thead>
             <tbody>
               {history.map(op => (
                 <tr key={op.id}>
-                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                     {new Date(op.updatedAt).toLocaleString('id-ID')}
                   </td>
-                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                     {op.user.name}
                   </td>
-                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
-                    <span className={`badge ${op.status === 'APPROVED' ? 'badge-success' : 'badge-error'}`}>
+                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
+                    <span className={`badge ${op.status === 'APPROVED' ? 'badge-success' : 'badge-danger'}`}>
                       {op.status}
                     </span>
                   </td>
-                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border)' }}>
+                  <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                     <Link href={`/dashboard/opname/approve/${op.id}`} style={{ color: 'var(--primary)', textDecoration: 'underline', fontSize: '0.875rem' }}>Lihat Detail</Link>
                   </td>
                 </tr>

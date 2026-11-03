@@ -27,7 +27,7 @@ export default function DashboardStockSummaryTable({ items }: Props) {
 
   return (
     <div style={{ marginBottom: '2.5rem' }}>
-      <h2 style={{ marginBottom: '1rem' }}>📦 Saldo Stok Per User</h2>
+      <h2 style={{ marginBottom: '1rem' }}>Saldo Stok Per User</h2>
       <div className="table-card">
         <div className="table-responsive">
           <table>
@@ -49,8 +49,8 @@ export default function DashboardStockSummaryTable({ items }: Props) {
                     </span>
                   </td>
                   <td>{s.productName}</td>
-                  <td style={{ fontWeight: 700, color: s.balance > 0 ? 'var(--success)' : 'var(--danger)' }}>
-                    {s.balance} {s.unit}
+                  <td style={{ fontWeight: 600, color: s.balance > 0 ? 'var(--text-main)' : 'var(--danger)', whiteSpace: 'nowrap' }}>
+                    <span className="num">{s.balance}</span><span className="unit">{s.unit}</span>
                   </td>
                 </tr>
               ))}

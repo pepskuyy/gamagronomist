@@ -8,6 +8,7 @@ import TeamStockTable from '@/components/TeamStockTable'
 import TableFilter from '@/components/TableFilter'
 import TablePager from '@/components/TablePager'
 import { AdminResetButton } from '@/components/AdminResetButton'
+import { Plus, Package, History, Play, ArrowRight } from 'lucide-react'
 
 
 export default async function StockDashboardPage(props: { searchParams: Promise<Record<string, string | undefined>> }) {
@@ -183,30 +184,30 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       {!['FAM', 'WHM'].includes(session.role) && session.role !== 'SPV' && session.role !== 'ADMIN' && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '0.75rem' }}>
-            <h2 style={{ margin: 0 }}>📦 Saldo Stok Saat Ini</h2>
+            <h2 style={{ margin: 0 }}>Saldo Stok Saat Ini</h2>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               {['AFA', 'PLANTATION'].includes(session.role) && (
                 <Link href="/dashboard/stock/in">
-                  <button className="btn btn-primary">➕ Pengajuan Stok</button>
+                  <button className="btn btn-primary"><Plus size={16} strokeWidth={1.75} className="icon-inline" />Pengajuan Stok</button>
                 </Link>
               )}
               {session.role === 'BD' && (
                 <Link href="/dashboard/stock/bd-request">
-                  <button className="btn btn-primary" style={{ background: '#7c3aed', borderColor: '#7c3aed' }}>➕ Pengajuan Stok Sampel</button>
+                  <button className="btn btn-primary"><Plus size={16} strokeWidth={1.75} className="icon-inline" />Pengajuan Stok Sampel</button>
                 </Link>
               )}
               {['FO', 'INTERN'].includes(session.role) && (
                 <Link href="/dashboard/demoplot/request">
-                  <button className="btn btn-primary">📦 Minta Stok dari AFA</button>
+                  <button className="btn btn-primary"><Package size={16} strokeWidth={1.75} className="icon-inline" />Minta Stok dari AFA</button>
                 </Link>
               )}
               <Link href="/dashboard/stock/history">
-                <button className="btn btn-outline">🕒 Histori Ledger</button>
+                <button className="btn btn-outline"><History size={16} strokeWidth={1.75} className="icon-inline" />Histori Ledger</button>
               </Link>
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1.25rem' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1rem' }}>
             {myStocks.map((stock) => {
               const product = stock.product as any
               const hasGramasi   = product.unitGramasi && product.gramasiPerUnit && product.gramasiPerUnit > 0
@@ -221,21 +222,21 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
 
               return (
                 <div key={product.id} className="card" style={{ position: 'relative', overflow: 'hidden' }}>
-                  <div style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '0.5rem' }}>
+                  <div style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.5rem' }}>
                     {product.name}
-                    {hasGramasi && <span style={{ fontWeight: 400, textTransform: 'none', marginLeft: '0.35rem' }}>({product.gramasiPerUnit}{product.unitGramasi}/{product.unit})</span>}
+                    {hasGramasi && <span className="num" style={{ fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.375rem' }}>({product.gramasiPerUnit}{product.unitGramasi}/{product.unit})</span>}
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.4rem' }}>
-                    <span style={{ fontSize: '2.25rem', fontWeight: 800, lineHeight: 1, color: 'var(--primary)' }}>
+                  <div style={{ display: 'flex', alignItems: 'baseline' }}>
+                    <span className="num" style={{ fontSize: '2rem', fontWeight: 600, lineHeight: 1, color: 'var(--text-main)' }}>
                       {primaryQty.toLocaleString()}
                     </span>
-                    <span style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.3rem' }}>
+                    <span className="unit" style={{ fontSize: '0.875rem' }}>
                       {primaryUnit}
                     </span>
                   </div>
                   {secondaryQty != null && (
-                    <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
-                      = {Number.isInteger(secondaryQty) ? secondaryQty : secondaryQty.toFixed(1)} {secondaryUnit} total
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.5rem' }}>
+                      = <span className="num">{Number.isInteger(secondaryQty) ? secondaryQty : secondaryQty.toFixed(1)}</span><span className="unit">{secondaryUnit}</span> total
                     </div>
                   )}
                 </div>
@@ -255,11 +256,11 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
         <div style={{ marginBottom: '3rem', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
              <div>
-               <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.6rem' }}>🧪 Gudang Sampel SPV</h2>
-               <p style={{ margin: '0.3rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Kelola stok sampel mandiri yang dipisahkan dari persediaan Accurate.</p>
+               <h2 style={{ margin: 0, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>Gudang Sampel SPV</h2>
+               <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>Kelola stok sampel mandiri yang dipisahkan dari persediaan Accurate.</p>
              </div>
              <Link href="/dashboard/stock/sample">
-               <button className="btn btn-primary" style={{ background: '#7c3aed', borderColor: '#7c3aed' }}>Buka Gudang Sampel →</button>
+               <button className="btn btn-primary">Buka Gudang Sampel<ArrowRight size={16} strokeWidth={1.75} className="icon-inline" /></button>
              </Link>
           </div>
         </div>
@@ -270,7 +271,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-              <h2 style={{ margin: 0 }}>👀 Pantauan Stok User</h2>
+              <h2 style={{ margin: 0 }}>Pantauan Stok User</h2>
             </div>
           </div>
           <TableFilter prefix="u" showDateRange={false} />
@@ -298,7 +299,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       {['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role) && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>📨 Pengajuan Stok {['AFA', 'PLANTATION', 'BD'].includes(session.role) ? 'Saya' : session.role === 'SPV' ? 'dari Tim' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Pengajuan Stok {['AFA', 'PLANTATION', 'BD'].includes(session.role) ? 'Saya' : session.role === 'SPV' ? 'dari Tim' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
           </div>
           <TableFilter prefix="a" showDateRange={true} />
 
@@ -319,9 +320,9 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       {!['FAM', 'WHM'].includes(session.role) && (
       <div style={{ marginBottom: '3rem' }}>
         <h2 style={{ margin: 0, marginBottom: '1rem', fontSize: '1.25rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          📦 {['FO', 'INTERN'].includes(session.role) ? 'Permintaan Stok Saya' : 'Permintaan Stok FO'}
+          {['FO', 'INTERN'].includes(session.role) ? 'Permintaan Stok Saya' : 'Permintaan Stok FO'}
           {foStockRequests.filter((r: any) => r.status === 'SUBMITTED').length > 0 && (
-            <span style={{ background: 'var(--danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '9999px' }}>
+            <span className="num" style={{ background: 'var(--danger-bg)', color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 500, padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)' }}>
               {foStockRequests.filter((r: any) => r.status === 'SUBMITTED').length} baru
             </span>
           )}
@@ -338,27 +339,27 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
               <table style={{ minWidth: 600, width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr>
-                    <th style={{ padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>ID</th>
-                    <th style={{ padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>Tanggal</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>ID</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>Tanggal</th>
                     {!['FO','INTERN'].includes(session.role) && (
-                      <th style={{ padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>FO Pengaju</th>
+                      <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>FO Pengaju</th>
                     )}
-                    <th style={{ padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>Catatan</th>
-                    <th style={{ padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>Produk Diminta</th>
-                    <th style={{ padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>Status</th>
-                    <th style={{ padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>Aksi</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>Catatan</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }}>Produk Diminta</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>Status</th>
+                    <th style={{ padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>Aksi</th>
                   </tr>
                 </thead>
                 <tbody>
                   {foStockRequests.map((req: any) => (
                     <tr key={req.id}>
-                      <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
-                      <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
+                      <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', fontFamily: 'var(--font-mono-stack)', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
+                      <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', whiteSpace: 'nowrap', fontSize: '0.875rem' }}>{new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(req.createdAt)}</td>
                       {!['FO','INTERN'].includes(session.role) && (
-                        <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', color: 'var(--primary)', fontWeight: 600 }}>{req.fo?.name}</td>
+                        <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', color: 'var(--text-main)', fontWeight: 500 }}>{req.fo?.name}</td>
                       )}
-                      <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', fontSize: '0.85rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
-                      <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.82rem' }}>
+                      <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)', fontSize: '0.875rem', maxWidth: 200 }}>{req.plan !== '-' ? req.plan : '-'}</td>
+                      <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.82rem' }}>
                         {req.details?.map((d: any) => {
                           const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
                           const hasGramasi = d.product?.gramasiPerUnit && d.product?.unitGramasi
@@ -380,24 +381,24 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                           return label
                         }).join(', ')}
                       </td>
-                      <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>{getStatusBadge(req.status)}</td>
-                      <td style={{ padding: '0.85rem 1rem', borderBottom: '1px solid var(--border)', textAlign: 'center' }}>
+                      <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', textAlign: 'center' }}>{getStatusBadge(req.status)}</td>
+                      <td style={{ padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', textAlign: 'center' }}>
                         <div className="action-row" style={{ justifyContent: 'center' }}>
                           {req.status === 'SUBMITTED' && ['AFA', 'PLANTATION'].includes(session.role) && (
                             <Link href={`/dashboard/demoplot/approve/${req.id}`}>
-                              <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Approve Stok</button>
+                              <button className="btn btn-primary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}>Approve Stok</button>
                             </Link>
                           )}
                           {req.status === 'APPROVED' && req.demoPlots?.length > 0 && (req.foId === session.userId || req.afaId === session.userId) && (
                             <Link href={`/dashboard/demoplot/continue/${req.id}`}>
-                              <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
+                              <button className="btn btn-primary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}><Play size={14} strokeWidth={1.75} className="icon-inline" />Lanjutkan Sesi</button>
                             </Link>
                           )}
                           {session.role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED'].includes(req.status) && !req.accurateInvoiceNo && (
                             <AdminResetButton requestId={req.id} />
                           )}
                           <Link href={`/dashboard/demoplot/detail/${req.id}`}>
-                            <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
+                            <button className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}>Detail</button>
                           </Link>
                         </div>
                       </td>

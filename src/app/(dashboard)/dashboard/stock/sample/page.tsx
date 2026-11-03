@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useTransition } from 'react'
 import Link from 'next/link'
 import { addSampleStock, adjustSampleStock, editSampleProduct, removeSampleProduct } from '@/app/actions/sample-stock'
+import { Package, Plus, ClipboardList, Pencil, Trash2, Check, ArrowLeft, Inbox } from 'lucide-react'
 
 type Balance  = {
   productId: string; productName: string; sku?: string | null; unit: string; balance: number
@@ -96,11 +97,11 @@ function ProductCombobox({
       {open && (
         <div ref={listRef} style={{
           position: 'absolute', top: 'calc(100% + 4px)', left: 0, right: 0, zIndex: 200,
-          background: '#fff', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.1)', maxHeight: 260, overflowY: 'auto',
+          background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
+          boxShadow: 'var(--shadow-md)', maxHeight: 260, overflowY: 'auto',
         }}>
           {filtered.length === 0 ? (
-            <div style={{ padding: '0.75rem 1rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+            <div style={{ padding: '0.75rem 1rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
               Tidak ada produk yang cocok.
             </div>
           ) : filtered.map((p, i) => (
@@ -108,22 +109,22 @@ function ProductCombobox({
               onMouseDown={() => selectItem(p)}
               onMouseEnter={() => setHL(i)}
               style={{
-                padding: '0.6rem 1rem', cursor: 'pointer', fontSize: '0.875rem',
+                padding: '0.5rem 1rem', cursor: 'pointer', fontSize: '0.875rem',
                 background: i === highlighted ? 'var(--primary-light)' : 'transparent',
                 color: i === highlighted ? 'var(--primary)' : 'var(--text-main)',
-                fontWeight: p.id === value ? 600 : 400,
+                fontWeight: p.id === value ? 500 : 400,
                 display: 'flex', justifyContent: 'space-between', gap: '0.5rem', alignItems: 'center',
               }}
             >
-              <span style={{ display: 'flex', flexDirection: 'column', gap: '0.1rem' }}>
+              <span style={{ display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
                 <span>{p.name}</span>
                 {p.gramasiPerUnit && p.unitGramasi && (
-                  <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                  <span className="num" style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                     {p.gramasiPerUnit}{p.unitGramasi}/{p.unit}
                   </span>
                 )}
               </span>
-              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+              <span className="mono" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                 {p.unit}
               </span>
             </div>
@@ -265,7 +266,7 @@ export default function SampleStockPage() {
     if (!confirm(label)) return
     startTransition(async () => {
       const res = await removeSampleProduct(b.productId, b.balance)
-      if (res?.error) alert('❌ ' + res.error)
+      if (res?.error) alert(res.error)
       else fetchAll()
     })
   }
@@ -306,8 +307,8 @@ export default function SampleStockPage() {
     })
   }
 
-  const tdStyle = { padding: '0.65rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem', verticalAlign: 'middle' }
-  const thStyle: React.CSSProperties = { padding: '0.6rem 1rem', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }
+  const tdStyle = { padding: '0.625rem 1rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.875rem', verticalAlign: 'middle', fontVariantNumeric: 'tabular-nums' as const }
+  const thStyle: React.CSSProperties = { padding: '0.625rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }
 
   const UNITS = ['PCS', 'Btl', 'Bks', 'Box', 'Sak', 'gl', 'Pack', 'Rol', 'Kg', 'Lt']
 
@@ -329,18 +330,18 @@ export default function SampleStockPage() {
     <div>
       {/* Header */}
       <div className="back-header" style={{ marginBottom: '1.5rem' }}>
-        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Kembali</Link>
         <div>
-          <h2 style={{ margin: 0 }}>🧪 Gudang Sampel</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
+          <h2 style={{ margin: 0 }}>Gudang Sampel</h2>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Stok sampel SPV — terpisah dari Gudang Utama (Accurate)
           </p>
         </div>
       </div>
 
       {owners.length > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
-          <label htmlFor="sample-owner" style={{ fontSize: '0.85rem', fontWeight: 600 }}>Lihat gudang milik:</label>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+          <label htmlFor="sample-owner" style={{ fontSize: '0.875rem', fontWeight: 500 }}>Lihat gudang milik:</label>
           <select
             id="sample-owner"
             className="form-control"
@@ -354,21 +355,22 @@ export default function SampleStockPage() {
             ))}
           </select>
           {viewingOther && (
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Mode lihat saja — tambah, edit, hapus, dan opname hanya dari akun pemiliknya.</span>
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Mode lihat saja — tambah, edit, hapus, dan opname hanya dari akun pemiliknya.</span>
           )}
         </div>
       )}
 
       {/* Tab Bar */}
-      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '2px solid var(--border)', flexWrap: 'wrap' }}>
-        {([['balance', '📦 Saldo Stok'], ['add', '➕ Tambah Stok Masuk'], ['history', '📋 Riwayat']] as const).filter(([key]) => !(viewingOther && key === 'add')).map(([key, label]) => (
+      <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', borderBottom: '1px solid var(--border)', flexWrap: 'wrap' }}>
+        {([['balance', 'Saldo Stok'], ['add', 'Tambah Stok Masuk'], ['history', 'Riwayat']] as const).filter(([key]) => !(viewingOther && key === 'add')).map(([key, label]) => (
           <button key={key} onClick={() => setTab(key)} style={{
-            padding: '0.6rem 1.2rem', border: 'none', background: 'none', cursor: 'pointer',
-            fontWeight: tab === key ? 700 : 400,
-            color: tab === key ? 'var(--primary)' : 'var(--text-muted)',
-            borderBottom: tab === key ? '3px solid var(--primary)' : '3px solid transparent',
-            fontSize: '0.875rem', marginBottom: '-2px', transition: 'all 0.15s',
-          }}>{label}</button>
+            padding: '0.625rem 1rem', border: 'none', background: 'none', cursor: 'pointer',
+            fontWeight: 500,
+            color: tab === key ? 'var(--text-main)' : 'var(--text-muted)',
+            borderBottom: tab === key ? '2px solid var(--primary)' : '2px solid transparent',
+            fontSize: '0.875rem', marginBottom: '-1px', transition: 'var(--transition)',
+            display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+          }}>{key === 'balance' ? <Package size={16} strokeWidth={1.75} /> : key === 'add' ? <Plus size={16} strokeWidth={1.75} /> : <ClipboardList size={16} strokeWidth={1.75} />}{label}</button>
         ))}
       </div>
 
@@ -381,7 +383,7 @@ export default function SampleStockPage() {
               <input
                 type="text"
                 className="form-control"
-                placeholder="🔍 Cari nama produk atau kode SKU..."
+                placeholder="Cari nama produk atau kode SKU..."
                 value={balanceSearch}
                 onChange={e => setBalanceSearch(e.target.value)}
                 style={{ maxWidth: 320 }}
@@ -392,12 +394,12 @@ export default function SampleStockPage() {
             <p style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>Memuat...</p>
           ) : balances.length === 0 ? (
             <div style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-              <p style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>💭</p>
+              <p style={{ marginBottom: '0.5rem', display: 'flex', justifyContent: 'center' }}><Inbox size={28} strokeWidth={1.5} /></p>
               <p>Belum ada stok di Gudang Sampel.</p>
-              {!viewingOther && <button onClick={() => setTab('add')} className="btn btn-primary" style={{ marginTop: '1rem' }}>+ Tambah Stok Masuk</button>}
+              {!viewingOther && <button onClick={() => setTab('add')} className="btn btn-primary" style={{ marginTop: '1rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Tambah Stok Masuk</button>}
             </div>
           ) : filteredBalances.length === 0 ? (
-            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+            <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               Tidak ada produk yang cocok dengan “{balanceSearch}”
             </div>
           ) : (
@@ -413,59 +415,61 @@ export default function SampleStockPage() {
                     onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')}
                     onMouseLeave={e => (e.currentTarget.style.background = '')}
                   >
-                    <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>
+                    <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }}>
                       {b.productName}
                       {b.gramasiPerUnit && b.unitGramasi && (
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginTop: '0.15rem' }}>
+                        <div className="num" style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginTop: '0.125rem' }}>
                           {b.gramasiPerUnit}{b.unitGramasi} / {b.unit}
                         </div>
                       )}
                     </td>
-                    <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.82rem', color: b.sku ? 'var(--text-main)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                    <td style={{ ...tdStyle, fontFamily: 'var(--font-mono-stack)', fontSize: '0.8rem', color: b.sku ? 'var(--text-main)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
                       {b.sku || '-'}
                     </td>
                     <td style={tdStyle}>
                       {b.gramasiPerUnit && b.unitGramasi && b.balance > 0 ? (
                         <>
-                          <span style={{ fontSize: '1.1rem', fontWeight: 700, color: b.balance <= 0 ? '#dc2626' : '#16a34a' }}>
+                          <span className="num" style={{ fontSize: '1rem', fontWeight: 600, color: b.balance <= 0 ? 'var(--danger)' : 'var(--text-main)' }}>
                             {(b.balance * b.gramasiPerUnit).toLocaleString('id-ID')}
                           </span>
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
+                          <span className="unit">
                             {b.unitGramasi}
                           </span>
-                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
-                            = {b.balance} {b.unit} total
+                          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+                            = <span className="num">{b.balance}</span><span className="unit">{b.unit}</span> total
                           </div>
                         </>
                       ) : (
-                        <span style={{ fontSize: '1.1rem', fontWeight: 700, color: b.balance <= 0 ? '#dc2626' : '#16a34a' }}>
+                        <span className="num" style={{ fontSize: '1rem', fontWeight: 600, color: b.balance <= 0 ? 'var(--danger)' : 'var(--text-main)' }}>
                           {b.balance}
                         </span>
                       )}
                     </td>
-                    <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{b.unit}</td>
+                    <td style={{ ...tdStyle, color: 'var(--text-muted)' }}><span className="mono" style={{ fontSize: '0.85em' }}>{b.unit}</span></td>
                     {!viewingOther && <td style={{ ...tdStyle, textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
                         <button
                           onClick={() => openEditModal(b)}
                           title="Edit nama / satuan isi produk"
                           style={{
-                            background: '#dbeafe', color: '#1d4ed8', border: '1px solid #bfdbfe',
-                            borderRadius: '6px', padding: '0.3rem 0.7rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
+                            background: 'var(--surface)', color: 'var(--text-main)', border: '1px solid var(--border)',
+                            borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500,
+                            display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
                           }}
                         >
-                          ✏️ Edit
+                          <Pencil size={14} strokeWidth={1.75} />Edit
                         </button>
                         <button
                           onClick={() => handleRemove(b)}
                           disabled={isPending}
                           title="Hapus produk dari Gudang Sampel"
                           style={{
-                            background: '#fee2e2', color: '#b91c1c', border: '1px solid #fecaca',
-                            borderRadius: '6px', padding: '0.3rem 0.7rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 600,
+                            background: 'var(--surface)', color: 'var(--danger)', border: '1px solid var(--border)',
+                            borderRadius: 'var(--radius-sm)', padding: '0.25rem 0.75rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 500,
+                            display: 'inline-flex', alignItems: 'center', gap: '0.375rem',
                           }}
                         >
-                          🗑️ Hapus
+                          <Trash2 size={14} strokeWidth={1.75} />Hapus
                         </button>
                       </div>
                     </td>}
@@ -480,7 +484,7 @@ export default function SampleStockPage() {
       {/* ── TAMBAH STOK ── */}
       {tab === 'add' && (
         <div className="card" style={{ maxWidth: 560 }}>
-          <h3 style={{ marginBottom: '0.5rem' }}>➕ Input Stok Masuk Gudang Sampel</h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>Input Stok Masuk Gudang Sampel</h3>
 
           {/* Mode Toggle */}
           <div style={{ display: 'flex', gap: '0', marginBottom: '1.5rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', overflow: 'hidden' }}>
@@ -488,25 +492,25 @@ export default function SampleStockPage() {
               type="button"
               onClick={() => { setMode('existing'); resetForms() }}
               style={{
-                flex: 1, padding: '0.55rem', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+                flex: 1, padding: '0.5rem', border: 'none', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 background: mode === 'existing' ? 'var(--primary)' : 'transparent',
                 color: mode === 'existing' ? '#fff' : 'var(--text-muted)',
-                transition: 'all 0.15s',
+                transition: 'var(--transition)',
               }}
             >
-              📋 Pilih dari Katalog
+              <ClipboardList size={16} strokeWidth={1.75} />Pilih dari Katalog
             </button>
             <button
               type="button"
               onClick={() => { setMode('new'); resetForms() }}
               style={{
-                flex: 1, padding: '0.55rem', border: 'none', cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+                flex: 1, padding: '0.5rem', border: 'none', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 500, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem',
                 background: mode === 'new' ? 'var(--primary)' : 'transparent',
                 color: mode === 'new' ? '#fff' : 'var(--text-muted)',
-                transition: 'all 0.15s',
+                transition: 'var(--transition)',
               }}
             >
-              ✨ Buat SKU Baru
+              <Plus size={16} strokeWidth={1.75} />Buat SKU Baru
             </button>
           </div>
 
@@ -536,7 +540,7 @@ export default function SampleStockPage() {
                   <input type="number" min="1" step="1" name="quantity" className="form-control"
                     placeholder="0" value={qty} onChange={e => setQty(e.target.value)} required style={{ flex: 1 }} />
                   {selectedProductObj && (
-                    <span style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                    <span className="mono" style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                       {selectedProductObj.unit}
                     </span>
                   )}
@@ -551,7 +555,7 @@ export default function SampleStockPage() {
               </div>
 
               <button type="submit" disabled={isPending || !selectedProduct} className="btn btn-primary" style={{ width: '100%' }}>
-                {isPending ? 'Menyimpan...' : '✅ Simpan Stok Masuk'}
+                {isPending ? 'Menyimpan...' : <><Check size={16} strokeWidth={1.75} className="icon-inline" />Simpan Stok Masuk</>}
               </button>
             </form>
           )}
@@ -562,7 +566,7 @@ export default function SampleStockPage() {
               <input type="hidden" name="mode" value="new" />
               <input type="hidden" name="newUnit" value="PCS" />
               <div style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1.25rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                ✨ SKU baru akan otomatis terdaftar di database produk dan langsung masuk ke Gudang Sampel. Satuan kemasan: <strong>PCS</strong>.
+                SKU baru akan otomatis terdaftar di database produk dan langsung masuk ke Gudang Sampel. Satuan kemasan: <strong>PCS</strong>.
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '0.75rem' }}>
@@ -595,7 +599,7 @@ export default function SampleStockPage() {
                     <input type="number" min="1" step="1" name="quantity" className="form-control"
                       placeholder="0" value={newQty} onChange={e => setNewQty(e.target.value)} required style={{ flex: 1 }} />
                     {(newUnit) && (
-                      <span style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                      <span className="mono" style={{ whiteSpace: 'nowrap', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                         {newUnit}
                       </span>
                     )}
@@ -608,8 +612,8 @@ export default function SampleStockPage() {
                 </div>
               </div>
 
-              <button type="submit" disabled={isPending || !newName.trim()} className="btn btn-primary" style={{ width: '100%', background: '#7c3aed', borderColor: '#7c3aed' }}>
-                {isPending ? 'Menyimpan...' : '✨ Buat SKU & Tambah Stok'}
+              <button type="submit" disabled={isPending || !newName.trim()} className="btn btn-primary" style={{ width: '100%' }}>
+                {isPending ? 'Menyimpan...' : 'Buat SKU & Tambah Stok'}
               </button>
             </form>
           )}
@@ -621,11 +625,11 @@ export default function SampleStockPage() {
         <div className="table-card">
           <div style={{ padding: '1rem', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
-              <h3 style={{ margin: 0, fontSize: '1rem' }}>⚖️ Penyesuaian / Opname Stok Sampel</h3>
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>Penyesuaian / Opname Stok Sampel</h3>
               <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)' }}>Input stok aktual barang di gudang. Sistem akan otomatis melakukan adjustment jika ada selisih tanpa perlu approval.</p>
             </div>
             <button onClick={handleOpnameSubmit} disabled={isPending} className="btn btn-primary">
-              {isPending ? 'Menyimpan...' : '✅ Simpan Semua Penyesuaian'}
+              {isPending ? 'Menyimpan...' : <><Check size={16} strokeWidth={1.75} className="icon-inline" />Simpan Semua Penyesuaian</>}
             </button>
           </div>
 
@@ -648,30 +652,30 @@ export default function SampleStockPage() {
                   const data = opnameData[b.productId] || { actual: '', notes: '' }
                   const actual = parseFloat(data.actual)
                   const diff = !data.actual || isNaN(actual) ? 0 : actual - b.balance
-                  const statusColor = diff === 0 ? 'var(--text-muted)' : (diff > 0 ? '#16a34a' : '#dc2626')
+                  const statusColor = diff === 0 ? 'var(--text-muted)' : (diff > 0 ? 'var(--success)' : 'var(--danger)')
 
                   return (
                     <tr key={b.productId} style={{ background: diff !== 0 ? 'var(--surface-hover)' : 'var(--surface)' }}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{b.productName}</td>
-                      <td style={{ ...tdStyle, fontSize: '1rem', fontWeight: 700, fontFamily: 'monospace' }}>
-                        {b.balance} <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--text-muted)' }}>{b.unit}</span>
+                      <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }}>{b.productName}</td>
+                      <td style={{ ...tdStyle, fontSize: '1rem', fontWeight: 600 }}>
+                        <span className="num">{b.balance}</span><span className="unit">{b.unit}</span>
                       </td>
                       <td style={{ ...tdStyle, width: '160px' }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                           <input type="number" step="any" min="0" placeholder={b.balance.toString()} 
-                            className="form-control" style={{ width: '80px', padding: '0.4rem 0.5rem' }} 
+                            className="form-control" style={{ width: '80px', padding: '0.375rem 0.5rem' }} 
                             value={data.actual}
                             onChange={e => setOpnameData({ ...opnameData, [b.productId]: { ...data, actual: e.target.value } })}
                           />
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{b.unit}</span>
+                          <span className="unit" style={{ marginLeft: 0 }}>{b.unit}</span>
                         </div>
                       </td>
-                      <td style={{ ...tdStyle, color: statusColor, fontWeight: 700, fontFamily: 'monospace', fontSize: '0.9rem' }}>
+                      <td className="num" style={{ ...tdStyle, color: statusColor, fontWeight: 600, fontSize: '0.875rem' }}>
                         {diff > 0 ? `+${diff}` : diff}
                       </td>
                       <td style={{ ...tdStyle, width: '25%' }}>
                         <input type="text" placeholder="opsional"
-                          className="form-control" style={{ width: '100%', padding: '0.4rem 0.5rem' }}
+                          className="form-control" style={{ width: '100%', padding: '0.375rem 0.5rem' }}
                           value={data.notes}
                           onChange={e => setOpnameData({ ...opnameData, [b.productId]: { ...data, notes: e.target.value } })}
                         />
@@ -711,42 +715,42 @@ export default function SampleStockPage() {
                   let labelBg   = ''
                   let labelColor = ''
                   if (row.transactionType === 'SAMPLE_IN') {
-                    labelText = '📥 Stok Masuk'; labelBg = '#dcfce7'; labelColor = '#166534'
+                    labelText = 'Stok Masuk'; labelBg = 'var(--success-bg)'; labelColor = 'var(--success)'
                   } else if (row.transactionType === 'SAMPLE_OUT') {
-                    labelText = '📤 Keluar ke AFA'; labelBg = '#fee2e2'; labelColor = '#991b1b'
+                    labelText = 'Keluar ke AFA'; labelBg = 'var(--danger-bg)'; labelColor = 'var(--danger)'
                   } else if (row.transactionType === 'OPNAME_PLUS') {
-                    labelText = '⚖️ Opname (+)'; labelBg = '#dbeafe'; labelColor = '#1e40af'
+                    labelText = 'Opname (+)'; labelBg = 'var(--info-bg)'; labelColor = 'var(--info)'
                   } else if (row.transactionType === 'OPNAME_MINUS') {
-                    labelText = '⚖️ Opname (-)'; labelBg = '#fef9c3'; labelColor = '#92400e'
+                    labelText = 'Opname (-)'; labelBg = 'var(--warning-bg)'; labelColor = 'var(--warning)'
                   } else {
-                    labelText = row.transactionType; labelBg = 'var(--surface-2)'; labelColor = 'var(--text-muted)'
+                    labelText = row.transactionType; labelBg = 'var(--surface-2)'; labelColor = 'var(--text-secondary)'
                   }
                   return (
                     <tr key={row.id}
                       onMouseEnter={e => (e.currentTarget.style.background = 'var(--surface-hover)')} onMouseLeave={e => (e.currentTarget.style.background = '')}
                     >
-                      <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.8rem', fontFamily: 'monospace' }}>
+                      <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(row.createdAt))}
                       </td>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{row.product.name}</td>
+                      <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }}>{row.product.name}</td>
                       <td style={tdStyle}>
                         <span style={{
-                          padding: '0.2rem 0.65rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700,
+                          padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500,
                           background: labelBg, color: labelColor, whiteSpace: 'nowrap',
                         }}>
                           {labelText}
                         </span>
                       </td>
-                      <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.82rem', color: 'var(--text-muted)', textAlign: 'right' }}>
-                        {row.stockBefore} {unit}
+                      <td style={{ ...tdStyle, fontSize: '0.8rem', color: 'var(--text-muted)', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <span className="num">{row.stockBefore}</span><span className="unit">{unit}</span>
                       </td>
                       <td style={tdStyle}>
-                        <span style={{ color: isOut ? '#dc2626' : '#16a34a', fontWeight: 700 }}>
-                          {isOut ? '' : '+'}{row.quantity} {unit}
+                        <span style={{ color: isOut ? 'var(--danger)' : 'var(--success)', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          <span className="num">{isOut ? '' : '+'}{row.quantity}</span><span className="unit">{unit}</span>
                         </span>
                       </td>
-                      <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.82rem', fontWeight: 700, color: isOut ? '#dc2626' : '#16a34a', textAlign: 'right' }}>
-                        {row.stockAfter} {unit}
+                      <td style={{ ...tdStyle, fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', textAlign: 'right', whiteSpace: 'nowrap' }}>
+                        <span className="num">{row.stockAfter}</span><span className="unit">{unit}</span>
                       </td>
                       <td style={{ ...tdStyle, color: 'var(--text-muted)', maxWidth: 220, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {row.notes || '-'}
@@ -775,15 +779,15 @@ export default function SampleStockPage() {
             style={{ width: '100%', maxWidth: 480, padding: '1.75rem', position: 'relative' }}
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 700 }}>
-              ✏️ Edit Produk Sampel
+            <h3 style={{ margin: '0 0 0.25rem', fontSize: '1.1rem', fontWeight: 600 }}>
+              Edit Produk Sampel
             </h3>
-            <p style={{ margin: '0 0 1.25rem', fontSize: '0.83rem', color: 'var(--text-muted)' }}>
-              Satuan kemasan: <strong>{editTarget.unit}</strong> &nbsp;|&nbsp; Saldo: <strong>{editTarget.balance}</strong>
+            <p style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
+              Satuan kemasan: <strong style={{ fontWeight: 500 }}>{editTarget.unit}</strong> &nbsp;|&nbsp; Saldo: <strong className="num" style={{ fontWeight: 500 }}>{editTarget.balance}</strong>
             </p>
 
             {editError && (
-              <div style={{ marginBottom: '1rem', padding: '0.65rem 0.9rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+              <div style={{ marginBottom: '1rem', padding: '0.625rem 0.875rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>
                 {editError}
               </div>
             )}
@@ -827,8 +831,8 @@ export default function SampleStockPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
-              <button onClick={closeEditModal} className="btn" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.5rem' }}>
+              <button onClick={closeEditModal} className="btn btn-outline" style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
                 Batal
               </button>
               <button
@@ -837,7 +841,7 @@ export default function SampleStockPage() {
                 className="btn btn-primary"
                 style={{ padding: '0.5rem 1.5rem', fontSize: '0.875rem' }}
               >
-                {editLoading ? 'Menyimpan...' : '✅ Simpan Perubahan'}
+                {editLoading ? 'Menyimpan...' : 'Simpan Perubahan'}
               </button>
             </div>
           </div>

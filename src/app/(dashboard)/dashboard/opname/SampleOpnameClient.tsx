@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useTransition } from 'react'
 import { adjustSampleStock } from '@/app/actions/sample-stock'
+import { Check } from 'lucide-react'
 
 type Balance = { productId: string; productName: string; unit: string; balance: number }
 
@@ -60,26 +61,26 @@ export default function SampleOpnameClient() {
     })
   }
 
-  const tdStyle: React.CSSProperties = { padding: '0.65rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem', verticalAlign: 'middle' }
-  const thStyle: React.CSSProperties = { padding: '0.6rem 1rem', fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }
+  const tdStyle: React.CSSProperties = { padding: '0.625rem 1rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.875rem', verticalAlign: 'middle', fontVariantNumeric: 'tabular-nums' }
+  const thStyle: React.CSSProperties = { padding: '0.625rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', textAlign: 'left', borderBottom: '1px solid var(--border)', background: 'var(--surface-2)' }
 
   return (
     <div>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.25rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h3 style={{ margin: 0 }}>⚖️ Opname Stok Gudang Sampel</h3>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+          <h3 style={{ margin: 0 }}>Opname Stok Gudang Sampel</h3>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Input stok aktual per produk dalam satuan kemasan. Adjustment akan langsung tercatat tanpa perlu persetujuan.
           </p>
         </div>
         <button onClick={handleSubmit} disabled={isPending} className="btn btn-primary">
-          {isPending ? 'Menyimpan...' : '✅ Simpan Semua Penyesuaian'}
+          {isPending ? 'Menyimpan...' : <><Check size={16} strokeWidth={1.75} className="icon-inline" />Simpan Semua Penyesuaian</>}
         </button>
       </div>
 
-      {error   && <div style={{ background: '#fee2e2', color: '#991b1b', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
-      {success && <div style={{ background: '#dcfce7', color: '#166534', borderRadius: '8px', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>{success}</div>}
+      {error   && <div style={{ background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>{error}</div>}
+      {success && <div style={{ background: 'var(--success-bg)', color: 'var(--success)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', fontSize: '0.875rem' }}>{success}</div>}
 
       <div className="table-card">
         {loading ? (
@@ -103,14 +104,14 @@ export default function SampleOpnameClient() {
                   const data   = opnameData[b.productId] || { actual: '', notes: '' }
                   const actual = parseFloat(data.actual)
                   const diff   = !data.actual || isNaN(actual) ? 0 : actual - b.balance
-                  const diffColor = diff > 0 ? '#16a34a' : diff < 0 ? '#dc2626' : 'var(--text-muted)'
+                  const diffColor = diff > 0 ? 'var(--success)' : diff < 0 ? 'var(--danger)' : 'var(--text-muted)'
 
                   return (
-                    <tr key={b.productId} style={{ background: diff !== 0 ? '#fffbeb' : 'var(--surface)' }}>
-                      <td style={{ ...tdStyle, fontWeight: 600, color: 'var(--primary)' }}>{b.productName}</td>
-                      <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '1rem', fontWeight: 700 }}>
-                        {b.balance}
-                        <span style={{ fontSize: '0.75rem', fontWeight: 'normal', color: 'var(--text-muted)', marginLeft: '4px' }}>{b.unit}</span>
+                    <tr key={b.productId} style={{ background: diff !== 0 ? 'var(--warning-bg)' : 'var(--surface)' }}>
+                      <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }}>{b.productName}</td>
+                      <td style={{ ...tdStyle, fontSize: '1rem', fontWeight: 600 }}>
+                        <span className="num">{b.balance}</span>
+                        <span className="unit">{b.unit}</span>
                       </td>
                       <td style={{ ...tdStyle }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -118,14 +119,14 @@ export default function SampleOpnameClient() {
                             type="number" step="1" min="0"
                             placeholder={b.balance.toString()}
                             className="form-control"
-                            style={{ width: '90px', padding: '0.4rem 0.5rem' }}
+                            style={{ width: '90px', padding: '0.375rem 0.5rem' }}
                             value={data.actual}
                             onChange={e => setOpnameData({ ...opnameData, [b.productId]: { ...data, actual: e.target.value } })}
                           />
-                          <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{b.unit}</span>
+                          <span className="unit" style={{ marginLeft: 0, whiteSpace: 'nowrap' }}>{b.unit}</span>
                         </div>
                       </td>
-                      <td style={{ ...tdStyle, fontFamily: 'monospace', fontWeight: 700, color: diffColor, fontSize: '0.95rem' }}>
+                      <td className="num" style={{ ...tdStyle, fontWeight: 600, color: diffColor, fontSize: '0.875rem' }}>
                         {data.actual === '' ? '—' : diff > 0 ? `+${diff}` : diff}
                       </td>
                       <td style={tdStyle}>
@@ -133,7 +134,7 @@ export default function SampleOpnameClient() {
                           type="text"
                           className="form-control"
                           placeholder={diff !== 0 ? 'Keterangan wajib diisi...' : 'opsional'}
-                          style={{ padding: '0.4rem 0.5rem', borderColor: diff !== 0 && !data.notes ? 'var(--danger)' : undefined }}
+                          style={{ padding: '0.375rem 0.5rem', borderColor: diff !== 0 && !data.notes ? 'var(--danger)' : undefined }}
                           value={data.notes}
                           onChange={e => setOpnameData({ ...opnameData, [b.productId]: { ...data, notes: e.target.value } })}
                         />

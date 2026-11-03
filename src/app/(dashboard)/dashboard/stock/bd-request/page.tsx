@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { submitAfaStockRequest } from '@/app/actions/afa-stock'
 import SearchableSelect from '@/components/SearchableSelect'
+import { X, Warehouse, FlaskConical, Clock, Plus, ClipboardList, FileText, Download, ArrowLeft } from 'lucide-react'
 
 type SampleProduct = {
   productId:      string
@@ -217,7 +218,7 @@ export default function BdStockRequestPage() {
       if (res?.error) setError(res.error)
       else {
         // Produk tanpa isi per kemasan: pengajuan tersimpan, tapi stoknya tertahan sampai admin melengkapi
-        if (res && 'warning' in res && res.warning) alert('⏸ ' + res.warning)
+        if (res && 'warning' in res && res.warning) alert(res.warning)
         setSelectedProducts([]); setCurrentProduct(''); setCurrentQty('')
         setNotes(''); setDestinationCustomer(''); setError(null)
         fetch('/api/bd-requests').then(r => r.json()).then(data => setRequests(Array.isArray(data) ? data : []))
@@ -228,16 +229,16 @@ export default function BdStockRequestPage() {
 
   function getStatusBadge(status: string, warehouseSource?: string | null) {
     const map: Record<string, { label: string; color: string; bg: string }> = {
-      SUBMITTED:       { label: 'Menunggu SPV',       color: '#92400e', bg: '#fef3c7' },
-      APPROVED_SPV:    { label: 'Disetujui SPV',       color: '#1e40af', bg: '#dbeafe' },
-      APPROVED_FAM:    { label: 'Disetujui FA Manager',color: '#5b21b6', bg: '#ede9fe' },
-      APPROVED_WHM:    { label: 'Disetujui WH Manager',color: '#065f46', bg: '#d1fae5' },
-      APPROVED:        { label: 'Selesai',              color: '#166534', bg: '#dcfce7' },
-      REJECTED:        { label: 'Ditolak',              color: '#991b1b', bg: '#fee2e2' },
+      SUBMITTED:       { label: 'Menunggu SPV',       color: 'var(--warning)', bg: 'var(--warning-bg)' },
+      APPROVED_SPV:    { label: 'Disetujui SPV',       color: 'var(--info)', bg: 'var(--info-bg)' },
+      APPROVED_FAM:    { label: 'Disetujui FA Manager',color: 'var(--info)', bg: 'var(--info-bg)' },
+      APPROVED_WHM:    { label: 'Disetujui WH Manager',color: 'var(--info)', bg: 'var(--info-bg)' },
+      APPROVED:        { label: 'Selesai',              color: 'var(--success)', bg: 'var(--success-bg)' },
+      REJECTED:        { label: 'Ditolak',              color: 'var(--danger)', bg: 'var(--danger-bg)' },
     }
     const s = map[status] ?? { label: status, color: 'var(--text-muted)', bg: 'var(--surface-2)' }
     return (
-      <span style={{ padding: '0.2rem 0.6rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 700, background: s.bg, color: s.color }}>
+      <span style={{ padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500, background: s.bg, color: s.color, whiteSpace: 'nowrap' }}>
         {s.label}
       </span>
     )
@@ -314,21 +315,21 @@ export default function BdStockRequestPage() {
     }
   }
 
-  const thStyle: React.CSSProperties = { padding: '0.65rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }
-  const tdStyle: React.CSSProperties = { padding: '0.75rem 1rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem' }
+  const thStyle: React.CSSProperties = { padding: '0.625rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left' }
+  const tdStyle: React.CSSProperties = { padding: '0.75rem 1rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.875rem', fontVariantNumeric: 'tabular-nums' }
 
   const currentProductOptions = requestMode === 'SAMPLE'
     ? sampleProducts.map(p => ({
         value: p.productId,
         label: p.gramasiPerUnit && p.unitGramasi
-          ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • 🧪 ${p.balance} ${p.unit}`
-          : `${p.productName} (${p.unit}) • 🧪 ${p.balance} ${p.unit}`,
+          ? `${p.productName} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit} • Stok sampel: ${p.balance} ${p.unit}`
+          : `${p.productName} (${p.unit}) • Stok sampel: ${p.balance} ${p.unit}`,
       }))
     : mainProducts.map(p => ({
         value: p.id,
         label: p.gramasiPerUnit && p.unitGramasi
-          ? `${p.name} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit}${p.spvStock != null ? ` • 🏭 ${p.spvStock} ${p.unit}` : ''}`
-          : `${p.name} (${p.unit})${p.spvStock != null ? ` • 🏭 ${p.spvStock} ${p.unit}` : ''}`,
+          ? `${p.name} — ${p.gramasiPerUnit}${p.unitGramasi}/${p.unit}${p.spvStock != null ? ` • Stok SPV: ${p.spvStock} ${p.unit}` : ''}`
+          : `${p.name} (${p.unit})${p.spvStock != null ? ` • Stok SPV: ${p.spvStock} ${p.unit}` : ''}`,
       }))
 
   const currentUnit = requestMode === 'SAMPLE' ? (sampleDetail?.unit || 'kemasan') : (mainDetail?.unit || 'kemasan')
@@ -336,31 +337,32 @@ export default function BdStockRequestPage() {
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard" style={{ color: 'var(--text-muted)' }}>← Dashboard</Link>
+        <Link href="/dashboard" style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Dashboard</Link>
         <div>
-          <h2 style={{ margin: 0 }}>📦 Stok BD</h2>
-          <p style={{ margin: '0.2rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
+          <h2 style={{ margin: 0 }}>Stok BD</h2>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Pengajuan stok Busdev & riwayat permintaan.
           </p>
         </div>
       </div>
 
       {/* Tab */}
-      <div style={{ display: 'flex', borderBottom: '2px solid var(--border)', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
         {[
-          { key: 'form',    label: '➕ Ajukan Stok Baru' },
-          { key: 'history', label: '📋 Riwayat Pengajuan' },
+          { key: 'form',    label: 'Ajukan Stok Baru' },
+          { key: 'history', label: 'Riwayat Pengajuan' },
         ].map(tab => (
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key as any)}
             style={{
-              padding: '0.65rem 1.5rem', fontWeight: 600, fontSize: '0.9rem', border: 'none', background: 'none', cursor: 'pointer',
-              borderBottom: activeTab === tab.key ? '2px solid #7c3aed' : '2px solid transparent',
-              color: activeTab === tab.key ? '#7c3aed' : 'var(--text-muted)',
-              marginBottom: '-2px', transition: 'all 0.15s',
+              padding: '0.625rem 1.25rem', fontWeight: 500, fontSize: '0.875rem', border: 'none', background: 'none', cursor: 'pointer',
+              borderBottom: activeTab === tab.key ? '2px solid var(--primary)' : '2px solid transparent',
+              color: activeTab === tab.key ? 'var(--text-main)' : 'var(--text-muted)',
+              marginBottom: '-1px', transition: 'var(--transition)',
+              display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
             }}
-          >{tab.label}</button>
+          >{tab.key === 'form' ? <Plus size={16} strokeWidth={1.75} /> : <ClipboardList size={16} strokeWidth={1.75} />}{tab.label}</button>
         ))}
       </div>
 
@@ -369,25 +371,25 @@ export default function BdStockRequestPage() {
         <div>
           {/* Mode selector */}
           <div className="card" style={{ marginBottom: '1rem', padding: '1rem 1.25rem' }}>
-            <p style={{ fontWeight: 600, fontSize: '0.875rem', marginBottom: '0.75rem' }}>🏭 Ajukan dari Gudang:</p>
+            <p style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-main)', marginBottom: '0.75rem' }}>Ajukan dari Gudang:</p>
             <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap' }}>
               {([
-                ['SAMPLE', '🧪 Gudang Sampel SPV', 'Approval 1 langkah oleh SPV. Untuk kebutuhan sampel & demo.', '#ede9fe', '#7c3aed'],
-                ['MAIN',   '🏭 Gudang Utama (Accurate)', 'Approval penuh: SPV → FA Manager → WH Manager. Stok dari gudang Accurate.', '#dbeafe', '#1d4ed8'],
+                ['SAMPLE', 'Gudang Sampel SPV', 'Approval 1 langkah oleh SPV. Untuk kebutuhan sampel & demo.', 'var(--primary-light)', 'var(--primary)'],
+                ['MAIN',   'Gudang Utama (Accurate)', 'Approval penuh: SPV → FA Manager → WH Manager. Stok dari gudang Accurate.', 'var(--primary-light)', 'var(--primary)'],
               ] as const).map(([val, label, desc, bg, color]) => (
                 <label key={val} onClick={() => setRequestMode(val)}
                   style={{
-                    flex: 1, minWidth: 200, cursor: 'pointer', padding: '0.85rem 1rem',
-                    border: `2px solid ${requestMode === val ? color : 'var(--border)'}`,
-                    borderRadius: 'var(--radius-sm)', background: requestMode === val ? bg : 'white',
-                    transition: 'all 0.15s',
+                    flex: 1, minWidth: 200, cursor: 'pointer', padding: '0.75rem 1rem',
+                    border: `1px solid ${requestMode === val ? color : 'var(--border)'}`,
+                    borderRadius: 'var(--radius-sm)', background: requestMode === val ? bg : 'var(--surface)',
+                    transition: 'var(--transition)',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.25rem' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.25rem' }}>
                     <input type="radio" name="requestMode" value={val} checked={requestMode === val} onChange={() => setRequestMode(val)} />
-                    <span style={{ fontWeight: 700, color }}>{label}</span>
+                    <span style={{ fontWeight: 500, color: 'var(--text-main)', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>{val === 'MAIN' ? <Warehouse size={16} strokeWidth={1.75} /> : <FlaskConical size={16} strokeWidth={1.75} />}{label}</span>
                   </div>
-                  <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)', paddingLeft: '1.4rem' }}>{desc}</p>
+                  <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-muted)', paddingLeft: '1.5rem' }}>{desc}</p>
                 </label>
               ))}
             </div>
@@ -395,21 +397,21 @@ export default function BdStockRequestPage() {
 
           <div className="card">
             {error && (
-              <div style={{ marginBottom: '1rem', color: 'var(--danger)', background: '#fee2e2', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>{error}</div>
+              <div style={{ marginBottom: '1rem', color: 'var(--danger)', background: 'var(--danger-bg)', padding: '0.75rem', borderRadius: 'var(--radius-sm)' }}>{error}</div>
             )}
 
             <form onSubmit={handleSubmit}>
 
               {/* Customer picker — shown for BOTH modes */}
               <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>📍 Tujuan Pengiriman</h3>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Tujuan Pengiriman</h3>
                 <div className="form-group">
                   <label className="form-label">
                     Pilih Pelanggan (Busdev) <span style={{ color: 'var(--danger)' }}>*</span>
                   </label>
                   {loadingCustomers ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.9rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                      <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid #7c3aed', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 0.875rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                      <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid var(--primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
                       Memuat daftar pelanggan dari Accurate...
                     </div>
                   ) : (
@@ -431,20 +433,20 @@ export default function BdStockRequestPage() {
 
               {/* MAIN mode info banner */}
               {requestMode === 'MAIN' && (
-                <div style={{ marginBottom: '1.5rem', padding: '0.75rem 1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: '#1d4ed8' }}>
-                  🏭 Mode Gudang Utama — Stok akan diambil dari Accurate setelah disetujui WH Manager. Pilih sumber gudang per produk.
+                <div style={{ marginBottom: '1.5rem', padding: '0.75rem 1rem', background: 'var(--info-bg)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--info)', display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}>
+                  <Warehouse size={16} strokeWidth={1.75} style={{ flexShrink: 0, marginTop: '0.125rem' }} />Mode Gudang Utama — Stok akan diambil dari Accurate setelah disetujui WH Manager. Pilih sumber gudang per produk.
                 </div>
               )}
 
               {/* Pilih Produk */}
               <div style={{ marginBottom: '2rem' }}>
-                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>📦 Kebutuhan Produk</h3>
+                <h3 style={{ fontSize: '1.1rem', marginBottom: '1rem' }}>Kebutuhan Produk</h3>
                 <div className="picker-row">
                   <div style={{ flex: 2 }}>
                     <label className="form-label">Pilih Produk</label>
                     {(requestMode === 'SAMPLE' ? loadingSample : loadingMain) ? (
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.6rem 0.9rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                        <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid #7c3aed', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.625rem 0.875rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
+                        <span style={{ display: 'inline-block', width: 16, height: 16, border: '2px solid var(--primary)', borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
                         Memuat produk...
                       </div>
                     ) : (
@@ -471,42 +473,42 @@ export default function BdStockRequestPage() {
 
                 {/* Product info card — SAMPLE mode */}
                 {requestMode === 'SAMPLE' && sampleDetail && (
-                  <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: '#ede9fe', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
+                  <div style={{ marginTop: '0.75rem', padding: '0.625rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                     {sampleDetail.unitGramasi && sampleDetail.gramasiPerUnit && (
-                      <span>📐 <strong>{sampleDetail.gramasiPerUnit}{sampleDetail.unitGramasi}</strong> per {sampleDetail.unit}</span>
+                      <span><strong className="num" style={{ fontWeight: 600 }}>{sampleDetail.gramasiPerUnit}{sampleDetail.unitGramasi}</strong> per {sampleDetail.unit}</span>
                     )}
                     {currentSampleBalance != null && currentSampleBalance > 0 ? (
-                      <span style={{ color: '#5b21b6' }}>🧪 Stok Sampel SPV: <strong>{currentSampleBalance} {sampleDetail.unit}</strong></span>
+                      <span style={{ color: 'var(--success)' }}>Stok Sampel SPV: <strong className="num" style={{ fontWeight: 600 }}>{currentSampleBalance}</strong><span className="unit">{sampleDetail.unit}</span></span>
                     ) : (
-                      <span style={{ color: '#b45309' }}>🧪 Belum ada di gudang sampel — SPV akan melakukan pengadaan</span>
+                      <span style={{ color: 'var(--warning)' }}>Belum ada di gudang sampel — SPV akan melakukan pengadaan</span>
                     )}
                   </div>
                 )}
 
                 {/* Product info card — MAIN mode */}
                 {requestMode === 'MAIN' && mainDetail && (
-                  <div style={{ marginTop: '0.75rem', padding: '0.65rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                  <div style={{ marginTop: '0.75rem', padding: '0.625rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
                     <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap' }}>
                       {mainDetail.unitGramasi && mainDetail.gramasiPerUnit && (
-                        <span>📐 <strong>{mainDetail.gramasiPerUnit}{mainDetail.unitGramasi}</strong> per {mainDetail.unit}</span>
+                        <span><strong className="num" style={{ fontWeight: 600 }}>{mainDetail.gramasiPerUnit}{mainDetail.unitGramasi}</strong> per {mainDetail.unit}</span>
                       )}
-                      <span style={{ color: mainDetail.spvStock ? '#166534' : '#6b7280' }}>
-                        🏪 Stok SPV: <strong>{mainDetail.spvStock != null ? `${mainDetail.spvStock} ${mainDetail.unit}` : 'Belum tersinkron'}</strong>
+                      <span style={{ color: mainDetail.spvStock ? 'var(--success)' : 'var(--text-muted)' }}>
+                        Stok SPV: <strong className="num" style={{ fontWeight: 600 }}>{mainDetail.spvStock != null ? `${mainDetail.spvStock} ${mainDetail.unit}` : 'Belum tersinkron'}</strong>
                       </span>
                     </div>
                     {/* Warehouse picker per SKU */}
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
-                      <span style={{ fontWeight: 600, fontSize: '0.8rem', color: '#1d4ed8' }}>🏭 Sumber Gudang Accurate:</span>
+                      <span style={{ fontWeight: 500, fontSize: '0.8rem', color: 'var(--text-secondary)', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}><Warehouse size={14} strokeWidth={1.75} />Sumber Gudang Accurate:</span>
                       {loadingWarehouses[currentProduct] ? (
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>⏳ Memuat daftar gudang...</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Clock size={14} strokeWidth={1.75} />Memuat daftar gudang...</span>
                       ) : warehouseOptions[currentProduct] ? (
                         <select
                           value={selectedWarehouses[currentProduct] ?? ''}
                           onChange={e => setSelectedWarehouses(prev => ({ ...prev, [currentProduct]: e.target.value }))}
                           style={{
-                            padding: '0.3rem 0.6rem', fontSize: '0.82rem',
-                            border: '1.5px solid #bfdbfe', borderRadius: '0.35rem',
-                            background: '#eff6ff', color: '#1d4ed8', fontWeight: 600, cursor: 'pointer',
+                            padding: '0.25rem 0.5rem', fontSize: '0.8rem',
+                            border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                            background: 'var(--surface)', color: 'var(--text-main)', fontWeight: 500, cursor: 'pointer',
                           }}
                         >
                           {warehouseOptions[currentProduct].map(wh => (
@@ -516,7 +518,7 @@ export default function BdStockRequestPage() {
                           ))}
                         </select>
                       ) : (
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Pilih produk untuk melihat gudang tersedia</span>
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Pilih produk untuk melihat gudang tersedia</span>
                       )}
                     </div>
                   </div>
@@ -542,36 +544,36 @@ export default function BdStockRequestPage() {
                               <div style={{ fontWeight: 500 }}>{p.name}</div>
                               {requestMode === 'SAMPLE' ? (
                                 p.spvStock != null && p.spvStock > 0 ? (
-                                  <div style={{ fontSize: '0.75rem', color: '#5b21b6' }}>🧪 Stok sampel: {p.spvStock} {p.unit}</div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok sampel: <span className="num">{p.spvStock}</span><span className="unit">{p.unit}</span></div>
                                 ) : (
-                                  <div style={{ fontSize: '0.75rem', color: '#b45309' }}>🧪 Belum ada di sampel</div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--warning)' }}>Belum ada di sampel</div>
                                 )
                               ) : (
                                 p.spvStock != null && (
-                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok SPV: {p.spvStock} {p.unit}</div>
+                                  <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Stok SPV: <span className="num">{p.spvStock}</span><span className="unit">{p.unit}</span></div>
                                 )
                               )}
                             </td>
                             <td style={tdStyle}>
-                              <span style={{ fontWeight: 700, fontSize: '1.05rem' }}>{p.qtyRequested}</span>
-                              <span style={{ color: 'var(--text-muted)', marginLeft: '0.4rem' }}>{p.unit}</span>
+                              <span className="num" style={{ fontWeight: 600, fontSize: '1rem' }}>{p.qtyRequested}</span>
+                              <span className="unit">{p.unit}</span>
                             </td>
                             {requestMode === 'MAIN' && (
                               <td style={tdStyle}>
-                                <span style={{ fontSize: '0.82rem', color: '#1d4ed8', fontWeight: 600 }}>
-                                  🏭 {p.accurateWarehouse ?? 'Gudang Baik'}
+                                <span style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                                  <Warehouse size={14} strokeWidth={1.75} />{p.accurateWarehouse ?? 'Gudang Baik'}
                                 </span>
                               </td>
                             )}
                             <td style={tdStyle}>
                               {p.unitGramasi && p.gramasiPerUnit ? (
-                                <span style={{ color: '#2563eb', fontSize: '0.85rem' }}>
+                                <span className="num" style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
                                   {(p.qtyRequested * p.gramasiPerUnit).toLocaleString('id-ID')}{p.unitGramasi}
                                 </span>
                               ) : <span style={{ color: 'var(--text-muted)' }}>—</span>}
                             </td>
                             <td style={{ ...tdStyle, textAlign: 'center' }}>
-                              <button type="button" onClick={() => removeProduct(p.productId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1.2rem' }}>✕</button>
+                              <button type="button" onClick={() => removeProduct(p.productId)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', display: 'inline-flex', padding: '0.25rem' }} aria-label="Hapus"><X size={16} strokeWidth={1.75} /></button>
                             </td>
                           </tr>
                         ))}
@@ -597,9 +599,7 @@ export default function BdStockRequestPage() {
               <button
                 type="submit" className="btn btn-primary"
                 style={{
-                  width: '100%', padding: '0.8rem', fontSize: '1rem',
-                  background: requestMode === 'MAIN' ? '#1d4ed8' : '#7c3aed',
-                  borderColor: requestMode === 'MAIN' ? '#1d4ed8' : '#7c3aed',
+                  width: '100%', padding: '0.75rem', fontSize: '1rem',
                 }}
                 disabled={isPending || selectedProducts.length === 0 || !destinationCustomer}
               >
@@ -642,21 +642,21 @@ export default function BdStockRequestPage() {
                 <tbody>
                   {requests.map(req => (
                     <tr key={req.id}>
-                      <td style={{ ...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
+                      <td style={{ ...tdStyle, fontFamily: 'var(--font-mono-stack)', fontSize: '0.8rem' }}>{req.id.slice(0, 8).toUpperCase()}</td>
                       <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
                         {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(req.createdAt))}
                       </td>
                       <td style={tdStyle}>
                         {req.warehouseSource === 'SAMPLE' ? (
-                          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#7c3aed', background: '#ede9fe', padding: '0.15rem 0.55rem', borderRadius: '9999px' }}>🧪 Sampel</span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', background: 'var(--surface-2)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><FlaskConical size={14} strokeWidth={1.75} />Sampel</span>
                         ) : (
-                          <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#1d4ed8', background: '#dbeafe', padding: '0.15rem 0.55rem', borderRadius: '9999px' }}>🏭 Utama</span>
+                          <span style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', background: 'var(--surface-2)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Warehouse size={14} strokeWidth={1.75} />Utama</span>
                         )}
                       </td>
                       <td style={{ ...tdStyle, maxWidth: 200, color: 'var(--text-muted)', fontSize: '0.8rem' }}>
                         {req.plan && req.plan !== '-' ? req.plan.split('\n')[0] : '-'}
                       </td>
-                      <td style={{ ...tdStyle, fontSize: '0.82rem' }}>
+                      <td style={{ ...tdStyle, fontSize: '0.8rem' }}>
                         {req.details?.map((d: any) => {
                           const qty = d.qtyApproved != null ? d.qtyApproved : d.qtyRequested
                           return `${d.product?.name}: ${qty} ${d.requestUnit || d.product?.unit || ''}`
@@ -666,8 +666,8 @@ export default function BdStockRequestPage() {
                       {req.warehouseSource !== 'SAMPLE' ? (
                         <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
                           {req.accurateInvoiceNo ? (
-                            <span style={{ fontSize: '0.8rem', fontWeight: 600, color: '#166534', background: '#dcfce7', padding: '0.2rem 0.6rem', borderRadius: '0.3rem', border: '1px solid #bbf7d0' }}>
-                              📄 {req.accurateInvoiceNo}
+                            <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--success)', background: 'var(--success-bg)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem', fontFamily: 'var(--font-mono-stack)' }}>
+                              <FileText size={14} strokeWidth={1.75} />{req.accurateInvoiceNo}
                             </span>
                           ) : (
                             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>—</span>
@@ -681,9 +681,9 @@ export default function BdStockRequestPage() {
                           <button
                             onClick={() => handleDownloadPdf(req)}
                             className="btn btn-outline"
-                            style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem', color: '#0ea5e9', borderColor: '#e0f2fe' }}
+                            style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}
                           >
-                            📄 Download PDF
+                            <Download size={14} strokeWidth={1.75} className="icon-inline" />Download PDF
                           </button>
                         )}
                       </td>

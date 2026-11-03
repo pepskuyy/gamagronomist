@@ -4,6 +4,7 @@ import { decrypt } from '@/lib/auth'
 import ApproveClient from './ApproveClient'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
 
 
 export default async function OpnameApproveDetail({ params }: { params: Promise<{ id: string }> }) {
@@ -40,7 +41,7 @@ export default async function OpnameApproveDetail({ params }: { params: Promise<
     <div className="space-y-6">
       <div className="flex-between">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <Link href="/dashboard/opname" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+          <Link href="/dashboard/opname" style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Kembali</Link>
           <h2 style={{ margin: 0 }}>Review Opname: {opname.user.name}</h2>
         </div>
       </div>
