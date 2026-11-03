@@ -3,6 +3,7 @@
 import { useEffect, useState, Fragment } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Tooltip, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { Map as MapIcon, Package, Satellite, Sprout, Star, Store, Target } from 'lucide-react'
 import { OpportunityZone, ZoneStoreItem } from '@/lib/demoplot-opportunity'
 
 interface Props {
@@ -85,44 +86,51 @@ export default function OpportunityMapInner({
           left: 52,
           zIndex: 1000,
           display: 'flex',
-          gap: '0.25rem',
-          background: 'rgba(255,255,255,0.95)',
-          padding: '3px',
-          borderRadius: '8px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+          gap: '2px',
+          background: 'var(--surface)',
+          padding: '2px',
+          borderRadius: 'var(--radius-sm)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-sm)',
         }}
       >
         <button
           type="button"
           onClick={() => setMapMode('osm')}
           style={{
-            padding: '0.35rem 0.75rem',
-            borderRadius: '6px',
+            padding: '0.25rem 0.625rem',
+            borderRadius: 'var(--radius-xs)',
             fontSize: '0.78rem',
-            fontWeight: 700,
-            background: mapMode === 'osm' ? '#0f172a' : 'transparent',
-            color: mapMode === 'osm' ? '#ffffff' : '#475569',
+            fontWeight: 500,
+            background: mapMode === 'osm' ? 'var(--surface-3)' : 'transparent',
+            color: mapMode === 'osm' ? 'var(--text-main)' : 'var(--text-muted)',
             border: 'none',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
           }}
         >
-          🗺️ Peta
+          <MapIcon size={14} strokeWidth={1.75} /> Peta
         </button>
         <button
           type="button"
           onClick={() => setMapMode('satellite')}
           style={{
-            padding: '0.35rem 0.75rem',
-            borderRadius: '6px',
+            padding: '0.25rem 0.625rem',
+            borderRadius: 'var(--radius-xs)',
             fontSize: '0.78rem',
-            fontWeight: 700,
-            background: mapMode === 'satellite' ? '#0f172a' : 'transparent',
-            color: mapMode === 'satellite' ? '#ffffff' : '#475569',
+            fontWeight: 500,
+            background: mapMode === 'satellite' ? 'var(--surface-3)' : 'transparent',
+            color: mapMode === 'satellite' ? 'var(--text-main)' : 'var(--text-muted)',
             border: 'none',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
           }}
         >
-          🛰️ Satelit
+          <Satellite size={14} strokeWidth={1.75} /> Satelit
         </button>
       </div>
 
@@ -130,22 +138,21 @@ export default function OpportunityMapInner({
       <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 1000 }}>
         <div
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(4px)',
-            padding: '0.45rem 0.9rem',
-            borderRadius: '9999px',
-            fontSize: '0.82rem',
-            fontWeight: 700,
-            color: '#1e293b',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            background: 'var(--surface)',
+            padding: '0.25rem 0.75rem',
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.8rem',
+            fontWeight: 500,
+            color: 'var(--text-secondary)',
+            boxShadow: 'var(--shadow-sm)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            border: '1px solid #e2e8f0',
+            gap: '0.375rem',
+            border: '1px solid var(--border)',
           }}
         >
-          <span>🎯</span>
-          <span>{zones.length} Zona Rekomendasi Terdeteksi</span>
+          <Target size={14} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} />
+          <span><span className="num" style={{ color: 'var(--text-main)' }}>{zones.length}</span> Zona Rekomendasi Terdeteksi</span>
         </div>
       </div>
 
@@ -156,29 +163,26 @@ export default function OpportunityMapInner({
           bottom: 24,
           left: 12,
           zIndex: 1000,
-          background: 'rgba(255, 255, 255, 0.96)',
-          backdropFilter: 'blur(4px)',
-          borderRadius: '0.65rem',
-          padding: '0.75rem 0.95rem',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-          border: '1px solid #e2e8f0',
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.75rem 1rem',
+          boxShadow: 'var(--shadow-sm)',
+          border: '1px solid var(--border)',
           fontSize: '0.75rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.4rem',
+          gap: '0.375rem',
           minWidth: '220px',
         }}
       >
         <div
           style={{
-            fontSize: '0.7rem',
-            fontWeight: 800,
-            color: '#64748b',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
+            fontSize: '0.75rem',
+            fontWeight: 500,
+            color: 'var(--text-muted)',
           }}
         >
-          LEGENDA REKOMENDASI
+          Legenda rekomendasi
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
@@ -191,7 +195,7 @@ export default function OpportunityMapInner({
               border: '2px solid #b91c1c',
             }}
           />
-          <span style={{ color: '#334155', fontWeight: 600 }}>
+          <span style={{ color: 'var(--text-secondary)' }}>
             Zona Urgensi: Kawal Sell-Out (Merah)
           </span>
         </div>
@@ -206,7 +210,7 @@ export default function OpportunityMapInner({
               border: '2px solid #d97706',
             }}
           />
-          <span style={{ color: '#334155', fontWeight: 500 }}>
+          <span style={{ color: 'var(--text-secondary)' }}>
             Zona Potensial / Penetrasi (Oranye/Kuning)
           </span>
         </div>
@@ -221,7 +225,7 @@ export default function OpportunityMapInner({
               border: '1.5px solid #059669',
             }}
           />
-          <span style={{ color: '#334155', fontWeight: 500 }}>
+          <span style={{ color: 'var(--text-secondary)' }}>
             Zona Terawat (Baru ada demplot)
           </span>
         </div>
@@ -229,8 +233,8 @@ export default function OpportunityMapInner({
         <div
           style={{
             height: '1px',
-            background: '#e2e8f0',
-            margin: '0.2rem 0',
+            background: 'var(--border)',
+            margin: '0.25rem 0',
           }}
         />
 
@@ -244,8 +248,8 @@ export default function OpportunityMapInner({
               border: '2px solid #7c2d12',
             }}
           />
-          <span style={{ color: '#334155', fontWeight: 600 }}>
-            ⭐ Toko Berstok Produk Fokus
+          <span style={{ color: 'var(--text-secondary)' }}>
+            Toko Berstok Produk Fokus
           </span>
         </div>
 
@@ -259,8 +263,8 @@ export default function OpportunityMapInner({
               border: '1px solid #1d4ed8',
             }}
           />
-          <span style={{ color: '#334155', fontWeight: 500 }}>
-            🏪 Kios Sekitar (Spillover)
+          <span style={{ color: 'var(--text-secondary)' }}>
+            Kios Sekitar (Spillover)
           </span>
         </div>
 
@@ -274,8 +278,8 @@ export default function OpportunityMapInner({
               border: '1px solid #6d28d9',
             }}
           />
-          <span style={{ color: '#334155', fontWeight: 500 }}>
-            🌾 Demplot Lalu Terdekat
+          <span style={{ color: 'var(--text-secondary)' }}>
+            Demplot Lalu Terdekat
           </span>
         </div>
       </div>
@@ -346,13 +350,13 @@ export default function OpportunityMapInner({
               >
                 <Tooltip direction="top" offset={[0, -10]} opacity={0.95}>
                   <div style={{ textAlign: 'center' }}>
-                    <div style={{ fontWeight: 800, fontSize: '0.85rem' }}>
+                    <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>
                       #{zone.rank} {zone.title}
                     </div>
-                    <div style={{ fontSize: '0.75rem', color: '#475569' }}>
-                      Skor: <strong>{zone.score}/100</strong> • {zone.urgency_label}
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
+                      Skor: <strong className="num" style={{ fontWeight: 600 }}>{zone.score}/100</strong> • {zone.urgency_label}
                     </div>
-                    <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       {zone.stocked_stores_count} Toko Berstok • {zone.total_stores_in_radius} Total Kios
                     </div>
                   </div>
@@ -363,51 +367,51 @@ export default function OpportunityMapInner({
                     <div
                       style={{
                         display: 'inline-block',
-                        padding: '0.2rem 0.5rem',
-                        borderRadius: '0.25rem',
-                        fontSize: '0.7rem',
-                        fontWeight: 700,
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: 'var(--radius-xs)',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
                         background: style.stroke,
                         color: '#ffffff',
-                        marginBottom: '0.4rem',
+                        marginBottom: '0.5rem',
                       }}
                     >
                       Peringkat #{zone.rank} • Skor {zone.score}/100
                     </div>
-                    <h4 style={{ margin: '0 0 0.25rem', fontSize: '0.95rem', fontWeight: 800 }}>
+                    <h4 style={{ margin: '0 0 0.25rem', fontSize: '0.95rem', fontWeight: 600 }}>
                       {zone.title}
                     </h4>
-                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', color: '#475569' }}>
+                    <p style={{ margin: '0 0 0.5rem', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                       {zone.action_summary}
                     </p>
-                    <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '0.4rem', fontSize: '0.75rem' }}>
-                      <div>
-                        🏪 Toko berstok produk fokus: <strong>{zone.stocked_stores_count} toko</strong>
+                    <div style={{ borderTop: '1px solid var(--border)', paddingTop: '0.5rem', fontSize: '0.75rem', display: 'flex', flexDirection: 'column', gap: '0.125rem' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <Store size={14} strokeWidth={1.75} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /> <span>Toko berstok produk fokus: <strong className="num" style={{ fontWeight: 600 }}>{zone.stocked_stores_count}</strong><span className="unit">toko</span></span>
                       </div>
-                      <div>
-                        📦 Nilai stok produk sales: <strong>Rp {zone.total_dev_stock_omset.toLocaleString('id-ID')}</strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <Package size={14} strokeWidth={1.75} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /> <span>Nilai stok produk sales: <strong className="num" style={{ fontWeight: 600 }}>Rp {zone.total_dev_stock_omset.toLocaleString('id-ID')}</strong></span>
                       </div>
-                      <div>
-                        🌾 Demplot terakhir:{' '}
-                        <strong>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <Sprout size={14} strokeWidth={1.75} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /> <span>Demplot terakhir:{' '}
+                        <strong style={{ fontWeight: 600 }}>
                           {zone.last_demoplot_days_ago !== null
                             ? `${zone.last_demoplot_days_ago} hari lalu`
                             : 'Nihil (Belum pernah)'}
-                        </strong>
+                        </strong></span>
                       </div>
                     </div>
                     <button
                       type="button"
                       onClick={() => onSelectZone(zone)}
                       style={{
-                        marginTop: '0.6rem',
+                        marginTop: '0.5rem',
                         width: '100%',
-                        padding: '0.4rem',
-                        borderRadius: '0.375rem',
+                        padding: '0.375rem',
+                        borderRadius: 'var(--radius-sm)',
                         border: 'none',
-                        background: '#0f172a',
+                        background: 'var(--text-main)',
                         color: '#ffffff',
-                        fontWeight: 700,
+                        fontWeight: 500,
                         fontSize: '0.78rem',
                         cursor: 'pointer',
                       }}
@@ -445,21 +449,21 @@ export default function OpportunityMapInner({
                 >
                   <Tooltip direction="top" offset={[0, -8]}>
                     <div style={{ fontSize: '0.78rem' }}>
-                      <div style={{ fontWeight: 700, color: hasStock ? '#c2410c' : '#1e40af' }}>
-                        {hasStock ? '⭐ ' : '🏪 '}
+                      <div style={{ fontWeight: 600, color: hasStock ? 'var(--warning)' : 'var(--info)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                        {hasStock ? <Star size={12} strokeWidth={1.75} fill="currentColor" /> : <Store size={12} strokeWidth={1.75} />}
                         {store.name}
                       </div>
-                      <div>Jarak dari pusat zona: {store.distance_km} km</div>
+                      <div>Jarak dari pusat zona: <span className="num">{store.distance_km}</span><span className="unit">km</span></div>
                       {hasStock ? (
-                        <div style={{ color: '#b45309', fontWeight: 600 }}>
+                        <div className="num" style={{ color: 'var(--warning)', fontWeight: 500 }}>
                           Stok: Rp {store.total_dev_omset.toLocaleString('id-ID')} (
                           {store.stocked_items.map((it) => it.product_name).join(', ')})
                         </div>
                       ) : (
-                        <div style={{ color: '#64748b' }}>Belum memasok produk fokus</div>
+                        <div style={{ color: 'var(--text-muted)' }}>Belum memasok produk fokus</div>
                       )}
                       {store.default_salesman && (
-                        <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                           Sales: {store.default_salesman}
                         </div>
                       )}
@@ -488,14 +492,14 @@ export default function OpportunityMapInner({
               >
                 <Tooltip direction="bottom" offset={[0, 8]}>
                   <div style={{ fontSize: '0.75rem' }}>
-                    <div style={{ fontWeight: 700, color: '#6d28d9' }}>
-                      🌾 Demplot: {dp.farmer_name}
+                    <div style={{ fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.25rem' }}>
+                      <Sprout size={12} strokeWidth={1.75} /> Demplot: {dp.farmer_name}
                     </div>
                     <div>Komoditas: {dp.commodity}</div>
                     <div>Tanggal: {dp.date}</div>
-                    <div>Jarak: {dp.distance_km} km</div>
+                    <div>Jarak: <span className="num">{dp.distance_km}</span><span className="unit">km</span></div>
                     {dp.products.length > 0 && (
-                      <div style={{ color: '#475569' }}>
+                      <div style={{ color: 'var(--text-secondary)' }}>
                         Produk: {dp.products.slice(0, 2).join(', ')}
                       </div>
                     )}

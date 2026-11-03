@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { AlertTriangle, Calendar, MapPin, Ruler, Store, User, X } from 'lucide-react'
 
 interface InvoiceItem {
   item_no?: string
@@ -74,8 +75,7 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
         position: 'fixed',
         inset: 0,
         zIndex: 9999,
-        background: 'rgba(15, 23, 42, 0.65)',
-        backdropFilter: 'blur(4px)',
+        background: 'rgba(23, 23, 23, 0.4)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -85,14 +85,15 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
     >
       <div
         style={{
-          background: '#ffffff',
-          borderRadius: '1rem',
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius-xl)',
+          border: '1px solid var(--border)',
           maxWidth: '820px',
           width: '100%',
           maxHeight: '90vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)',
+          boxShadow: 'var(--shadow-lg)',
           overflow: 'hidden',
           animation: 'fadeIn 0.2s ease-out',
         }}
@@ -106,17 +107,17 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'flex-start',
-            background: 'var(--surface-2)',
+            background: 'var(--surface)',
           }}
         >
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-              <span style={{ fontSize: '1.4rem' }}>🏪</span>
-              <h3 style={{ margin: 0, fontSize: '1.2rem', fontWeight: 800 }}>{store.name}</h3>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+              <Store size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+              <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600 }}>{store.name}</h3>
             </div>
             <div
               style={{
-                marginTop: '0.35rem',
+                marginTop: '0.375rem',
                 fontSize: '0.82rem',
                 color: 'var(--text-muted)',
                 display: 'flex',
@@ -124,36 +125,36 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
                 flexWrap: 'wrap',
               }}
             >
-              <span>📍 {store.city || 'Kota -'}</span>
-              <span>📏 Jarak: {store.distance_km} km dari demoplot</span>
-              {store.default_salesman && <span>👤 Sales: {store.default_salesman}</span>}
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><MapPin size={14} strokeWidth={1.75} /> {store.city || 'Kota -'}</span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><Ruler size={14} strokeWidth={1.75} /> Jarak: <span className="num">{store.distance_km}</span><span className="unit">km</span> dari demoplot</span>
+              {store.default_salesman && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><User size={14} strokeWidth={1.75} /> Sales: {store.default_salesman}</span>}
             </div>
           </div>
 
           <button
             onClick={onClose}
             style={{
-              background: '#e2e8f0',
-              border: 'none',
-              borderRadius: '9999px',
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
               width: '32px',
               height: '32px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              fontWeight: 700,
-              color: '#475569',
+              color: 'var(--text-muted)',
             }}
+            aria-label="Tutup"
           >
-            ✕
+            <X size={16} strokeWidth={1.75} />
           </button>
         </div>
 
         {/* Content */}
         <div style={{ padding: '1.5rem', overflowY: 'auto', flex: 1 }}>
           <div style={{ marginBottom: '1rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: 'var(--text-main)' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)' }}>
               Riwayat Pembelian 12 Bulan Terakhir ({invoices.length} Faktur)
             </h4>
           </div>
@@ -165,7 +166,7 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
                   display: 'inline-block',
                   width: '32px',
                   height: '32px',
-                  border: '3px solid #cbd5e1',
+                  border: '3px solid var(--border)',
                   borderTopColor: 'var(--primary)',
                   borderRadius: '50%',
                   animation: 'spin 0.8s linear infinite',
@@ -178,13 +179,16 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
             <div
               style={{
                 padding: '1rem',
-                background: '#fee2e2',
-                color: '#991b1b',
-                borderRadius: '0.5rem',
-                fontSize: '0.85rem',
+                background: 'var(--danger-bg)',
+                color: 'var(--danger)',
+                borderRadius: 'var(--radius-sm)',
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '0.5rem',
               }}
             >
-              ⚠️ {error}
+              <AlertTriangle size={16} strokeWidth={1.75} style={{ flexShrink: 0 }} /> {error}
             </div>
           ) : invoices.length === 0 ? (
             <div
@@ -199,18 +203,17 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
               <p style={{ margin: 0 }}>Belum ada data faktur pembelian yang tercatat dalam 12 bulan terakhir untuk toko ini.</p>
             </div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {invoices.map((inv) => {
                 const isRetur = (inv.status || '').toLowerCase().includes('retur')
                 return (
                   <div
                     key={inv.id_invoice}
                     style={{
-                      border: `1px solid ${isRetur ? '#fecaca' : 'var(--border)'}`,
-                      borderRadius: '0.65rem',
+                      border: '1px solid var(--border)',
+                      borderRadius: 'var(--radius-md)',
                       padding: '1rem',
-                      background: isRetur ? '#fff5f5' : '#ffffff',
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                      background: isRetur ? 'var(--danger-bg)' : 'var(--surface)',
                     }}
                   >
                     <div
@@ -224,30 +227,32 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <strong style={{ fontSize: '0.9rem', color: 'var(--text-main)', fontFamily: 'monospace' }}>
+                        <strong style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-main)', fontFamily: 'var(--font-mono-stack)' }}>
                           {inv.id_invoice}
                         </strong>
                         <span
                           style={{
-                            fontSize: '0.72rem',
-                            fontWeight: 700,
-                            padding: '0.15rem 0.5rem',
-                            borderRadius: '9999px',
-                            background: isRetur ? '#fee2e2' : '#dcfce7',
-                            color: isRetur ? '#b91c1c' : '#15803d',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: 'var(--radius-xs)',
+                            background: isRetur ? 'var(--danger-bg)' : 'var(--success-bg)',
+                            color: isRetur ? 'var(--danger)' : 'var(--success)',
                           }}
                         >
                           {inv.status || 'Terkirim'}
                         </span>
                       </div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                          📅 {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(inv.tanggal))}
+                        <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                          <Calendar size={14} strokeWidth={1.75} /> {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(inv.tanggal))}
                         </span>
                         <strong
+                          className="num"
                           style={{
                             fontSize: '0.95rem',
-                            color: isRetur ? '#dc2626' : '#15803d',
+                            fontWeight: 600,
+                            color: isRetur ? 'var(--danger)' : 'var(--text-main)',
                           }}
                         >
                           {formatRp(inv.omset)}
@@ -260,12 +265,12 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
                       <div
                         style={{
                           background: 'var(--surface-2)',
-                          borderRadius: '0.5rem',
-                          padding: '0.6rem 0.8rem',
+                          borderRadius: 'var(--radius-sm)',
+                          padding: '0.5rem 0.75rem',
                           fontSize: '0.8rem',
                         }}
                       >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.375rem' }}>
                           {inv.items.map((it, idx) => (
                             <div
                               key={idx}
@@ -273,15 +278,15 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
                                 display: 'flex',
                                 justifyContent: 'space-between',
                                 alignItems: 'center',
-                                borderBottom: idx < inv.items.length - 1 ? '1px dashed #e2e8f0' : 'none',
-                                paddingBottom: idx < inv.items.length - 1 ? '0.35rem' : '0',
+                                borderBottom: idx < inv.items.length - 1 ? '1px solid var(--border-light)' : 'none',
+                                paddingBottom: idx < inv.items.length - 1 ? '0.375rem' : '0',
                               }}
                             >
-                              <span style={{ fontWeight: 600, color: '#334155' }}>
+                              <span style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>
                                 • {it.item_name || it.item_no || 'Produk'}
                               </span>
-                              <span style={{ color: 'var(--text-muted)' }}>
-                                {it.quantity} {it.unit || 'PCS'} {it.total_price ? `(${formatRp(it.total_price)})` : ''}
+                              <span className="num" style={{ color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
+                                {it.quantity}<span className="unit">{it.unit || 'PCS'}</span> {it.total_price ? `(${formatRp(it.total_price)})` : ''}
                               </span>
                             </div>
                           ))}
@@ -302,7 +307,7 @@ export default function StoreHistoryModal({ isOpen, onClose, store }: Props) {
             borderTop: '1px solid var(--border)',
             display: 'flex',
             justifyContent: 'flex-end',
-            background: 'var(--surface-2)',
+            background: 'var(--surface)',
           }}
         >
           <button

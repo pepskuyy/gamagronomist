@@ -3,6 +3,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
 import dynamic from 'next/dynamic'
 import { ComponentProps } from 'react'
+import { Map as MapIcon, RefreshCw } from 'lucide-react'
 
 const OpportunityMapInner = dynamic(
   () => import('./OpportunityMapInner'),
@@ -18,9 +19,9 @@ const OpportunityMapInner = dynamic(
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f1f5f9',
+          background: 'var(--surface-2)',
           borderRadius: 'var(--radius-lg, 0.75rem)',
-          color: '#64748b',
+          color: 'var(--text-muted)',
           gap: '0.75rem',
         }}
       >
@@ -28,13 +29,13 @@ const OpportunityMapInner = dynamic(
           style={{
             width: '36px',
             height: '36px',
-            border: '3px solid #cbd5e1',
-            borderTopColor: '#0284c7',
+            border: '3px solid var(--border)',
+            borderTopColor: 'var(--primary)',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
           }}
         />
-        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>Memuat Peta Opportunity Finder...</span>
+        <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Memuat Peta Opportunity Finder...</span>
         <style jsx>{`
           @keyframes spin {
             to {
@@ -73,19 +74,19 @@ class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
             flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            background: '#f8fafc',
+            background: 'var(--surface-2)',
             borderRadius: 'var(--radius-lg, 0.75rem)',
-            color: '#475569',
+            color: 'var(--text-secondary)',
             padding: '2rem',
             textAlign: 'center',
-            border: '1px solid #e2e8f0',
+            border: '1px solid var(--border)',
           }}
         >
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>🗺️</div>
-          <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700, color: '#0f172a' }}>
+          <MapIcon size={32} strokeWidth={1.5} style={{ marginBottom: '0.75rem', color: 'var(--text-light)' }} />
+          <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600, color: 'var(--text-main)' }}>
             Peta Membutuhkan Refresh
           </h4>
-          <p style={{ margin: '0.35rem 0 1rem', fontSize: '0.82rem', color: '#64748b', maxWidth: '320px' }}>
+          <p style={{ margin: '0.375rem 0 1rem', fontSize: '0.82rem', color: 'var(--text-muted)', maxWidth: '320px' }}>
             Modul visual peta Leaflet siap dimuat ulang.
           </p>
           <button
@@ -96,16 +97,19 @@ class MapErrorBoundary extends Component<{ children: ReactNode }, { hasError: bo
             }}
             style={{
               padding: '0.5rem 1.25rem',
-              borderRadius: '0.375rem',
+              borderRadius: 'var(--radius-sm)',
               border: 'none',
-              background: '#0284c7',
+              background: 'var(--primary)',
               color: '#ffffff',
-              fontWeight: 700,
+              fontWeight: 500,
               fontSize: '0.82rem',
               cursor: 'pointer',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
           >
-            🔄 Muat Ulang Peta
+            <RefreshCw size={16} strokeWidth={1.75} /> Muat Ulang Peta
           </button>
         </div>
       )

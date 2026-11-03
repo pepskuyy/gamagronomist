@@ -55,7 +55,7 @@ export default function RadiusSettingsModal({ settings, onClose, onSaved }: Prop
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(15,23,42,0.45)',
+        background: 'rgba(23,23,23,0.4)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -68,21 +68,22 @@ export default function RadiusSettingsModal({ settings, onClose, onSaved }: Prop
         style={{
           width: '100%',
           maxWidth: '440px',
-          background: '#ffffff',
-          borderRadius: '1rem',
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius-xl)',
           padding: '1.5rem',
-          boxShadow: '0 20px 50px rgba(15,23,42,0.25)',
+          border: '1px solid var(--border)',
+          boxShadow: 'var(--shadow-lg)',
         }}
       >
-        <h3 id="radius-settings-title" style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
-          ⚙ Radius Coverage Default
+        <h3 id="radius-settings-title" style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)' }}>
+          Radius Coverage Default
         </h3>
-        <p style={{ margin: '0.6rem 0 1rem', fontSize: '0.82rem', color: '#475569', lineHeight: 1.55 }}>
+        <p style={{ margin: '0.5rem 0 1rem', fontSize: '0.82rem', color: 'var(--text-secondary)', lineHeight: 1.55 }}>
           Radius ini dipakai untuk lingkaran di peta, daftar toko sekitar, perhitungan dampak & % terdampak, tabel daftar
           demplot, serta export Excel. Pilihan radius di atas peta hanya mengubah tampilan sementara user tersebut.
         </p>
 
-        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, color: '#334155', marginBottom: '0.35rem' }}>
+        <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
           Radius default (km, 0,5–20)
         </label>
         <input
@@ -100,13 +101,13 @@ export default function RadiusSettingsModal({ settings, onClose, onSaved }: Prop
           style={{
             width: '100%',
             boxSizing: 'border-box',
-            padding: '0.55rem 0.75rem',
-            borderRadius: '0.5rem',
+            padding: '0.5rem 0.75rem',
+            borderRadius: 'var(--radius-sm)',
             fontSize: '0.95rem',
-            border: error ? '1px solid #dc2626' : '1px solid var(--border)',
+            border: error ? '1px solid var(--danger)' : '1px solid var(--border)',
           }}
         />
-        {error && <div style={{ marginTop: '0.4rem', fontSize: '0.78rem', color: '#dc2626', fontWeight: 600 }}>{error}</div>}
+        {error && <div style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: 'var(--danger)', fontWeight: 500 }}>{error}</div>}
 
         {settings.updated_at && (
           <div style={{ marginTop: '0.75rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
@@ -121,7 +122,7 @@ export default function RadiusSettingsModal({ settings, onClose, onSaved }: Prop
             type="button"
             onClick={onClose}
             disabled={saving}
-            style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid var(--border)', background: '#ffffff', fontWeight: 600, cursor: 'pointer' }}
+            style={{ padding: '0.5rem 1rem', borderRadius: '0.5rem', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-main)', fontWeight: 500, cursor: 'pointer' }}
           >
             Batal
           </button>
@@ -135,7 +136,7 @@ export default function RadiusSettingsModal({ settings, onClose, onSaved }: Prop
               border: 'none',
               background: 'var(--primary)',
               color: '#ffffff',
-              fontWeight: 700,
+              fontWeight: 500,
               cursor: saving ? 'wait' : 'pointer',
             }}
           >

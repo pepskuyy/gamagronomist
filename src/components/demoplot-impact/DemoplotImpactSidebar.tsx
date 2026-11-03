@@ -2,6 +2,7 @@
 
 import type { DemoplotImpactDetail, StoreImpactResult, DemoImpactSummary } from '@/lib/demoplot-impact'
 import { formatKm } from '@/lib/impact-tier'
+import { AlertTriangle, FlaskConical, MapPin, ShoppingCart, Store, TrendingDown, TrendingUp, User, X } from 'lucide-react'
 import ImpactPenetrationCard from './ImpactPenetrationCard'
 import SampleYieldCard from './SampleYieldCard'
 
@@ -29,7 +30,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           alignItems: 'center',
           justifyContent: 'center',
           padding: '2.5rem',
-          background: '#ffffff',
+          background: 'var(--surface)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border)',
           textAlign: 'center',
@@ -40,15 +41,15 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           style={{
             width: '40px',
             height: '40px',
-            border: '3.5px solid #e2e8f0',
+            border: '3px solid var(--border)',
             borderTopColor: 'var(--primary)',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
             marginBottom: '1rem',
           }}
         />
-        <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 700 }}>Menghitung Analitik Dampak...</h4>
-        <p style={{ margin: '0.35rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+        <h4 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}>Menghitung Analitik Dampak...</h4>
+        <p style={{ margin: '0.375rem 0 0', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
           Mencocokkan toko dalam radius {radiusLabel} & komparasi faktur penjualan 60 hari.
         </p>
       </div>
@@ -60,13 +61,13 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
       <div
         style={{
           padding: '1.5rem',
-          background: '#ffffff',
+          background: 'var(--surface)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border)',
           boxShadow: 'var(--shadow-sm)',
         }}
       >
-        <div style={{ color: '#dc2626', fontWeight: 700, marginBottom: '0.5rem' }}>⚠️ Gagal Memuat Analitik</div>
+        <div style={{ color: 'var(--danger)', fontWeight: 600, marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><AlertTriangle size={16} strokeWidth={1.75} /> Gagal Memuat Analitik</div>
         <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', margin: 0 }}>{error}</p>
       </div>
     )
@@ -82,15 +83,15 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           alignItems: 'center',
           justifyContent: 'center',
           padding: '2.5rem',
-          background: '#ffffff',
+          background: 'var(--surface)',
           borderRadius: 'var(--radius-lg)',
           border: '1px solid var(--border)',
           textAlign: 'center',
           boxShadow: 'var(--shadow-sm)',
         }}
       >
-        <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📍</div>
-        <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800 }}>Pilih Titik Demoplot</h3>
+        <MapPin size={32} strokeWidth={1.5} style={{ marginBottom: '1rem', color: 'var(--text-light)' }} />
+        <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600 }}>Pilih Titik Demoplot</h3>
         <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)', maxWidth: '280px', lineHeight: 1.5 }}>
           Klik salah satu titik lingkaran pada peta untuk menganalisis dampak penjualan toko di sekitarnya (radius {radiusLabel}).
         </p>
@@ -105,7 +106,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
   return (
     <div
       style={{
-        background: '#ffffff',
+        background: 'var(--surface)',
         borderRadius: 'var(--radius-lg)',
         border: '1px solid var(--border)',
         boxShadow: 'var(--shadow-sm)',
@@ -123,8 +124,7 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.3rem' }}>🌱</span>
-              <h2 style={{ margin: 0, fontSize: '1.35rem', fontWeight: 800, color: '#0f172a' }}>
+              <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)' }}>
                 {demoplot.farmerName}
               </h2>
             </div>
@@ -132,9 +132,9 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
               <button
                 onClick={onClose}
                 style={{
-                  background: 'var(--surface-2)',
-                  border: 'none',
-                  borderRadius: '9999px',
+                  background: 'transparent',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-sm)',
                   width: '28px',
                   height: '28px',
                   cursor: 'pointer',
@@ -142,9 +142,11 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
                   alignItems: 'center',
                   justifyContent: 'center',
                   color: 'var(--text-muted)',
+                  flexShrink: 0,
                 }}
+                aria-label="Tutup"
               >
-                ✕
+                <X size={16} strokeWidth={1.75} />
               </button>
             )}
           </div>
@@ -156,34 +158,35 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.25rem 0.65rem',
-                  borderRadius: '9999px',
+                  gap: '0.375rem',
+                  padding: '0.25rem 0.625rem',
+                  borderRadius: 'var(--radius-xs)',
                   fontSize: '0.78rem',
-                  fontWeight: 700,
-                  background: '#f0fdf4',
-                  color: '#15803d',
-                  border: '1px solid #bbf7d0',
+                  fontWeight: 500,
+                  background: 'var(--success-bg)',
+                  color: 'var(--success)',
                 }}
               >
-                🌿 Terindikasi berdampak pada penjualan
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'currentColor', flexShrink: 0 }} />
+                Terindikasi berdampak pada penjualan
               </span>
             ) : (
               <span
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  gap: '0.35rem',
-                  padding: '0.25rem 0.65rem',
-                  borderRadius: '9999px',
+                  gap: '0.375rem',
+                  padding: '0.25rem 0.625rem',
+                  borderRadius: 'var(--radius-xs)',
                   fontSize: '0.78rem',
-                  fontWeight: 600,
-                  background: '#f8fafc',
-                  color: '#64748b',
-                  border: '1px solid #e2e8f0',
+                  fontWeight: 500,
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-muted)',
+                  border: '1px solid var(--border-light)',
                 }}
               >
-                ⚪ Belum terindikasi berdampak penjualan
+                <span style={{ width: 8, height: 8, borderRadius: '50%', border: '1.5px solid currentColor', flexShrink: 0 }} />
+                Belum terindikasi berdampak penjualan
               </span>
             )}
           </div>
@@ -192,21 +195,20 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
             <strong>{demoplot.commodity}</strong> • {demoplot.date}
           </div>
 
-          <div style={{ marginTop: '0.35rem', fontSize: '0.82rem', color: '#475569' }}>
-            📍 {demoplot.location_label} • <strong>{demoplot.foName}</strong>
+          <div style={{ marginTop: '0.375rem', fontSize: '0.82rem', color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
+            <MapPin size={14} strokeWidth={1.75} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /> {demoplot.location_label} • <strong style={{ fontWeight: 500 }}>{demoplot.foName}</strong>
           </div>
 
           {demoplot.resultNotes && (
             <div
               style={{
                 marginTop: '0.75rem',
-                padding: '0.65rem 0.85rem',
-                background: '#fffbeb',
-                borderLeft: '3px solid #f59e0b',
-                borderRadius: '0.35rem',
+                padding: '0.625rem 0.75rem',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border-light)',
+                borderRadius: 'var(--radius-sm)',
                 fontSize: '0.8rem',
-                fontStyle: 'italic',
-                color: '#92400e',
+                color: 'var(--text-secondary)',
                 lineHeight: 1.5,
               }}
             >
@@ -217,23 +219,23 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
 
         {/* 2. Produk yang Didemoplotkan */}
         <div>
-          <h4 style={{ margin: '0 0 0.6rem 0', fontSize: '0.88rem', fontWeight: 700, color: '#334155' }}>
-            🧪 Produk yang Didemoplotkan
+          <h4 style={{ margin: '0 0 0.5rem 0', fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+            <FlaskConical size={16} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Produk yang Didemoplotkan
           </h4>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.45rem' }}>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
             {demoplot.products.map((p, idx) => (
               <span
                 key={idx}
                 style={{
                   display: 'inline-flex',
                   alignItems: 'center',
-                  padding: '0.3rem 0.75rem',
-                  borderRadius: '9999px',
+                  padding: '0.25rem 0.625rem',
+                  borderRadius: 'var(--radius-xs)',
                   fontSize: '0.78rem',
-                  fontWeight: 600,
-                  background: '#ede9fe',
-                  color: '#6d28d9',
-                  border: '1px solid #ddd6fe',
+                  fontWeight: 500,
+                  background: 'var(--surface-2)',
+                  color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-light)',
                 }}
               >
                 {p.label}
@@ -244,9 +246,9 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
 
         {/* 3. Dampak Pembelian */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.3rem' }}>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-              📈 Dampak Pembelian (radius {radiusLabel})
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+              <TrendingUp size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Dampak Pembelian (radius {radiusLabel})
             </h4>
           </div>
           <p style={{ margin: '0 0 1rem 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -260,88 +262,91 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem', marginBottom: '1rem' }}>
             <div
               style={{
-                padding: '0.85rem',
-                background: '#f8fafc',
-                border: '1px solid #e2e8f0',
-                borderRadius: '0.65rem',
+                padding: '0.75rem',
+                background: 'var(--surface-2)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
               }}
             >
-              <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>
                 Omset Sebelum
               </div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#1e293b', marginTop: '0.2rem' }}>
+              <div className="num" style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.25rem' }}>
                 {formatRp(summary.before_omset)}
               </div>
-              <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                {summary.before_invoices_count} invoice
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
+                <span className="num">{summary.before_invoices_count}</span> invoice
               </div>
             </div>
 
             <div
               style={{
-                padding: '0.85rem',
-                background: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                borderRadius: '0.65rem',
+                padding: '0.75rem',
+                background: 'var(--success-bg)',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-md)',
               }}
             >
-              <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#166534', textTransform: 'uppercase' }}>
+              <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--success)' }}>
                 Omset Sesudah
               </div>
-              <div style={{ fontSize: '1.05rem', fontWeight: 800, color: '#15803d', marginTop: '0.2rem' }}>
+              <div className="num" style={{ fontSize: '1.05rem', fontWeight: 600, color: 'var(--success)', marginTop: '0.25rem' }}>
                 {formatRp(summary.after_omset)}
               </div>
-              <div style={{ fontSize: '0.72rem', color: '#166534', marginTop: '0.15rem' }}>
-                {summary.after_invoices_count} invoice
+              <div style={{ fontSize: '0.75rem', color: 'var(--success)', marginTop: '0.125rem' }}>
+                <span className="num">{summary.after_invoices_count}</span> invoice
               </div>
             </div>
           </div>
 
           {/* Per-Product Impact Cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
             {product_impacts.map((pi, idx) => {
               // Qty faktur bisa bercampur satuan (Btl, Box, ...), jadi tanda naik/turun tanpa angka
-              const deltaTag = pi.delta_qty > 0 ? '▲ Naik' : pi.delta_qty < 0 ? '▼ Turun' : '= Tetap'
+              const deltaTag = pi.delta_qty > 0 ? 'Naik' : pi.delta_qty < 0 ? 'Turun' : 'Tetap'
               return (
                 <div
                   key={idx}
                   style={{
-                    padding: '0.85rem',
-                    background: '#ffffff',
+                    padding: '0.75rem',
+                    background: 'var(--surface)',
                     border: '1px solid var(--border)',
-                    borderRadius: '0.65rem',
-                    boxShadow: '0 1px 2px rgba(0,0,0,0.03)',
+                    borderRadius: 'var(--radius-md)',
                   }}
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
-                    <strong style={{ fontSize: '0.85rem', color: '#1e293b' }}>{pi.product_name}</strong>
+                    <strong style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-main)' }}>{pi.product_name}</strong>
                     <span
                       style={{
-                        padding: '0.15rem 0.5rem',
-                        borderRadius: '9999px',
-                        fontSize: '0.72rem',
-                        fontWeight: 700,
-                        background: pi.delta_qty > 0 ? '#dcfce7' : '#f1f5f9',
-                        color: pi.delta_qty > 0 ? '#15803d' : '#64748b',
+                        padding: '0.125rem 0.5rem',
+                        borderRadius: 'var(--radius-xs)',
+                        fontSize: '0.75rem',
+                        fontWeight: 500,
+                        background: pi.delta_qty > 0 ? 'var(--success-bg)' : 'var(--surface-2)',
+                        color: pi.delta_qty > 0 ? 'var(--success)' : 'var(--text-muted)',
                         whiteSpace: 'nowrap',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.25rem',
                       }}
                     >
+                      {pi.delta_qty > 0 ? <TrendingUp size={14} strokeWidth={1.75} /> : pi.delta_qty < 0 ? <TrendingDown size={14} strokeWidth={1.75} /> : null}
                       {deltaTag}
                     </span>
                   </div>
 
-                  <div style={{ marginTop: '0.4rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+                  <div className="num" style={{ marginTop: '0.5rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
                     Sebelum: {pi.before_label} ({formatRp(pi.before_omset)}) → Sesudah: {pi.after_label} ({formatRp(pi.after_omset)})
                   </div>
 
                   {pi.is_new && (
-                    <div style={{ marginTop: '0.35rem', fontSize: '0.75rem', fontWeight: 600, color: '#15803d' }}>
-                      ✨ Pembelian baru muncul setelah demoplot
+                    <div style={{ marginTop: '0.375rem', fontSize: '0.75rem', fontWeight: 500, color: 'var(--success)' }}>
+                      Pembelian baru muncul setelah demoplot
                     </div>
                   )}
 
                   {pi.matched_skus && pi.matched_skus.length > 0 && (
-                    <div style={{ marginTop: '0.3rem', fontSize: '0.72rem', color: '#64748b', fontStyle: 'italic' }}>
+                    <div style={{ marginTop: '0.25rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       Produk invoice: {pi.matched_skus.join(', ')}
                     </div>
                   )}
@@ -353,27 +358,26 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
 
         {/* 4. Toko dalam radius */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '1.25rem' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.85rem', flexWrap: 'wrap', gap: '0.5rem' }}>
-            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 800, color: '#0f172a' }}>
-              🏪 Toko Radius {radiusLabel} ({stores.length})
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', flexWrap: 'wrap', gap: '0.5rem' }}>
+            <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+              <Store size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Toko Radius {radiusLabel} ({stores.length})
             </h4>
             <span
               style={{
                 fontSize: '0.75rem',
-                fontWeight: 700,
-                padding: '0.2rem 0.6rem',
-                borderRadius: '9999px',
-                background: summary.impacted_stores_count > 0 ? '#f0fdf4' : '#f1f5f9',
-                color: summary.impacted_stores_count > 0 ? '#15803d' : '#64748b',
-                border: summary.impacted_stores_count > 0 ? '1px solid #bbf7d0' : '1px solid #e2e8f0',
+                fontWeight: 500,
+                padding: '0.125rem 0.5rem',
+                borderRadius: 'var(--radius-xs)',
+                background: summary.impacted_stores_count > 0 ? 'var(--success-bg)' : 'var(--surface-2)',
+                color: summary.impacted_stores_count > 0 ? 'var(--success)' : 'var(--text-muted)',
               }}
             >
-              ⭐ {summary.impacted_stores_count} Terdampak Penjualan
+              <span className="num">{summary.impacted_stores_count}</span> Terdampak Penjualan
             </span>
           </div>
 
           {stores.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+            <div style={{ textAlign: 'center', padding: '1.5rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
               Tidak ada toko berkoordinat dalam radius {radiusLabel} dari lokasi kegiatan ini.
             </div>
           ) : (
@@ -383,11 +387,11 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
                   key={st.customer_id}
                   onClick={() => onSelectStore(st)}
                   style={{
-                    padding: '0.9rem',
-                    borderRadius: '0.65rem',
-                    border: `1px solid ${st.has_impact ? '#86efac' : 'var(--border)'}`,
-                    borderLeft: `3.5px solid ${st.has_impact ? '#16a34a' : '#94a3b8'}`,
-                    background: st.has_impact ? '#f0fdf4' : '#ffffff',
+                    padding: '0.75rem',
+                    borderRadius: 'var(--radius-md)',
+                    border: '1px solid var(--border)',
+                    borderLeft: `3px solid ${st.has_impact ? 'var(--success)' : 'var(--border)'}`,
+                    background: st.has_impact ? 'var(--success-bg)' : 'var(--surface)',
                     cursor: 'pointer',
                     transition: 'var(--transition)',
                     boxShadow: '0 1px 3px rgba(0,0,0,0.02)',
@@ -398,41 +402,41 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
                 >
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
                     <div>
-                      <strong style={{ fontSize: '0.88rem', color: '#0f172a' }}>{st.name}</strong>
+                      <strong style={{ fontSize: '0.875rem', fontWeight: 500, color: 'var(--text-main)' }}>{st.name}</strong>
                       {st.has_impact && (
-                        <div style={{ marginTop: '0.2rem' }}>
+                        <div style={{ marginTop: '0.25rem' }}>
                           <span
                             style={{
                               display: 'inline-flex',
                               alignItems: 'center',
-                              padding: '0.1rem 0.45rem',
-                              borderRadius: '9999px',
-                              fontSize: '0.7rem',
-                              fontWeight: 700,
-                              background: '#dcfce7',
-                              color: '#15803d',
+                              padding: '0.125rem 0.375rem',
+                              borderRadius: 'var(--radius-xs)',
+                              fontSize: '0.75rem',
+                              fontWeight: 500,
+                              background: 'var(--surface)',
+                              color: 'var(--success)',
                             }}
                           >
-                            ⭐ Terdampak
+                            Terdampak
                           </span>
                         </div>
                       )}
                     </div>
-                    <span style={{ fontSize: '0.8rem', fontWeight: 700, color: '#7c3aed', whiteSpace: 'nowrap' }}>
-                      {st.distance_km} km
+                    <span style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                      <span className="num">{st.distance_km}</span><span className="unit">km</span>
                     </span>
                   </div>
 
                   {st.has_impact && (
-                    <div style={{ marginTop: '0.6rem', padding: '0.5rem 0.65rem', background: '#ffffff', borderRadius: '0.45rem', border: '1px solid #bbf7d0', fontSize: '0.78rem' }}>
-                      <div style={{ fontWeight: 700, color: '#166534', marginBottom: '0.2rem' }}>
-                        🛒 +{st.impact_label} Penjualan Produk Demplot ({formatRp(st.impact_total_omset)})
+                    <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.625rem', background: 'var(--surface)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.78rem' }}>
+                      <div className="num" style={{ fontWeight: 500, color: 'var(--success)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                        <ShoppingCart size={14} strokeWidth={1.75} style={{ flexShrink: 0 }} /> +{st.impact_label} Penjualan Produk Demplot ({formatRp(st.impact_total_omset)})
                       </div>
-                      <div style={{ color: '#475569', fontSize: '0.74rem' }}>
+                      <div style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
                         {st.impact_products.map((ip, i) => (
                           <span key={i}>
-                            {ip.product_name} ({ip.quantity} {ip.unit})
-                            {ip.is_new && <strong style={{ color: '#d97706' }}> ✨ Produk Baru</strong>}
+                            {ip.product_name} (<span className="num">{ip.quantity}</span><span className="unit">{ip.unit}</span>)
+                            {ip.is_new && <strong style={{ color: 'var(--warning)', fontWeight: 500 }}> Produk Baru</strong>}
                             {i < st.impact_products.length - 1 ? ' • ' : ''}
                           </span>
                         ))}
@@ -440,9 +444,9 @@ export default function DemoplotImpactSidebar({ data, loading, error, onSelectSt
                     </div>
                   )}
 
-                  <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.74rem', color: 'var(--text-muted)' }}>
+                  <div style={{ marginTop: '0.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                     <span>{st.customer_no || ''} {st.city || ''}</span>
-                    {st.default_salesman && <span>👤 {st.default_salesman}</span>}
+                    {st.default_salesman && <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><User size={12} strokeWidth={1.75} /> {st.default_salesman}</span>}
                   </div>
                 </div>
               ))}

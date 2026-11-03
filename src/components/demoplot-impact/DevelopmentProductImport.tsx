@@ -2,6 +2,7 @@
 
 import { useMemo, useRef, useState } from 'react'
 import { normalizeProductName } from '@/lib/product-name'
+import { ArrowLeft, Check, Download, FileSpreadsheet, FolderOpen, Search } from 'lucide-react'
 
 export interface ImportCandidate {
   name: string
@@ -170,33 +171,33 @@ export default function DevelopmentProductImport({ candidates, existingNames, on
     }
   }
 
-  const th: React.CSSProperties = { padding: '0.5rem 0.6rem', textAlign: 'left', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', color: '#64748b', background: '#f1f5f9', borderBottom: '1px solid #e2e8f0' }
-  const td: React.CSSProperties = { padding: '0.5rem 0.6rem', fontSize: '0.8rem', borderBottom: '1px solid #e2e8f0' }
-  const btn: React.CSSProperties = { padding: '0.5rem 1rem', fontSize: '0.84rem', fontWeight: 600, borderRadius: '0.375rem', border: '1px solid #cbd5e1', background: '#ffffff', color: '#475569', cursor: 'pointer' }
-  const btnPrimary: React.CSSProperties = { ...btn, border: 'none', background: '#16a34a', color: '#ffffff', fontWeight: 700 }
+  const th: React.CSSProperties = { padding: '0.5rem 0.625rem', textAlign: 'left', fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }
+  const td: React.CSSProperties = { padding: '0.5rem 0.625rem', fontSize: '0.8rem', borderBottom: '1px solid var(--border-light)' }
+  const btn: React.CSSProperties = { padding: '0.5rem 1rem', fontSize: '0.875rem', fontWeight: 500, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-main)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.5rem' }
+  const btnPrimary: React.CSSProperties = { ...btn, border: '1px solid var(--primary)', background: 'var(--primary)', color: '#ffffff', fontWeight: 500 }
 
   return (
-    <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '0.75rem', padding: '1.1rem 1.25rem', marginBottom: '1.5rem' }}>
+    <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', marginBottom: '1.5rem' }}>
       {step === 'upload' && (
         <>
-          <h4 style={{ margin: '0 0 0.35rem', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b' }}>📥 Import Produk Fokus dari Excel</h4>
-          <p style={{ margin: '0 0 0.85rem', fontSize: '0.8rem', color: '#64748b' }}>
+          <h4 style={{ margin: '0 0 0.375rem', fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><FileSpreadsheet size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Import Produk Fokus dari Excel</h4>
+          <p style={{ margin: '0 0 0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             Isi <code>kode_sku</code> (SKU Accurate) <strong>atau</strong> <code>nama_produk</code>. Jika hanya kode yang diisi, nama diambil otomatis dari SKU Accurate.
             Produk yang sudah terdaftar akan <strong>diperbarui</strong>; kolom kosong tidak menimpa data lama. Kolom <code>aktif</code>: Ya / Tidak.
             Produk ber-kode dicocokkan ke invoice per kode SKU (satu ukuran kemasan); nama tanpa kode dicocokkan per nama (semua ukuran).
           </p>
 
-          <label style={{ border: '2px dashed #cbd5e1', borderRadius: '0.75rem', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.35rem', cursor: 'pointer', background: '#ffffff' }}>
-            <span style={{ fontSize: '2rem' }}>📂</span>
-            <span style={{ fontWeight: 600, fontSize: '0.88rem' }}>Klik untuk pilih file Excel</span>
-            <span style={{ fontSize: '0.75rem', color: '#64748b' }}>.xlsx atau .xls — maksimal {MAX_ROWS} baris</span>
+          <label style={{ border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)', padding: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.375rem', cursor: 'pointer', background: 'var(--surface)' }}>
+            <FolderOpen size={28} strokeWidth={1.5} style={{ color: 'var(--text-light)' }} />
+            <span style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-main)' }}>Klik untuk pilih file Excel</span>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>.xlsx atau .xls — maksimal {MAX_ROWS} baris</span>
             <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: 'none' }} />
           </label>
 
-          {fileError && <div style={{ marginTop: '0.75rem', padding: '0.6rem 0.85rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '0.5rem', fontSize: '0.82rem' }}>{fileError}</div>}
+          {fileError && <div style={{ marginTop: '0.75rem', padding: '0.625rem 0.75rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem' }}>{fileError}</div>}
 
-          <div style={{ display: 'flex', gap: '0.6rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
-            <button type="button" onClick={() => downloadTemplate(candidates)} style={btn}>⬇️ Unduh Template</button>
+          <div style={{ display: 'flex', gap: '0.5rem', marginTop: '1rem', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={() => downloadTemplate(candidates)} style={btn}><Download size={16} strokeWidth={1.75} /> Unduh Template</button>
             <button type="button" onClick={onCancel} style={btn}>Batal</button>
           </div>
         </>
@@ -204,13 +205,13 @@ export default function DevelopmentProductImport({ candidates, existingNames, on
 
       {step === 'preview' && (
         <>
-          <h4 style={{ margin: '0 0 0.35rem', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b' }}>🔍 Preview Import ({rows.length} baris)</h4>
-          <p style={{ margin: '0 0 0.75rem', fontSize: '0.78rem', color: '#64748b' }}>
+          <h4 style={{ margin: '0 0 0.375rem', fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}><Search size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Preview Import (<span className="num">{rows.length}</span> baris)</h4>
+          <p style={{ margin: '0 0 0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             Kolom <strong>Kecocokan</strong> menunjukkan apakah nama produk ditemukan di SKU Accurate. Produk bertanda ⚠ tetap bisa diimpor,
             tetapi kemungkinan tidak akan cocok dengan invoice sehingga tidak berpengaruh ke skoring.
           </p>
 
-          <div style={{ maxHeight: '320px', overflowY: 'auto', border: '1px solid #e2e8f0', borderRadius: '0.5rem', marginBottom: '0.85rem', background: '#ffffff' }}>
+          <div style={{ maxHeight: '320px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '0.75rem', background: 'var(--surface)' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead style={{ position: 'sticky', top: 0 }}>
                 <tr>
@@ -225,13 +226,13 @@ export default function DevelopmentProductImport({ candidates, existingNames, on
               </thead>
               <tbody>
                 {preview.map((p, i) => (
-                  <tr key={i} style={{ background: p.ok ? 'transparent' : '#fff7ed' }}>
-                    <td style={td}>{i + 2}</td>
-                    <td style={{ ...td, fontFamily: 'monospace', fontSize: '0.72rem', color: '#0369a1' }}>{p.code || '—'}</td>
-                    <td style={td}><strong>{p.resolvedName || <em style={{ color: '#9ca3af' }}>kosong</em>}</strong></td>
-                    <td style={{ ...td, color: '#64748b' }}>{p.targetCrop || '—'}</td>
+                  <tr key={i} style={{ background: p.ok ? 'transparent' : 'var(--warning-bg)' }}>
+                    <td className="num" style={{ ...td, color: 'var(--text-muted)' }}>{i + 2}</td>
+                    <td style={{ ...td, fontFamily: 'var(--font-mono-stack)', fontSize: '0.75rem', color: 'var(--text-secondary)' }}>{p.code || '—'}</td>
+                    <td style={td}><strong style={{ fontWeight: 500 }}>{p.resolvedName || <span style={{ color: 'var(--text-light)', fontWeight: 400 }}>kosong</span>}</strong></td>
+                    <td style={{ ...td, color: 'var(--text-muted)' }}>{p.targetCrop || '—'}</td>
                     <td style={td}>{p.isActive === false ? 'Tidak' : p.isActive === true ? 'Ya' : '—'}</td>
-                    <td style={{ ...td, fontSize: '0.75rem', fontWeight: 600, color: !p.ok ? '#dc2626' : p.match.startsWith('✓') ? '#16a34a' : p.match.startsWith('≈') ? '#0369a1' : '#c2410c' }}>{p.match}</td>
+                    <td style={{ ...td, fontSize: '0.75rem', fontWeight: 500, color: !p.ok ? 'var(--danger)' : p.match.startsWith('✓') ? 'var(--success)' : p.match.startsWith('≈') ? 'var(--info)' : 'var(--warning)' }}>{p.match}</td>
                     <td style={{ ...td, fontSize: '0.75rem' }}>{!p.ok ? 'Dilewati' : p.isUpdate ? 'Perbarui' : 'Baru'}</td>
                   </tr>
                 ))}
@@ -239,12 +240,13 @@ export default function DevelopmentProductImport({ candidates, existingNames, on
             </table>
           </div>
 
-          {fileError && <div style={{ marginBottom: '0.75rem', padding: '0.6rem 0.85rem', background: '#fee2e2', color: '#b91c1c', borderRadius: '0.5rem', fontSize: '0.82rem' }}>{fileError}</div>}
+          {fileError && <div style={{ marginBottom: '0.75rem', padding: '0.625rem 0.75rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem' }}>{fileError}</div>}
 
-          <div style={{ display: 'flex', gap: '0.6rem', justifyContent: 'flex-end' }}>
-            <button type="button" onClick={() => { setStep('upload'); setRows([]); if (fileRef.current) fileRef.current.value = '' }} style={btn}>← Ganti File</button>
+          <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <button type="button" onClick={() => { setStep('upload'); setRows([]); if (fileRef.current) fileRef.current.value = '' }} style={btn}><ArrowLeft size={16} strokeWidth={1.75} /> Ganti File</button>
             <button type="button" onClick={handleImport} disabled={loading || validCount === 0} style={{ ...btnPrimary, opacity: loading || validCount === 0 ? 0.6 : 1 }}>
-              {loading ? '⏳ Mengimpor...' : `✅ Import ${validCount} Produk`}
+              {!loading && <Check size={16} strokeWidth={1.75} />}
+              {loading ? 'Mengimpor...' : `Import ${validCount} Produk`}
             </button>
           </div>
         </>
@@ -252,25 +254,25 @@ export default function DevelopmentProductImport({ candidates, existingNames, on
 
       {step === 'done' && result && (
         <>
-          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.92rem', fontWeight: 700, color: '#1e293b' }}>🎉 Hasil Import</h4>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.6rem', marginBottom: '0.85rem' }}>
+          <h4 style={{ margin: '0 0 0.75rem', fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)' }}>Hasil Import</h4>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '0.5rem', marginBottom: '0.75rem' }}>
             {[
-              { label: 'Ditambahkan', value: result.inserted, bg: '#dcfce7', color: '#166534' },
-              { label: 'Diperbarui', value: result.updated, bg: '#e0f2fe', color: '#075985' },
-              { label: 'Dilewati', value: result.skipped, bg: result.skipped > 0 ? '#fff7ed' : '#f0fdf4', color: result.skipped > 0 ? '#9a3412' : '#166534' },
+              { label: 'Ditambahkan', value: result.inserted, bg: 'var(--success-bg)', color: 'var(--success)' },
+              { label: 'Diperbarui', value: result.updated, bg: 'var(--info-bg)', color: 'var(--info)' },
+              { label: 'Dilewati', value: result.skipped, bg: result.skipped > 0 ? 'var(--warning-bg)' : 'var(--surface)', color: result.skipped > 0 ? 'var(--warning)' : 'var(--text-muted)' },
             ].map((s) => (
-              <div key={s.label} style={{ padding: '0.75rem', background: s.bg, borderRadius: '0.5rem', textAlign: 'center' }}>
-                <div style={{ fontSize: '1.5rem', fontWeight: 800, color: s.color }}>{s.value}</div>
+              <div key={s.label} style={{ padding: '0.75rem', background: s.bg, borderRadius: 'var(--radius-sm)', textAlign: 'center' }}>
+                <div className="num" style={{ fontSize: '1.5rem', fontWeight: 600, color: s.color }}>{s.value}</div>
                 <div style={{ fontSize: '0.78rem', color: s.color }}>{s.label}</div>
               </div>
             ))}
           </div>
 
           {result.errors.length > 0 && (
-            <div style={{ maxHeight: '160px', overflowY: 'auto', border: '1px solid #fde68a', borderRadius: '0.5rem', marginBottom: '0.85rem' }}>
+            <div style={{ maxHeight: '160px', overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: '0.75rem' }}>
               {result.errors.map((e, i) => (
-                <div key={i} style={{ padding: '0.45rem 0.7rem', borderBottom: '1px solid #fde68a', fontSize: '0.78rem', background: '#fffbeb' }}>
-                  <strong>Baris {e.row}:</strong> {e.name} — <span style={{ color: '#92400e' }}>{e.reason}</span>
+                <div key={i} style={{ padding: '0.5rem 0.75rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.78rem', background: 'var(--warning-bg)' }}>
+                  <strong style={{ fontWeight: 500 }}>Baris {e.row}:</strong> {e.name} — <span style={{ color: 'var(--warning)' }}>{e.reason}</span>
                 </div>
               ))}
             </div>

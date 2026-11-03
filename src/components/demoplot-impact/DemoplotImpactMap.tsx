@@ -17,9 +17,9 @@ const DemoplotImpactMapInner = dynamic(
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          background: '#f1f5f9',
+          background: 'var(--surface-2)',
           borderRadius: 'var(--radius-lg)',
-          color: '#64748b',
+          color: 'var(--text-muted)',
           gap: '0.75rem',
         }}
       >
@@ -27,13 +27,13 @@ const DemoplotImpactMapInner = dynamic(
           style={{
             width: '36px',
             height: '36px',
-            border: '3px solid #cbd5e1',
+            border: '3px solid var(--border)',
             borderTopColor: 'var(--primary)',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
           }}
         />
-        <span style={{ fontSize: '0.85rem', fontWeight: 600 }}>🗺️ Memuat peta analitik demoplot...</span>
+        <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Memuat peta analitik demoplot...</span>
       </div>
     ),
   }

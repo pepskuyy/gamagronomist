@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Info, MapPin, RotateCcw, Settings } from 'lucide-react'
 import { RADIUS_PRESETS, formatKm, HELP_RADIUS } from '@/lib/impact-tier'
 
 interface Props {
@@ -41,14 +42,15 @@ export default function RadiusCoverageBar({ defaultRadius, activeRadius, isOverr
   }
 
   const chipStyle = (active: boolean): React.CSSProperties => ({
-    padding: '0.3rem 0.7rem',
-    borderRadius: '9999px',
+    padding: '0.25rem 0.75rem',
+    borderRadius: 'var(--radius-sm)',
     fontSize: '0.78rem',
-    fontWeight: 700,
+    fontWeight: 500,
     cursor: 'pointer',
-    border: active ? '1px solid #7c3aed' : '1px solid var(--border)',
-    background: active ? '#7c3aed' : '#ffffff',
-    color: active ? '#ffffff' : '#334155',
+    border: active ? '1px solid var(--primary)' : '1px solid var(--border)',
+    background: active ? 'var(--primary)' : 'var(--surface)',
+    color: active ? '#ffffff' : 'var(--text-secondary)',
+    transition: 'var(--transition)',
     whiteSpace: 'nowrap',
   })
 
@@ -59,18 +61,18 @@ export default function RadiusCoverageBar({ defaultRadius, activeRadius, isOverr
         flexWrap: 'wrap',
         alignItems: 'center',
         gap: '0.5rem 0.75rem',
-        padding: '0.65rem 0.9rem',
-        background: '#ffffff',
+        padding: '0.75rem 1rem',
+        background: 'var(--surface)',
         border: '1px solid var(--border)',
         borderRadius: 'var(--radius-lg)',
         boxShadow: 'var(--shadow-sm)',
       }}
     >
-      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#0f172a', whiteSpace: 'nowrap' }} title={HELP_RADIUS(formatKm(activeRadius))}>
-        📍 Radius coverage <span style={{ color: '#94a3b8', fontWeight: 600 }}>ⓘ</span>
+      <span style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-main)', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }} title={HELP_RADIUS(formatKm(activeRadius))}>
+        <MapPin size={16} strokeWidth={1.75} className="icon-inline" /> Radius coverage <Info size={14} strokeWidth={1.75} style={{ color: 'var(--text-light)' }} />
       </span>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem' }}>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem' }}>
         {chips.map((km) => (
           <button
             key={km}
@@ -100,10 +102,10 @@ export default function RadiusCoverageBar({ defaultRadius, activeRadius, isOverr
           }}
           style={{
             width: '78px',
-            padding: '0.3rem 0.55rem',
-            borderRadius: '9999px',
+            padding: '0.25rem 0.5rem',
+            borderRadius: 'var(--radius-sm)',
             fontSize: '0.78rem',
-            border: invalid ? '1px solid #dc2626' : '1px solid var(--border)',
+            border: invalid ? '1px solid var(--danger)' : '1px solid var(--border)',
             outline: 'none',
           }}
         />
@@ -113,13 +115,13 @@ export default function RadiusCoverageBar({ defaultRadius, activeRadius, isOverr
         <button
           type="button"
           onClick={() => onChange(null)}
-          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: '#7c3aed', fontSize: '0.78rem', fontWeight: 700 }}
+          style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', color: 'var(--text-secondary)', fontSize: '0.78rem', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
         >
-          ↺ Kembali ke default
+          <RotateCcw size={14} strokeWidth={1.75} /> Kembali ke default
         </button>
       )}
 
-      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.6rem', flexWrap: 'wrap' }}>
+      <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
         <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
           {isOverride ? `Tampilan sementara — default tetap ${formatKm(defaultRadius)}` : `Default ${formatKm(defaultRadius)}`}
         </span>
@@ -128,18 +130,21 @@ export default function RadiusCoverageBar({ defaultRadius, activeRadius, isOverr
             type="button"
             onClick={onOpenSettings}
             style={{
-              padding: '0.3rem 0.7rem',
-              borderRadius: '0.45rem',
+              padding: '0.25rem 0.75rem',
+              borderRadius: 'var(--radius-sm)',
               fontSize: '0.78rem',
-              fontWeight: 700,
+              fontWeight: 500,
               cursor: 'pointer',
               border: '1px solid var(--border)',
-              background: 'var(--surface-2)',
-              color: '#334155',
+              background: 'var(--surface)',
+              color: 'var(--text-secondary)',
               whiteSpace: 'nowrap',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.375rem',
             }}
           >
-            ⚙ Ubah default
+            <Settings size={14} strokeWidth={1.75} /> Ubah default
           </button>
         )}
       </div>

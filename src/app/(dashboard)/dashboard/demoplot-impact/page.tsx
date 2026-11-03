@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition, useMemo, useRef } from 'react'
+import { AlertOctagon, BarChart3, Calendar, Check, CheckCircle2, ClipboardList, Compass, Info, Package, RefreshCw, Search, Settings, Star, Target, X, XCircle } from 'lucide-react'
 import DemoplotImpactMap from '@/components/demoplot-impact/DemoplotImpactMap'
 import DemoplotImpactSidebar from '@/components/demoplot-impact/DemoplotImpactSidebar'
 import dynamic from 'next/dynamic'
@@ -338,19 +339,19 @@ export default function DemoplotImpactPage() {
 
   if (!mounted) {
     return (
-      <div style={{ padding: '3.5rem 1rem', textAlign: 'center', color: '#64748b' }}>
+      <div style={{ padding: '3.5rem 1rem', textAlign: 'center', color: 'var(--text-muted)' }}>
         <div
           style={{
             width: '36px',
             height: '36px',
-            border: '3px solid #cbd5e1',
-            borderTopColor: '#0284c7',
+            border: '3px solid var(--border)',
+            borderTopColor: 'var(--primary)',
             borderRadius: '50%',
             animation: 'spin 0.8s linear infinite',
             margin: '0 auto 1rem',
           }}
         />
-        <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+        <div style={{ fontWeight: 500, fontSize: '0.95rem', color: 'var(--text-main)' }}>
           Memuat Analitik & Rekomendasi Demplot...
         </div>
       </div>
@@ -370,10 +371,10 @@ export default function DemoplotImpactPage() {
         }}
       >
         <div>
-          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-main)' }}>
-            📈 Analitik & Rekomendasi Demo Plot
+          <h1 style={{ margin: 0, fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-main)' }}>
+            Analitik & Rekomendasi Demo Plot
           </h1>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.88rem', color: 'var(--text-muted)' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Analisis dampak penjualan kegiatan di lapangan & rekomendasi titik demplot baru berbasis serapan produk fokus (Follow-The-Sales)
           </p>
         </div>
@@ -385,12 +386,12 @@ export default function DemoplotImpactPage() {
             disabled={isSyncing}
             className="btn btn-primary"
             style={{
-              padding: '0.55rem 1.15rem',
-              fontSize: '0.85rem',
-              fontWeight: 700,
+              padding: '0.5rem 1rem',
+              fontSize: '0.875rem',
+              fontWeight: 500,
               display: 'flex',
               alignItems: 'center',
-              gap: '0.45rem',
+              gap: '0.5rem',
             }}
           >
             {isSyncing ? (
@@ -410,7 +411,7 @@ export default function DemoplotImpactPage() {
               </>
             ) : (
               <>
-                <span>🔄</span>
+                <RefreshCw size={16} strokeWidth={1.75} />
                 <span>Sinkronkan Data Sales</span>
               </>
             )}
@@ -423,14 +424,17 @@ export default function DemoplotImpactPage() {
         <div
           style={{
             padding: '0.75rem 1rem',
-            borderRadius: '0.5rem',
-            fontSize: '0.85rem',
-            background: syncMsg.startsWith('✅') ? '#f0fdf4' : '#fee2e2',
-            color: syncMsg.startsWith('✅') ? '#15803d' : '#b91c1c',
-            border: `1px solid ${syncMsg.startsWith('✅') ? '#bbf7d0' : '#fecaca'}`,
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.875rem',
+            background: syncMsg.startsWith('✅') ? 'var(--success-bg)' : 'var(--danger-bg)',
+            color: syncMsg.startsWith('✅') ? 'var(--success)' : 'var(--danger)',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
           }}
         >
-          {syncMsg}
+          {syncMsg.startsWith('✅') ? <CheckCircle2 size={16} strokeWidth={1.75} style={{ flexShrink: 0 }} /> : <XCircle size={16} strokeWidth={1.75} style={{ flexShrink: 0 }} />}
+          <span>{syncMsg.replace(/^(✅|❌)\s*/, '')}</span>
         </div>
       )}
 
@@ -438,41 +442,42 @@ export default function DemoplotImpactPage() {
       <div
         style={{
           display: 'flex',
-          gap: '0.5rem',
-          borderBottom: '2px solid var(--border, #e2e8f0)',
-          paddingBottom: '0.25rem',
+          gap: '0.25rem',
+          borderBottom: '1px solid var(--border)',
+          flexWrap: 'wrap',
         }}
       >
         <button
           type="button"
           onClick={() => setActiveTab('impact')}
           style={{
-            padding: '0.65rem 1.25rem',
-            borderRadius: '0.5rem 0.5rem 0 0',
+            padding: '0.625rem 1rem',
+            borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
             fontSize: '0.9rem',
-            fontWeight: 800,
+            fontWeight: 500,
             cursor: 'pointer',
             border: 'none',
-            background: activeTab === 'impact' ? 'var(--surface, #ffffff)' : 'transparent',
-            color: activeTab === 'impact' ? 'var(--primary, #0284c7)' : 'var(--text-muted, #64748b)',
-            borderBottom: activeTab === 'impact' ? '3px solid var(--primary, #0284c7)' : '3px solid transparent',
-            marginBottom: '-4px',
+            background: 'transparent',
+            color: activeTab === 'impact' ? 'var(--text-main)' : 'var(--text-muted)',
+            borderBottom: activeTab === 'impact' ? '2px solid var(--primary)' : '2px solid transparent',
+            marginBottom: '-1px',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            transition: 'all 0.2s',
+            transition: 'var(--transition)',
           }}
         >
-          <span>📊</span>
+          <BarChart3 size={16} strokeWidth={1.75} />
           <span>Evaluasi Dampak Penjualan</span>
           <span
+            className="num"
             style={{
-              fontSize: '0.72rem',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '9999px',
-              background: activeTab === 'impact' ? '#e0f2fe' : '#f1f5f9',
-              color: activeTab === 'impact' ? '#0369a1' : '#64748b',
-              fontWeight: 700,
+              fontSize: '0.75rem',
+              padding: '0.125rem 0.375rem',
+              borderRadius: 'var(--radius-xs)',
+              background: 'var(--surface-2)',
+              color: 'var(--text-muted)',
+              fontWeight: 500,
             }}
           >
             {demoplots.length} kegiatan
@@ -483,32 +488,33 @@ export default function DemoplotImpactPage() {
           type="button"
           onClick={() => setActiveTab('opportunity')}
           style={{
-            padding: '0.65rem 1.25rem',
-            borderRadius: '0.5rem 0.5rem 0 0',
+            padding: '0.625rem 1rem',
+            borderRadius: 'var(--radius-sm) var(--radius-sm) 0 0',
             fontSize: '0.9rem',
-            fontWeight: 800,
+            fontWeight: 500,
             cursor: 'pointer',
             border: 'none',
-            background: activeTab === 'opportunity' ? 'var(--surface, #ffffff)' : 'transparent',
-            color: activeTab === 'opportunity' ? '#b45309' : 'var(--text-muted, #64748b)',
-            borderBottom: activeTab === 'opportunity' ? '3px solid #d97706' : '3px solid transparent',
-            marginBottom: '-4px',
+            background: 'transparent',
+            color: activeTab === 'opportunity' ? 'var(--text-main)' : 'var(--text-muted)',
+            borderBottom: activeTab === 'opportunity' ? '2px solid var(--primary)' : '2px solid transparent',
+            marginBottom: '-1px',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem',
-            transition: 'all 0.2s',
+            transition: 'var(--transition)',
           }}
         >
-          <span>🎯</span>
+          <Target size={16} strokeWidth={1.75} />
           <span>Opportunity Finder (Rekomendasi Lokasi)</span>
           <span
+            className="num"
             style={{
-              fontSize: '0.72rem',
-              padding: '0.15rem 0.5rem',
-              borderRadius: '9999px',
-              background: '#fef3c7',
-              color: '#92400e',
-              fontWeight: 700,
+              fontSize: '0.75rem',
+              padding: '0.125rem 0.375rem',
+              borderRadius: 'var(--radius-xs)',
+              background: 'var(--warning-bg)',
+              color: 'var(--warning)',
+              fontWeight: 500,
             }}
           >
             {oppResult?.summary.urgent_sellout_zones_count || 0} Mendesak
@@ -522,20 +528,20 @@ export default function DemoplotImpactPage() {
       {activeTab === 'impact' && (
         <>
           {/* Date Range Filter Bar */}
-          <div className="card" style={{ padding: '1.1rem 1.35rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>📅</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
+          <div className="card" style={{ padding: '1rem 1.25rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+                <Calendar size={16} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} />
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
                   Filter Rentang Tanggal Kegiatan Demo Plot
                 </span>
-                <span style={{ fontSize: '0.75rem', fontWeight: 600, padding: '0.15rem 0.55rem', borderRadius: '9999px', background: '#f1f5f9', color: '#475569' }}>
+                <span className="num" style={{ fontSize: '0.75rem', fontWeight: 500, padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', background: 'var(--surface-2)', color: 'var(--text-secondary)' }}>
                   {demoplots.length} kegiatan tampil
                 </span>
               </div>
 
               {/* Preset Buttons */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
                 {[
                   { id: 'all', label: 'Semua Waktu' },
                   { id: '30d', label: '30 Hari Terakhir' },
@@ -550,10 +556,10 @@ export default function DemoplotImpactPage() {
                       type="button"
                       onClick={() => handlePreset(p.id)}
                       style={{
-                        padding: '0.25rem 0.65rem',
-                        borderRadius: '9999px',
+                        padding: '0.25rem 0.625rem',
+                        borderRadius: 'var(--radius-sm)',
                         fontSize: '0.75rem',
-                        fontWeight: 600,
+                        fontWeight: 500,
                         cursor: 'pointer',
                         border: isActive ? '1px solid var(--primary)' : '1px solid var(--border)',
                         background: isActive ? 'var(--primary-light)' : 'transparent',
@@ -569,7 +575,7 @@ export default function DemoplotImpactPage() {
             </div>
 
             {/* Date Inputs Form */}
-            <form onSubmit={handleApplyCustomFilter} style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+            <form onSubmit={handleApplyCustomFilter} style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Dari:</span>
                 <input
@@ -580,12 +586,12 @@ export default function DemoplotImpactPage() {
                     setActivePreset('custom')
                   }}
                   style={{
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    padding: '0.4rem 0.65rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.375rem 0.625rem',
                     fontSize: '0.82rem',
-                    color: '#374151',
-                    background: '#fff',
+                    color: 'var(--text-main)',
+                    background: 'var(--surface)',
                     outline: 'none',
                   }}
                 />
@@ -601,12 +607,12 @@ export default function DemoplotImpactPage() {
                     setActivePreset('custom')
                   }}
                   style={{
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    padding: '0.4rem 0.65rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.375rem 0.625rem',
                     fontSize: '0.82rem',
-                    color: '#374151',
-                    background: '#fff',
+                    color: 'var(--text-main)',
+                    background: 'var(--surface)',
                     outline: 'none',
                   }}
                 />
@@ -615,7 +621,7 @@ export default function DemoplotImpactPage() {
               <button
                 type="submit"
                 className="btn btn-primary"
-                style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 600 }}
+                style={{ padding: '0.375rem 1rem', fontSize: '0.8rem', fontWeight: 500 }}
               >
                 Terapkan
               </button>
@@ -625,14 +631,14 @@ export default function DemoplotImpactPage() {
                   type="button"
                   onClick={handleResetFilter}
                   className="btn btn-outline"
-                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', color: 'var(--danger)', borderColor: '#fca5a5' }}
+                  style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem', fontWeight: 500 }}
                 >
-                  ✕ Reset
+                  <X size={14} strokeWidth={1.75} /> Reset
                 </button>
               )}
 
               <div style={{ marginLeft: 'auto', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-                Periode aktif: <strong>{periodLabel}</strong>
+                Periode aktif: <strong style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>{periodLabel}</strong>
               </div>
             </form>
           </div>
@@ -726,70 +732,70 @@ export default function DemoplotImpactPage() {
         <>
           {/* Summary Metric Strip */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '1rem' }}>
-            <div className="card" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #ef4444' }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                🚨 Zona Kawal Sell-Out (Mendesak)
+            <div className="card" style={{ padding: '1rem 1.25rem' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                <AlertOctagon size={14} strokeWidth={1.75} style={{ color: 'var(--danger)' }} /> Zona Kawal Sell-Out (Mendesak)
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#dc2626', marginTop: '0.25rem' }}>
+              <div className="num" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--danger)', marginTop: '0.25rem' }}>
                 {oppResult?.summary.urgent_sellout_zones_count || 0}
-                <span style={{ fontSize: '0.82rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.375rem' }}>
                   zona prioritas
                 </span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                 Toko sudah ada stok, belum ada demplot
               </div>
             </div>
 
-            <div className="card" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #f59e0b' }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                ⭐ Kios Memasok Produk Fokus
+            <div className="card" style={{ padding: '1rem 1.25rem' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                <Star size={14} strokeWidth={1.75} style={{ color: 'var(--warning)' }} /> Kios Memasok Produk Fokus
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#d97706', marginTop: '0.25rem' }}>
+              <div className="num" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.25rem' }}>
                 {oppResult?.summary.total_stocked_stores || 0}
-                <span style={{ fontSize: '0.82rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.375rem' }}>
                   kios binaan
                 </span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                 Sudah kulakan produk dari tim Sales
               </div>
             </div>
 
-            <div className="card" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #0284c7' }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                📦 Nilai Stok Produk Sales di Kios
+            <div className="card" style={{ padding: '1rem 1.25rem' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                <Package size={14} strokeWidth={1.75} /> Nilai Stok Produk Sales di Kios
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#0369a1', marginTop: '0.25rem' }}>
+              <div className="num" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.25rem' }}>
                 {formatRp(oppResult?.summary.total_dev_stock_omset || 0)}
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                 Perlu edukasi lapangan agar segera terserap
               </div>
             </div>
 
-            <div className="card" style={{ padding: '1rem 1.25rem', borderLeft: '4px solid #8b5cf6' }}>
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 600 }}>
-                🎯 Total Zona Peluang Terdeteksi
+            <div className="card" style={{ padding: '1rem 1.25rem' }}>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500, display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
+                <Target size={14} strokeWidth={1.75} /> Total Zona Peluang Terdeteksi
               </div>
-              <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#7c3aed', marginTop: '0.25rem' }}>
+              <div className="num" style={{ fontSize: '1.5rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.25rem' }}>
                 {oppResult?.summary.total_zones_found || 0}
-                <span style={{ fontSize: '0.82rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.35rem' }}>
+                <span style={{ fontSize: '0.82rem', fontWeight: 400, color: 'var(--text-muted)', marginLeft: '0.375rem' }}>
                   klaster 5 km
                 </span>
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.2rem' }}>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
                 Berdasarkan 2.980 toko berkoordinat
               </div>
             </div>
           </div>
 
           {/* Opportunity Control & Filter Bar */}
-          <div className="card" style={{ padding: '1.1rem 1.35rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.85rem' }}>
+          <div className="card" style={{ padding: '1rem 1.25rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem', marginBottom: '0.75rem' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <span style={{ fontSize: '1.1rem' }}>🧭</span>
-                <span style={{ fontSize: '0.9rem', fontWeight: 700, color: 'var(--text-main)' }}>
+                <Compass size={16} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} />
+                <span style={{ fontSize: '0.9rem', fontWeight: 600, color: 'var(--text-main)' }}>
                   Filter Parameter Analisis Peluang Lapangan
                 </span>
               </div>
@@ -799,20 +805,20 @@ export default function DemoplotImpactPage() {
                   type="button"
                   onClick={() => setIsScoringModalOpen(true)}
                   style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    background: '#f0f9ff',
-                    color: '#0369a1',
-                    border: '1px solid #bae6fd',
+                    padding: '0.375rem 0.75rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.8rem',
+                    fontWeight: 500,
+                    background: 'var(--surface)',
+                    color: 'var(--text-main)',
+                    border: '1px solid var(--border)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.35rem',
+                    gap: '0.375rem',
                   }}
                 >
-                  <span>💡</span>
+                  <Info size={16} strokeWidth={1.75} />
                   <span>Mekanisme Skoring</span>
                 </button>
 
@@ -820,28 +826,28 @@ export default function DemoplotImpactPage() {
                   type="button"
                   onClick={() => setIsDevModalOpen(true)}
                   style={{
-                    padding: '0.35rem 0.75rem',
-                    borderRadius: '0.375rem',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    background: '#fff7ed',
-                    color: '#c2410c',
-                    border: '1px solid #ffedd5',
+                    padding: '0.375rem 0.75rem',
+                    borderRadius: 'var(--radius-sm)',
+                    fontSize: '0.8rem',
+                    fontWeight: 500,
+                    background: 'var(--surface)',
+                    color: 'var(--text-main)',
+                    border: '1px solid var(--border)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.35rem',
+                    gap: '0.375rem',
                   }}
                 >
-                  <span>⚙️</span>
+                  <Settings size={16} strokeWidth={1.75} />
                   <span>Kelola Produk Fokus ({oppResult?.summary.active_dev_products_count || 0})</span>
                 </button>
               </div>
             </div>
 
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.85rem', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
               {/* Filter Region */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Wilayah:</span>
                 <select
                   value={oppRegion}
@@ -851,12 +857,12 @@ export default function DemoplotImpactPage() {
                     loadOpportunities(r, oppSalesman, oppProduct)
                   }}
                   style={{
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    padding: '0.4rem 0.65rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.375rem 0.625rem',
                     fontSize: '0.82rem',
-                    color: '#374151',
-                    background: '#fff',
+                    color: 'var(--text-main)',
+                    background: 'var(--surface)',
                   }}
                 >
                   <option value="">Semua Wilayah</option>
@@ -867,7 +873,7 @@ export default function DemoplotImpactPage() {
               </div>
 
               {/* Filter Produk Pengembangan */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Produk Fokus:</span>
                 <select
                   value={oppProduct}
@@ -877,12 +883,12 @@ export default function DemoplotImpactPage() {
                     loadOpportunities(oppRegion, oppSalesman, p)
                   }}
                   style={{
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    padding: '0.4rem 0.65rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.375rem 0.625rem',
                     fontSize: '0.82rem',
-                    color: '#374151',
-                    background: '#fff',
+                    color: 'var(--text-main)',
+                    background: 'var(--surface)',
                     maxWidth: '220px',
                   }}
                 >
@@ -896,7 +902,7 @@ export default function DemoplotImpactPage() {
               </div>
 
               {/* Filter Salesman */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem' }}>
                 <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 500 }}>Salesman:</span>
                 <input
                   type="text"
@@ -909,12 +915,12 @@ export default function DemoplotImpactPage() {
                     }
                   }}
                   style={{
-                    border: '1px solid #d1d5db',
-                    borderRadius: '0.5rem',
-                    padding: '0.4rem 0.65rem',
+                    border: '1px solid var(--border)',
+                    borderRadius: 'var(--radius-sm)',
+                    padding: '0.375rem 0.625rem',
                     fontSize: '0.82rem',
-                    color: '#374151',
-                    background: '#fff',
+                    color: 'var(--text-main)',
+                    background: 'var(--surface)',
                     width: '160px',
                   }}
                 />
@@ -924,9 +930,9 @@ export default function DemoplotImpactPage() {
                 type="button"
                 onClick={() => loadOpportunities(oppRegion, oppSalesman, oppProduct)}
                 className="btn btn-primary"
-                style={{ padding: '0.4rem 1rem', fontSize: '0.8rem', fontWeight: 600 }}
+                style={{ padding: '0.375rem 1rem', fontSize: '0.8rem', fontWeight: 500 }}
               >
-                🔍 Terapkan Filter
+                <Search size={14} strokeWidth={1.75} /> Terapkan Filter
               </button>
 
               {(oppRegion || oppSalesman || oppProduct) && (
@@ -939,9 +945,9 @@ export default function DemoplotImpactPage() {
                     loadOpportunities('', '', '')
                   }}
                   className="btn btn-outline"
-                  style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', color: 'var(--danger)', borderColor: '#fca5a5' }}
+                  style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem', fontWeight: 500 }}
                 >
-                  ✕ Reset
+                  <X size={14} strokeWidth={1.75} /> Reset
                 </button>
               )}
             </div>
@@ -954,21 +960,21 @@ export default function DemoplotImpactPage() {
               style={{
                 padding: '3rem 1.5rem',
                 textAlign: 'center',
-                background: '#ffffff',
-                border: '1.5px dashed #cbd5e1',
-                borderRadius: '1rem',
+                background: 'var(--surface)',
+                border: '1px dashed var(--border)',
+                borderRadius: 'var(--radius-lg)',
               }}
             >
-              <div style={{ fontSize: '3rem', marginBottom: '0.75rem' }}>🎯</div>
-              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 800, color: '#0f172a' }}>
+              <Target size={32} strokeWidth={1.5} style={{ marginBottom: '0.75rem', color: 'var(--text-light)' }} />
+              <h3 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, color: 'var(--text-main)' }}>
                 Belum Ada Produk Fokus yang Diaktifkan
               </h3>
               <p
                 style={{
                   margin: '0.5rem auto 1.5rem',
                   maxWidth: '540px',
-                  color: '#64748b',
-                  fontSize: '0.88rem',
+                  color: 'var(--text-muted)',
+                  fontSize: '0.875rem',
                   lineHeight: 1.6,
                 }}
               >
@@ -979,15 +985,15 @@ export default function DemoplotImpactPage() {
                 onClick={() => setIsDevModalOpen(true)}
                 className="btn btn-primary"
                 style={{
-                  padding: '0.65rem 1.5rem',
+                  padding: '0.625rem 1.5rem',
                   fontSize: '0.9rem',
-                  fontWeight: 700,
+                  fontWeight: 500,
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '0.5rem',
                 }}
               >
-                <span>⚙️</span>
+                <Settings size={16} strokeWidth={1.75} />
                 <span>Pilih & Aktifkan Produk Fokus Sekarang</span>
               </button>
             </div>
@@ -1038,16 +1044,16 @@ export default function DemoplotImpactPage() {
           <div className="card" style={{ padding: '1.25rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '0.5rem' }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-main)' }}>
-                  📋 Tabel Prioritas Rekomendasi Lokasi Demoplot
+                <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                  <ClipboardList size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Tabel Prioritas Rekomendasi Lokasi Demoplot
                 </h3>
-                <p style={{ margin: '0.2rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+                <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   Urutan zona di bawah telah dibobotkan berdasarkan urgensi sell-out, ketiadaan demplot, dan densitas kios
                 </p>
               </div>
 
               <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                Menampilkan <strong>{oppResult?.zones.length || 0}</strong> zona prioritas
+                Menampilkan <strong className="num" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{oppResult?.zones.length || 0}</strong> zona prioritas
               </div>
             </div>
 
@@ -1063,16 +1069,16 @@ export default function DemoplotImpactPage() {
               <div style={{ overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82rem', textAlign: 'left' }}>
                   <thead>
-                    <tr style={{ borderBottom: '2px solid #e2e8f0', color: '#64748b' }}>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Rank</th>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Nama Zona & Wilayah</th>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Skor Peluang</th>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Status Urgensi</th>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Kios Berstok</th>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Nilai Stok Fokus</th>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Demplot Terakhir</th>
-                      <th style={{ padding: '0.6rem 0.75rem' }}>Sales Terkait</th>
-                      <th style={{ padding: '0.6rem 0.75rem', textAlign: 'center' }}>Aksi</th>
+                    <tr style={{ borderBottom: '1px solid var(--border)', color: 'var(--text-muted)', background: 'var(--surface-2)', fontSize: '0.8rem' }}>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Rank</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Nama Zona & Wilayah</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Skor Peluang</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Status Urgensi</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Kios Berstok</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Nilai Stok Fokus</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Demplot Terakhir</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>Sales Terkait</th>
+                      <th style={{ padding: '0.625rem 0.75rem', fontWeight: 500, textAlign: 'center' }}>Aksi</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1083,81 +1089,82 @@ export default function DemoplotImpactPage() {
                           key={z.id}
                           onClick={() => setSelectedZoneId(z.id)}
                           style={{
-                            borderBottom: '1px solid #f1f5f9',
-                            background: isSelected ? '#f0f9ff' : 'transparent',
+                            borderBottom: '1px solid var(--border-light)',
+                            background: isSelected ? 'var(--primary-light)' : 'transparent',
                             cursor: 'pointer',
-                            transition: 'background 0.15s',
+                            transition: 'var(--transition)',
                           }}
                         >
-                          <td style={{ padding: '0.65rem 0.75rem', fontWeight: 800, color: '#0f172a' }}>
+                          <td className="num" style={{ padding: '0.625rem 0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>
                             #{z.rank}
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem' }}>
-                            <div style={{ fontWeight: 700, color: '#0f172a' }}>{z.title}</div>
-                            <div style={{ fontSize: '0.72rem', color: '#64748b' }}>
+                          <td style={{ padding: '0.625rem 0.75rem' }}>
+                            <div style={{ fontWeight: 500, color: 'var(--text-main)' }}>{z.title}</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                               {z.city || '-'} ({z.region || '-'})
                             </div>
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem' }}>
+                          <td style={{ padding: '0.625rem 0.75rem' }}>
                             <span
+                              className="num"
                               style={{
-                                fontWeight: 800,
-                                fontSize: '0.85rem',
-                                color: z.score >= 80 ? '#dc2626' : z.score >= 60 ? '#d97706' : '#16a34a',
+                                fontWeight: 600,
+                                fontSize: '0.875rem',
+                                color: z.score >= 80 ? 'var(--danger)' : z.score >= 60 ? 'var(--warning)' : 'var(--success)',
                               }}
                             >
                               {z.score} / 100
                             </span>
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem' }}>
+                          <td style={{ padding: '0.625rem 0.75rem' }}>
                             <span
                               style={{
                                 display: 'inline-block',
-                                padding: '0.2rem 0.55rem',
-                                borderRadius: '9999px',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
+                                padding: '0.125rem 0.5rem',
+                                borderRadius: 'var(--radius-xs)',
+                                fontSize: '0.75rem',
+                                fontWeight: 500,
                                 background:
                                   z.urgency_badge_color === 'red'
-                                    ? '#fee2e2'
+                                    ? 'var(--danger-bg)'
                                     : z.urgency_badge_color === 'amber'
-                                    ? '#fef3c7'
+                                    ? 'var(--warning-bg)'
                                     : z.urgency_badge_color === 'emerald'
-                                    ? '#dcfce7'
-                                    : '#e0f2fe',
+                                    ? 'var(--success-bg)'
+                                    : 'var(--info-bg)',
                                 color:
                                   z.urgency_badge_color === 'red'
-                                    ? '#991b1b'
+                                    ? 'var(--danger)'
                                     : z.urgency_badge_color === 'amber'
-                                    ? '#92400e'
+                                    ? 'var(--warning)'
                                     : z.urgency_badge_color === 'emerald'
-                                    ? '#166534'
-                                    : '#0369a1',
+                                    ? 'var(--success)'
+                                    : 'var(--info)',
                               }}
                             >
                               {z.urgency_label}
                             </span>
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem' }}>
-                            <span style={{ fontWeight: 700, color: '#ea580c' }}>{z.stocked_stores_count}</span>
-                            <span style={{ color: '#64748b' }}> / {z.total_stores_in_radius} kios</span>
+                          <td style={{ padding: '0.625rem 0.75rem' }}>
+                            <span className="num" style={{ fontWeight: 500, color: 'var(--text-main)' }}>{z.stocked_stores_count}</span>
+                            <span className="num" style={{ color: 'var(--text-muted)' }}> / {z.total_stores_in_radius}<span className="unit">kios</span></span>
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem', fontWeight: 600 }}>
+                          <td className="num" style={{ padding: '0.625rem 0.75rem', fontWeight: 500 }}>
                             {formatRp(z.total_dev_stock_omset)}
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem' }}>
+                          <td style={{ padding: '0.625rem 0.75rem' }}>
                             {z.last_demoplot_days_ago !== null ? (
-                              <span style={{ color: z.last_demoplot_days_ago > 90 ? '#ef4444' : '#10b981' }}>
+                              <span className="num" style={{ color: z.last_demoplot_days_ago > 90 ? 'var(--danger)' : 'var(--success)' }}>
                                 {z.last_demoplot_days_ago} hari lalu
                               </span>
                             ) : (
-                              <span style={{ color: '#ef4444', fontWeight: 700 }}>Nihil</span>
+                              <span style={{ color: 'var(--danger)', fontWeight: 500 }}>Nihil</span>
                             )}
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem', color: '#64748b', fontSize: '0.75rem' }}>
+                          <td style={{ padding: '0.625rem 0.75rem', color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                             {z.salesmen_involved.join(', ') || '-'}
                           </td>
-                          <td style={{ padding: '0.65rem 0.75rem', textAlign: 'center' }}>
+                          <td style={{ padding: '0.625rem 0.75rem', textAlign: 'center' }}>
                             <button
                               type="button"
                               onClick={(e) => {
@@ -1165,17 +1172,22 @@ export default function DemoplotImpactPage() {
                                 setSelectedZoneId(z.id)
                               }}
                               style={{
-                                padding: '0.25rem 0.6rem',
-                                borderRadius: '0.25rem',
-                                border: '1px solid #cbd5e1',
-                                background: isSelected ? '#0f172a' : '#ffffff',
-                                color: isSelected ? '#ffffff' : '#334155',
-                                fontSize: '0.72rem',
-                                fontWeight: 700,
+                                padding: '0.25rem 0.625rem',
+                                borderRadius: 'var(--radius-xs)',
+                                border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border)',
+                                background: isSelected ? 'var(--primary)' : 'var(--surface)',
+                                color: isSelected ? '#ffffff' : 'var(--text-secondary)',
+                                fontSize: '0.75rem',
+                                fontWeight: 500,
                                 cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '0.25rem',
+                                whiteSpace: 'nowrap',
                               }}
                             >
-                              {isSelected ? '✓ Terpilih' : 'Lihat di Peta'}
+                              {isSelected && <Check size={14} strokeWidth={1.75} />}
+                              {isSelected ? 'Terpilih' : 'Lihat di Peta'}
                             </button>
                           </td>
                         </tr>

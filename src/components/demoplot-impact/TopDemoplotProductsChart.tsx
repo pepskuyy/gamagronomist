@@ -1,5 +1,7 @@
 'use client'
 
+import { Calendar } from 'lucide-react'
+
 interface ProductStat {
   name: string
   count: number
@@ -38,7 +40,7 @@ export default function TopDemoplotProductsChart({
     <div className="card" style={{ padding: '1.5rem' }}>
       <div style={{ marginBottom: '1.25rem', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div>
-          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 800, color: '#0f172a' }}>
+          <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: 600, color: 'var(--text-main)' }}>
             Produk Paling Sering Dipakai di Kegiatan
           </h3>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
@@ -47,57 +49,60 @@ export default function TopDemoplotProductsChart({
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
           {onTypeChange && (
-            <div style={{ display: 'flex', gap: '3px', background: '#f1f5f9', padding: '3px', borderRadius: '8px' }}>
+            <div style={{ display: 'flex', gap: '2px', background: 'var(--surface-2)', padding: '2px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border-light)' }}>
               <button
                 type="button"
                 onClick={() => onTypeChange('demoplot')}
                 style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  padding: '3px 8px',
-                  borderRadius: '6px',
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-xs)',
                   border: 'none',
                   cursor: 'pointer',
-                  background: activeType === 'demoplot' ? '#8b5cf6' : 'transparent',
-                  color: activeType === 'demoplot' ? '#fff' : '#64748b',
-                  transition: 'all 0.15s',
+                  background: activeType === 'demoplot' ? 'var(--surface)' : 'transparent',
+                  color: activeType === 'demoplot' ? 'var(--text-main)' : 'var(--text-muted)',
+                  boxShadow: activeType === 'demoplot' ? 'var(--shadow-xs)' : 'none',
+                  transition: 'var(--transition)',
                 }}
               >
-                🌾 Demplot
+                Demplot
               </button>
               <button
                 type="button"
                 onClick={() => onTypeChange('spot-demplot')}
                 style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  padding: '3px 8px',
-                  borderRadius: '6px',
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-xs)',
                   border: 'none',
                   cursor: 'pointer',
-                  background: activeType === 'spot-demplot' ? '#8b5cf6' : 'transparent',
-                  color: activeType === 'spot-demplot' ? '#fff' : '#64748b',
-                  transition: 'all 0.15s',
+                  background: activeType === 'spot-demplot' ? 'var(--surface)' : 'transparent',
+                  color: activeType === 'spot-demplot' ? 'var(--text-main)' : 'var(--text-muted)',
+                  boxShadow: activeType === 'spot-demplot' ? 'var(--shadow-xs)' : 'none',
+                  transition: 'var(--transition)',
                 }}
               >
-                🌿 Spot Demplot
+                Spot Demplot
               </button>
               <button
                 type="button"
                 onClick={() => onTypeChange('all')}
                 style={{
-                  fontSize: '0.72rem',
-                  fontWeight: 600,
-                  padding: '3px 8px',
-                  borderRadius: '6px',
+                  fontSize: '0.75rem',
+                  fontWeight: 500,
+                  padding: '4px 10px',
+                  borderRadius: 'var(--radius-xs)',
                   border: 'none',
                   cursor: 'pointer',
-                  background: activeType === 'all' ? '#8b5cf6' : 'transparent',
-                  color: activeType === 'all' ? '#fff' : '#64748b',
-                  transition: 'all 0.15s',
+                  background: activeType === 'all' ? 'var(--surface)' : 'transparent',
+                  color: activeType === 'all' ? 'var(--text-main)' : 'var(--text-muted)',
+                  boxShadow: activeType === 'all' ? 'var(--shadow-xs)' : 'none',
+                  transition: 'var(--transition)',
                 }}
               >
-                📊 Semua
+                Semua
               </button>
             </div>
           )}
@@ -105,15 +110,18 @@ export default function TopDemoplotProductsChart({
             <span
               style={{
                 fontSize: '0.78rem',
-                fontWeight: 600,
-                padding: '0.2rem 0.65rem',
-                borderRadius: '9999px',
-                background: '#f1f5f9',
-                color: '#475569',
-                border: '1px solid #e2e8f0',
+                fontWeight: 500,
+                padding: '0.25rem 0.625rem',
+                borderRadius: 'var(--radius-xs)',
+                background: 'var(--surface-2)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border)',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.375rem',
               }}
             >
-              📅 {periodLabel}
+              <Calendar size={14} strokeWidth={1.75} /> {periodLabel}
             </span>
           )}
         </div>
@@ -128,8 +136,8 @@ export default function TopDemoplotProductsChart({
                 style={{
                   width: '200px',
                   fontSize: '0.82rem',
-                  fontWeight: 600,
-                  color: '#334155',
+                  fontWeight: 500,
+                  color: 'var(--text-secondary)',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   whiteSpace: 'nowrap',
@@ -145,7 +153,7 @@ export default function TopDemoplotProductsChart({
                   style={{
                     flex: 1,
                     height: '24px',
-                    background: '#f1f5f9',
+                    background: 'var(--surface-2)',
                     borderRadius: '6px',
                     overflow: 'hidden',
                     display: 'flex',
@@ -155,17 +163,18 @@ export default function TopDemoplotProductsChart({
                     style={{
                       width: `${pct}%`,
                       height: '100%',
-                      background: 'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 100%)',
+                      background: idx === 0 ? 'var(--primary)' : idx < 3 ? '#a3a3a3' : '#d4d4d4',
                       borderRadius: '6px',
                       transition: 'width 0.6s cubic-bezier(0.4, 0, 0.2, 1)',
                     }}
                   />
                 </div>
                 <span
+                  className="num"
                   style={{
                     fontSize: '0.8rem',
-                    fontWeight: 700,
-                    color: '#6d28d9',
+                    fontWeight: idx === 0 ? 600 : 500,
+                    color: idx === 0 ? 'var(--text-main)' : 'var(--text-secondary)',
                     width: '55px',
                     textAlign: 'right',
                     flexShrink: 0,

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
+import { AlertTriangle, CheckCircle2, FileSpreadsheet, Info, Package, Plus, Search, Target, Trash2, X } from 'lucide-react'
 import DevelopmentProductImport from './DevelopmentProductImport'
 
 export interface DevelopmentProduct {
@@ -223,28 +224,27 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.65)',
+        backgroundColor: 'rgba(23, 23, 23, 0.4)',
         zIndex: 99999,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '1rem',
-        backdropFilter: 'blur(3px)',
       }}
       onClick={handleClose}
     >
       <div
         style={{
-          backgroundColor: 'var(--card-bg, #ffffff)',
-          borderRadius: '1rem',
+          backgroundColor: 'var(--surface)',
+          borderRadius: 'var(--radius-xl)',
           maxWidth: '820px',
           width: '100%',
           maxHeight: '92vh',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.25), 0 10px 10px -5px rgba(0, 0, 0, 0.1)',
+          boxShadow: 'var(--shadow-lg)',
           overflow: 'hidden',
-          border: '1px solid var(--border-color, #e2e8f0)',
+          border: '1px solid var(--border)',
         }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -252,38 +252,44 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
         <div
           style={{
             padding: '1.25rem 1.5rem',
-            borderBottom: '1px solid var(--border-color, #e2e8f0)',
+            borderBottom: '1px solid var(--border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: 'linear-gradient(135deg, #1e293b 0%, #0f172a 100%)',
-            color: '#ffffff',
+            gap: '1rem',
+            background: 'var(--surface)',
+            color: 'var(--text-main)',
           }}
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-              <span style={{ fontSize: '1.25rem' }}>🎯</span>
-              <h3 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 800, color: '#ffffff' }}>
+              <Target size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)', flexShrink: 0 }} />
+              <h3 style={{ margin: 0, fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-main)' }}>
                 Kelola Produk Pengembangan & Fokus Penjualan
               </h3>
             </div>
-            <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: '#94a3b8' }}>
+            <p style={{ margin: '0.25rem 0 0', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
               Daftar SKU fokus yang diprioritaskan untuk pengawalan demo plot pasca penjualan oleh tim Sales
             </p>
           </div>
           <button
             onClick={handleClose}
+            aria-label="Tutup"
             style={{
-              background: 'rgba(255,255,255,0.1)',
-              border: 'none',
-              borderRadius: '0.375rem',
-              color: '#ffffff',
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
+              color: 'var(--text-muted)',
               cursor: 'pointer',
-              padding: '0.4rem 0.6rem',
-              fontSize: '1rem',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
             }}
           >
-            ✕
+            <X size={16} strokeWidth={1.75} />
           </button>
         </div>
 
@@ -292,13 +298,16 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
           <div
             style={{
               padding: '0.75rem 1.5rem',
-              fontSize: '0.85rem',
-              background: msg.type === 'success' ? '#f0fdf4' : '#fef2f2',
-              color: msg.type === 'success' ? '#166534' : '#991b1b',
-              borderBottom: `1px solid ${msg.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+              fontSize: '0.875rem',
+              background: msg.type === 'success' ? 'var(--success-bg)' : 'var(--danger-bg)',
+              color: msg.type === 'success' ? 'var(--success)' : 'var(--danger)',
+              borderBottom: '1px solid var(--border)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
             }}
           >
-            {msg.type === 'success' ? '✅' : '⚠️'} {msg.text}
+            {msg.type === 'success' ? <CheckCircle2 size={16} strokeWidth={1.75} style={{ flexShrink: 0 }} /> : <AlertTriangle size={16} strokeWidth={1.75} style={{ flexShrink: 0 }} />} {msg.text}
           </div>
         )}
 
@@ -310,22 +319,21 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
               style={{
                 padding: '1rem 1.25rem',
                 marginBottom: '1.5rem',
-                background: '#fef2f2',
-                border: '1px solid #fecaca',
-                borderRadius: '0.75rem',
-                color: '#991b1b',
-                fontSize: '0.85rem',
+                background: 'var(--danger-bg)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--danger)',
+                fontSize: '0.875rem',
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
                 gap: '1rem',
               }}
             >
-              <span>⚠️ {loadError} Perubahan dinonaktifkan sampai data berhasil dimuat.</span>
+              <span style={{ display: 'flex', alignItems: 'flex-start', gap: '0.5rem' }}><AlertTriangle size={16} strokeWidth={1.75} style={{ flexShrink: 0, marginTop: '0.125rem' }} /> <span>{loadError} Perubahan dinonaktifkan sampai data berhasil dimuat.</span></span>
               <button
                 type="button"
                 onClick={loadData}
-                style={{ padding: '0.4rem 0.85rem', fontSize: '0.8rem', fontWeight: 600, borderRadius: '0.375rem', border: '1px solid #fca5a5', background: '#ffffff', color: '#991b1b', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem', fontWeight: 500, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'var(--surface)', color: 'var(--text-main)', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 Coba Lagi
               </button>
@@ -349,20 +357,20 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
           {!showImport && (
           <div
             style={{
-              background: '#f8fafc',
-              border: '1px solid #e2e8f0',
-              borderRadius: '0.75rem',
-              padding: '1.1rem 1.25rem',
+              background: 'var(--surface-2)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-md)',
+              padding: '1rem 1.25rem',
               marginBottom: '1.5rem',
               opacity: canEdit ? 1 : 0.55,
             }}
           >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem', flexWrap: 'wrap' }}>
-              <h4 style={{ margin: 0, fontSize: '0.92rem', fontWeight: 700, color: '#1e293b' }}>
-                ➕ Tambah Produk Fokus Baru
+              <h4 style={{ margin: 0, fontSize: '0.9375rem', fontWeight: 600, color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                <Plus size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Tambah Produk Fokus Baru
               </h4>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   {loading ? 'Memuat produk...' : `Tersedia ${candidates.length} SKU Accurate`}
                 </span>
                 <button
@@ -370,27 +378,30 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                   onClick={() => setShowImport(true)}
                   disabled={!canEdit}
                   style={{
-                    padding: '0.35rem 0.75rem',
-                    fontSize: '0.78rem',
-                    fontWeight: 700,
-                    borderRadius: '0.375rem',
-                    border: '1px solid #16a34a',
-                    background: '#f0fdf4',
-                    color: '#166534',
+                    padding: '0.375rem 0.75rem',
+                    fontSize: '0.8rem',
+                    fontWeight: 500,
+                    borderRadius: 'var(--radius-sm)',
+                    border: '1px solid var(--border)',
+                    background: 'var(--surface)',
+                    color: 'var(--text-main)',
                     cursor: canEdit ? 'pointer' : 'not-allowed',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.375rem',
                   }}
                 >
-                  📥 Import Excel
+                  <FileSpreadsheet size={16} strokeWidth={1.75} /> Import Excel
                 </button>
               </div>
             </div>
 
-            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
-              <fieldset disabled={!canEdit || adding} style={{ border: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
+            <form onSubmit={handleAddProduct} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+              <fieldset disabled={!canEdit || adding} style={{ border: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
               {/* Kolom Pencarian Cepat SKU */}
               <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 700, color: '#475569', marginBottom: '0.25rem' }}>
-                  🔍 Cari SKU Accurate (Ketik kata kunci untuk memfilter dropdown)
+                <label style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
+                  <Search size={14} strokeWidth={1.75} /> Cari SKU Accurate (Ketik kata kunci untuk memfilter dropdown)
                 </label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input
@@ -401,11 +412,10 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     style={{
                       flex: 1,
                       padding: '0.5rem 0.75rem',
-                      fontSize: '0.84rem',
-                      borderRadius: '0.375rem',
-                      border: '1.5px solid #0284c7',
-                      background: '#ffffff',
-                      outline: 'none',
+                      fontSize: '0.875rem',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
                     }}
                   />
                   {searchTerm && (
@@ -413,13 +423,13 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                       type="button"
                       onClick={() => setSearchTerm('')}
                       style={{
-                        padding: '0.4rem 0.75rem',
+                        padding: '0.375rem 0.75rem',
                         fontSize: '0.75rem',
-                        borderRadius: '0.375rem',
-                        border: '1px solid #cbd5e1',
-                        background: '#ffffff',
+                        borderRadius: 'var(--radius-sm)',
+                        border: '1px solid var(--border)',
+                        background: 'var(--surface)',
                         cursor: 'pointer',
-                        color: '#64748b',
+                        color: 'var(--text-muted)',
                       }}
                     >
                       Reset Filter
@@ -430,24 +440,24 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
 
               {/* Tag Quick-Pick jika ada hasil pencarian spesifik */}
               {searchTerm.trim().length >= 2 && filteredCandidates.length > 0 && (
-                <div style={{ background: '#f1f5f9', padding: '0.6rem 0.75rem', borderRadius: '0.375rem' }}>
-                  <div style={{ fontSize: '0.72rem', fontWeight: 600, color: '#64748b', marginBottom: '0.35rem' }}>
-                    ⚡ Klik langsung untuk memilih ({filteredCandidates.length} hasil):
+                <div style={{ background: 'var(--surface)', border: '1px solid var(--border-light)', padding: '0.625rem 0.75rem', borderRadius: 'var(--radius-sm)' }}>
+                  <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)', marginBottom: '0.375rem' }}>
+                    Klik langsung untuk memilih ({filteredCandidates.length} hasil):
                   </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.35rem', maxHeight: '100px', overflowY: 'auto' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.375rem', maxHeight: '100px', overflowY: 'auto' }}>
                     {filteredCandidates.slice(0, 15).map((item) => (
                       <button
                         key={item.id}
                         type="button"
                         onClick={() => handleQuickPick(item)}
                         style={{
-                          padding: '0.2rem 0.55rem',
-                          borderRadius: '9999px',
-                          border: '1px solid #cbd5e1',
-                          background: selectedMasterId === item.id ? '#0284c7' : '#ffffff',
-                          color: selectedMasterId === item.id ? '#ffffff' : '#0f172a',
+                          padding: '0.25rem 0.5rem',
+                          borderRadius: 'var(--radius-xs)',
+                          border: selectedMasterId === item.id ? '1px solid var(--primary)' : '1px solid var(--border)',
+                          background: selectedMasterId === item.id ? 'var(--primary)' : 'var(--surface)',
+                          color: selectedMasterId === item.id ? '#ffffff' : 'var(--text-main)',
                           fontSize: '0.75rem',
-                          fontWeight: 600,
+                          fontWeight: 500,
                           cursor: 'pointer',
                         }}
                       >
@@ -462,11 +472,11 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
               <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '0.75rem' }}>
                 <div>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.25rem' }}>
-                    <label style={{ fontSize: '0.75rem', fontWeight: 600, color: '#64748b' }}>
+                    <label style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)' }}>
                       Pilih Dari Dropdown SKU Accurate
                     </label>
-                    <span style={{ fontSize: '0.7rem', color: '#0284c7', fontWeight: 600 }}>
-                      {filteredCandidates.length} SKU tampil
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>
+                      <span className="num">{filteredCandidates.length}</span> SKU tampil
                     </span>
                   </div>
                   <select
@@ -474,11 +484,11 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     onChange={handleSelectMaster}
                     style={{
                       width: '100%',
-                      padding: '0.5rem 0.6rem',
+                      padding: '0.5rem 0.625rem',
                       fontSize: '0.82rem',
-                      borderRadius: '0.375rem',
-                      border: '1px solid #cbd5e1',
-                      background: '#ffffff',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
                     }}
                   >
                     <option value="">-- Pilih dari SKU Accurate ({filteredCandidates.length} SKU) --</option>
@@ -491,7 +501,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                     Nama Produk (atau ketik nama custom) *
                   </label>
                   <input
@@ -502,10 +512,11 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     required
                     style={{
                       width: '100%',
-                      padding: '0.5rem 0.6rem',
+                      padding: '0.5rem 0.625rem',
                       fontSize: '0.82rem',
-                      borderRadius: '0.375rem',
-                      border: '1px solid #cbd5e1',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
                     }}
                   />
                 </div>
@@ -514,7 +525,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
               {/* Input Komoditas & Catatan */}
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                     Target Komoditas / Sasaran Hama (Opsional)
                   </label>
                   <input
@@ -524,16 +535,17 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     placeholder="misal: Padi, Jagung, Bawang Merah, Wereng"
                     style={{
                       width: '100%',
-                      padding: '0.45rem 0.6rem',
+                      padding: '0.5rem 0.625rem',
                       fontSize: '0.82rem',
-                      borderRadius: '0.375rem',
-                      border: '1px solid #cbd5e1',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
                     }}
                   />
                 </div>
 
                 <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 600, color: '#64748b', marginBottom: '0.25rem' }}>
+                  <label style={{ display: 'block', fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.25rem' }}>
                     Catatan Sasaran (Opsional)
                   </label>
                   <input
@@ -543,18 +555,19 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                     placeholder="misal: Fokus Penjualan Nasional Q1 2026"
                     style={{
                       width: '100%',
-                      padding: '0.45rem 0.6rem',
+                      padding: '0.5rem 0.625rem',
                       fontSize: '0.82rem',
-                      borderRadius: '0.375rem',
-                      border: '1px solid #cbd5e1',
+                      borderRadius: 'var(--radius-sm)',
+                      border: '1px solid var(--border)',
+                      background: 'var(--surface)',
                     }}
                   />
                 </div>
               </div>
 
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '0.75rem', marginTop: '0.25rem', flexWrap: 'wrap' }}>
-                <span style={{ fontSize: '0.72rem', color: '#64748b', maxWidth: '420px' }}>
-                  💡 Produk dari SKU Accurate dicocokkan ke invoice per <strong>kode SKU</strong> (satu ukuran kemasan).
+                <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', maxWidth: '420px' }}>
+                  <Info size={14} strokeWidth={1.75} className="icon-inline" /> Produk dari SKU Accurate dicocokkan ke invoice per <strong>kode SKU</strong> (satu ukuran kemasan).
                   Nama custom tanpa kode (mis. &quot;Pronate&quot;) dicocokkan per <strong>nama</strong> (semua ukuran).
                 </span>
                 <button
@@ -562,19 +575,20 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                   className="btn btn-secondary"
                   style={{
                     padding: '0.5rem 1.25rem',
-                    fontSize: '0.84rem',
-                    fontWeight: 700,
-                    background: '#0284c7',
+                    fontSize: '0.875rem',
+                    fontWeight: 500,
+                    background: 'var(--primary)',
                     color: '#ffffff',
                     border: 'none',
-                    borderRadius: '0.375rem',
+                    borderRadius: 'var(--radius-sm)',
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '0.4rem',
+                    gap: '0.5rem',
                   }}
                 >
-                  {adding ? '⏳ Menyimpan...' : '➕ Tambahkan ke Daftar Produk Fokus'}
+                  {!adding && <Plus size={16} strokeWidth={1.75} />}
+                  {adding ? 'Menyimpan...' : 'Tambahkan ke Daftar Produk Fokus'}
                 </button>
               </div>
               </fieldset>
@@ -584,17 +598,17 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
 
           {/* Daftar Produk Fokus Saat Ini */}
           <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-              <h4 style={{ margin: 0, fontSize: '0.95rem', fontWeight: 700, color: '#0f172a' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem', gap: '0.75rem', flexWrap: 'wrap' }}>
+              <h4 className="num" style={{ margin: 0, fontSize: '0.95rem', fontWeight: 600, color: 'var(--text-main)' }}>
                 Daftar Produk Pengembangan Terdaftar ({products.filter((p) => p.isActive).length} Aktif / {products.length} Total)
               </h4>
-              <span style={{ fontSize: '0.75rem', color: '#64748b' }}>
+              <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                 Produk aktif langsung dianalisis oleh mesin Opportunity Finder
               </span>
             </div>
 
             {loading ? (
-              <div style={{ padding: '2rem', textAlign: 'center', color: '#64748b' }}>
+              <div style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                 Memuat daftar produk...
               </div>
             ) : loadError ? null : products.length === 0 ? (
@@ -602,14 +616,14 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                 style={{
                   padding: '2.5rem 1rem',
                   textAlign: 'center',
-                  background: '#f8fafc',
-                  borderRadius: '0.5rem',
-                  border: '1px dashed #cbd5e1',
-                  color: '#64748b',
+                  background: 'var(--surface-2)',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px dashed var(--border)',
+                  color: 'var(--text-muted)',
                 }}
               >
-                <div style={{ fontSize: '1.75rem', marginBottom: '0.5rem' }}>📦</div>
-                <div style={{ fontWeight: 600 }}>Belum ada produk pengembangan yang didaftarkan.</div>
+                <Package size={28} strokeWidth={1.5} style={{ marginBottom: '0.5rem', color: 'var(--text-light)' }} />
+                <div style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Belum ada produk pengembangan yang didaftarkan.</div>
                 <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
                   Gunakan form di atas atau Import Excel untuk mendaftarkan produk prioritas penjualan Gama Agro.
                 </div>
@@ -624,9 +638,9 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                       alignItems: 'center',
                       justifyContent: 'space-between',
                       padding: '0.75rem 1rem',
-                      borderRadius: '0.5rem',
-                      background: prod.isActive ? '#ffffff' : '#f1f5f9',
-                      border: `1px solid ${prod.isActive ? '#cbd5e1' : '#e2e8f0'}`,
+                      borderRadius: 'var(--radius-sm)',
+                      background: prod.isActive ? 'var(--surface)' : 'var(--surface-2)',
+                      border: '1px solid var(--border)',
                       opacity: busyId === prod.id ? 0.5 : prod.isActive ? 1 : 0.6,
                     }}
                   >
@@ -639,12 +653,12 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                         style={{
                           width: '36px',
                           height: '20px',
-                          background: prod.isActive ? '#10b981' : '#cbd5e1',
+                          background: prod.isActive ? 'var(--primary)' : '#d4d4d4',
                           borderRadius: '10px',
                           border: 'none',
                           cursor: 'pointer',
                           position: 'relative',
-                          transition: 'background 0.2s',
+                          transition: 'var(--transition)',
                           padding: 0,
                           flexShrink: 0,
                         }}
@@ -655,7 +669,7 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                             width: '16px',
                             height: '16px',
                             borderRadius: '50%',
-                            background: '#ffffff',
+                            background: 'var(--surface)',
                             position: 'absolute',
                             top: '2px',
                             left: prod.isActive ? '18px' : '2px',
@@ -665,19 +679,20 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                       </button>
 
                       <div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', flexWrap: 'wrap' }}>
-                          <span style={{ fontWeight: 700, fontSize: '0.9rem', color: '#0f172a' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 500, fontSize: '0.9rem', color: 'var(--text-main)' }}>
                             {prod.name}
                           </span>
                           {prod.code && (
                             <span
                               style={{
-                                fontSize: '0.7rem',
-                                padding: '0.1rem 0.35rem',
-                                borderRadius: '0.25rem',
-                                background: '#e0f2fe',
-                                color: '#0369a1',
-                                fontWeight: 600,
+                                fontSize: '0.75rem',
+                                padding: '0.125rem 0.375rem',
+                                borderRadius: 'var(--radius-xs)',
+                                background: 'var(--surface-2)',
+                                color: 'var(--text-secondary)',
+                                fontFamily: 'var(--font-mono-stack)',
+                                fontWeight: 400,
                               }}
                             >
                               {prod.code}
@@ -687,12 +702,12 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                             <span
                               title="Tanpa kode SKU: dicocokkan ke invoice berdasarkan nama, mencakup semua ukuran kemasan"
                               style={{
-                                fontSize: '0.7rem',
-                                padding: '0.1rem 0.35rem',
-                                borderRadius: '0.25rem',
-                                background: '#fef3c7',
-                                color: '#92400e',
-                                fontWeight: 600,
+                                fontSize: '0.75rem',
+                                padding: '0.125rem 0.375rem',
+                                borderRadius: 'var(--radius-xs)',
+                                background: 'var(--warning-bg)',
+                                color: 'var(--warning)',
+                                fontWeight: 500,
                               }}
                             >
                               cocok via nama
@@ -701,11 +716,11 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                           {!prod.isActive && (
                             <span
                               style={{
-                                fontSize: '0.7rem',
-                                padding: '0.1rem 0.35rem',
-                                borderRadius: '0.25rem',
-                                background: '#f1f5f9',
-                                color: '#64748b',
+                                fontSize: '0.75rem',
+                                padding: '0.125rem 0.375rem',
+                                borderRadius: 'var(--radius-xs)',
+                                background: 'var(--surface-3)',
+                                color: 'var(--text-muted)',
                               }}
                             >
                               Nonaktif
@@ -713,14 +728,14 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                           )}
                         </div>
                         {(prod.targetCrop || prod.notes) && (
-                          <div style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.15rem' }}>
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
                             {prod.targetCrop && (
                               <span>
-                                🌱 Komoditas: <strong>{prod.targetCrop}</strong>
+                                Komoditas: <strong style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>{prod.targetCrop}</strong>
                               </span>
                             )}
                             {prod.targetCrop && prod.notes && <span> • </span>}
-                            {prod.notes && <span>📌 {prod.notes}</span>}
+                            {prod.notes && <span>{prod.notes}</span>}
                           </div>
                         )}
                       </div>
@@ -731,17 +746,21 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
                       onClick={() => handleDelete(prod)}
                       disabled={busyId === prod.id}
                       title="Hapus produk"
+                      aria-label="Hapus produk"
                       style={{
                         background: 'transparent',
                         border: 'none',
-                        color: '#ef4444',
+                        color: 'var(--text-muted)',
                         cursor: 'pointer',
-                        padding: '0.3rem 0.5rem',
-                        fontSize: '0.9rem',
-                        borderRadius: '0.25rem',
+                        padding: '0.375rem',
+                        borderRadius: 'var(--radius-xs)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
                       }}
                     >
-                      🗑️
+                      <Trash2 size={16} strokeWidth={1.75} />
                     </button>
                   </div>
                 ))}
@@ -754,14 +773,15 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
         <div
           style={{
             padding: '1rem 1.5rem',
-            borderTop: '1px solid var(--border-color, #e2e8f0)',
+            borderTop: '1px solid var(--border)',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            background: '#f8fafc',
+            gap: '1rem',
+            background: 'var(--surface)',
           }}
         >
-          <div style={{ fontSize: '0.8rem', color: '#64748b' }}>
+          <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
             Setiap perubahan langsung tersimpan & berlaku untuk semua akun
           </div>
           <button
@@ -769,13 +789,14 @@ export default function DevelopmentProductsModal({ isOpen, onClose, onSaved }: P
             onClick={handleClose}
             style={{
               padding: '0.5rem 1.25rem',
-              fontSize: '0.85rem',
-              fontWeight: 700,
-              borderRadius: '0.375rem',
+              fontSize: '0.875rem',
+              fontWeight: 500,
+              borderRadius: 'var(--radius-sm)',
               border: 'none',
-              background: '#16a34a',
+              background: 'var(--primary)',
               color: '#ffffff',
               cursor: 'pointer',
+              flexShrink: 0,
             }}
           >
             Selesai

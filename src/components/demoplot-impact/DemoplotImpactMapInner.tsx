@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 import { MapContainer, TileLayer, CircleMarker, Circle, Popup, Tooltip, useMap } from 'react-leaflet'
 import 'leaflet/dist/leaflet.css'
+import { Map as MapIcon, Satellite } from 'lucide-react'
 import type { StoreImpactResult, DemoImpactSummary } from '@/lib/demoplot-impact'
 import { formatKm } from '@/lib/impact-tier'
 
@@ -59,38 +60,44 @@ export default function DemoplotImpactMapInner({
     <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '520px', borderRadius: 'var(--radius-lg)', overflow: 'hidden' }}>
       
       {/* Top Left: Basemap Switcher */}
-      <div style={{ position: 'absolute', top: 12, left: 52, zIndex: 1000, display: 'flex', gap: '0.25rem', background: 'rgba(255,255,255,0.95)', padding: '3px', borderRadius: '8px', boxShadow: '0 2px 8px rgba(0,0,0,0.15)' }}>
+      <div style={{ position: 'absolute', top: 12, left: 52, zIndex: 1000, display: 'flex', gap: '2px', background: 'var(--surface)', padding: '2px', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', boxShadow: 'var(--shadow-sm)' }}>
         <button
           type="button"
           onClick={() => setMapMode('osm')}
           style={{
-            padding: '0.35rem 0.75rem',
-            borderRadius: '6px',
+            padding: '0.25rem 0.625rem',
+            borderRadius: 'var(--radius-xs)',
             fontSize: '0.78rem',
-            fontWeight: 700,
-            background: mapMode === 'osm' ? '#0f172a' : 'transparent',
-            color: mapMode === 'osm' ? '#ffffff' : '#475569',
+            fontWeight: 500,
+            background: mapMode === 'osm' ? 'var(--surface-3)' : 'transparent',
+            color: mapMode === 'osm' ? 'var(--text-main)' : 'var(--text-muted)',
             border: 'none',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
           }}
         >
-          🗺️ Peta
+          <MapIcon size={14} strokeWidth={1.75} /> Peta
         </button>
         <button
           type="button"
           onClick={() => setMapMode('satellite')}
           style={{
-            padding: '0.35rem 0.75rem',
-            borderRadius: '6px',
+            padding: '0.25rem 0.625rem',
+            borderRadius: 'var(--radius-xs)',
             fontSize: '0.78rem',
-            fontWeight: 700,
-            background: mapMode === 'satellite' ? '#0f172a' : 'transparent',
-            color: mapMode === 'satellite' ? '#ffffff' : '#475569',
+            fontWeight: 500,
+            background: mapMode === 'satellite' ? 'var(--surface-3)' : 'transparent',
+            color: mapMode === 'satellite' ? 'var(--text-main)' : 'var(--text-muted)',
             border: 'none',
             cursor: 'pointer',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: '0.375rem',
           }}
         >
-          🛰️ Satelit
+          <Satellite size={14} strokeWidth={1.75} /> Satelit
         </button>
       </div>
 
@@ -98,22 +105,20 @@ export default function DemoplotImpactMapInner({
       <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 1000 }}>
         <div
           style={{
-            background: 'rgba(255, 255, 255, 0.95)',
-            backdropFilter: 'blur(4px)',
-            padding: '0.4rem 0.85rem',
-            borderRadius: '9999px',
+            background: 'var(--surface)',
+            padding: '0.25rem 0.75rem',
+            borderRadius: 'var(--radius-sm)',
             fontSize: '0.8rem',
-            fontWeight: 700,
-            color: '#1e293b',
-            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            fontWeight: 500,
+            color: 'var(--text-secondary)',
+            boxShadow: 'var(--shadow-sm)',
             display: 'flex',
             alignItems: 'center',
-            gap: '0.4rem',
-            border: '1px solid #e2e8f0',
+            gap: '0.375rem',
+            border: '1px solid var(--border)',
           }}
         >
-          <span>🌾</span>
-          <span>{demoplots.length} titik demoplot</span>
+          <span><span className="num" style={{ color: 'var(--text-main)' }}>{demoplots.length}</span> titik demoplot</span>
         </div>
       </div>
 
@@ -124,46 +129,45 @@ export default function DemoplotImpactMapInner({
           bottom: 24,
           left: 12,
           zIndex: 1000,
-          background: 'rgba(255, 255, 255, 0.96)',
-          backdropFilter: 'blur(4px)',
-          borderRadius: '0.65rem',
-          padding: '0.75rem 0.95rem',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.12)',
-          border: '1px solid #e2e8f0',
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius-md)',
+          padding: '0.75rem 1rem',
+          boxShadow: 'var(--shadow-sm)',
+          border: '1px solid var(--border)',
           fontSize: '0.75rem',
           display: 'flex',
           flexDirection: 'column',
-          gap: '0.4rem',
+          gap: '0.375rem',
           minWidth: '190px',
         }}
       >
-        <div style={{ fontSize: '0.7rem', fontWeight: 800, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-          LEGENDA
+        <div style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--text-muted)' }}>
+          Legenda
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#8b5cf6', border: '1.5px solid #7c3aed' }} />
-          <span style={{ color: '#334155', fontWeight: 500 }}>Demplot</span>
+          <span style={{ color: 'var(--text-secondary)' }}>Demplot</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#10b981', border: '1.5px solid #059669' }} />
-          <span style={{ color: '#334155', fontWeight: 500 }}>Demplot berdampak penjualan</span>
+          <span style={{ color: 'var(--text-secondary)' }}>Demplot berdampak penjualan</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#2563eb', border: '1px solid #1d4ed8' }} />
-          <span style={{ color: '#334155', fontWeight: 500 }}>Toko dalam radius</span>
+          <span style={{ color: 'var(--text-secondary)' }}>Toko dalam radius</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <div style={{ width: 11, height: 11, borderRadius: '50%', background: '#059669', border: '2px solid #064e3b' }} />
-          <span style={{ color: '#334155', fontWeight: 600 }}>Toko berdampak penjualan</span>
+          <span style={{ color: 'var(--text-secondary)' }}>Toko berdampak penjualan</span>
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#ef4444', border: '2px solid #b91c1c' }} />
-          <span style={{ color: '#334155', fontWeight: 600 }}>Demplot terpilih</span>
+          <span style={{ color: 'var(--text-secondary)' }}>Demplot terpilih</span>
         </div>
       </div>
 
@@ -230,13 +234,13 @@ export default function DemoplotImpactMapInner({
               >
                 <Tooltip direction="top" offset={[0, -6]}>
                   <div style={{ fontSize: '11px', lineHeight: 1.4 }}>
-                    <strong>{st.name}</strong> ({st.distance_km} km)<br />
+                    <strong style={{ fontWeight: 600 }}>{st.name}</strong> (<span className="num">{st.distance_km}</span><span className="unit">km</span>)<br />
                     {isImpacted ? (
-                      <span style={{ color: '#15803d', fontWeight: 700 }}>
-                        ⭐ Terdampak: +{st.impact_label}
+                      <span style={{ color: 'var(--success)', fontWeight: 500 }}>
+                        Terdampak: +{st.impact_label}
                       </span>
                     ) : (
-                      <span style={{ color: '#64748b' }}>Toko dalam radius {formatKm(radiusKm)}</span>
+                      <span style={{ color: 'var(--text-muted)' }}>Toko dalam radius {formatKm(radiusKm)}</span>
                     )}
                   </div>
                 </Tooltip>
@@ -278,14 +282,14 @@ export default function DemoplotImpactMapInner({
             >
               <Tooltip direction="top" offset={[0, -6]}>
                 <div style={{ fontSize: '11px', lineHeight: 1.4 }}>
-                  <strong>{dp.farmerName}</strong> ({dp.commodity})<br />
-                  <span>📍 {dp.area} • {dp.foName}</span><br />
+                  <strong style={{ fontWeight: 600 }}>{dp.farmerName}</strong> ({dp.commodity})<br />
+                  <span>{dp.area} • {dp.foName}</span><br />
                   {isImpacted ? (
-                    <span style={{ color: '#15803d', fontWeight: 700 }}>
-                      🌿 Berdampak pada penjualan
+                    <span style={{ color: 'var(--success)', fontWeight: 500 }}>
+                      Berdampak pada penjualan
                     </span>
                   ) : (
-                    <span style={{ color: '#64748b' }}>📅 {dp.date}</span>
+                    <span style={{ color: 'var(--text-muted)' }}>{dp.date}</span>
                   )}
                 </div>
               </Tooltip>
