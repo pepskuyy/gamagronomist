@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { generateApiKeyAction, toggleApiKeyAction, deleteApiKeyAction } from '@/app/actions/api-keys'
+import { Key, BookOpen, Plus, Loader2, CheckCircle2, Check, Copy } from 'lucide-react'
 
 type ApiKeyItem = {
   id: string
@@ -124,18 +125,16 @@ export default function OpenApiClient({ initialKeys }: Props) {
   const th: React.CSSProperties = {
     padding: '0.75rem 1rem',
     borderBottom: '1px solid var(--border)',
-    fontWeight: 600,
+    fontWeight: 500,
     color: 'var(--text-muted)',
-    fontSize: '0.75rem',
-    textTransform: 'uppercase',
-    letterSpacing: '0.04em',
+    fontSize: '0.8rem',
     background: 'var(--surface-2)',
     textAlign: 'left',
   }
 
   const td: React.CSSProperties = {
-    padding: '0.85rem 1rem',
-    borderBottom: '1px solid var(--border)',
+    padding: '0.75rem 1rem',
+    borderBottom: '1px solid var(--border-light)',
     fontSize: '0.875rem',
     verticalAlign: 'middle',
   }
@@ -144,32 +143,35 @@ export default function OpenApiClient({ initialKeys }: Props) {
     <div>
       {/* Header */}
       <div style={{ marginBottom: '1.5rem' }}>
-        <h2 style={{ marginBottom: '0.25rem' }}>🔑 Open API</h2>
-        <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+        <h2 style={{ marginBottom: '0.25rem' }}>Open API</h2>
+        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
           Kelola akses API key dan dokumentasi endpoint Open API read-only (<code>/api/v1/*</code>)
         </p>
       </div>
 
       {/* Tab Switcher */}
-      <div style={{ display: 'flex', gap: '0.25rem', borderBottom: '2px solid var(--border)', marginBottom: '1.5rem' }}>
+      <div style={{ display: 'flex', gap: '0.25rem', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
         {(['keys', 'docs'] as const).map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
             style={{
-              padding: '0.6rem 1.2rem',
-              fontWeight: 600,
+              padding: '0.625rem 1.25rem',
+              fontWeight: 500,
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '0.5rem',
               fontSize: '0.875rem',
               background: 'none',
               border: 'none',
               borderBottom: activeTab === tab ? '2px solid var(--primary)' : '2px solid transparent',
-              color: activeTab === tab ? 'var(--primary)' : 'var(--text-muted)',
+              color: activeTab === tab ? 'var(--text-main)' : 'var(--text-muted)',
               cursor: 'pointer',
-              marginBottom: '-2px',
+              marginBottom: '-1px',
               transition: 'var(--transition)',
             }}
           >
-            {tab === 'keys' ? '🔑 API Keys' : '📖 Dokumentasi API'}
+            {tab === 'keys' ? <><Key size={16} strokeWidth={1.75} /> API Keys</> : <><BookOpen size={16} strokeWidth={1.75} /> Dokumentasi API</>}
           </button>
         ))}
       </div>
@@ -179,14 +181,14 @@ export default function OpenApiClient({ initialKeys }: Props) {
         <div>
           {/* Generate Key Card */}
           <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ marginBottom: '0.4rem' }}>Buat API Key Baru</h3>
-            <p style={{ fontSize: '0.875rem', marginBottom: '1.25rem' }}>
+            <h3 style={{ marginBottom: '0.5rem' }}>Buat API Key Baru</h3>
+            <p style={{ fontSize: '0.875rem', marginBottom: '1.25rem', color: 'var(--text-muted)' }}>
               API key digunakan oleh aplikasi pihak ketiga untuk mengakses Open API read-only (<code>/api/v1/*</code>).
-              Lihat rincian endpoint di tab <button onClick={() => setActiveTab('docs')} style={{ color: 'var(--primary)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit' }}>Dokumentasi API</button>.
+              Lihat rincian endpoint di tab <button onClick={() => setActiveTab('docs')} style={{ color: 'var(--primary)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>Dokumentasi API</button>.
             </p>
 
             {error && (
-              <div style={{ padding: '0.65rem 1rem', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 'var(--radius-sm)', color: '#b91c1c', fontSize: '0.875rem', marginBottom: '1rem' }}>
+              <div style={{ padding: '0.625rem 1rem', background: 'var(--danger-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', fontSize: '0.875rem', marginBottom: '1rem' }}>
                 {error}
               </div>
             )}
@@ -207,22 +209,22 @@ export default function OpenApiClient({ initialKeys }: Props) {
                 onClick={handleGenerate}
                 disabled={isPending}
               >
-                {isPending ? '⏳ Generating...' : '+ Generate Key'}
+                {isPending ? <><Loader2 size={16} strokeWidth={1.75} className="icon-inline" style={{ animation: 'spin 0.8s linear infinite' }} /> Generating...</> : <><Plus size={16} strokeWidth={1.75} className="icon-inline" /> Generate Key</>}
               </button>
             </div>
 
             {/* One-time Key Display */}
             {newRawKey && (
-              <div style={{ marginTop: '1.25rem', padding: '1rem 1.25rem', background: '#f0fdf4', border: '1.5px solid #86efac', borderRadius: 'var(--radius-sm)' }}>
+              <div style={{ marginTop: '1.25rem', padding: '1rem 1.25rem', background: 'var(--success-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
-                  <span style={{ fontWeight: 700, color: '#16a34a', fontSize: '0.875rem' }}>✅ API Key berhasil dibuat!</span>
-                  <span style={{ background: '#dc2626', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '999px' }}>SEKALI TAMPIL</span>
+                  <span style={{ fontWeight: 600, color: 'var(--success)', fontSize: '0.875rem' }}><CheckCircle2 size={16} strokeWidth={1.75} className="icon-inline" /> API Key berhasil dibuat!</span>
+                  <span style={{ background: 'var(--danger-bg)', color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 500, padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)' }}>Sekali tampil</span>
                 </div>
-                <p style={{ fontSize: '0.82rem', color: '#374151', marginBottom: '0.85rem' }}>
+                <p style={{ fontSize: '0.82rem', color: 'var(--text-secondary)', marginBottom: '0.75rem' }}>
                   Salin key ini sekarang. Setelah Anda menutup notifikasi ini, key <strong>tidak dapat ditampilkan lagi</strong>.
                 </p>
                 <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center', flexWrap: 'wrap' }}>
-                  <code style={{ flex: 1, padding: '0.6rem 0.85rem', background: '#1e293b', color: '#a7f3d0', borderRadius: 'var(--radius-xs)', fontSize: '0.875rem', wordBreak: 'break-all', fontFamily: 'monospace' }}>
+                  <code style={{ flex: 1, padding: '0.625rem 0.75rem', background: 'var(--surface)', color: 'var(--text-main)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', wordBreak: 'break-all', fontFamily: 'var(--font-mono-stack)' }}>
                     {newRawKey}
                   </code>
                   <button
@@ -230,12 +232,12 @@ export default function OpenApiClient({ initialKeys }: Props) {
                     onClick={handleCopy}
                     style={{ flexShrink: 0 }}
                   >
-                    {copied ? '✅ Tersalin!' : '📋 Salin'}
+                    {copied ? <><Check size={16} strokeWidth={1.75} className="icon-inline" /> Tersalin!</> : <><Copy size={16} strokeWidth={1.75} className="icon-inline" /> Salin</>}
                   </button>
                 </div>
                 <button
                   onClick={() => setNewRawKey(null)}
-                  style={{ marginTop: '0.85rem', fontSize: '0.8rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
+                  style={{ marginTop: '0.75rem', fontSize: '0.8rem', color: 'var(--text-muted)', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
                 >
                   Tutup notifikasi ini
                 </button>
@@ -265,24 +267,24 @@ export default function OpenApiClient({ initialKeys }: Props) {
                   </tr>
                 ) : (
                   keys.map(k => (
-                    <tr key={k.id} style={{ background: k.isActive ? 'transparent' : '#fafafa' }}>
-                      <td style={{ ...td, fontWeight: 600 }}>{k.name}</td>
+                    <tr key={k.id} style={{ background: k.isActive ? 'transparent' : 'var(--surface-2)' }}>
+                      <td style={{ ...td, fontWeight: 500 }}>{k.name}</td>
                       <td style={td}>
-                        <code style={{ fontSize: '0.875rem', color: 'var(--text-muted)' }}>{k.keyPrefix}</code>
+                        <code style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono-stack)' }}>{k.keyPrefix}</code>
                       </td>
                       <td style={td}>
                         {k.isActive
-                          ? <span style={{ background: '#d1fae5', color: '#065f46', padding: '0.2rem 0.65rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 700 }}>Aktif</span>
-                          : <span style={{ background: '#fee2e2', color: '#991b1b', padding: '0.2rem 0.65rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 700 }}>Nonaktif</span>
+                          ? <span style={{ background: 'var(--success-bg)', color: 'var(--success)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500 }}>Aktif</span>
+                          : <span style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500 }}>Nonaktif</span>
                         }
                       </td>
-                      <td style={{ ...td, color: 'var(--text-muted)' }}>{formatDate(k.lastUsedAt)}</td>
-                      <td style={{ ...td, color: 'var(--text-muted)' }}>{formatDate(k.createdAt)}</td>
+                      <td className="num" style={{ ...td, color: 'var(--text-muted)' }}>{formatDate(k.lastUsedAt)}</td>
+                      <td className="num" style={{ ...td, color: 'var(--text-muted)' }}>{formatDate(k.createdAt)}</td>
                       <td style={td}>
                         <div style={{ display: 'flex', gap: '0.5rem' }}>
                           <button
                             className="btn btn-outline"
-                            style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem', color: k.isActive ? '#b45309' : '#15803d', borderColor: k.isActive ? '#fde68a' : '#bbf7d0' }}
+                            style={{ fontSize: '0.78rem', padding: '0.25rem 0.75rem', color: k.isActive ? 'var(--warning)' : 'var(--success)' }}
                             onClick={() => handleToggle(k.id, k.isActive)}
                             disabled={isPending}
                           >
@@ -290,7 +292,7 @@ export default function OpenApiClient({ initialKeys }: Props) {
                           </button>
                           <button
                             className="btn btn-outline"
-                            style={{ fontSize: '0.78rem', padding: '0.3rem 0.75rem', color: '#dc2626', borderColor: '#fecaca' }}
+                            style={{ fontSize: '0.78rem', padding: '0.25rem 0.75rem', color: 'var(--danger)' }}
                             onClick={() => handleDelete(k.id)}
                             disabled={isPending}
                           >
@@ -315,18 +317,18 @@ export default function OpenApiClient({ initialKeys }: Props) {
             <h3 style={{ marginBottom: '0.75rem' }}>Autentikasi</h3>
             <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
               Kirim API key pada header{' '}
-              <code style={{ background: 'var(--surface-2)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>Authorization: Bearer &lt;key&gt;</code>{' '}
+              <code style={{ background: 'var(--surface-2)', padding: '0.125rem 0.375rem', borderRadius: 'var(--radius-xs)' }}>Authorization: Bearer &lt;key&gt;</code>{' '}
               atau{' '}
-              <code style={{ background: 'var(--surface-2)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>x-api-key: &lt;key&gt;</code>.{' '}
+              <code style={{ background: 'var(--surface-2)', padding: '0.125rem 0.375rem', borderRadius: 'var(--radius-xs)' }}>x-api-key: &lt;key&gt;</code>.{' '}
               Key dibuat oleh superadmin di tab{' '}
-              <button onClick={() => setActiveTab('keys')} style={{ color: 'var(--primary)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit' }}>
+              <button onClick={() => setActiveTab('keys')} style={{ color: 'var(--primary)', fontWeight: 500, background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit', padding: 0 }}>
                 API Keys
               </button>.{' '}
               Rate limit: <strong>300 request/menit per key</strong> (HTTP 429 bila terlampaui).
             </p>
 
-            <div style={{ background: '#1e293b', borderRadius: 'var(--radius-sm)', padding: '1rem 1.25rem', marginBottom: '1rem', overflowX: 'auto' }}>
-              <pre style={{ margin: 0, color: '#a7f3d0', fontSize: '0.82rem', fontFamily: 'monospace', whiteSpace: 'pre' }}>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '1rem 1.25rem', marginBottom: '1rem', overflowX: 'auto' }}>
+              <pre style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.82rem', fontFamily: 'var(--font-mono-stack)', whiteSpace: 'pre' }}>
 {`curl -H "Authorization: Bearer sk_xxxxxxxx" \\
   "https://<domain>/api/v1/demoplot?from=2026-09-01&to=2026-09-30"`}
               </pre>
@@ -334,7 +336,7 @@ export default function OpenApiClient({ initialKeys }: Props) {
 
             <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>
               Spesifikasi machine-readable (OpenAPI 3.0):{' '}
-              <a href="/api/v1/openapi" target="_blank" style={{ color: 'var(--primary)', fontWeight: 600 }}>
+              <a href="/api/v1/openapi" target="_blank" style={{ color: 'var(--primary)', fontWeight: 500 }}>
                 /api/v1/openapi
               </a>
             </p>
@@ -355,14 +357,14 @@ export default function OpenApiClient({ initialKeys }: Props) {
                   <tr key={ep.path}>
                     <td style={td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <span style={{ background: '#d1fae5', color: '#065f46', fontSize: '0.72rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '4px', flexShrink: 0 }}>
+                        <span style={{ background: 'var(--success-bg)', color: 'var(--success)', fontSize: '0.75rem', fontWeight: 500, padding: '0.125rem 0.375rem', borderRadius: 'var(--radius-xs)', flexShrink: 0, fontFamily: 'var(--font-mono-stack)' }}>
                           {ep.method}
                         </span>
-                        <code style={{ fontSize: '0.82rem', wordBreak: 'break-all' }}>{ep.path}</code>
+                        <code style={{ fontSize: '0.82rem', wordBreak: 'break-all', fontFamily: 'var(--font-mono-stack)' }}>{ep.path}</code>
                       </div>
                     </td>
                     <td style={{ ...td, color: 'var(--text-muted)' }}>{ep.desc}</td>
-                    <td style={{ ...td, color: 'var(--text-light)', fontSize: '0.8rem', fontFamily: 'monospace' }}>{ep.params}</td>
+                    <td style={{ ...td, color: 'var(--text-light)', fontSize: '0.8rem', fontFamily: 'var(--font-mono-stack)' }}>{ep.params}</td>
                   </tr>
                 ))}
               </tbody>
@@ -375,8 +377,8 @@ export default function OpenApiClient({ initialKeys }: Props) {
             <p style={{ fontSize: '0.875rem', marginBottom: '1rem' }}>
               Semua endpoint mengembalikan JSON dengan field <code>data</code> (array) dan <code>meta</code> (paginasi).
             </p>
-            <div style={{ background: '#1e293b', borderRadius: 'var(--radius-sm)', padding: '1rem 1.25rem', overflowX: 'auto' }}>
-              <pre style={{ margin: 0, color: '#a7f3d0', fontSize: '0.82rem', fontFamily: 'monospace', whiteSpace: 'pre' }}>
+            <div style={{ background: 'var(--surface-2)', border: '1px solid var(--border-light)', borderRadius: 'var(--radius-sm)', padding: '1rem 1.25rem', overflowX: 'auto' }}>
+              <pre style={{ margin: 0, color: 'var(--text-main)', fontSize: '0.82rem', fontFamily: 'var(--font-mono-stack)', whiteSpace: 'pre' }}>
 {`{
   "data": [ ... ],
   "meta": {
@@ -408,7 +410,7 @@ export default function OpenApiClient({ initialKeys }: Props) {
                   { code: '500 Internal Server Error', desc: 'Terjadi kesalahan di server. Hubungi admin.' },
                 ].map(row => (
                   <tr key={row.code}>
-                    <td style={td}><code style={{ fontWeight: 700 }}>{row.code}</code></td>
+                    <td style={td}><code style={{ fontWeight: 500, fontFamily: 'var(--font-mono-stack)' }}>{row.code}</code></td>
                     <td style={{ ...td, color: 'var(--text-muted)' }}>{row.desc}</td>
                   </tr>
                 ))}

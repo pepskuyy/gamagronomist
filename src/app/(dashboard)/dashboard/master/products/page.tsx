@@ -5,6 +5,7 @@ import Link from 'next/link'
 import dynamic from 'next/dynamic'
 import { createProduct, updateProduct, deleteProduct, bulkDeleteProducts } from '@/app/actions/master'
 import { stockUnitMode, suggestGramasiFromName } from '@/lib/stock-units'
+import { Plus, Pencil, Trash2, RefreshCw, Upload, Download, PauseCircle, CheckCircle2, XCircle, AlertTriangle, X, Check } from 'lucide-react'
 
 // Modal import hanya dimuat saat dibuka
 const ImportModal = dynamic(() => import('@/components/ImportModal'), { ssr: false })
@@ -16,11 +17,11 @@ const overlayStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
 }
 const modalStyle: React.CSSProperties = {
-  background: '#fff', borderRadius: '1rem', padding: '2rem', width: '100%', maxWidth: '460px',
-  boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+  background: 'var(--surface)', borderRadius: 'var(--radius-xl)', padding: '2rem', width: '100%', maxWidth: '460px',
+  boxShadow: 'var(--shadow-lg)'
 }
-const inputStyle: React.CSSProperties = { width: '100%', padding: '0.6rem 0.9rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.9rem', boxSizing: 'border-box' }
-const labelStyle: React.CSSProperties = { fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '0.35rem' }
+const inputStyle: React.CSSProperties = { width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', background: 'var(--surface)', color: 'var(--text-main)', boxSizing: 'border-box' }
+const labelStyle: React.CSSProperties = { fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.375rem' }
 
 export default function ProductsMasterPage() {
   const [products, setProducts] = useState<Product[]>([])
@@ -46,8 +47,8 @@ export default function ProductsMasterPage() {
     if (new URLSearchParams(window.location.search).get('satuan') === 'belum') setOnlyUndecided(true)
   }, [])
 
-  const thStyle: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
-  const tdStyle: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
+  const thStyle: React.CSSProperties = { padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
+  const tdStyle: React.CSSProperties = { padding: '0.75rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border-light)' }
 
   const fetchData = async () => {
     const res = await fetch('/api/master/products')
@@ -76,7 +77,7 @@ export default function ProductsMasterPage() {
         ? await createProduct(fd)
         : await updateProduct(selected!.id, fd)
       if (res?.needConfirm) {
-        if (!confirm(`⚠️ ${res.warning}`)) return
+        if (!confirm(`${res.warning}`)) return
         fd.set('confirmGramasiChange', 'true')
         res = await updateProduct(selected!.id, fd)
       }
@@ -174,18 +175,18 @@ export default function ProductsMasterPage() {
       {modal && (
         <div style={overlayStyle} onClick={e => e.target === e.currentTarget && closeModal()}>
           <div style={modalStyle}>
-            <h3 style={{ marginBottom: '1.5rem' }}>{modal === 'add' ? '➕ Tambah Produk' : '✏️ Edit Produk'}</h3>
+            <h3 style={{ marginBottom: '1.5rem' }}>{modal === 'add' ? 'Tambah Produk' : 'Edit Produk'}</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               <div>
                 <label style={labelStyle}>ID Produk</label>
                 <input name="code" style={inputStyle} defaultValue={selected?.code || ''} placeholder="contoh: P001 (opsional)" />
               </div>
               <div>
-                <label style={labelStyle}>Nama Produk <span style={{ color: 'red' }}>*</span></label>
+                <label style={labelStyle}>Nama Produk <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <input name="name" style={inputStyle} required value={formName} onChange={e => setFormName(e.target.value)} placeholder="contoh: Fungisida Bintang" />
               </div>
               <div>
-                <label style={labelStyle}>Satuan Kemasan <span style={{ color: 'red' }}>*</span></label>
+                <label style={labelStyle}>Satuan Kemasan <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <select name="unit" style={inputStyle} required defaultValue={selected?.unit || ''}>
                   <option value="">-- Pilih Satuan Kemasan --</option>
                   <option value="PCS">PCS (pieces satuan)</option>
@@ -215,9 +216,9 @@ export default function ProductsMasterPage() {
               </div>
               <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '-0.5rem' }}>Contoh: Fungisida 500ml/Btl → pilih ml, isi 500. Digunakan FO saat request eceran.</p>
               {!formHasGramasi && nameSuggestion && (
-                <div style={{ marginTop: '-0.5rem', fontSize: '0.8rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.5rem', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
+                <div style={{ marginTop: '-0.5rem', fontSize: '0.8rem', background: 'var(--info-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.5rem 0.75rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.5rem' }}>
                   <span>Saran dari nama: <strong>{nameSuggestion.gramasiPerUnit} {nameSuggestion.unitGramasi}</strong> per kemasan</span>
-                  <button type="button" className="btn btn-outline" style={{ padding: '0.2rem 0.6rem', fontSize: '0.75rem' }}
+                  <button type="button" className="btn btn-outline" style={{ padding: '0.25rem 0.625rem', fontSize: '0.75rem' }}
                     onClick={() => { setFormUnitGramasi(nameSuggestion.unitGramasi); setFormGramasi(String(nameSuggestion.gramasiPerUnit)) }}>
                     Pakai saran
                   </button>
@@ -226,10 +227,10 @@ export default function ProductsMasterPage() {
               <div>
                 <label style={labelStyle}>Satuan Stok</label>
                 {formHasGramasi ? (
-                  <div style={{ fontSize: '0.82rem', color: '#166534' }}>✓ Stok dihitung dalam {formUnitGramasi} (isi per kemasan terisi)</div>
+                  <div style={{ fontSize: '0.82rem', color: 'var(--success)' }}><Check size={14} strokeWidth={1.75} className="icon-inline" /> Stok dihitung dalam {formUnitGramasi} (isi per kemasan terisi)</div>
                 ) : (
                   <select name="stockUnitMode" style={inputStyle} value={formMode} onChange={e => setFormMode(e.target.value)}>
-                    <option value="">⏸ Belum ditentukan (stok masuk ditahan)</option>
+                    <option value="">Belum ditentukan (stok masuk ditahan)</option>
                     <option value="KEMASAN">Kemasan utuh (tanpa gramasi, dihitung per kemasan)</option>
                   </select>
                 )}
@@ -241,7 +242,7 @@ export default function ProductsMasterPage() {
                 <label style={labelStyle}>Deskripsi</label>
                 <textarea name="description" style={{ ...inputStyle, minHeight: '80px', resize: 'vertical' }} defaultValue={selected?.description || ''} placeholder="Keterangan singkat tentang produk..." />
               </div>
-              {error && <div style={{ color: '#dc2626', fontSize: '0.875rem', background: '#fee2e2', padding: '0.6rem 0.9rem', borderRadius: '0.5rem' }}>{error}</div>}
+              {error && <div style={{ color: 'var(--danger)', fontSize: '0.875rem', background: 'var(--danger-bg)', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-sm)' }}>{error}</div>}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button type="submit" className="btn btn-primary" disabled={isPending} style={{ flex: 1 }}>
                   {isPending ? 'Menyimpan...' : 'Simpan'}
@@ -257,7 +258,7 @@ export default function ProductsMasterPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/dashboard/master" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>← Master Data</Link>
-          <h2 style={{ margin: 0 }}>🧪 Master Data: Produk</h2>
+          <h2 style={{ margin: 0 }}>Master Data: Produk</h2>
         </div>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
           <input 
@@ -272,21 +273,21 @@ export default function ProductsMasterPage() {
             onClick={handleAccurateSync}
             disabled={syncing}
             className="btn btn-outline"
-            style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', borderColor: '#d97706', color: '#92400e', background: syncing ? '#fef3c7' : undefined }}
+            style={{ background: syncing ? 'var(--surface-2)' : undefined }}
             title="Sinkronisasi nama & SKU produk dari Accurate Online"
           >
-            {syncing ? <><span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid #d97706', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Menyinkronkan...</> : '🔄 Sync Accurate'}
+            {syncing ? <><span style={{ display: 'inline-block', width: 14, height: 14, border: '2px solid var(--text-muted)', borderTop: '2px solid transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} /> Menyinkronkan...</> : <><RefreshCw size={16} strokeWidth={1.75} className="icon-inline" /> Sync Accurate</>}
           </button>
-          <button onClick={handleExportExcel} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📤 Export Excel</button>
-          <button onClick={() => setShowImport(true)} className="btn btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>📥 Import Excel</button>
+          <button onClick={handleExportExcel} className="btn btn-outline"><Upload size={16} strokeWidth={1.75} className="icon-inline" /> Export Excel</button>
+          <button onClick={() => setShowImport(true)} className="btn btn-outline"><Download size={16} strokeWidth={1.75} className="icon-inline" /> Import Excel</button>
           <button
             onClick={() => setOnlyUndecided(v => !v)}
             className={onlyUndecided ? 'btn btn-primary' : 'btn btn-outline'}
             title="Produk yang isi per kemasannya belum diisi. Stok masuk untuk produk ini ditahan."
           >
-            ⏸ Satuan belum ditentukan ({undecidedCount})
+            <PauseCircle size={16} strokeWidth={1.75} className="icon-inline" /> Satuan belum ditentukan (<span className="num">{undecidedCount}</span>)
           </button>
-          <button onClick={openAdd} className="btn btn-primary">➕ Tambah Produk</button>
+          <button onClick={openAdd} className="btn btn-primary"><Plus size={16} strokeWidth={1.75} className="icon-inline" /> Tambah Produk</button>
         </div>
       </div>
 
@@ -295,29 +296,29 @@ export default function ProductsMasterPage() {
         <div style={{
           display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '1rem',
           padding: '0.75rem 1rem',
-          background: syncResult.ok ? '#f0fdf4' : '#fef2f2',
-          border: `1px solid ${syncResult.ok ? '#86efac' : '#fca5a5'}`,
-          borderRadius: '0.5rem',
+          background: syncResult.ok ? 'var(--success-bg)' : 'var(--danger-bg)',
+          border: '1px solid var(--border)',
+          borderRadius: 'var(--radius-sm)',
           marginBottom: '1rem',
           fontSize: '0.875rem',
         }}>
           <div>
-            <div style={{ fontWeight: 600, color: syncResult.ok ? '#166534' : '#991b1b' }}>
-              {syncResult.ok ? '✅' : '❌'} {syncResult.msg}
+            <div style={{ fontWeight: 500, color: syncResult.ok ? 'var(--success)' : 'var(--danger)' }}>
+              {syncResult.ok ? <CheckCircle2 size={16} strokeWidth={1.75} className="icon-inline" /> : <XCircle size={16} strokeWidth={1.75} className="icon-inline" />} {syncResult.msg}
             </div>
-            {syncResult.detail && <div style={{ color: 'var(--text-muted)', marginTop: '0.2rem', fontSize: '0.8rem' }}>{syncResult.detail}</div>}
-            {syncResult.ok && <div style={{ color: '#92400e', marginTop: '0.25rem', fontSize: '0.78rem' }}>⚠️ Produk baru dari Accurate ditambahkan dengan satuan <strong>PCS</strong> — harap perbarui satuan kemasan & gramasi secara manual.</div>}
+            {syncResult.detail && <div style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.8rem' }}>{syncResult.detail}</div>}
+            {syncResult.ok && <div style={{ color: 'var(--warning)', marginTop: '0.25rem', fontSize: '0.78rem' }}><AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> Produk baru dari Accurate ditambahkan dengan satuan <strong>PCS</strong> — harap perbarui satuan kemasan & gramasi secara manual.</div>}
           </div>
-          <button onClick={() => setSyncResult(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1rem', padding: '0 0.25rem' }}>✕</button>
+          <button onClick={() => setSyncResult(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', fontSize: '1rem', padding: '0 0.25rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" /></button>
         </div>
       )}
 
       {/* Bulk delete bar */}
       {selectedProducts.size > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
-          <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedProducts.size} produk dipilih</span>
-          <button onClick={handleBulkDelete} disabled={isPending} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>🗑️ Hapus yang Dipilih</button>
-          <button onClick={() => setSelectedProducts(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 1rem', marginBottom: '1rem' }}>
+          <span style={{ fontWeight: 500, fontSize: '0.875rem' }}><span className="num">{selectedProducts.size}</span> produk dipilih</span>
+          <button onClick={handleBulkDelete} disabled={isPending} className="btn btn-danger" style={{ padding: '0.375rem 0.875rem', fontSize: '0.82rem' }}><Trash2 size={16} strokeWidth={1.75} className="icon-inline" /> Hapus yang Dipilih</button>
+          <button onClick={() => setSelectedProducts(new Set())} className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.82rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" /> Batal</button>
         </div>
       )}
 
@@ -344,33 +345,33 @@ export default function ProductsMasterPage() {
                   <td style={{...tdStyle, width: '40px', textAlign: 'center'}}>
                     <input type="checkbox" checked={selectedProducts.has(p.id)} onChange={() => toggleProduct(p.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
                   </td>
-                  <td style={{...tdStyle, fontFamily: 'monospace', fontSize: '0.8rem', color: 'var(--text-muted)'}}>{p.code || '—'}</td>
-                  <td style={{...tdStyle, fontWeight: 600, color: 'var(--primary)'}}>{p.name}</td>
+                  <td style={{...tdStyle, fontFamily: 'var(--font-mono-stack)', fontSize: '0.8rem', color: 'var(--text-muted)'}}>{p.code || '—'}</td>
+                  <td style={{...tdStyle, fontWeight: 500, color: 'var(--text-main)'}}>{p.name}</td>
                   <td style={{...tdStyle}}><span className="badge badge-neutral" style={{ fontSize: '0.75rem' }}>{p.unit}</span></td>
                   <td style={{...tdStyle}}>
                     {stockUnitMode(p) === 'GRAMASI' ? (
-                      <span className="badge" style={{ fontSize: '0.75rem', background: '#eff6ff', color: '#2563eb', border: '1px solid #bfdbfe' }}>
+                      <span className="badge num" style={{ fontSize: '0.75rem', background: 'var(--info-bg)', color: 'var(--info)' }}>
                         {p.gramasiPerUnit}{p.unitGramasi}/{p.unit}
                       </span>
                     ) : stockUnitMode(p) === 'KEMASAN' ? (
                       <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>Kemasan utuh</span>
                     ) : (
-                      <span title="Stok masuk ditahan sampai isi per kemasan diisi atau ditandai Kemasan utuh" style={{ fontSize: '0.75rem', fontWeight: 700, color: '#92400e', background: '#fef3c7', padding: '0.1rem 0.45rem', borderRadius: '9999px', whiteSpace: 'nowrap' }}>
-                        ⏸ Belum ditentukan{(() => { const sg = suggestGramasiFromName(p.name); return sg ? ` · saran ${sg.gramasiPerUnit}${sg.unitGramasi}` : '' })()}
+                      <span title="Stok masuk ditahan sampai isi per kemasan diisi atau ditandai Kemasan utuh" style={{ fontSize: '0.75rem', fontWeight: 500, color: 'var(--warning)', background: 'var(--warning-bg)', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+                        <PauseCircle size={14} strokeWidth={1.75} /> Belum ditentukan{(() => { const sg = suggestGramasiFromName(p.name); return sg ? ` · saran ${sg.gramasiPerUnit}${sg.unitGramasi}` : '' })()}
                       </span>
                     )}
                   </td>
                   <td style={{...tdStyle, textAlign: 'right'}}>
                     {p.spvStock != null ? (
-                      <span style={{ fontWeight: 600, color: p.spvStock > 0 ? '#166534' : '#b91c1c' }}>
-                        {p.spvStock.toLocaleString('id-ID')} {p.unit}
+                      <span style={{ fontWeight: 600, color: p.spvStock > 0 ? 'var(--success)' : 'var(--danger)' }}>
+                        <span className="num">{p.spvStock.toLocaleString('id-ID')}</span> <span className="unit">{p.unit}</span>
                       </span>
                     ) : <span style={{ color: 'var(--text-muted)', fontSize: '0.8rem' }}>—</span>}
                   </td>
                   <td style={{...tdStyle, color: 'var(--text-muted)'}}>{p.description || '—'}</td>
                   <td style={{...tdStyle, textAlign: 'center', whiteSpace: 'nowrap'}}>
-                    <button onClick={() => openEdit(p)} className="btn btn-outline" style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', marginRight: '0.4rem' }}>✏️ Edit</button>
-                    <button onClick={() => handleDelete(p.id, p.name)} style={{ padding: '0.3rem 0.6rem', fontSize: '0.75rem', background: '#fee2e2', border: '1px solid #fecaca', borderRadius: '0.4rem', color: '#b91c1c', cursor: 'pointer' }}>🗑️</button>
+                    <button onClick={() => openEdit(p)} className="btn btn-outline" style={{ padding: '0.25rem 0.625rem', fontSize: '0.75rem', marginRight: '0.5rem' }}><Pencil size={14} strokeWidth={1.75} className="icon-inline" /> Edit</button>
+                    <button onClick={() => handleDelete(p.id, p.name)} title="Hapus" style={{ padding: '0.25rem 0.5rem', fontSize: '0.75rem', background: 'var(--danger-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center', verticalAlign: 'middle' }}><Trash2 size={14} strokeWidth={1.75} /></button>
                   </td>
                 </tr>
               ))}

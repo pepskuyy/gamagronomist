@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { Clock, Smartphone, Server, Phone, Pencil, FlaskConical, Send, Info, RotateCcw, Plus, Save } from 'lucide-react'
 
 interface ConfigEntry {
   key: string
@@ -85,7 +86,7 @@ export default function WahaSettingsClient() {
       })
       const data = await res.json()
       if (data.success) {
-        setMsg({ type: 'success', text: `✅ ${data.updated} konfigurasi berhasil disimpan.` })
+        setMsg({ type: 'success', text: `${data.updated} konfigurasi berhasil disimpan.` })
       } else {
         setMsg({ type: 'error', text: data.error ?? 'Gagal menyimpan.' })
       }
@@ -108,9 +109,9 @@ export default function WahaSettingsClient() {
       })
       const data = await res.json()
       if (data.success) {
-        setMsg({ type: 'success', text: '✅ Pesan WA test berhasil dikirim! Cek WhatsApp Anda.' })
+        setMsg({ type: 'success', text: 'Pesan WA test berhasil dikirim! Cek WhatsApp Anda.' })
       } else {
-        setMsg({ type: 'error', text: `❌ Gagal kirim WA: ${data.error}` })
+        setMsg({ type: 'error', text: `Gagal kirim WA: ${data.error}` })
       }
     } catch {
       setMsg({ type: 'error', text: 'Gagal menghubungi server.' })
@@ -131,30 +132,33 @@ export default function WahaSettingsClient() {
 
   if (loading) return (
     <div className="card" style={{ padding: '2rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-      ⏳ Memuat konfigurasi...
+      <Clock size={16} strokeWidth={1.75} className="icon-inline" /> Memuat konfigurasi...
     </div>
   )
 
   const tabStyle = (active: boolean): React.CSSProperties => ({
-    padding: '0.6rem 1.25rem',
-    fontSize: '0.85rem',
-    fontWeight: 600,
+    padding: '0.625rem 1.25rem',
+    fontSize: '0.875rem',
+    fontWeight: 500,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.5rem',
     cursor: 'pointer',
     border: 'none',
     borderBottom: active ? '2px solid var(--primary)' : '2px solid transparent',
     background: 'none',
-    color: active ? 'var(--primary)' : 'var(--text-muted)',
-    transition: 'all 0.15s',
+    color: active ? 'var(--text-main)' : 'var(--text-muted)',
+    transition: 'var(--transition)',
   })
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       {/* Header */}
       <div>
-        <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          📱 Integrasi WhatsApp (WAHA)
+        <h2 style={{ margin: 0, fontSize: '1.25rem', fontWeight: 600, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <Smartphone size={18} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> Integrasi WhatsApp (WAHA)
         </h2>
-        <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+        <p style={{ margin: '0.25rem 0 0', color: 'var(--text-muted)', fontSize: '0.875rem' }}>
           Konfigurasi notifikasi WhatsApp otomatis untuk alur approval pengajuan stok AFA.
         </p>
       </div>
@@ -162,10 +166,10 @@ export default function WahaSettingsClient() {
       {/* Message */}
       {msg && (
         <div style={{
-          padding: '0.85rem 1rem', borderRadius: '0.5rem', fontSize: '0.875rem', fontWeight: 500,
-          background: msg.type === 'success' ? '#f0fdf4' : '#fef2f2',
-          border: `1px solid ${msg.type === 'success' ? '#86efac' : '#fecaca'}`,
-          color: msg.type === 'success' ? '#16a34a' : '#dc2626',
+          padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', fontWeight: 500,
+          background: msg.type === 'success' ? 'var(--success-bg)' : 'var(--danger-bg)',
+          border: '1px solid var(--border)',
+          color: msg.type === 'success' ? 'var(--success)' : 'var(--danger)',
         }}>
           {msg.text}
         </div>
@@ -174,9 +178,9 @@ export default function WahaSettingsClient() {
       {/* Tabs */}
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ display: 'flex', borderBottom: '1px solid var(--border)' }}>
-          <button style={tabStyle(activeTab === 'server')}    onClick={() => setActiveTab('server')}>🖥️ Server WAHA</button>
-          <button style={tabStyle(activeTab === 'phones')}    onClick={() => setActiveTab('phones')}>📞 Nomor WA</button>
-          <button style={tabStyle(activeTab === 'templates')} onClick={() => setActiveTab('templates')}>✏️ Template Pesan</button>
+          <button style={tabStyle(activeTab === 'server')}    onClick={() => setActiveTab('server')}><Server size={16} strokeWidth={1.75} /> Server WAHA</button>
+          <button style={tabStyle(activeTab === 'phones')}    onClick={() => setActiveTab('phones')}><Phone size={16} strokeWidth={1.75} /> Nomor WA</button>
+          <button style={tabStyle(activeTab === 'templates')} onClick={() => setActiveTab('templates')}><Pencil size={16} strokeWidth={1.75} /> Template Pesan</button>
         </div>
 
         <div style={{ padding: '1.5rem' }}>
@@ -189,7 +193,7 @@ export default function WahaSettingsClient() {
               </p>
               {byGroup('server').map(c => (
                 <div key={c.key}>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
                     {c.label}
                   </label>
                   <input
@@ -202,14 +206,14 @@ export default function WahaSettingsClient() {
                       c.key === 'waha_api_key'  ? 'Kosongkan jika tidak pakai auth' :
                       'default'
                     }
-                    style={{ width: '100%', maxWidth: 480, padding: '0.55rem 0.85rem', fontSize: '0.875rem' }}
+                    style={{ width: '100%', maxWidth: 480, padding: '0.5rem 0.75rem', fontSize: '0.875rem' }}
                   />
                 </div>
               ))}
 
               {/* Test WA */}
               <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)' }}>
-                <p style={{ margin: '0 0 0.75rem', fontSize: '0.82rem', fontWeight: 600 }}>🧪 Test Kirim WA</p>
+                <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', fontWeight: 600 }}><FlaskConical size={16} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)' }} /> Test Kirim WA</p>
                 <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                   <input
                     type="text"
@@ -217,11 +221,11 @@ export default function WahaSettingsClient() {
                     value={testPhone}
                     onChange={e => setTestPhone(e.target.value)}
                     placeholder="08xxxxxxxxxx"
-                    style={{ width: 220, padding: '0.55rem 0.85rem', fontSize: '0.875rem' }}
+                    style={{ width: 220, padding: '0.5rem 0.75rem', fontSize: '0.875rem' }}
                   />
                   <button onClick={testWa} disabled={testing} className="btn btn-primary"
-                    style={{ padding: '0.55rem 1.25rem', fontSize: '0.875rem' }}>
-                    {testing ? '⏳ Mengirim...' : '📤 Kirim Test WA'}
+                    style={{ padding: '0.5rem 1.25rem', fontSize: '0.875rem' }}>
+                    {testing ? <><Clock size={16} strokeWidth={1.75} className="icon-inline" /> Mengirim...</> : <><Send size={16} strokeWidth={1.75} className="icon-inline" /> Kirim Test WA</>}
                   </button>
                 </div>
                 <p style={{ margin: '0.5rem 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>Simpan konfigurasi terlebih dahulu agar test menggunakan pengaturan terbaru.</p>
@@ -238,7 +242,7 @@ export default function WahaSettingsClient() {
               </p>
               {byGroup('phones').map(c => (
                 <div key={c.key}>
-                  <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>
                     {c.label}
                   </label>
                   <input
@@ -247,7 +251,7 @@ export default function WahaSettingsClient() {
                     value={values[c.key] ?? ''}
                     onChange={e => setValues(v => ({ ...v, [c.key]: e.target.value }))}
                     placeholder="08xxxxxxxxxx, 08xxxxxxxxxx"
-                    style={{ width: '100%', maxWidth: 480, padding: '0.55rem 0.85rem', fontSize: '0.875rem' }}
+                    style={{ width: '100%', maxWidth: 480, padding: '0.5rem 0.75rem', fontSize: '0.875rem' }}
                   />
                 </div>
               ))}
@@ -257,8 +261,8 @@ export default function WahaSettingsClient() {
           {/* ── Templates ── */}
           {activeTab === 'templates' && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1.75rem' }}>
-              <div style={{ padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: '0.5rem', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-                <strong style={{ color: 'var(--text)' }}>ℹ️ Placeholder yang tersedia (klik untuk sisipkan):</strong> Data dari sistem yang bisa disisipkan ke dalam teks pesan secara otomatis.
+              <div style={{ padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
+                <Info size={14} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)', marginRight: '0.25rem' }} /><strong style={{ color: 'var(--text-main)', fontWeight: 500 }}>Placeholder yang tersedia (klik untuk sisipkan):</strong> Data dari sistem yang bisa disisipkan ke dalam teks pesan secara otomatis.
                 Biarkan kosong untuk menggunakan pesan bawaan.
               </div>
 
@@ -268,33 +272,34 @@ export default function WahaSettingsClient() {
                 return (
                   <div key={c.key} style={{ borderBottom: '1px solid var(--border)', paddingBottom: '1.5rem' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '0.5rem' }}>
-                      <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text)' }}>
+                      <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-main)' }}>
                         {eventLabel}
                       </label>
                       <button
                         onClick={() => resetTemplate(c.key, c.defaultValue)}
-                        style={{ fontSize: '0.72rem', color: 'var(--text-muted)', cursor: 'pointer', background: 'none', border: 'none', padding: '0.2rem 0.5rem', borderRadius: '0.3rem' }}
+                        style={{ fontSize: '0.75rem', color: 'var(--text-muted)', cursor: 'pointer', background: 'none', border: 'none', padding: '0.25rem 0.5rem', borderRadius: 'var(--radius-xs)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}
                       >
-                        ↩ Reset ke default
+                        <RotateCcw size={12} strokeWidth={1.75} /> Reset ke default
                       </button>
                     </div>
 
                     {/* Placeholder chips */}
                     {phs.length > 0 && (
-                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.4rem', marginBottom: '0.5rem' }}>
+                      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem', marginBottom: '0.5rem' }}>
                         {phs.map(ph => (
                           <button
                             key={ph.label}
                             title={ph.desc}
                             onClick={() => insertPlaceholder(c.key, ph.label)}
                             style={{
-                              padding: '0.2rem 0.6rem', fontSize: '0.72rem', fontWeight: 600,
-                              background: 'var(--primary-light, #eff6ff)', color: 'var(--primary)',
-                              border: '1px solid var(--primary-100, #bfdbfe)', borderRadius: '9999px',
-                              cursor: 'pointer', transition: 'background 0.15s',
+                              padding: '0.125rem 0.5rem', fontSize: '0.75rem', fontWeight: 500, fontFamily: 'var(--font-mono-stack)',
+                              background: 'var(--surface-2)', color: 'var(--text-secondary)',
+                              border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)',
+                              cursor: 'pointer', transition: 'var(--transition)',
+                              display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
                             }}
                           >
-                            + {ph.label}
+                            <Plus size={12} strokeWidth={1.75} /> {ph.label}
                           </button>
                         ))}
                       </div>
@@ -306,9 +311,9 @@ export default function WahaSettingsClient() {
                       value={values[c.key] ?? ''}
                       onChange={e => setValues(v => ({ ...v, [c.key]: e.target.value }))}
                       placeholder={c.defaultValue}
-                      style={{ width: '100%', resize: 'vertical', fontFamily: 'monospace', fontSize: '0.82rem', padding: '0.65rem 0.85rem', lineHeight: 1.65 }}
+                      style={{ width: '100%', resize: 'vertical', fontFamily: 'var(--font-mono-stack)', fontSize: '0.82rem', padding: '0.625rem 0.75rem', lineHeight: 1.65 }}
                     />
-                    <p style={{ margin: '0.3rem 0 0', fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+                    <p style={{ margin: '0.25rem 0 0', fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                       Kosongkan untuk menggunakan pesan bawaan. Gunakan *teks* untuk bold. Gunakan \n untuk baris baru.
                     </p>
                   </div>
@@ -322,22 +327,22 @@ export default function WahaSettingsClient() {
       {/* Save Button */}
       <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
         <button onClick={saveAll} disabled={saving} className="btn btn-primary"
-          style={{ padding: '0.65rem 1.75rem', fontSize: '0.95rem', fontWeight: 700 }}>
-          {saving ? '⏳ Menyimpan...' : '💾 Simpan Semua Konfigurasi'}
+          style={{ padding: '0.625rem 1.75rem', fontSize: '0.875rem', fontWeight: 500 }}>
+          {saving ? <><Clock size={16} strokeWidth={1.75} className="icon-inline" /> Menyimpan...</> : <><Save size={16} strokeWidth={1.75} className="icon-inline" /> Simpan Semua Konfigurasi</>}
         </button>
       </div>
 
       {/* Alur info */}
       <div className="card" style={{ padding: '1.25rem', background: 'var(--surface-2)', fontSize: '0.82rem', color: 'var(--text-muted)' }}>
-        <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text)' }}>ℹ️ Alur Notifikasi WhatsApp</strong>
-        <ol style={{ paddingLeft: '1.2rem', lineHeight: 2, margin: 0 }}>
+        <strong style={{ display: 'block', marginBottom: '0.5rem', color: 'var(--text-main)', fontWeight: 600 }}><Info size={14} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)', marginRight: '0.375rem' }} />Alur Notifikasi WhatsApp</strong>
+        <ol style={{ paddingLeft: '1.25rem', lineHeight: 2, margin: 0 }}>
           <li><strong>AFA submit</strong> → WA ke nomor <strong>SPV</strong></li>
           <li><strong>SPV approve</strong> → WA ke nomor <strong>FA Manager</strong></li>
           <li><strong>FA Manager approve</strong> → WA ke nomor <strong>WH Manager</strong></li>
           <li><strong>WH Manager approve</strong> → WA ke nomor <strong>SPV</strong> (konfirmasi terima)</li>
           <li><strong>SPV konfirmasi terima</strong> → WA ke nomor WA pribadi AFA yang bersangkutan</li>
         </ol>
-        <p style={{ margin: '0.75rem 0 0', fontStyle: 'italic' }}>
+        <p style={{ margin: '0.75rem 0 0' }}>
           Nomor WA AFA diambil dari profil masing-masing user (atur via Manajemen User → edit user → kolom No. WhatsApp).
         </p>
       </div>

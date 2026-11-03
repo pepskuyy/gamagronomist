@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { cldThumb } from '@/lib/cloudinary-url'
 import { createUser, updateUser, deleteUser, bulkDeleteUsers } from '@/app/actions/master'
 import ImageUploader from '@/components/ImageUploader'
+import { Plus, Pencil, Trash2, X } from 'lucide-react'
 
 type User = { id: string; name: string; username: string; role: string; isActive: boolean; photo: string | null; area: { id: string; name: string } | null; afa: { id: string; name: string } | null }
 type Area = { id: string; name: string }
@@ -17,8 +18,8 @@ const overlayStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem'
 }
 const modalStyle: React.CSSProperties = {
-  background: '#fff', borderRadius: '1rem', padding: '2rem', width: '100%', maxWidth: '520px',
-  boxShadow: '0 20px 60px rgba(0,0,0,0.3)', maxHeight: '90vh', overflowY: 'auto'
+  background: 'var(--surface)', borderRadius: 'var(--radius-xl)', padding: '2rem', width: '100%', maxWidth: '520px',
+  boxShadow: 'var(--shadow-lg)', maxHeight: '90vh', overflowY: 'auto'
 }
 
 export default function UsersMasterPage() {
@@ -93,8 +94,8 @@ export default function UsersMasterPage() {
 
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Memuat data...</div>
 
-  const inputStyle: React.CSSProperties = { width: '100%', padding: '0.6rem 0.9rem', border: '1px solid #d1d5db', borderRadius: '0.5rem', fontSize: '0.9rem', boxSizing: 'border-box' }
-  const labelStyle: React.CSSProperties = { fontSize: '0.82rem', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '0.35rem' }
+  const inputStyle: React.CSSProperties = { width: '100%', padding: '0.625rem 0.875rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem', background: 'var(--surface)', color: 'var(--text-main)', boxSizing: 'border-box' }
+  const labelStyle: React.CSSProperties = { fontSize: '0.82rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.375rem' }
 
   return (
     <div>
@@ -102,16 +103,16 @@ export default function UsersMasterPage() {
       {modal && (
         <div style={overlayStyle} onClick={(e) => e.target === e.currentTarget && closeModal()}>
           <div style={modalStyle}>
-            <h3 style={{ marginBottom: '1.5rem' }}>{modal === 'add' ? '➕ Tambah User Baru' : '✏️ Edit User'}</h3>
+            <h3 style={{ marginBottom: '1.5rem' }}>{modal === 'add' ? 'Tambah User Baru' : 'Edit User'}</h3>
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
               {modal === 'add' && (
                 <div>
-                  <label style={labelStyle}>Username <span style={{ color: 'red' }}>*</span></label>
+                  <label style={labelStyle}>Username <span style={{ color: 'var(--danger)' }}>*</span></label>
                   <input name="username" style={inputStyle} required placeholder="contoh: afa2" />
                 </div>
               )}
               <div>
-                <label style={labelStyle}>Nama Lengkap <span style={{ color: 'red' }}>*</span></label>
+                <label style={labelStyle}>Nama Lengkap <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <input name="name" style={inputStyle} required defaultValue={selected?.name} placeholder="contoh: Budi Santoso" />
               </div>
               <div>
@@ -129,16 +130,16 @@ export default function UsersMasterPage() {
                     <ImageUploader onUploadSuccess={(urls) => setFormPhoto(urls[0] || null)} maxFiles={1} label="Upload" />
                   </div>
                   {formPhoto && (
-                    <button type="button" onClick={() => setFormPhoto(null)} className="btn btn-outline" style={{ color: 'var(--danger)', borderColor: 'var(--danger)', padding: '0.4rem 0.75rem' }}>Hapus</button>
+                    <button type="button" onClick={() => setFormPhoto(null)} className="btn btn-outline" style={{ color: 'var(--danger)', padding: '0.375rem 0.75rem' }}>Hapus</button>
                   )}
                 </div>
               </div>
               <div>
-                <label style={labelStyle}>{modal === 'add' ? 'Password' : 'Password Baru'} {modal === 'add' && <span style={{ color: 'red' }}>*</span>}</label>
+                <label style={labelStyle}>{modal === 'add' ? 'Password' : 'Password Baru'} {modal === 'add' && <span style={{ color: 'var(--danger)' }}>*</span>}</label>
                 <input name="password" type="password" style={inputStyle} required={modal === 'add'} placeholder={modal === 'edit' ? 'Kosongkan jika tidak diubah' : 'Minimal 6 karakter'} />
               </div>
               <div>
-                <label style={labelStyle}>Role <span style={{ color: 'red' }}>*</span></label>
+                <label style={labelStyle}>Role <span style={{ color: 'var(--danger)' }}>*</span></label>
                 <select name="role" style={inputStyle} required defaultValue={selected?.role || ''}>
                   <option value="">-- Pilih Role --</option>
                   {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
@@ -167,7 +168,7 @@ export default function UsersMasterPage() {
                   </select>
                 </div>
               )}
-              {error && <div style={{ color: '#dc2626', fontSize: '0.875rem', background: '#fee2e2', padding: '0.6rem 0.9rem', borderRadius: '0.5rem' }}>{error}</div>}
+              {error && <div style={{ color: 'var(--danger)', fontSize: '0.875rem', background: 'var(--danger-bg)', padding: '0.625rem 0.875rem', borderRadius: 'var(--radius-sm)' }}>{error}</div>}
               <div style={{ display: 'flex', gap: '0.75rem', marginTop: '0.5rem' }}>
                 <button type="submit" className="btn btn-primary" disabled={isPending} style={{ flex: 1 }}>
                   {isPending ? 'Menyimpan...' : 'Simpan'}
@@ -183,62 +184,62 @@ export default function UsersMasterPage() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/dashboard/master" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>← Master Data</Link>
-          <h2 style={{ margin: 0 }}>👥 Master Data: Pengguna</h2>
+          <h2 style={{ margin: 0 }}>Master Data: Pengguna</h2>
         </div>
-        <button onClick={openAdd} className="btn btn-primary">➕ Tambah User</button>
+        <button onClick={openAdd} className="btn btn-primary"><Plus size={16} strokeWidth={1.75} className="icon-inline" /> Tambah User</button>
       </div>
 
       {/* Bulk delete bar */}
       {selectedUsers.size > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
-          <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedUsers.size} user dipilih</span>
-          <button onClick={handleBulkDelete} disabled={isPending} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>🗑️ Hapus yang Dipilih</button>
-          <button onClick={() => setSelectedUsers(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 1rem', marginBottom: '1rem' }}>
+          <span style={{ fontWeight: 500, fontSize: '0.875rem' }}><span className="num">{selectedUsers.size}</span> user dipilih</span>
+          <button onClick={handleBulkDelete} disabled={isPending} className="btn btn-danger" style={{ padding: '0.375rem 0.875rem', fontSize: '0.82rem' }}><Trash2 size={16} strokeWidth={1.75} className="icon-inline" /> Hapus yang Dipilih</button>
+          <button onClick={() => setSelectedUsers(new Set())} className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.82rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" /> Batal</button>
         </div>
       )}
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         <div style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead style={{ background: 'var(--surface-hover)', borderBottom: '2px solid var(--border)' }}>
+            <thead style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
               <tr>
-                <th style={{ padding: '0.85rem 1rem', width: '40px', textAlign: 'center' }}>
+                <th style={{ padding: '0.75rem 1rem', width: '40px', textAlign: 'center' }}>
                   <input type="checkbox" checked={users.length > 0 && selectedUsers.size === users.length} onChange={e => toggleAllUsers(e.target.checked)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
                 </th>
                 {['Nama', 'Username', 'Role', 'Status', 'Area', 'Supervisor AFA', 'Aksi'].map(h => (
-                  <th key={h} style={{ padding: '0.85rem 1rem', fontWeight: 600, fontSize: '0.82rem', textTransform: 'uppercase', letterSpacing: '0.04em', color: 'var(--text-muted)' }}>{h}</th>
+                  <th key={h} style={{ padding: '0.75rem 1rem', fontWeight: 500, fontSize: '0.8rem', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {users.map(u => (
-                <tr key={u.id} style={{ borderBottom: '1px solid var(--border)', background: selectedUsers.has(u.id) ? 'var(--primary-light)' : undefined }}>
-                  <td style={{ padding: '0.85rem 1rem', width: '40px', textAlign: 'center' }}>
+                <tr key={u.id} style={{ borderBottom: '1px solid var(--border-light)', background: selectedUsers.has(u.id) ? 'var(--primary-light)' : undefined }}>
+                  <td style={{ padding: '0.75rem 1rem', width: '40px', textAlign: 'center' }}>
                     <input type="checkbox" checked={selectedUsers.has(u.id)} onChange={() => toggleUser(u.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} />
                   </td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 'bold', fontSize: '0.85rem', flexShrink: 0, overflow: 'hidden' }}>
+                      <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'var(--primary-light)', color: 'var(--primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 600, fontSize: '0.875rem', flexShrink: 0, overflow: 'hidden' }}>
                         {u.photo ? <img src={cldThumb(u.photo, 64)} alt={u.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : u.name.charAt(0).toUpperCase()}
                       </div>
-                      <span style={{ fontWeight: 600 }}>{u.name}</span>
+                      <span style={{ fontWeight: 500 }}>{u.name}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{u.username}</td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
+                  <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono-stack)', fontSize: '0.82rem' }}>{u.username}</td>
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     <span className={`badge ${roleBadge[u.role] ?? 'badge-neutral'}`}>{u.role}</span>
                   </td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
-                    <span style={{ padding: '0.15rem 0.5rem', borderRadius: '9999px', fontSize: '0.75rem', fontWeight: 600, background: u.isActive ? '#dcfce7' : '#fee2e2', color: u.isActive ? '#166534' : '#991b1b' }}>
+                  <td style={{ padding: '0.75rem 1rem' }}>
+                    <span style={{ padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500, background: u.isActive ? 'var(--success-bg)' : 'var(--danger-bg)', color: u.isActive ? 'var(--success)' : 'var(--danger)' }}>
                       {u.isActive ? 'Aktif' : 'Nonaktif'}
                     </span>
                   </td>
-                  <td style={{ padding: '0.85rem 1rem' }}>{u.area?.name || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
-                  <td style={{ padding: '0.85rem 1rem', color: 'var(--text-muted)' }}>{u.afa?.name || '-'}</td>
-                  <td style={{ padding: '0.85rem 1rem' }}>
+                  <td style={{ padding: '0.75rem 1rem' }}>{u.area?.name || <span style={{ color: 'var(--text-muted)' }}>-</span>}</td>
+                  <td style={{ padding: '0.75rem 1rem', color: 'var(--text-muted)' }}>{u.afa?.name || '-'}</td>
+                  <td style={{ padding: '0.75rem 1rem' }}>
                     <div style={{ display: 'flex', gap: '0.5rem' }}>
-                      <button onClick={() => openEdit(u)} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>✏️ Edit</button>
-                      <button onClick={() => handleDelete(u.id, u.name)} style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem', background: 'none', border: '1px solid var(--border)', borderRadius: '0.4rem', color: 'var(--danger)', cursor: 'pointer' }}>🗑️</button>
+                      <button onClick={() => openEdit(u)} className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}><Pencil size={14} strokeWidth={1.75} className="icon-inline" /> Edit</button>
+                      <button onClick={() => handleDelete(u.id, u.name)} title="Hapus" style={{ padding: '0.375rem 0.625rem', fontSize: '0.8rem', background: 'none', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', color: 'var(--danger)', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}><Trash2 size={14} strokeWidth={1.75} /></button>
                     </div>
                   </td>
                 </tr>
@@ -250,7 +251,7 @@ export default function UsersMasterPage() {
           </table>
         </div>
         <div style={{ padding: '0.75rem 1rem', fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'right', borderTop: '1px solid var(--border)' }}>
-          Total: {users.length} user
+          Total: <span className="num">{users.length}</span> user
         </div>
       </div>
     </div>

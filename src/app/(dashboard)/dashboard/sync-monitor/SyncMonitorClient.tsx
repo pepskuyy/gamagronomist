@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useTransition, useCallback } from 'react'
+import { RefreshCw, Package, Sprout, RotateCw, X, ClipboardList, ArrowLeft, ArrowRight } from 'lucide-react'
 
 interface SyncLogItem {
   id: string
@@ -90,13 +91,13 @@ export default function SyncMonitorClient({ userRole }: Props) {
 
         setTriggerMsg({
           type: 'success',
-          text: `✅ Sinkronisasi "${label}" selesai diproses!`,
+          text: `Sinkronisasi "${label}" selesai diproses!`,
         })
         fetchLogs(1, statusFilter, typeFilter)
       } catch (err: any) {
         setTriggerMsg({
           type: 'error',
-          text: `❌ Gagal memicu sinkronisasi: ${err.message}`,
+          text: `Gagal memicu sinkronisasi: ${err.message}`,
         })
       }
     })
@@ -134,26 +135,25 @@ export default function SyncMonitorClient({ userRole }: Props) {
         }}
       >
         <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-            <span style={{ fontSize: '1.4rem' }}>🔄</span>
-            <h1 style={{ margin: 0, fontSize: '1.45rem', fontWeight: 800, color: 'var(--text-main, #0f172a)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem' }}>
+            <h1 style={{ margin: 0, fontSize: '1.375rem', fontWeight: 600, color: 'var(--text-main)' }}>
               Monitoring Sinkronisasi Data
             </h1>
             <span
               style={{
-                fontSize: '0.72rem',
-                fontWeight: 700,
-                padding: '0.15rem 0.55rem',
-                borderRadius: '9999px',
-                background: '#fee2e2',
-                color: '#b91c1c',
-                border: '1px solid #fecaca',
+                fontSize: '0.75rem',
+                fontWeight: 500,
+                padding: '0.125rem 0.5rem',
+                borderRadius: 'var(--radius-xs)',
+                background: 'var(--surface-2)',
+                color: 'var(--text-secondary)',
+                border: '1px solid var(--border-light)',
               }}
             >
               Khusus Admin
             </span>
           </div>
-          <p style={{ margin: '0.25rem 0 0', fontSize: '0.86rem', color: 'var(--text-muted, #64748b)' }}>
+          <p style={{ margin: '0.25rem 0 0', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Riwayat log otomatis dan manual sinkronisasi data Sales Dashboard, Accurate Online, dan SIMOTANDI
           </p>
         </div>
@@ -166,15 +166,11 @@ export default function SyncMonitorClient({ userRole }: Props) {
             disabled={isTriggering}
             className="btn btn-primary"
             style={{
-              padding: '0.5rem 0.95rem',
+              padding: '0.5rem 1rem',
               fontSize: '0.82rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
             }}
           >
-            <span>🔄</span>
+            <RefreshCw size={16} strokeWidth={1.75} className="icon-inline" />
             <span>Sync Sales Dashboard</span>
           </button>
 
@@ -182,21 +178,13 @@ export default function SyncMonitorClient({ userRole }: Props) {
             type="button"
             onClick={() => handleTriggerSync('accurate', 'Accurate Barang & Stok')}
             disabled={isTriggering}
-            className="btn btn-secondary"
+            className="btn btn-outline"
             style={{
-              padding: '0.5rem 0.95rem',
+              padding: '0.5rem 1rem',
               fontSize: '0.82rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              cursor: 'pointer',
             }}
           >
-            <span>📦</span>
+            <Package size={16} strokeWidth={1.75} className="icon-inline" />
             <span>Sync Accurate</span>
           </button>
 
@@ -204,21 +192,13 @@ export default function SyncMonitorClient({ userRole }: Props) {
             type="button"
             onClick={() => handleTriggerSync('simotandi', 'SIMOTANDI Fase Padi')}
             disabled={isTriggering}
-            className="btn btn-secondary"
+            className="btn btn-outline"
             style={{
-              padding: '0.5rem 0.95rem',
+              padding: '0.5rem 1rem',
               fontSize: '0.82rem',
-              fontWeight: 700,
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.4rem',
-              background: '#ffffff',
-              border: '1px solid #cbd5e1',
-              color: '#334155',
-              cursor: 'pointer',
             }}
           >
-            <span>🌾</span>
+            <Sprout size={16} strokeWidth={1.75} className="icon-inline" />
             <span>Sync SIMOTANDI</span>
           </button>
 
@@ -226,17 +206,13 @@ export default function SyncMonitorClient({ userRole }: Props) {
             type="button"
             onClick={() => fetchLogs(page, statusFilter, typeFilter)}
             title="Muat Ulang Log"
+            className="btn btn-outline"
             style={{
-              padding: '0.5rem 0.65rem',
-              fontSize: '0.85rem',
-              borderRadius: '0.375rem',
-              border: '1px solid #cbd5e1',
-              background: '#ffffff',
-              color: '#475569',
-              cursor: 'pointer',
+              padding: '0.5rem 0.625rem',
+              fontSize: '0.875rem',
             }}
           >
-            ↻
+            <RotateCw size={16} strokeWidth={1.75} />
           </button>
         </div>
       </div>
@@ -246,11 +222,11 @@ export default function SyncMonitorClient({ userRole }: Props) {
         <div
           style={{
             padding: '0.75rem 1rem',
-            borderRadius: '0.5rem',
-            fontSize: '0.85rem',
-            background: triggerMsg.type === 'success' ? '#f0fdf4' : '#fee2e2',
-            color: triggerMsg.type === 'success' ? '#15803d' : '#b91c1c',
-            border: `1px solid ${triggerMsg.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+            borderRadius: 'var(--radius-sm)',
+            fontSize: '0.875rem',
+            background: triggerMsg.type === 'success' ? 'var(--success-bg)' : 'var(--danger-bg)',
+            color: triggerMsg.type === 'success' ? 'var(--success)' : 'var(--danger)',
+            border: '1px solid var(--border)',
           }}
         >
           {triggerMsg.text}
@@ -258,40 +234,40 @@ export default function SyncMonitorClient({ userRole }: Props) {
       )}
 
       {/* Summary Cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.85rem' }}>
-        <div className="card" style={{ padding: '0.9rem 1.15rem' }}>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Total Sinkronisasi Tercatat</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#0f172a', marginTop: '0.2rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '0.75rem' }}>
+        <div className="card" style={{ padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>Total Sinkronisasi Tercatat</div>
+          <div className="num" style={{ fontSize: '1.375rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.25rem' }}>
             {summary?.totalRuns || totalCount}
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400, marginLeft: '0.3rem' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '0.25rem' }}>
               eksekusi
             </span>
           </div>
         </div>
 
-        <div className="card" style={{ padding: '0.9rem 1.15rem', borderLeft: '4px solid #16a34a' }}>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Berhasil</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#16a34a', marginTop: '0.2rem' }}>
+        <div className="card" style={{ padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>Berhasil</div>
+          <div className="num" style={{ fontSize: '1.375rem', fontWeight: 600, color: 'var(--success)', marginTop: '0.25rem' }}>
             {summary?.successCount || 0}
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400, marginLeft: '0.3rem' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '0.25rem' }}>
               sesi
             </span>
           </div>
         </div>
 
-        <div className="card" style={{ padding: '0.9rem 1.15rem', borderLeft: '4px solid #dc2626' }}>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Gagal / Kendala</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#dc2626', marginTop: '0.2rem' }}>
+        <div className="card" style={{ padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>Gagal / Kendala</div>
+          <div className="num" style={{ fontSize: '1.375rem', fontWeight: 600, color: 'var(--danger)', marginTop: '0.25rem' }}>
             {summary?.failedCount || 0}
-            <span style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 400, marginLeft: '0.3rem' }}>
+            <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 400, marginLeft: '0.25rem' }}>
               sesi
             </span>
           </div>
         </div>
 
-        <div className="card" style={{ padding: '0.9rem 1.15rem', borderLeft: '4px solid #0284c7' }}>
-          <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>Terakhir Dijalankan</div>
-          <div style={{ fontSize: '0.88rem', fontWeight: 700, color: '#0f172a', marginTop: '0.45rem' }}>
+        <div className="card" style={{ padding: '1rem 1.25rem' }}>
+          <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 500 }}>Terakhir Dijalankan</div>
+          <div className="num" style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-main)', marginTop: '0.5rem' }}>
             {summary?.lastRun ? formatWibDate(summary.lastRun) : '-'}
           </div>
         </div>
@@ -301,29 +277,29 @@ export default function SyncMonitorClient({ userRole }: Props) {
       <div
         className="card"
         style={{
-          padding: '0.85rem 1.25rem',
+          padding: '0.75rem 1.25rem',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center',
           flexWrap: 'wrap',
           gap: '0.75rem',
-          background: '#ffffff',
+          background: 'var(--surface)',
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flexWrap: 'wrap' }}>
           {/* Filter Status */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Status:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>Status:</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               style={{
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                padding: '0.35rem 0.6rem',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '0.375rem 0.625rem',
                 fontSize: '0.78rem',
-                background: '#ffffff',
-                color: '#334155',
+                background: 'var(--surface)',
+                color: 'var(--text-secondary)',
               }}
             >
               <option value="">Semua Status</option>
@@ -334,18 +310,18 @@ export default function SyncMonitorClient({ userRole }: Props) {
           </div>
 
           {/* Filter Tipe Data */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-            <span style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Tipe Data:</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }}>Tipe Data:</span>
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
               style={{
-                border: '1px solid #cbd5e1',
-                borderRadius: '0.375rem',
-                padding: '0.35rem 0.6rem',
+                border: '1px solid var(--border)',
+                borderRadius: 'var(--radius-sm)',
+                padding: '0.375rem 0.625rem',
                 fontSize: '0.78rem',
-                background: '#ffffff',
-                color: '#334155',
+                background: 'var(--surface)',
+                color: 'var(--text-secondary)',
               }}
             >
               <option value="">Semua Tipe Data</option>
@@ -366,19 +342,22 @@ export default function SyncMonitorClient({ userRole }: Props) {
               style={{
                 border: 'none',
                 background: 'transparent',
-                color: '#ef4444',
+                color: 'var(--danger)',
                 fontSize: '0.75rem',
-                fontWeight: 600,
+                fontWeight: 500,
                 cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '0.25rem',
               }}
             >
-              ✕ Reset Filter
+              <X size={14} strokeWidth={1.75} /> Reset Filter
             </button>
           )}
         </div>
 
-        <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-          Menampilkan {logs.length} dari {totalCount} log
+        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+          Menampilkan <span className="num">{logs.length}</span> dari <span className="num">{totalCount}</span> log
         </div>
       </div>
 
@@ -388,9 +367,9 @@ export default function SyncMonitorClient({ userRole }: Props) {
         style={{
           padding: 0,
           overflow: 'hidden',
-          background: '#ffffff',
-          borderRadius: '0.75rem',
-          border: '1px solid #e2e8f0',
+          background: 'var(--surface)',
+          borderRadius: 'var(--radius-lg)',
+          border: '1px solid var(--border)',
         }}
       >
         <div style={{ overflowX: 'auto' }}>
@@ -398,38 +377,38 @@ export default function SyncMonitorClient({ userRole }: Props) {
             style={{
               width: '100%',
               borderCollapse: 'collapse',
-              fontSize: '0.84rem',
+              fontSize: '0.875rem',
               textAlign: 'left',
             }}
           >
             <thead>
               <tr
                 style={{
-                  borderBottom: '1px solid #e2e8f0',
-                  color: '#475569',
-                  background: '#f8fafc',
+                  borderBottom: '1px solid var(--border)',
+                  color: 'var(--text-secondary)',
+                  background: 'var(--surface-2)',
                   fontSize: '0.8rem',
-                  fontWeight: 700,
+                  fontWeight: 500,
                 }}
               >
-                <th style={{ padding: '0.85rem 1.25rem', width: '190px' }}>Waktu (WIB)</th>
-                <th style={{ padding: '0.85rem 1rem', width: '260px' }}>Tipe Data</th>
-                <th style={{ padding: '0.85rem 1rem', width: '110px' }}>Pemicu</th>
-                <th style={{ padding: '0.85rem 1rem', width: '110px' }}>Status</th>
-                <th style={{ padding: '0.85rem 1rem', width: '120px', textAlign: 'center' }}>Data Diproses</th>
-                <th style={{ padding: '0.85rem 1.25rem' }}>Keterangan</th>
+                <th style={{ padding: '0.75rem 1.25rem', width: '190px' }}>Waktu (WIB)</th>
+                <th style={{ padding: '0.75rem 1rem', width: '260px' }}>Tipe Data</th>
+                <th style={{ padding: '0.75rem 1rem', width: '110px' }}>Pemicu</th>
+                <th style={{ padding: '0.75rem 1rem', width: '110px' }}>Status</th>
+                <th style={{ padding: '0.75rem 1rem', width: '120px', textAlign: 'center' }}>Data Diproses</th>
+                <th style={{ padding: '0.75rem 1.25rem' }}>Keterangan</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '3.5rem', textAlign: 'center', color: '#64748b' }}>
+                  <td colSpan={6} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
                     <div
                       style={{
                         width: '32px',
                         height: '32px',
-                        border: '3px solid #cbd5e1',
-                        borderTopColor: '#0284c7',
+                        border: '3px solid var(--border)',
+                        borderTopColor: 'var(--text-muted)',
                         borderRadius: '50%',
                         animation: 'spin 0.8s linear infinite',
                         margin: '0 auto 0.75rem',
@@ -440,9 +419,9 @@ export default function SyncMonitorClient({ userRole }: Props) {
                 </tr>
               ) : logs.length === 0 ? (
                 <tr>
-                  <td colSpan={6} style={{ padding: '3.5rem', textAlign: 'center', color: '#64748b' }}>
-                    <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>📋</div>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: '#0f172a' }}>
+                  <td colSpan={6} style={{ padding: '3.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>
+                    <ClipboardList size={28} strokeWidth={1.5} style={{ marginBottom: '0.5rem', color: 'var(--text-light)' }} />
+                    <div style={{ fontWeight: 600, fontSize: '0.9375rem', color: 'var(--text-main)' }}>
                       Belum Ada Riwayat Log Sinkronisasi
                     </div>
                     <div style={{ fontSize: '0.8rem', marginTop: '0.25rem' }}>
@@ -460,8 +439,8 @@ export default function SyncMonitorClient({ userRole }: Props) {
                     <tr
                       key={log.id}
                       style={{
-                        borderBottom: '1px solid #f1f5f9',
-                        transition: 'background 0.15s',
+                        borderBottom: '1px solid var(--border-light)',
+                        transition: 'var(--transition)',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.background = '#f8fafc'
@@ -473,8 +452,8 @@ export default function SyncMonitorClient({ userRole }: Props) {
                       {/* Waktu (WIB) */}
                       <td
                         style={{
-                          padding: '0.85rem 1.25rem',
-                          color: '#334155',
+                          padding: '0.75rem 1.25rem',
+                          color: 'var(--text-secondary)',
                           fontSize: '0.82rem',
                           fontVariantNumeric: 'tabular-nums',
                           whiteSpace: 'nowrap',
@@ -486,26 +465,26 @@ export default function SyncMonitorClient({ userRole }: Props) {
                       {/* Tipe Data */}
                       <td
                         style={{
-                          padding: '0.85rem 1rem',
-                          fontWeight: 600,
-                          color: '#0f172a',
-                          fontSize: '0.84rem',
+                          padding: '0.75rem 1rem',
+                          fontWeight: 500,
+                          color: 'var(--text-main)',
+                          fontSize: '0.875rem',
                         }}
                       >
                         {log.dataType}
                       </td>
 
                       {/* Pemicu */}
-                      <td style={{ padding: '0.85rem 1rem' }}>
+                      <td style={{ padding: '0.75rem 1rem' }}>
                         <span
                           style={{
                             display: 'inline-block',
-                            padding: '0.2rem 0.65rem',
-                            borderRadius: '9999px',
-                            fontSize: '0.74rem',
-                            fontWeight: 700,
-                            background: isManual ? '#e0f2fe' : '#f1f5f9',
-                            color: isManual ? '#0284c7' : '#475569',
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: 'var(--radius-xs)',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            background: isManual ? 'var(--info-bg)' : 'var(--surface-2)',
+                            color: isManual ? 'var(--info)' : 'var(--text-secondary)',
                           }}
                         >
                           {isManual ? 'Manual' : 'Otomatis'}
@@ -513,16 +492,16 @@ export default function SyncMonitorClient({ userRole }: Props) {
                       </td>
 
                       {/* Status */}
-                      <td style={{ padding: '0.85rem 1rem' }}>
+                      <td style={{ padding: '0.75rem 1rem' }}>
                         <span
                           style={{
                             display: 'inline-block',
-                            padding: '0.2rem 0.65rem',
-                            borderRadius: '9999px',
-                            fontSize: '0.74rem',
-                            fontWeight: 700,
-                            background: isSuccess ? '#dcfce7' : isRunning ? '#fef3c7' : '#fee2e2',
-                            color: isSuccess ? '#16a34a' : isRunning ? '#d97706' : '#dc2626',
+                            padding: '0.125rem 0.5rem',
+                            borderRadius: 'var(--radius-xs)',
+                            fontSize: '0.75rem',
+                            fontWeight: 500,
+                            background: isSuccess ? 'var(--success-bg)' : isRunning ? 'var(--warning-bg)' : 'var(--danger-bg)',
+                            color: isSuccess ? 'var(--success)' : isRunning ? 'var(--warning)' : 'var(--danger)',
                           }}
                         >
                           {isSuccess ? 'Berhasil' : isRunning ? 'Diproses' : 'Gagal'}
@@ -532,11 +511,11 @@ export default function SyncMonitorClient({ userRole }: Props) {
                       {/* Data Diproses */}
                       <td
                         style={{
-                          padding: '0.85rem 1rem',
+                          padding: '0.75rem 1rem',
                           textAlign: 'center',
-                          fontWeight: 800,
-                          fontSize: '0.88rem',
-                          color: '#0f172a',
+                          fontWeight: 600,
+                          fontSize: '0.875rem',
+                          color: 'var(--text-main)',
                           fontVariantNumeric: 'tabular-nums',
                         }}
                       >
@@ -546,15 +525,15 @@ export default function SyncMonitorClient({ userRole }: Props) {
                       {/* Keterangan */}
                       <td
                         style={{
-                          padding: '0.85rem 1.25rem',
-                          color: '#475569',
+                          padding: '0.75rem 1.25rem',
+                          color: 'var(--text-secondary)',
                           fontSize: '0.82rem',
                           lineHeight: 1.4,
                         }}
                       >
                         {log.message || '-'}
                         {log.errorDetail && (
-                          <div style={{ color: '#dc2626', fontSize: '0.72rem', marginTop: '0.15rem' }}>
+                          <div style={{ color: 'var(--danger)', fontSize: '0.75rem', marginTop: '0.125rem' }}>
                             {log.errorDetail}
                           </div>
                         )}
@@ -571,19 +550,19 @@ export default function SyncMonitorClient({ userRole }: Props) {
         {totalPages > 1 && (
           <div
             style={{
-              padding: '0.85rem 1.25rem',
-              borderTop: '1px solid #e2e8f0',
+              padding: '0.75rem 1.25rem',
+              borderTop: '1px solid var(--border)',
               display: 'flex',
               justifyContent: 'space-between',
               alignItems: 'center',
-              background: '#f8fafc',
+              background: 'var(--surface-2)',
             }}
           >
-            <div style={{ fontSize: '0.78rem', color: '#64748b' }}>
-              Halaman {page} dari {totalPages}
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+              Halaman <span className="num">{page}</span> dari <span className="num">{totalPages}</span>
             </div>
 
-            <div style={{ display: 'flex', gap: '0.4rem' }}>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button
                 type="button"
                 onClick={() => {
@@ -593,17 +572,17 @@ export default function SyncMonitorClient({ userRole }: Props) {
                 }}
                 disabled={page <= 1}
                 style={{
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  border: '1px solid #cbd5e1',
-                  background: page <= 1 ? '#f1f5f9' : '#ffffff',
-                  color: page <= 1 ? '#94a3b8' : '#334155',
+                  padding: '0.375rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border)',
+                  background: page <= 1 ? 'var(--surface-2)' : 'var(--surface)',
+                  color: page <= 1 ? 'var(--text-light)' : 'var(--text-secondary)',
                   fontSize: '0.78rem',
                   fontWeight: 600,
                   cursor: page <= 1 ? 'not-allowed' : 'pointer',
                 }}
               >
-                ← Sebelumnya
+                <ArrowLeft size={14} strokeWidth={1.75} className="icon-inline" /> Sebelumnya
               </button>
 
               <button
@@ -615,17 +594,17 @@ export default function SyncMonitorClient({ userRole }: Props) {
                 }}
                 disabled={page >= totalPages}
                 style={{
-                  padding: '0.35rem 0.75rem',
-                  borderRadius: '0.375rem',
-                  border: '1px solid #cbd5e1',
-                  background: page >= totalPages ? '#f1f5f9' : '#ffffff',
-                  color: page >= totalPages ? '#94a3b8' : '#334155',
+                  padding: '0.375rem 0.75rem',
+                  borderRadius: 'var(--radius-sm)',
+                  border: '1px solid var(--border)',
+                  background: page >= totalPages ? 'var(--surface-2)' : 'var(--surface)',
+                  color: page >= totalPages ? 'var(--text-light)' : 'var(--text-secondary)',
                   fontSize: '0.78rem',
                   fontWeight: 600,
                   cursor: page >= totalPages ? 'not-allowed' : 'pointer',
                 }}
               >
-                Selanjutnya →
+                Selanjutnya <ArrowRight size={14} strokeWidth={1.75} className="icon-inline" />
               </button>
             </div>
           </div>

@@ -4,21 +4,22 @@ import { useState, useEffect } from 'react'
 import { getAllDrafts, deleteDraft, updateDraftStatus, type PendingDraft } from '@/lib/offline-db'
 import Link from 'next/link'
 import { refreshPendingDraftCount } from '@/hooks/usePendingDraftCount'
+import { ArrowLeft, WifiOff, Loader2, Upload, CheckCircle2, Calendar, Camera, AlertTriangle, RotateCcw, Trash2 } from 'lucide-react'
 
 const TYPE_LABELS: Record<string, string> = {
-  'spot-demplot': '🌿 Spot Demplot',
-  'cb': '📝 Customer Behavior',
-  'kios': '🏪 Visit Kios',
-  'gathering': '🤝 Gathering',
-  'company': '🏢 Visit Company',
-  'video-konten': '📹 Video Konten',
+  'spot-demplot': 'Spot Demplot',
+  'cb': 'Customer Behavior',
+  'kios': 'Visit Kios',
+  'gathering': 'Gathering',
+  'company': 'Visit Company',
+  'video-konten': 'Video Konten',
 }
 
 const STATUS_BADGES: Record<string, { label: string; bg: string; color: string; border: string }> = {
-  pending:  { label: 'Menunggu Sinyal', bg: '#fef3c7', color: '#92400e', border: '#fde68a' },
-  syncing:  { label: 'Sedang Dikirim',  bg: '#eff6ff', color: '#1d4ed8', border: '#bfdbfe' },
-  synced:   { label: 'Terkirim ✓',      bg: '#dcfce7', color: '#15803d', border: '#86efac' },
-  failed:   { label: 'Gagal ✗',         bg: '#fee2e2', color: '#991b1b', border: '#fca5a5' },
+  pending:  { label: 'Menunggu Sinyal', bg: 'var(--warning-bg)', color: 'var(--warning)', border: 'transparent' },
+  syncing:  { label: 'Sedang Dikirim',  bg: 'var(--info-bg)',    color: 'var(--info)',    border: 'transparent' },
+  synced:   { label: 'Terkirim',        bg: 'var(--success-bg)', color: 'var(--success)', border: 'transparent' },
+  failed:   { label: 'Gagal',           bg: 'var(--danger-bg)',  color: 'var(--danger)',  border: 'transparent' },
 }
 
 export default function OfflineQueuePage() {
@@ -97,21 +98,21 @@ export default function OfflineQueuePage() {
   return (
     <div style={{ padding: '1.5rem', maxWidth: '900px', margin: '0 auto' }}>
       <div className="back-header" style={{ marginBottom: '1.5rem' }}>
-        <Link href="/dashboard/reports" style={{ textDecoration: 'none', color: 'var(--text-muted)' }}>
-          ← Kembali
+        <Link href="/dashboard/reports" style={{ textDecoration: 'none', color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}>
+          <ArrowLeft size={16} strokeWidth={1.75} /> Kembali
         </Link>
-        <h2 style={{ margin: 0 }}>📱 Antrian Laporan Offline</h2>
+        <h2 style={{ margin: 0 }}>Antrian Laporan Offline</h2>
       </div>
 
       {/* Status bar */}
       <div className="card" style={{ marginBottom: '1.5rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <div style={{ fontWeight: 600, fontSize: '1rem' }}>
+          <div style={{ fontWeight: 600, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
             {isOnline
-              ? '🟢 Terhubung ke Internet'
-              : '📵 Tidak Ada Koneksi'}
+              ? <><span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--success)', display: 'inline-block' }} /> Terhubung ke Internet</>
+              : <><WifiOff size={16} strokeWidth={1.75} style={{ color: 'var(--danger)' }} /> Tidak Ada Koneksi</>}
           </div>
-          <div style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
+          <div style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>
             {pendingCount > 0
               ? `${pendingCount} laporan menunggu untuk dikirim`
               : 'Semua laporan sudah terkirim'}
@@ -124,7 +125,7 @@ export default function OfflineQueuePage() {
             className="btn btn-primary"
             style={{ padding: '0.5rem 1.25rem' }}
           >
-            {syncing ? '⏳ Mengirim...' : '📤 Kirim Semua Sekarang'}
+            {syncing ? <><Loader2 size={16} strokeWidth={1.75} className="icon-inline" style={{ animation: 'spin 0.8s linear infinite' }} /> Mengirim...</> : <><Upload size={16} strokeWidth={1.75} className="icon-inline" /> Kirim Semua Sekarang</>}
           </button>
         )}
       </div>
@@ -132,9 +133,9 @@ export default function OfflineQueuePage() {
       {/* Draft list */}
       {drafts.length === 0 ? (
         <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>✅</div>
+          <CheckCircle2 size={28} strokeWidth={1.5} style={{ marginBottom: '0.75rem', color: 'var(--success)' }} />
           <h3>Tidak Ada Draft Offline</h3>
-          <p style={{ fontSize: '0.9rem' }}>Semua laporan sudah terkirim ke server.</p>
+          <p style={{ fontSize: '0.875rem' }}>Semua laporan sudah terkirim ke server.</p>
           <Link href="/dashboard/reports" className="btn btn-primary" style={{ marginTop: '1rem', display: 'inline-block' }}>
             Lihat Laporan
           </Link>
@@ -150,27 +151,27 @@ export default function OfflineQueuePage() {
                 className="card"
                 style={{
                   cursor: 'pointer',
-                  border: isSelected ? '2px solid var(--primary)' : '1px solid var(--border)',
-                  transition: 'border-color 0.15s'
+                  border: isSelected ? '1px solid var(--primary)' : '1px solid var(--border)',
+                  transition: 'var(--transition)'
                 }}
                 onClick={() => setSelectedId(isSelected ? null : draft.id)}
               >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '0.5rem' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
                     <div>
-                      <div style={{ fontWeight: 600, fontSize: '0.95rem' }}>
+                      <div style={{ fontWeight: 600, fontSize: '0.9375rem' }}>
                         {TYPE_LABELS[draft.type] || draft.type}
                       </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
-                        📅 {new Date(draft.createdAt).toLocaleString('id-ID')}
+                      <div className="num" style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
+                        <Calendar size={14} strokeWidth={1.75} className="icon-inline" /> {new Date(draft.createdAt).toLocaleString('id-ID')}
                         {' · '}
-                        📸 {draft.photoBlobs?.length || 0} foto
+                        <Camera size={14} strokeWidth={1.75} className="icon-inline" /> {draft.photoBlobs?.length || 0} foto
                       </div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                     <span style={{
-                      padding: '0.2rem 0.6rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 600,
+                      padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500,
                       background: statusInfo.bg, color: statusInfo.color, border: `1px solid ${statusInfo.border}`
                     }}>
                       {statusInfo.label}
@@ -179,32 +180,34 @@ export default function OfflineQueuePage() {
                       <button
                         onClick={e => { e.stopPropagation(); handleRetry(draft.id) }}
                         style={{
-                          padding: '0.2rem 0.6rem', fontSize: '0.75rem', background: 'var(--primary)',
-                          color: 'white', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer'
+                          padding: '0.25rem 0.625rem', fontSize: '0.75rem', background: 'var(--primary)',
+                          color: '#fff', border: 'none', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                          display: 'inline-flex', alignItems: 'center', gap: '0.25rem'
                         }}
                       >
-                        Coba Lagi
+                        <RotateCcw size={12} strokeWidth={1.75} /> Coba Lagi
                       </button>
                     )}
                     <button
                       onClick={e => { e.stopPropagation(); handleDelete(draft.id) }}
                       style={{
-                        padding: '0.2rem 0.5rem', fontSize: '0.75rem', background: 'none',
-                        color: 'var(--danger)', border: '1px solid var(--danger)',
-                        borderRadius: 'var(--radius-sm)', cursor: 'pointer'
+                        padding: '0.25rem 0.5rem', fontSize: '0.75rem', background: 'none',
+                        color: 'var(--danger)', border: '1px solid var(--border)',
+                        borderRadius: 'var(--radius-sm)', cursor: 'pointer',
+                        display: 'inline-flex', alignItems: 'center', gap: '0.25rem'
                       }}
                     >
-                      Hapus
+                      <Trash2 size={12} strokeWidth={1.75} /> Hapus
                     </button>
                   </div>
                 </div>
 
                 {/* Expanded detail */}
                 {isSelected && (
-                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.85rem' }}>
+                  <div style={{ marginTop: '1rem', paddingTop: '1rem', borderTop: '1px solid var(--border)', fontSize: '0.875rem' }}>
                     {draft.errorMsg && (
                       <div style={{ color: 'var(--danger)', marginBottom: '0.5rem', fontSize: '0.8rem' }}>
-                        ⚠️ Error: {draft.errorMsg}
+                        <AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> Error: {draft.errorMsg}
                       </div>
                     )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.25rem 1rem' }}>
@@ -217,7 +220,7 @@ export default function OfflineQueuePage() {
                     </div>
                     {(draft.photoBlobs?.length ?? 0) > 0 && (
                       <div style={{ marginTop: '0.75rem' }}>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.4rem' }}>
+                        <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.5rem' }}>
                           Preview Foto (tersimpan lokal):
                         </div>
                         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -234,8 +237,8 @@ export default function OfflineQueuePage() {
                               <div key={i} style={{
                                 width: '60px', height: '60px', background: 'var(--surface-2)',
                                 borderRadius: 'var(--radius-sm)', display: 'flex', alignItems: 'center',
-                                justifyContent: 'center', fontSize: '1.5rem'
-                              }}>📷</div>
+                                justifyContent: 'center', color: 'var(--text-light)'
+                              }}><Camera size={20} strokeWidth={1.5} /></div>
                             )
                           ))}
                         </div>

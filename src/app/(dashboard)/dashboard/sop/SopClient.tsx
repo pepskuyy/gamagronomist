@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback, useRef } from 'react'
+import { Settings, Plus, Loader2, FileText, Eye, Download, Pencil, Trash2, X, CheckCircle2, Paperclip, AlertTriangle } from 'lucide-react'
 
 type Sop = {
   id: string
@@ -14,11 +15,11 @@ type Sop = {
 }
 
 const CATEGORY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-  Gudang:       { bg: '#fef3c7', text: '#92400e', border: '#fbbf24' },
-  Lapangan:     { bg: '#d1fae5', text: '#065f46', border: '#34d399' },
-  Administrasi: { bg: '#dbeafe', text: '#1e40af', border: '#60a5fa' },
-  Keuangan:     { bg: '#fce7f3', text: '#9d174d', border: '#f472b6' },
-  Umum:         { bg: '#f3e8ff', text: '#6b21a8', border: '#a78bfa' },
+  Gudang:       { bg: 'var(--warning-bg)', text: 'var(--warning)', border: 'var(--border)' },
+  Lapangan:     { bg: 'var(--success-bg)', text: 'var(--success)', border: 'var(--border)' },
+  Administrasi: { bg: 'var(--info-bg)',    text: 'var(--info)',    border: 'var(--border)' },
+  Keuangan:     { bg: 'var(--danger-bg)',  text: 'var(--danger)',  border: 'var(--border)' },
+  Umum:         { bg: 'var(--surface-2)',  text: 'var(--text-secondary)', border: 'var(--border)' },
 }
 
 export default function SopClient({ role }: { role: string }) {
@@ -220,18 +221,18 @@ export default function SopClient({ role }: { role: string }) {
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem', marginBottom: '1.5rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.3rem' }}>📖 SOP (Standard Operating Procedure)</h2>
-          <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem', margin: '0.25rem 0 0' }}>
+          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>SOP (Standard Operating Procedure)</h2>
+          <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', margin: '0.25rem 0 0' }}>
             Panduan prosedur operasional standar untuk seluruh tim
           </p>
         </div>
         {canEdit && (
           <div style={{ display: 'flex', gap: '0.5rem' }}>
-            <button className="btn btn-sm" onClick={() => setShowCategoryModal(true)} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem', background: 'var(--surface)', border: '1px solid var(--border)' }}>
-              ⚙️ Kelola Kategori
+            <button className="btn btn-outline btn-sm" onClick={() => setShowCategoryModal(true)}>
+              <Settings size={16} strokeWidth={1.75} className="icon-inline" /> Kelola Kategori
             </button>
-            <button className="btn btn-primary" onClick={openCreateForm} style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-              ＋ Upload SOP Baru
+            <button className="btn btn-primary" onClick={openCreateForm}>
+              <Plus size={16} strokeWidth={1.75} className="icon-inline" /> Upload SOP Baru
             </button>
           </div>
         )}
@@ -242,7 +243,7 @@ export default function SopClient({ role }: { role: string }) {
         <input
           type="text"
           className="form-control"
-          placeholder="🔍 Cari SOP..."
+          placeholder="Cari SOP..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
           style={{ maxWidth: 320, flex: 1 }}
@@ -264,14 +265,14 @@ export default function SopClient({ role }: { role: string }) {
               key={catObj.id}
               onClick={() => setFilterCategory(filterCategory === cat ? '' : cat)}
               style={{
-                padding: '0.4rem 0.85rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600,
-                border: `1.5px solid ${filterCategory === cat ? colors.border : 'var(--border)'}`,
+                padding: '0.375rem 0.75rem', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', fontWeight: 500,
+                border: `1px solid ${filterCategory === cat ? colors.border : 'var(--border)'}`,
                 background: filterCategory === cat ? colors.bg : 'var(--surface)',
                 color: filterCategory === cat ? colors.text : 'var(--text-muted)',
-                cursor: 'pointer', transition: 'all 0.15s',
+                cursor: 'pointer', transition: 'var(--transition)',
               }}
             >
-              {cat} ({count})
+              {cat} (<span className="num">{count}</span>)
             </button>
           )
         })}
@@ -280,18 +281,18 @@ export default function SopClient({ role }: { role: string }) {
       {/* Loading */}
       {loading && (
         <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '0.5rem' }}>⏳</div>
-          Memuat data SOP...
+          <Loader2 size={20} strokeWidth={1.75} style={{ animation: 'spin 0.8s linear infinite', marginBottom: '0.5rem' }} />
+          <div>Memuat data SOP...</div>
         </div>
       )}
 
       {/* Empty state */}
       {!loading && filtered.length === 0 && (
         <div className="card" style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-muted)' }}>
-          <div style={{ fontSize: '2.5rem', marginBottom: '0.75rem' }}>📄</div>
-          <p style={{ fontWeight: 600 }}>{searchQuery || filterCategory ? 'Tidak ada SOP yang cocok dengan filter.' : 'Belum ada SOP.'}</p>
+          <FileText size={28} strokeWidth={1.5} style={{ marginBottom: '0.75rem', color: 'var(--text-light)' }} />
+          <p style={{ fontWeight: 500 }}>{searchQuery || filterCategory ? 'Tidak ada SOP yang cocok dengan filter.' : 'Belum ada SOP.'}</p>
           {canEdit && !searchQuery && !filterCategory && (
-            <button className="btn btn-primary" onClick={openCreateForm} style={{ marginTop: '1rem' }}>＋ Upload SOP Pertama</button>
+            <button className="btn btn-primary" onClick={openCreateForm} style={{ marginTop: '1rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" /> Upload SOP Pertama</button>
           )}
         </div>
       )}
@@ -303,54 +304,54 @@ export default function SopClient({ role }: { role: string }) {
           <div key={category} style={{ marginBottom: '2rem' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.75rem' }}>
               <span style={{
-                padding: '0.25rem 0.7rem', borderRadius: '999px', fontSize: '0.75rem', fontWeight: 700,
+                padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.8rem', fontWeight: 500,
                 background: colors.bg, color: colors.text, border: `1px solid ${colors.border}`,
               }}>
                 {category}
               </span>
-              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{items.length} dokumen</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}><span className="num">{items.length}</span> dokumen</span>
             </div>
 
             <div style={{ display: 'grid', gap: '0.5rem' }}>
               {items.map(sop => (
-                <div key={sop.id} className="card" style={{ padding: '0.85rem 1.15rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
+                <div key={sop.id} className="card" style={{ padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '0.75rem', flexWrap: 'wrap' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0 }}>
-                    <span style={{ fontSize: '1.6rem', flexShrink: 0 }}>📄</span>
+                    <FileText size={20} strokeWidth={1.75} style={{ flexShrink: 0, color: 'var(--text-muted)' }} />
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 700, fontSize: '0.9rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      <div style={{ fontWeight: 500, fontSize: '0.875rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
                         {sop.title}
                       </div>
-                      <div style={{ fontSize: '0.73rem', color: 'var(--text-muted)', marginTop: '0.15rem' }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
                         Oleh {sop.author.name} • {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(sop.updatedAt))}
                         {sop.fileName && <span> • {sop.fileName}</span>}
                       </div>
                     </div>
                   </div>
 
-                  <div style={{ display: 'flex', gap: '0.4rem', flexShrink: 0 }}>
+                  <div style={{ display: 'flex', gap: '0.5rem', flexShrink: 0 }}>
                     <button
                       className="btn btn-sm btn-primary"
                       onClick={() => setViewingSop(sop)}
-                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.75rem' }}
+                      style={{ fontSize: '0.78rem', padding: '0.375rem 0.75rem' }}
                     >
-                      👁️ Lihat
+                      <Eye size={14} strokeWidth={1.75} className="icon-inline" /> Lihat
                     </button>
                     <a
                       href={sop.fileUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="btn btn-sm"
-                      style={{ fontSize: '0.78rem', padding: '0.35rem 0.75rem', textDecoration: 'none' }}
+                      className="btn btn-outline btn-sm"
+                      style={{ fontSize: '0.78rem', padding: '0.375rem 0.75rem', textDecoration: 'none' }}
                     >
-                      ⬇️ Unduh
+                      <Download size={14} strokeWidth={1.75} className="icon-inline" /> Unduh
                     </a>
                     {canEdit && (
                       <>
-                        <button className="btn btn-sm" onClick={() => openEditForm(sop)} style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem' }}>
-                          ✏️
+                        <button className="btn btn-outline btn-sm" onClick={() => openEditForm(sop)} title="Edit" style={{ fontSize: '0.78rem', padding: '0.375rem 0.5rem' }}>
+                          <Pencil size={14} strokeWidth={1.75} />
                         </button>
-                        <button className="btn btn-sm" onClick={() => handleDelete(sop.id)} style={{ fontSize: '0.78rem', padding: '0.35rem 0.6rem', color: 'var(--danger)' }}>
-                          🗑️
+                        <button className="btn btn-outline btn-sm" onClick={() => handleDelete(sop.id)} title="Hapus" style={{ fontSize: '0.78rem', padding: '0.375rem 0.5rem', color: 'var(--danger)' }}>
+                          <Trash2 size={14} strokeWidth={1.75} />
                         </button>
                       </>
                     )}
@@ -368,19 +369,19 @@ export default function SopClient({ role }: { role: string }) {
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1000 }} onClick={() => setViewingSop(null)} />
           <div style={{
             position: 'fixed', top: '2%', left: '2%', right: '2%', bottom: '2%',
-            background: 'var(--surface)', borderRadius: 'var(--radius-lg, 12px)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.3)', zIndex: 1001,
+            background: 'var(--surface)', borderRadius: 'var(--radius-lg)',
+            boxShadow: 'var(--shadow-lg)', zIndex: 1001,
             display: 'flex', flexDirection: 'column', overflow: 'hidden',
             animation: 'slideUp 0.2s ease-out',
           }}>
             {/* Viewer header */}
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '1rem',
-              padding: '0.85rem 1.25rem', borderBottom: '1px solid var(--border)', flexShrink: 0,
+              padding: '0.75rem 1.25rem', borderBottom: '1px solid var(--border)', flexShrink: 0,
             }}>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontWeight: 700, fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  📖 {viewingSop.title}
+                <div style={{ fontWeight: 600, fontSize: '1rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                  {viewingSop.title}
                 </div>
                 <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
                   {viewingSop.category} • Oleh {viewingSop.author.name}
@@ -391,13 +392,13 @@ export default function SopClient({ role }: { role: string }) {
                   href={viewingSop.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="btn btn-sm"
+                  className="btn btn-outline btn-sm"
                   style={{ fontSize: '0.78rem', textDecoration: 'none' }}
                 >
-                  ⬇️ Unduh PDF
+                  <Download size={14} strokeWidth={1.75} className="icon-inline" /> Unduh PDF
                 </a>
-                <button className="btn btn-sm" onClick={() => setViewingSop(null)} style={{ fontSize: '1rem', lineHeight: 1, padding: '0.3rem 0.6rem' }}>
-                  ✕
+                <button className="btn btn-outline btn-sm" onClick={() => setViewingSop(null)} title="Tutup" style={{ fontSize: '1rem', lineHeight: 1, padding: '0.375rem 0.5rem' }}>
+                  <X size={16} strokeWidth={1.75} />
                 </button>
               </div>
             </div>
@@ -420,12 +421,12 @@ export default function SopClient({ role }: { role: string }) {
           <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1000 }} onClick={() => setShowForm(false)} />
           <div style={{
             position: 'fixed', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            background: 'var(--surface)', borderRadius: 'var(--radius-lg, 12px)',
-            boxShadow: '0 24px 48px rgba(0,0,0,0.2)', padding: '1.75rem', width: '90%', maxWidth: 540, maxHeight: '90vh', overflow: 'auto',
+            background: 'var(--surface)', borderRadius: 'var(--radius-xl)',
+            boxShadow: 'var(--shadow-lg)', padding: '1.75rem', width: '90%', maxWidth: 540, maxHeight: '90vh', overflow: 'auto',
             zIndex: 1001, animation: 'slideUp 0.2s ease-out',
           }}>
-            <h3 style={{ margin: '0 0 1.25rem', fontSize: '1.1rem' }}>
-              {editingId ? '✏️ Edit SOP' : '📖 Upload SOP Baru'}
+            <h3 style={{ margin: '0 0 1.25rem', fontSize: '1.125rem' }}>
+              {editingId ? 'Edit SOP' : 'Upload SOP Baru'}
             </h3>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -450,16 +451,16 @@ export default function SopClient({ role }: { role: string }) {
                 {/* Current file indicator */}
                 {uploadedFileUrl && (
                   <div style={{
-                    display: 'flex', alignItems: 'center', gap: '0.6rem', padding: '0.6rem 0.85rem', marginBottom: '0.6rem',
-                    background: '#d1fae5', borderRadius: 'var(--radius-sm, 6px)', border: '1px solid #34d399',
+                    display: 'flex', alignItems: 'center', gap: '0.625rem', padding: '0.625rem 0.75rem', marginBottom: '0.625rem',
+                    background: 'var(--success-bg)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)',
                   }}>
-                    <span style={{ fontSize: '1.2rem' }}>✅</span>
+                    <CheckCircle2 size={18} strokeWidth={1.75} style={{ color: 'var(--success)', flexShrink: 0 }} />
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 600, fontSize: '0.82rem', color: '#065f46' }}>PDF berhasil diunggah</div>
-                      {uploadedFileName && <div style={{ fontSize: '0.75rem', color: '#047857', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{uploadedFileName}</div>}
+                      <div style={{ fontWeight: 500, fontSize: '0.82rem', color: 'var(--success)' }}>PDF berhasil diunggah</div>
+                      {uploadedFileName && <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{uploadedFileName}</div>}
                     </div>
                     {editingId && (
-                      <span style={{ fontSize: '0.72rem', color: '#065f46' }}>Upload baru untuk mengganti</span>
+                      <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Upload baru untuk mengganti</span>
                     )}
                   </div>
                 )}
@@ -468,9 +469,9 @@ export default function SopClient({ role }: { role: string }) {
                 <div
                   onClick={() => !uploading && fileInputRef.current?.click()}
                   style={{
-                    border: '2px dashed var(--border)', borderRadius: 'var(--radius-sm, 6px)',
+                    border: '1px dashed var(--border)', borderRadius: 'var(--radius-md)',
                     padding: '1.5rem', textAlign: 'center', cursor: uploading ? 'wait' : 'pointer',
-                    background: 'var(--surface-hover, #f8fafc)', transition: 'border-color 0.15s',
+                    background: 'var(--surface-2)', transition: 'var(--transition)',
                   }}
                 >
                   <input
@@ -482,13 +483,13 @@ export default function SopClient({ role }: { role: string }) {
                   />
                   {uploading ? (
                     <div>
-                      <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>⏳</div>
-                      <div style={{ fontWeight: 600, fontSize: '0.85rem', color: 'var(--text-muted)' }}>Mengunggah PDF...</div>
+                      <Loader2 size={20} strokeWidth={1.75} style={{ marginBottom: '0.5rem', color: 'var(--text-muted)', animation: 'spin 0.8s linear infinite' }} />
+                      <div style={{ fontWeight: 500, fontSize: '0.875rem', color: 'var(--text-muted)' }}>Mengunggah PDF...</div>
                     </div>
                   ) : (
                     <div>
-                      <div style={{ fontSize: '1.5rem', marginBottom: '0.4rem' }}>📎</div>
-                      <div style={{ fontWeight: 600, fontSize: '0.85rem' }}>Klik untuk pilih file PDF</div>
+                      <Paperclip size={20} strokeWidth={1.75} style={{ marginBottom: '0.5rem', color: 'var(--text-muted)' }} />
+                      <div style={{ fontWeight: 500, fontSize: '0.875rem' }}>Klik untuk pilih file PDF</div>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.25rem' }}>Maks 20MB • Format .pdf</div>
                     </div>
                   )}
@@ -496,8 +497,8 @@ export default function SopClient({ role }: { role: string }) {
 
                 {/* Upload error */}
                 {uploadError && (
-                  <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm, 6px)', fontSize: '0.8rem' }}>
-                    ⚠️ {uploadError}
+                  <div style={{ marginTop: '0.5rem', padding: '0.5rem 0.75rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
+                    <AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> {uploadError}
                   </div>
                 )}
               </div>
@@ -505,7 +506,7 @@ export default function SopClient({ role }: { role: string }) {
 
             {/* Actions */}
             <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
-              <button className="btn" onClick={() => setShowForm(false)} disabled={saving || uploading}>Batal</button>
+              <button className="btn btn-outline" onClick={() => setShowForm(false)} disabled={saving || uploading}>Batal</button>
               <button
                 className="btn btn-primary"
                 onClick={handleSave}
@@ -528,8 +529,8 @@ export default function SopClient({ role }: { role: string }) {
           <div className="card" style={{ width: '100%', maxWidth: 500, padding: '1.5rem', maxHeight: '90vh', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <h3 style={{ margin: 0 }}>Kelola Kategori SOP</h3>
-              <button className="btn btn-sm" onClick={() => setShowCategoryModal(false)} style={{ fontSize: '1.2rem', lineHeight: 1, padding: '0.2rem 0.5rem' }}>
-                ✕
+              <button className="btn btn-outline btn-sm" onClick={() => setShowCategoryModal(false)} title="Tutup" style={{ lineHeight: 1, padding: '0.375rem 0.5rem' }}>
+                <X size={16} strokeWidth={1.75} />
               </button>
             </div>
 
@@ -547,7 +548,7 @@ export default function SopClient({ role }: { role: string }) {
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
               {categories.map(cat => (
-                <div key={cat.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--surface-hover)', borderRadius: '6px' }}>
+                <div key={cat.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0.75rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)' }}>
                   {editingCategoryId === cat.id ? (
                     <input 
                       type="text" 
@@ -561,9 +562,9 @@ export default function SopClient({ role }: { role: string }) {
                     <span style={{ fontWeight: 500 }}>{cat.name}</span>
                   )}
                   
-                  <div style={{ display: 'flex', gap: '0.4rem' }}>
-                    <button className="btn btn-sm" onClick={() => setEditingCategoryId(cat.id)}>✏️</button>
-                    <button className="btn btn-sm" onClick={() => handleDeleteCategory(cat.id)} style={{ color: 'var(--danger)' }}>🗑️</button>
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <button className="btn btn-outline btn-sm" onClick={() => setEditingCategoryId(cat.id)} title="Edit" style={{ padding: '0.375rem 0.5rem' }}><Pencil size={14} strokeWidth={1.75} /></button>
+                    <button className="btn btn-outline btn-sm" onClick={() => handleDeleteCategory(cat.id)} title="Hapus" style={{ color: 'var(--danger)', padding: '0.375rem 0.5rem' }}><Trash2 size={14} strokeWidth={1.75} /></button>
                   </div>
                 </div>
               ))}

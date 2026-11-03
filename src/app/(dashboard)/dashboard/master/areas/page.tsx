@@ -2,14 +2,15 @@
 
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
+import { Plus, Trash2, X, Settings, MapPin, Search, Clock, CheckCircle2, AlertTriangle } from 'lucide-react'
 import { createArea, deleteArea, createFarmer, deleteFarmer, bulkDeleteAreas, bulkDeleteFarmers } from '@/app/actions/master'
 
 type Coverage = { id: string; kabupatenName: string }
 type Area = { id: string; name: string; users: { id: string; name: string; role: string }[] }
 type Farmer = { id: string; name: string; phone: string | null; address: string | null; area: string | null; createdAt: string }
 
-const tdStyle: React.CSSProperties = { padding: '0.7rem 0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.875rem' }
-const thStyle: React.CSSProperties = { padding: '0.7rem 0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', background: 'var(--surface-hover)' }
+const tdStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border-light)', fontSize: '0.875rem' }
+const thStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', textAlign: 'left' }
 const chkTd: React.CSSProperties = { ...tdStyle, width: '40px', textAlign: 'center' }
 const chkTh: React.CSSProperties = { ...thStyle, width: '40px', textAlign: 'center' }
 
@@ -204,28 +205,28 @@ export default function AreasPage() {
     <div>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <Link href="/dashboard/master" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>← Master Data</Link>
-        <h2 style={{ margin: 0 }}>🗺️ Area &amp; Petani</h2>
+        <h2 style={{ margin: 0 }}>Area &amp; Petani</h2>
       </div>
 
       {/* ─── AREA SECTION ─── */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <h3 style={{ marginBottom: '0.5rem' }}>Wilayah Area Operasional</h3>
         <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', marginBottom: '1.25rem' }}>
-          Klik <strong>⚙️ Coverage</strong> untuk mengatur kabupaten/kota yang masuk wilayah area tersebut.
+          Klik <strong>Coverage</strong> untuk mengatur kabupaten/kota yang masuk wilayah area tersebut.
           Digunakan untuk klasifikasi otomatis aktivitas berdasarkan koordinat GPS.
         </p>
 
         <form onSubmit={handleAddArea} style={{ display: 'flex', gap: '0.75rem', marginBottom: '1.25rem', flexWrap: 'wrap' }}>
           <input name="name" type="text" className="form-control" placeholder="Nama area baru, misal: TGH1" value={areaName} onChange={e => setAreaName(e.target.value)} style={{ flex: 1, minWidth: '200px' }} required />
-          <button type="submit" className="btn btn-primary" disabled={isPendingArea}>{isPendingArea ? 'Menyimpan...' : '➕ Tambah Area'}</button>
+          <button type="submit" className="btn btn-primary" disabled={isPendingArea}>{isPendingArea ? 'Menyimpan...' : <><Plus size={16} strokeWidth={1.75} className="icon-inline" /> Tambah Area</>}</button>
         </form>
         {areaError && <div style={{ color: 'var(--danger)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{areaError}</div>}
 
         {selectedAreas.size > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
-            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedAreas.size} area dipilih</span>
-            <button onClick={handleBulkDeleteAreas} disabled={isPendingArea} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>🗑️ Hapus yang Dipilih</button>
-            <button onClick={() => setSelectedAreas(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 1rem', marginBottom: '1rem' }}>
+            <span style={{ fontWeight: 500, fontSize: '0.875rem' }}><span className="num">{selectedAreas.size}</span> area dipilih</span>
+            <button onClick={handleBulkDeleteAreas} disabled={isPendingArea} className="btn btn-danger" style={{ padding: '0.375rem 0.875rem', fontSize: '0.82rem' }}><Trash2 size={16} strokeWidth={1.75} className="icon-inline" /> Hapus yang Dipilih</button>
+            <button onClick={() => setSelectedAreas(new Set())} className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.82rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" /> Batal</button>
           </div>
         )}
 
@@ -247,9 +248,9 @@ export default function AreasPage() {
                     <td style={chkTd}><input type="checkbox" checked={selectedAreas.has(a.id)} onChange={() => toggleArea(a.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} /></td>
                     <td style={tdStyle}><strong>{a.name}</strong></td>
                     <td style={tdStyle}>
-                      <span className="badge badge-neutral">{a.users.length} user</span>
+                      <span className="badge badge-neutral num">{a.users.length} user</span>
                       {a.users.slice(0, 3).map(u => (
-                        <span key={u.id} style={{ marginLeft: '0.4rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.name} ({u.role})</span>
+                        <span key={u.id} style={{ marginLeft: '0.5rem', fontSize: '0.75rem', color: 'var(--text-muted)' }}>{u.name} ({u.role})</span>
                       ))}
                       {a.users.length > 3 && <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>+{a.users.length - 3} lainnya</span>}
                     </td>
@@ -257,37 +258,37 @@ export default function AreasPage() {
                       <button
                         onClick={() => toggleCoveragePanel(a.id)}
                         className={expandedAreaId === a.id ? 'btn btn-primary' : 'btn btn-outline'}
-                        style={{ padding: '0.3rem 0.7rem', fontSize: '0.78rem' }}
+                        style={{ padding: '0.25rem 0.75rem', fontSize: '0.78rem' }}
                       >
-                        ⚙️ Coverage{coverages[a.id] ? ` (${coverages[a.id].length})` : ''}
+                        <Settings size={14} strokeWidth={1.75} className="icon-inline" /> Coverage{coverages[a.id] ? ` (${coverages[a.id].length})` : ''}
                       </button>
                     </td>
                     <td style={tdStyle}>
-                      <button onClick={() => handleDeleteArea(a.id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1rem' }} title="Hapus">🗑️</button>
+                      <button onClick={() => handleDeleteArea(a.id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1rem', display: 'inline-flex', padding: '0.25rem' }} title="Hapus"><Trash2 size={16} strokeWidth={1.75} /></button>
                     </td>
                   </tr>
                   {expandedAreaId === a.id && (
                     <tr key={`cov-${a.id}`}>
-                      <td colSpan={5} style={{ padding: 0, borderBottom: '2px solid var(--primary)' }}>
-                        <div style={{ background: 'var(--primary-light)', padding: '1rem 1.5rem' }}>
-                          <p style={{ fontWeight: 700, marginBottom: '0.4rem', color: 'var(--primary)' }}>
-                            📍 Coverage Kabupaten/Kota — {a.name}
+                      <td colSpan={5} style={{ padding: 0, borderBottom: '1px solid var(--border)' }}>
+                        <div style={{ background: 'var(--surface-2)', padding: '1rem 1.5rem' }}>
+                          <p style={{ fontWeight: 600, marginBottom: '0.5rem', color: 'var(--text-main)' }}>
+                            <MapPin size={16} strokeWidth={1.75} className="icon-inline" /> Coverage Kabupaten/Kota — {a.name}
                           </p>
-                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.85rem' }}>
+                          <p style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>
                             Aktivitas dengan GPS di kabupaten/kota berikut akan otomatis masuk area <strong>{a.name}</strong>.
                           </p>
 
                           {/* ── Geocode Test Tool ── */}
-                          <div style={{ background: 'white', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.85rem 1rem', marginBottom: '1rem' }}>
+                          <div style={{ background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '0.75rem 1rem', marginBottom: '1rem' }}>
                             <p style={{ fontWeight: 600, fontSize: '0.82rem', marginBottom: '0.5rem' }}>
-                              🔍 Uji Koordinat — Pastikan nama kabupaten/kota sesuai
+                              <Search size={14} strokeWidth={1.75} className="icon-inline" /> Uji Koordinat — Pastikan nama kabupaten/kota sesuai
                             </p>
-                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.6rem' }}>
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: '0.625rem' }}>
                               Buka Google Maps → klik lokasi → salin koordinat, lalu paste di sini untuk melihat nama yang harus digunakan.
                             </p>
                             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                               <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>Latitude</label>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 500, display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Latitude</label>
                                 <input
                                   className="form-control"
                                   placeholder="-7.0051"
@@ -297,7 +298,7 @@ export default function AreasPage() {
                                 />
                               </div>
                               <div>
-                                <label style={{ fontSize: '0.75rem', fontWeight: 600, display: 'block', marginBottom: '0.2rem' }}>Longitude</label>
+                                <label style={{ fontSize: '0.75rem', fontWeight: 500, display: 'block', marginBottom: '0.25rem', color: 'var(--text-secondary)' }}>Longitude</label>
                                 <input
                                   className="form-control"
                                   placeholder="110.4381"
@@ -312,30 +313,30 @@ export default function AreasPage() {
                                 className="btn btn-outline"
                                 style={{ fontSize: '0.82rem' }}
                               >
-                                {testLoading ? '⏳ Mengecek...' : '🔍 Cek'}
+                                {testLoading ? <><Clock size={14} strokeWidth={1.75} className="icon-inline" /> Mengecek...</> : <><Search size={14} strokeWidth={1.75} className="icon-inline" /> Cek</>}
                               </button>
                             </div>
-                            {testError && <p style={{ color: 'var(--danger)', fontSize: '0.78rem', marginTop: '0.4rem' }}>{testError}</p>}
+                            {testError && <p style={{ color: 'var(--danger)', fontSize: '0.78rem', marginTop: '0.5rem' }}>{testError}</p>}
                             {testResult && (
-                              <div style={{ marginTop: '0.6rem', padding: '0.65rem 0.85rem', background: '#f0fdf4', border: '1px solid #86efac', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
-                                <p style={{ fontWeight: 700, color: '#166534', marginBottom: '0.3rem' }}>✅ Hasil:</p>
+                              <div style={{ marginTop: '0.625rem', padding: '0.625rem 0.75rem', background: 'var(--success-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem' }}>
+                                <p style={{ fontWeight: 600, color: 'var(--success)', marginBottom: '0.25rem' }}><CheckCircle2 size={14} strokeWidth={1.75} className="icon-inline" /> Hasil:</p>
                                 {testResult.resolvedKabupaten
                                   ? (
                                     <>
                                       <p>Nama yang harus digunakan di Coverage:</p>
-                                      <code style={{ display: 'inline-block', background: '#dcfce7', border: '1px solid #86efac', borderRadius: '4px', padding: '0.2rem 0.6rem', fontSize: '0.85rem', fontWeight: 700, color: '#15803d', cursor: 'pointer', marginTop: '0.2rem' }}
+                                      <code style={{ display: 'inline-block', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '0.25rem 0.625rem', fontSize: '0.875rem', fontWeight: 600, color: 'var(--success)', cursor: 'pointer', marginTop: '0.25rem' }}
                                         onClick={() => setNewKab(testResult.resolvedKabupaten!)}
                                         title="Klik untuk isi ke input di bawah"
                                       >
                                         {testResult.resolvedKabupaten} &nbsp;← klik untuk isi otomatis
                                       </code>
-                                      <p style={{ color: 'var(--text-muted)', marginTop: '0.3rem', fontSize: '0.75rem' }}>
+                                      <p style={{ color: 'var(--text-muted)', marginTop: '0.25rem', fontSize: '0.75rem' }}>
                                         Raw Nominatim: county={testResult.nominatim.county || '-'}, city={testResult.nominatim.city || '-'}
                                       </p>
                                     </>
                                   )
                                   : (
-                                    <p style={{ color: '#b91c1c' }}>⚠️ Kabupaten tidak terdeteksi untuk koordinat ini. Raw: county={testResult.nominatim.county || '-'}, city={testResult.nominatim.city || '-'}</p>
+                                    <p style={{ color: 'var(--danger)' }}><AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> Kabupaten tidak terdeteksi untuk koordinat ini. Raw: county={testResult.nominatim.county || '-'}, city={testResult.nominatim.city || '-'}</p>
                                   )
                                 }
                               </div>
@@ -353,18 +354,18 @@ export default function AreasPage() {
                               style={{ flex: 1, minWidth: '260px', fontSize: '0.875rem' }}
                             />
                             <button onClick={() => handleAddKabupaten(a.id)} disabled={isPendingKab || !newKab.trim()} className="btn btn-primary" style={{ fontSize: '0.82rem' }}>
-                              {isPendingKab ? 'Menambahkan...' : '+ Tambah'}
+                              {isPendingKab ? 'Menambahkan...' : <><Plus size={14} strokeWidth={1.75} className="icon-inline" /> Tambah</>}
                             </button>
                           </div>
                           {kabError && <p style={{ color: 'var(--danger)', fontSize: '0.8rem', marginBottom: '0.5rem' }}>{kabError}</p>}
                           {(coverages[a.id] ?? []).length === 0
-                            ? <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>Belum ada kabupaten/kota yang dikonfigurasi.</p>
+                            ? <p style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>Belum ada kabupaten/kota yang dikonfigurasi.</p>
                             : (
                               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.5rem' }}>
                                 {(coverages[a.id] ?? []).map(cov => (
-                                  <span key={cov.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.35rem', background: 'white', border: '1px solid var(--primary)', borderRadius: '9999px', padding: '0.25rem 0.75rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--primary)' }}>
-                                    📍 {cov.kabupatenName}
-                                    <button onClick={() => handleDeleteKabupaten(a.id, cov.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--danger)', fontWeight: 700, fontSize: '0.9rem', lineHeight: 1, padding: 0 }}>×</button>
+                                  <span key={cov.id} style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem', background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-xs)', padding: '0.25rem 0.5rem 0.25rem 0.625rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-main)' }}>
+                                    <MapPin size={14} strokeWidth={1.75} style={{ color: 'var(--text-muted)' }} /> {cov.kabupatenName}
+                                    <button onClick={() => handleDeleteKabupaten(a.id, cov.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', lineHeight: 1, padding: 0, display: 'inline-flex' }} title="Hapus"><X size={14} strokeWidth={1.75} /></button>
                                   </span>
                                 ))}
                               </div>
@@ -389,11 +390,11 @@ export default function AreasPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.25rem' }}>
           <h3 style={{ margin: 0 }}>Data Petani</h3>
           <button onClick={() => setShowFarmerForm(v => !v)} className="btn btn-primary" style={{ fontSize: '0.875rem' }}>
-            {showFarmerForm ? '✕ Tutup Form' : '➕ Tambah Petani'}
+            {showFarmerForm ? <><X size={16} strokeWidth={1.75} className="icon-inline" /> Tutup Form</> : <><Plus size={16} strokeWidth={1.75} className="icon-inline" /> Tambah Petani</>}
           </button>
         </div>
         {showFarmerForm && (
-          <form onSubmit={handleAddFarmer} style={{ background: 'var(--surface-hover)', borderRadius: '0.75rem', padding: '1.25rem', marginBottom: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
+          <form onSubmit={handleAddFarmer} style={{ background: 'var(--surface-2)', borderRadius: 'var(--radius-md)', padding: '1.25rem', marginBottom: '1.25rem', display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1rem' }}>
             <div className="form-group" style={{ margin: 0 }}><label className="form-label">Nama Petani <span style={{ color: 'var(--danger)' }}>*</span></label><input name="name" type="text" className="form-control" required placeholder="Bpk. Budi" /></div>
             <div className="form-group" style={{ margin: 0 }}><label className="form-label">No. Telepon</label><input name="phone" type="text" className="form-control" placeholder="0812xxx" /></div>
             <div className="form-group" style={{ margin: 0 }}><label className="form-label">Area / Kecamatan</label><input name="area" type="text" className="form-control" placeholder="Kec. Ngimbang" /></div>
@@ -406,10 +407,10 @@ export default function AreasPage() {
           </form>
         )}
         {selectedFarmers.size > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
-            <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selectedFarmers.size} petani dipilih</span>
-            <button onClick={handleBulkDeleteFarmers} disabled={isPendingFarmer} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>🗑️ Hapus yang Dipilih</button>
-            <button onClick={() => setSelectedFarmers(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.625rem 1rem', marginBottom: '1rem' }}>
+            <span style={{ fontWeight: 500, fontSize: '0.875rem' }}><span className="num">{selectedFarmers.size}</span> petani dipilih</span>
+            <button onClick={handleBulkDeleteFarmers} disabled={isPendingFarmer} className="btn btn-danger" style={{ padding: '0.375rem 0.875rem', fontSize: '0.82rem' }}><Trash2 size={16} strokeWidth={1.75} className="icon-inline" /> Hapus yang Dipilih</button>
+            <button onClick={() => setSelectedFarmers(new Set())} className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.82rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" /> Batal</button>
           </div>
         )}
         <div className="table-responsive">
@@ -428,11 +429,11 @@ export default function AreasPage() {
               {farmers.map(f => (
                 <tr key={f.id} style={{ background: selectedFarmers.has(f.id) ? 'var(--primary-light)' : undefined }}>
                   <td style={chkTd}><input type="checkbox" checked={selectedFarmers.has(f.id)} onChange={() => toggleFarmer(f.id)} style={{ accentColor: 'var(--primary)', width: '1rem', height: '1rem' }} /></td>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{f.name}</td>
+                  <td style={{ ...tdStyle, fontWeight: 500 }}>{f.name}</td>
                   <td style={{ ...tdStyle, color: 'var(--text-muted)' }}>{f.phone || '-'}</td>
                   <td style={tdStyle}>{f.area || '-'}</td>
                   <td style={{ ...tdStyle, maxWidth: '180px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--text-muted)' }}>{f.address || '-'}</td>
-                  <td style={tdStyle}><button onClick={() => handleDeleteFarmer(f.id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1rem' }} title="Hapus">🗑️</button></td>
+                  <td style={tdStyle}><button onClick={() => handleDeleteFarmer(f.id)} style={{ background: 'none', border: 'none', color: 'var(--danger)', cursor: 'pointer', fontSize: '1rem', display: 'inline-flex', padding: '0.25rem' }} title="Hapus"><Trash2 size={16} strokeWidth={1.75} /></button></td>
                 </tr>
               ))}
               {farmers.length === 0 && (
@@ -441,7 +442,7 @@ export default function AreasPage() {
             </tbody>
           </table>
         </div>
-        <div style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'right' }}>Total: {farmers.length} petani terdaftar</div>
+        <div style={{ marginTop: '0.75rem', fontSize: '0.78rem', color: 'var(--text-muted)', textAlign: 'right' }}>Total: <span className="num">{farmers.length}</span> petani terdaftar</div>
       </div>
     </div>
   )

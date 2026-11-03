@@ -7,6 +7,7 @@ import UpdatePhoneForm from '@/components/UpdatePhoneForm'
 import UpdateProfilePhotoForm from '@/components/UpdateProfilePhotoForm'
 import WahaSettingsClient from './WahaSettingsClient'
 import MaintenanceToggle from '@/components/MaintenanceToggle'
+import { Camera, Smartphone, Mail, Lock, Construction, AlertTriangle } from 'lucide-react'
 
 
 export default async function SettingsPage() {
@@ -31,14 +32,14 @@ export default async function SettingsPage() {
 
   return (
     <div>
-      <h2 style={{ marginBottom: '0.5rem' }}>⚙️ Pengaturan Akun</h2>
+      <h2 style={{ marginBottom: '0.5rem' }}>Pengaturan Akun</h2>
       <p style={{ color: 'var(--text-muted)', marginBottom: '2rem' }}>
         Kelola pengaturan pribadi untuk akun <strong>{session.name}</strong> ({session.role})
       </p>
 
       {/* Profil Avatar Section */}
       <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '0.4rem' }}>📷 Foto Profil</h3>
+        <h3 style={{ marginBottom: '0.5rem' }}><Camera size={18} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />Foto Profil</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
           Gunakan foto diri yang jelas agar mudah dikenali oleh tim lain.
         </p>
@@ -47,12 +48,12 @@ export default async function SettingsPage() {
 
       {/* WhatsApp Phone Section */}
       <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '0.4rem' }}>📱 Nomor WhatsApp</h3>
+        <h3 style={{ marginBottom: '0.5rem' }}><Smartphone size={18} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />Nomor WhatsApp</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
           Daftarkan nomor WhatsApp Anda agar dapat menerima notifikasi sistem (pengajuan stok, approval, dll) via WhatsApp.
           {!user?.phone && (
-            <span style={{ display: 'block', marginTop: '0.5rem', color: 'var(--warning, #d97706)', fontWeight: 600, fontSize: '0.82rem' }}>
-              ⚠️ Anda belum mendaftarkan nomor WhatsApp. Notifikasi tidak akan terkirim.
+            <span style={{ display: 'block', marginTop: '0.5rem', color: 'var(--warning)', fontWeight: 500, fontSize: '0.82rem' }}>
+              <AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> Anda belum mendaftarkan nomor WhatsApp. Notifikasi tidak akan terkirim.
             </span>
           )}
         </p>
@@ -61,12 +62,12 @@ export default async function SettingsPage() {
 
       {/* Email Recovery Section */}
       <div className="card" style={{ maxWidth: 520, marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '0.4rem' }}>📧 Email Pemulihan</h3>
+        <h3 style={{ marginBottom: '0.5rem' }}><Mail size={18} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />Email Pemulihan</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
           Daftarkan email Anda agar dapat digunakan untuk mereset password jika lupa.
           {!user?.email && (
-            <span style={{ display: 'block', marginTop: '0.5rem', color: 'var(--warning, #d97706)', fontWeight: 600, fontSize: '0.82rem' }}>
-              ⚠️ Anda belum mendaftarkan email. Anda tidak bisa mereset password jika lupa.
+            <span style={{ display: 'block', marginTop: '0.5rem', color: 'var(--warning)', fontWeight: 500, fontSize: '0.82rem' }}>
+              <AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> Anda belum mendaftarkan email. Anda tidak bisa mereset password jika lupa.
             </span>
           )}
         </p>
@@ -75,7 +76,7 @@ export default async function SettingsPage() {
 
       {/* Change Password Section */}
       <div className="card" style={{ maxWidth: 520, marginBottom: '2rem' }}>
-        <h3 style={{ marginBottom: '0.4rem' }}>🔐 Ubah Password</h3>
+        <h3 style={{ marginBottom: '0.5rem' }}><Lock size={18} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />Ubah Password</h3>
         <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', marginBottom: '1.5rem' }}>
           Masukkan password lama Anda terlebih dahulu untuk memverifikasi identitas, lalu ketik password baru yang diinginkan.
         </p>
@@ -88,7 +89,7 @@ export default async function SettingsPage() {
           <hr style={{ border: 'none', borderTop: '1px solid var(--border)', marginBottom: '2rem' }} />
           
           <div className="card" style={{ marginBottom: '2rem' }}>
-            <h3 style={{ marginBottom: '0.4rem' }}>🚧 Maintenance Mode</h3>
+            <h3 style={{ marginBottom: '0.5rem' }}><Construction size={18} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--text-muted)', marginRight: '0.5rem' }} />Maintenance Mode</h3>
             <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>
               Aktifkan mode ini saat Anda sedang melakukan pemeliharaan server (contoh: migrasi database).
               Traffic pengguna lain akan dialihkan ke halaman Maintenance.

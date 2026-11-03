@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import MigrationImportModal from '@/components/MigrationImportModal'
+import { Globe, User, FileText, Sprout, Target, Download, Wrench, AlertTriangle, type LucideIcon } from 'lucide-react'
 
 type ImportCategory = {
   id: string
@@ -95,6 +96,11 @@ const categories: ImportCategory[] = [
   },
 ]
 
+// Ikon tampilan per kategori (field `icon` di atas tidak lagi dirender)
+const categoryIcons: Record<string, LucideIcon> = {
+  'area': Globe, 'user': User, 'cb': FileText, 'demoplot': Sprout, 'spot-demoplot': Target,
+}
+
 export default function MigrationHubPage() {
   const [activeImport, setActiveImport] = useState<ImportCategory | null>(null)
   const [repairMode, setRepairMode] = useState(false)
@@ -114,7 +120,7 @@ export default function MigrationHubPage() {
     <div>
       {activeImport && (
         <MigrationImportModal
-          title={repairMode ? `🔧 Repair Produk — ${activeImport.title}` : activeImport.title}
+          title={repairMode ? `Repair Produk — ${activeImport.title}` : activeImport.title}
           columns={activeImport.columns}
           onImport={(rows) => handleImport(activeImport.apiPath, rows)}
           onClose={() => { setActiveImport(null); setRepairMode(false) }}
@@ -124,35 +130,35 @@ export default function MigrationHubPage() {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <Link href="/dashboard/master" style={{ color: 'var(--text-muted)', textDecoration: 'none', fontSize: '0.9rem' }}>← Master Data</Link>
-        <h2 style={{ margin: 0 }}>📦 Migrasi Data dari Spreadsheet</h2>
+        <h2 style={{ margin: 0 }}>Migrasi Data dari Spreadsheet</h2>
       </div>
 
-      <div style={{ padding: '1rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', marginBottom: '2rem', fontSize: '0.875rem', color: '#1e40af' }}>
-        <strong>⚠️ Penting — Urutan Import:</strong> Lakukan import secara berurutan: <strong>Area → User → Customer Behavior → Demo Plot → Spot Demo Plot</strong>. Data petani akan otomatis dibuat dari data CB.
+      <div style={{ padding: '1rem', background: 'var(--info-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '2rem', fontSize: '0.875rem', color: 'var(--text-main)' }}>
+        <AlertTriangle size={16} strokeWidth={1.75} className="icon-inline" style={{ color: 'var(--info)', marginRight: '0.375rem' }} /><strong>Penting — Urutan Import:</strong> Lakukan import secara berurutan: <strong>Area → User → Customer Behavior → Demo Plot → Spot Demo Plot</strong>. Data petani akan otomatis dibuat dari data CB.
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1.5rem' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: '1rem' }}>
         {categories.sort((a, b) => a.order - b.order).map(cat => (
           <div key={cat.id} className="card" style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', marginBottom: '0.75rem' }}>
-                <span style={{ fontSize: '1.8rem' }}>{cat.icon}</span>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.625rem', marginBottom: '0.75rem' }}>
+                {(() => { const CatIcon = categoryIcons[cat.id]; return CatIcon ? <CatIcon size={20} strokeWidth={1.75} style={{ color: 'var(--text-muted)', flexShrink: 0 }} /> : null })()}
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '1rem' }}>{cat.order}. {cat.title}</h3>
+                  <h3 style={{ margin: 0, fontSize: '1rem', fontWeight: 600 }}><span className="num">{cat.order}.</span> {cat.title}</h3>
                 </div>
               </div>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>{cat.description}</p>
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', marginBottom: '0.75rem' }}>{cat.description}</p>
               <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
-                <strong>Kolom:</strong> {cat.columns.map(c => c.label).join(', ')}
+                <strong style={{ fontWeight: 500, color: 'var(--text-secondary)' }}>Kolom:</strong> {cat.columns.map(c => c.label).join(', ')}
               </div>
             </div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
               <button onClick={() => { setRepairMode(false); setActiveImport(cat) }} className="btn btn-primary" style={{ flex: 1 }}>
-                📥 Import {cat.title}
+                <Download size={16} strokeWidth={1.75} className="icon-inline" /> Import {cat.title}
               </button>
               {cat.supportsRepair && (
                 <button onClick={() => { setRepairMode(true); setActiveImport(cat) }} className="btn btn-outline" style={{ flex: 0, whiteSpace: 'nowrap', fontSize: '0.8rem' }} title="Upload ulang file yang sama untuk memperbaiki data produk yang hilang pada data migrasi sebelumnya">
-                  🔧 Repair
+                  <Wrench size={14} strokeWidth={1.75} className="icon-inline" /> Repair
                 </button>
               )}
             </div>

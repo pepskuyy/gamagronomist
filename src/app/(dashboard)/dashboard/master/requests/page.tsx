@@ -3,6 +3,7 @@
 import { useState, useTransition, useEffect } from 'react'
 import Link from 'next/link'
 import { approveAccountRequest, rejectAccountRequest } from '@/app/actions/register'
+import { Check, X } from 'lucide-react'
 
 type AccountRequest = {
   id: string; username: string; name: string; role: string;
@@ -11,9 +12,9 @@ type AccountRequest = {
 }
 
 const statusBadge: Record<string, string> = {
-  PENDING:  'background:#fef3c7;color:#b45309;',
-  APPROVED: 'background:#dcfce7;color:#15803d;',
-  REJECTED: 'background:#fee2e2;color:#b91c1c;',
+  PENDING:  'background:var(--warning-bg);color:var(--warning);',
+  APPROVED: 'background:var(--success-bg);color:var(--success);',
+  REJECTED: 'background:var(--danger-bg);color:var(--danger);',
 }
 
 export default function AccountRequestsPage() {
@@ -55,16 +56,16 @@ export default function AccountRequestsPage() {
 
   if (loading) return <div style={{ padding: '2rem', color: 'var(--text-muted)' }}>Memuat data...</div>
 
-  const td: React.CSSProperties = { padding: '0.85rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border)' }
-  const th: React.CSSProperties = { padding: '0.7rem 1rem', fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }
+  const td: React.CSSProperties = { padding: '0.75rem 1rem', fontSize: '0.875rem', borderBottom: '1px solid var(--border-light)' }
+  const th: React.CSSProperties = { padding: '0.75rem 1rem', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-muted)', background: 'var(--surface-2)', borderBottom: '1px solid var(--border)', textAlign: 'left', whiteSpace: 'nowrap' }
 
   return (
     <div>
       {/* Reject Modal */}
       {rejectModal && (
         <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,0.5)', zIndex:1000, display:'flex', alignItems:'center', justifyContent:'center', padding:'1rem' }}>
-          <div style={{ background:'#fff', borderRadius:'1rem', padding:'2rem', width:'100%', maxWidth:'420px', boxShadow:'0 20px 60px rgba(0,0,0,0.2)' }}>
-            <h3 style={{ marginBottom:'1rem' }}>❌ Alasan Penolakan</h3>
+          <div style={{ background:'var(--surface)', borderRadius:'var(--radius-xl)', padding:'2rem', width:'100%', maxWidth:'420px', boxShadow:'var(--shadow-lg)' }}>
+            <h3 style={{ marginBottom:'1rem' }}>Alasan Penolakan</h3>
             <textarea
               className="form-control" rows={3}
               placeholder="Jelaskan alasan penolakan kepada pemohon..."
@@ -90,14 +91,14 @@ export default function AccountRequestsPage() {
           <Link href="/dashboard/master" style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>← Master Data</Link>
           <div>
             <h2 style={{ margin: 0 }}>
-              📋 Permintaan Akun
+              Permintaan Akun
               {pendingCount > 0 && (
-                <span style={{ marginLeft: '0.5rem', background: 'var(--danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.55rem', borderRadius: '9999px' }}>
+                <span className="num" style={{ marginLeft: '0.5rem', background: 'var(--danger-bg)', color: 'var(--danger)', fontSize: '0.75rem', fontWeight: 500, padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', verticalAlign: 'middle' }}>
                   {pendingCount}
                 </span>
               )}
             </h2>
-            <p style={{ margin: 0, fontSize: '0.82rem' }}>Setujui atau tolak permintaan pembuatan akun dari calon pengguna</p>
+            <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-muted)' }}>Setujui atau tolak permintaan pembuatan akun dari calon pengguna</p>
           </div>
         </div>
       </div>
@@ -107,7 +108,7 @@ export default function AccountRequestsPage() {
         {(['ALL','PENDING','APPROVED','REJECTED'] as const).map(s => (
           <button key={s} onClick={() => setFilter(s)}
             className={filter === s ? 'btn btn-primary' : 'btn btn-outline'}
-            style={{ padding: '0.4rem 1rem', fontSize: '0.82rem' }}>
+            style={{ padding: '0.375rem 1rem', fontSize: '0.82rem' }}>
             {s === 'ALL' ? 'Semua' : s === 'PENDING' ? `Menunggu (${pendingCount})` : s === 'APPROVED' ? 'Disetujui' : 'Ditolak'}
           </button>
         ))}
@@ -125,10 +126,10 @@ export default function AccountRequestsPage() {
             </thead>
             <tbody>
               {filtered.map(r => (
-                <tr key={r.id} style={{ background: r.status === 'PENDING' ? 'rgba(255,243,210,0.3)' : 'transparent' }}>
+                <tr key={r.id} style={{ background: r.status === 'PENDING' ? 'var(--warning-bg)' : 'transparent' }}>
                   <td style={td}>
-                    <div style={{ fontWeight: 700 }}>{r.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>@{r.username}</div>
+                    <div style={{ fontWeight: 500 }}>{r.name}</div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono-stack)' }}>@{r.username}</div>
                   </td>
                   <td style={td}>
                     <span className={`badge ${['AFA', 'PLANTATION'].includes(r.role) ? 'badge-success' : 'badge-neutral'}`}>{r.role}</span>
@@ -136,25 +137,25 @@ export default function AccountRequestsPage() {
                   <td style={{ ...td, color: 'var(--text-muted)' }}>{r.areaName || '-'}</td>
                   <td style={{ ...td, color: 'var(--text-muted)' }}>{r.afaName || '-'}</td>
                   <td style={{ ...td, maxWidth: 180, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.notes || '-'}</td>
-                  <td style={{ ...td, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
+                  <td className="num" style={{ ...td, color: 'var(--text-muted)', whiteSpace: 'nowrap', fontSize: '0.78rem' }}>
                     {new Date(r.createdAt).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
                   </td>
                   <td style={td}>
-                    <span style={{ display: 'inline-flex', padding: '0.2rem 0.65rem', borderRadius: '9999px', fontSize: '0.72rem', fontWeight: 700, ...(Object.fromEntries(statusBadge[r.status]?.split(';').filter(Boolean).map(s => s.split(':').map(s=>s.trim())) ?? [])) }}>
+                    <span style={{ display: 'inline-flex', padding: '0.125rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.75rem', fontWeight: 500, ...(Object.fromEntries(statusBadge[r.status]?.split(';').filter(Boolean).map(s => s.split(':').map(s=>s.trim())) ?? [])) }}>
                       {r.status === 'PENDING' ? 'Menunggu' : r.status === 'APPROVED' ? 'Disetujui' : 'Ditolak'}
                     </span>
-                    {r.rejectReason && <div style={{ fontSize: '0.72rem', color: 'var(--danger)', marginTop: '0.2rem' }}>{r.rejectReason}</div>}
+                    {r.rejectReason && <div style={{ fontSize: '0.72rem', color: 'var(--danger)', marginTop: '0.25rem' }}>{r.rejectReason}</div>}
                   </td>
                   <td style={td}>
                     {r.status === 'PENDING' && (
-                      <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
                         <button onClick={() => handleApprove(r.id, r.name)} disabled={isPending}
-                          style={{ background: 'var(--primary)', color: '#fff', border: 'none', borderRadius: '0.4rem', padding: '0.35rem 0.75rem', fontSize: '0.78rem', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                          ✓ Setuju
+                          className="btn btn-primary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.78rem', whiteSpace: 'nowrap' }}>
+                          <Check size={14} strokeWidth={1.75} className="icon-inline" /> Setuju
                         </button>
                         <button onClick={() => { setRejectModal(r.id); setRejectReason('') }} disabled={isPending}
-                          style={{ background: 'none', border: '1px solid var(--danger)', borderRadius: '0.4rem', padding: '0.35rem 0.75rem', fontSize: '0.78rem', fontWeight: 700, color: 'var(--danger)', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                          ✗ Tolak
+                          className="btn btn-outline" style={{ padding: '0.375rem 0.75rem', fontSize: '0.78rem', color: 'var(--danger)', whiteSpace: 'nowrap' }}>
+                          <X size={14} strokeWidth={1.75} className="icon-inline" /> Tolak
                         </button>
                       </div>
                     )}
