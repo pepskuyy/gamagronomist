@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
 // Self-hosted Inter (variable font, termasuk axis opsz) — menggantikan
@@ -9,6 +9,13 @@ const inter = Inter({
   display: "swap",
   axes: ["opsz"],
   variable: "--font-inter",
+});
+
+// Mono untuk angka dan satuan (ml, gr, Btl, HST) — lihat .num / .unit di globals.css
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-mono",
 });
 
 export const metadata: Metadata = {
@@ -37,7 +44,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="id" className={inter.variable}>
+    <html lang="id" className={`${inter.variable} ${geistMono.variable}`}>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
         <meta name="theme-color" content="#1a9b55" />
@@ -60,13 +67,12 @@ export default function RootLayout({
             left: 0;
             height: 3px;
             width: 0%;
-            background: linear-gradient(90deg, #1a9b55, #4ade80);
+            background: #16824a;
             z-index: 99999;
             transition: width 0.2s ease, opacity 0.4s ease;
             opacity: 0;
             pointer-events: none;
             border-radius: 0 2px 2px 0;
-            box-shadow: 0 0 8px rgba(26,155,85,0.6);
           }
           #nav-progress-bar.loading {
             opacity: 1;
