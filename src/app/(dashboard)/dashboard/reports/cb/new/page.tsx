@@ -8,6 +8,7 @@ import GpsCapture from '@/components/GpsCapture'
 import { submitCustomerBehavior } from '@/app/actions/report'
 import { useOfflineDraft } from '@/hooks/useOfflineDraft'
 import type { PhotoBlob } from '@/lib/offline-db'
+import { Check, Plus, Save, WifiOff } from 'lucide-react'
 
 // ── Dropdown options ──────────────────────────────────────────────
 const OPT_DATA = {
@@ -71,25 +72,25 @@ function MultiChip({
       {options.map(opt => (
         <button key={opt} type="button" onClick={() => onToggle(opt)}
           style={{
-            padding: '0.35rem 0.9rem', borderRadius: '999px', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer',
+            padding: '0.375rem 0.875rem', borderRadius: 'var(--radius-xs)', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
             border: selected.includes(opt) ? '2px solid var(--primary)' : '1px solid var(--border)',
             background: selected.includes(opt) ? 'var(--primary-light)' : 'var(--surface-hover)',
             color: selected.includes(opt) ? 'var(--primary)' : 'var(--text-muted)',
-            transition: 'all 0.15s'
+            transition: 'var(--transition)'
           }}>
-          {selected.includes(opt) ? '✓ ' : ''}{opt}
+          {selected.includes(opt) ? <Check size={14} strokeWidth={1.75} className="icon-inline" /> : ''}{opt}
         </button>
       ))}
       {/* Lainnya chip */}
       <button type="button" onClick={() => onToggle('Lainnya')}
         style={{
-          padding: '0.35rem 0.9rem', borderRadius: '999px', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer',
-          border: hasOther ? '2px solid var(--secondary)' : '1px solid var(--border)',
-          background: hasOther ? '#f0fdf4' : 'var(--surface-hover)',
-          color: hasOther ? '#16a34a' : 'var(--text-muted)',
-          transition: 'all 0.15s'
+          padding: '0.375rem 0.875rem', borderRadius: 'var(--radius-xs)', fontSize: '0.82rem', fontWeight: 500, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
+          border: hasOther ? '2px solid var(--primary)' : '1px solid var(--border)',
+          background: hasOther ? 'var(--success-bg)' : 'var(--surface-hover)',
+          color: hasOther ? 'var(--success)' : 'var(--text-muted)',
+          transition: 'var(--transition)'
         }}>
-        {hasOther ? '✓ Lainnya' : '+ Lainnya'}
+        {hasOther ? <Check size={14} strokeWidth={1.75} className="icon-inline" /> : <Plus size={14} strokeWidth={1.75} className="icon-inline" />}Lainnya
       </button>
       {hasOther && (
         <input type="text" className="form-control" value={otherValue} onChange={e => onOtherChange(e.target.value)}
@@ -241,7 +242,7 @@ const NewCustomerBehaviorRef = () => {
   if (savedOffline) {
     return (
       <div className="form-container-wide" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💾</div>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}><Save size={40} strokeWidth={1.5} /></div>
         <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Tersimpan Offline!</h2>
         <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
           Laporan Customer Behavior tersimpan di perangkat. Akan otomatis terkirim begitu sinyal tersedia.
@@ -262,11 +263,11 @@ const NewCustomerBehaviorRef = () => {
       </div>
 
       {!isOnline && (
-        <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>📵</span>
+        <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ display: 'inline-flex', color: 'var(--warning)' }}><WifiOff size={16} strokeWidth={1.75} className="icon-inline" /></span>
           <div>
-            <strong style={{ color: '#92400e' }}>Mode Offline</strong>
-            <div style={{ fontSize: '0.8rem', color: '#92400e' }}>Isi form & ambil foto, lalu klik "Simpan Offline". GPS tidak butuh internet.</div>
+            <strong style={{ color: 'var(--warning)' }}>Mode Offline</strong>
+            <div style={{ fontSize: '0.8rem', color: 'var(--warning)' }}>Isi form & ambil foto, lalu klik "Simpan Offline". GPS tidak butuh internet.</div>
           </div>
         </div>
       )}
@@ -467,14 +468,14 @@ const NewCustomerBehaviorRef = () => {
               type="button"
               onClick={handleSaveOffline}
               className="btn btn-primary"
-              style={{ background: '#f59e0b', borderColor: '#f59e0b' }}
+              style={{ background: 'var(--warning)', borderColor: 'var(--warning)' }}
               disabled={loading || lat === null}
             >
-              {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : '💾 Simpan Offline'}
+              {loading ? 'Menyimpan...' : lat === null ? 'Ambil Lokasi Dulu' : 'Simpan Offline'}
             </button>
           ) : (
             <button type="submit" className="btn btn-primary" disabled={loading || lat === null}>
-              {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : 'Kirim Laporan Customer Behavior'}
+              {loading ? 'Menyimpan...' : lat === null ? 'Ambil Lokasi Dulu' : 'Kirim Laporan Customer Behavior'}
             </button>
           )}
         </div>

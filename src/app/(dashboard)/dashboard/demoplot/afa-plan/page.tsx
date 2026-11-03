@@ -7,6 +7,7 @@ import RegionSelect from '@/components/RegionSelect'
 import GpsCapture from '@/components/GpsCapture'
 import { submitAfaSelfPlan } from '@/app/actions/afa-plan'
 import SearchableSelect from '@/components/SearchableSelect'
+import { CheckCircle2, X } from 'lucide-react'
 
 type Product = { id: string; name: string; unit: string }
 type SelectedProduct = { productId: string; qtyRequested: number; name: string; unit: string }
@@ -61,22 +62,22 @@ export default function AfaSelfPlanPage() {
         <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
         <div>
           <h2 style={{ margin: 0 }}>Perencanaan Demo Plot Mandiri</h2>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.3rem', fontSize: '0.8rem', fontWeight: 600, color: '#16a34a', background: '#dcfce7', padding: '0.2rem 0.6rem', borderRadius: '999px' }}>
-            ✅ Langsung Disetujui — Tanpa Perlu Approval SPV
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.3rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--success)', background: 'var(--success-bg)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-xs)' }}>
+            <CheckCircle2 size={14} strokeWidth={1.75} className="icon-inline" /> Langsung Disetujui — Tanpa Perlu Approval SPV
           </div>
         </div>
       </div>
 
       {/* Info banner */}
-      <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '0.75rem', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.875rem', color: '#1e40af' }}>
-        <strong>ℹ️ Tentang Perencanaan Mandiri:</strong> Sebagai AFA, kamu bisa langsung membuat rencana demo plot sendiri.
+      <div style={{ backgroundColor: 'var(--info-bg)', border: '1px solid var(--border)', borderRadius: '0.75rem', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.875rem', color: 'var(--info)' }}>
+        <strong>Tentang Perencanaan Mandiri:</strong> Sebagai AFA, kamu bisa langsung membuat rencana demo plot sendiri.
         Perencanaan ini tidak memerlukan persetujuan dari SPV. Kamu juga yang akan mengeksekusi (realisasi) demo plot ini.
       </div>
 
       <form onSubmit={handleSubmit}>
         <div className="form-grid">
           <div className="card">
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>👤 Data Petani &amp; Area</h3>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Data Petani &amp; Area</h3>
             <div className="form-group">
               <label className="form-label">Nama Petani <span style={{ color: 'var(--danger)' }}>*</span></label>
               <input name="farmerName" type="text" className="form-control" required placeholder="Bpk. Budi" />
@@ -96,7 +97,7 @@ export default function AfaSelfPlanPage() {
           </div>
 
           <div className="card">
-            <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>📋 Detail Rencana</h3>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Detail Rencana</h3>
             <div className="form-group">
               <label className="form-label">Komoditas <span style={{ color: 'var(--danger)' }}>*</span></label>
               <input name="commodity" type="text" className="form-control" required placeholder="Padi / Jagung / Bawang" />
@@ -114,9 +115,9 @@ export default function AfaSelfPlanPage() {
 
         {/* Product picker */}
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>📦 Kebutuhan Produk dari Stok Sendiri</h3>
+          <h3 style={{ marginBottom: '1rem', fontSize: '1.1rem' }}>Kebutuhan Produk dari Stok Sendiri</h3>
           {error && (
-            <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#FEE2E2', color: '#991B1B', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }}>{error}</div>
+            <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-md)', fontSize: '0.875rem' }}>{error}</div>
           )}
 
           <div className="picker-row">
@@ -150,7 +151,7 @@ export default function AfaSelfPlanPage() {
                   <td style={tdStyle}>{p.name}</td>
                   <td style={tdStyle}>{p.qtyRequested} {p.unit}</td>
                   <td style={tdStyle}>
-                    <button type="button" onClick={() => setSelectedProducts(prev => prev.filter(x => x.productId !== p.productId))} style={{ color: 'var(--danger)', fontWeight: 'bold', background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+                    <button type="button" onClick={() => setSelectedProducts(prev => prev.filter(x => x.productId !== p.productId))} style={{ color: 'var(--danger)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer' }}><X size={16} strokeWidth={1.75} className="icon-inline" /></button>
                   </td>
                 </tr>
               ))}
@@ -166,7 +167,7 @@ export default function AfaSelfPlanPage() {
         </div>
 
         <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '1rem', fontSize: '1.1rem' }} disabled={loading || lat === null}>
-          {loading ? 'Menyimpan Perencanaan...' : lat === null ? '📍 Ambil Lokasi GPS Dulu' : '✅ Simpan & Langsung Setujui'}
+          {loading ? 'Menyimpan Perencanaan...' : lat === null ? 'Ambil Lokasi GPS Dulu' : 'Simpan & Langsung Setujui'}
         </button>
       </form>
     </div>

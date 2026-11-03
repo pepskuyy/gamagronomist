@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { submitRequestDemoPlot } from '@/app/actions/request'
 import SearchableSelect from '@/components/SearchableSelect'
+import { Inbox, X } from 'lucide-react'
 
 type AfaProduct = { 
   id: string; name: string; unit: string; balance: number;
@@ -72,7 +73,7 @@ export default function FOStockRequestPage() {
       if (res?.error) setError(res.error)
       else {
         // Produk tanpa isi per kemasan: pengajuan tersimpan, tapi stoknya tertahan sampai admin melengkapi
-        if (res && 'warning' in res && res.warning) alert('⏸ ' + res.warning)
+        if (res && 'warning' in res && res.warning) alert(res.warning)
         router.push('/dashboard/demoplot')
       }
     })
@@ -97,25 +98,25 @@ export default function FOStockRequestPage() {
       <div className="back-header">
         <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div>
-          <h2 style={{ margin: 0 }}>📦 Pengajuan Pengambilan Stok</h2>
+          <h2 style={{ margin: 0 }}>Pengajuan Pengambilan Stok</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Ajukan kebutuhan produk sample kepada AFA supervisormu</p>
         </div>
       </div>
 
       {/* Info banner */}
-      <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.875rem', color: '#1e40af' }}>
-        <strong>ℹ️ Alur Baru:</strong> Pengajuan ini hanya untuk mengambil stok produk dari AFA.
+      <div style={{ background: 'var(--info-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', padding: '1rem 1.25rem', marginBottom: '1.5rem', fontSize: '0.875rem', color: 'var(--info)' }}>
+        <strong>Alur Baru:</strong> Pengajuan ini hanya untuk mengambil stok produk dari AFA.
         Setelah disetujui, kamu bisa langsung melakukan demo plot <strong>kapan saja</strong> tanpa perlu membuat pengajuan baru.
       </div>
 
       {loading ? (
         <div className="card" style={{ padding: '3rem', textAlign: 'center', color: 'var(--text-muted)' }}>
-          <div style={{ width: 32, height: 32, border: '3px solid #e2e8f0', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
+          <div style={{ width: 32, height: 32, border: '3px solid var(--border)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite', margin: '0 auto 1rem' }} />
           Memuat data stok AFA...
         </div>
       ) : afaProducts.length === 0 ? (
         <div className="card" style={{ padding: '3rem', textAlign: 'center' }}>
-          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>📭</div>
+          <div style={{ fontSize: '3rem', marginBottom: '1rem' }}><Inbox size={40} strokeWidth={1.5} /></div>
           <h3 style={{ marginBottom: '0.5rem', color: 'var(--text-main)' }}>Stok AFA Kosong</h3>
           <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
             AFA supervisor Anda belum memiliki stok produk apapun. Hubungi AFA untuk meminta stok ke SPV terlebih dahulu.
@@ -125,17 +126,17 @@ export default function FOStockRequestPage() {
         <>
           {/* AFA Stock Overview */}
           <div className="card" style={{ marginBottom: '1.5rem' }}>
-            <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>📊 Stok AFA Saat Ini</h3>
+            <h3 style={{ marginBottom: '1rem', fontSize: '1rem' }}>Stok AFA Saat Ini</h3>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '0.75rem' }}>
               {afaProducts.map(p => (
                 <div key={p.id} style={{
                   padding: '0.75rem 1rem',
-                  background: p.balance > 0 ? '#f0fdf4' : '#fef2f2',
-                  border: `1px solid ${p.balance > 0 ? '#bbf7d0' : '#fecaca'}`,
+                  background: p.balance > 0 ? 'var(--success-bg)' : 'var(--danger-bg)',
+                  border: `1px solid ${p.balance > 0 ? 'var(--border)' : 'var(--border)'}`,
                   borderRadius: 'var(--radius-sm)',
                 }}>
                   <div style={{ fontSize: '0.8rem', fontWeight: 600, color: 'var(--text-main)', marginBottom: '0.25rem' }}>{p.name}</div>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: p.balance > 0 ? '#16a34a' : '#dc2626' }}>
+                  <div style={{ fontSize: '1.1rem', fontWeight: 600, color: p.balance > 0 ? 'var(--success)' : 'var(--danger)' }}>
                     {/* Show kemasan as primary if available */}
                     {p.balanceKemasan != null
                       ? <>{p.balanceKemasan} <span style={{ fontSize: '0.75rem', fontWeight: 500 }}>{p.unit}</span></>
@@ -151,9 +152,9 @@ export default function FOStockRequestPage() {
 
           <form onSubmit={handleSubmit}>
             <div className="card" style={{ marginBottom: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>📋 Kebutuhan Produk</h3>
+              <h3 style={{ marginBottom: '1rem' }}>Kebutuhan Produk</h3>
 
-              {error && <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fee2e2', color: '#991b1b', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
+              {error && <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
 
               <div className="picker-row">
                 <div style={{ flex: 2 }}>
@@ -188,14 +189,14 @@ export default function FOStockRequestPage() {
                     placeholder="0"
                   />
                   {selectedAfaProduct && selectedAfaProduct.gramasiPerUnit && selectedAfaProduct.gramasiPerUnit > 0 && Number(currentQty) > 0 && (
-                    <div style={{ fontSize: '0.75rem', color: '#0369a1', marginTop: '0.25rem' }}>
+                    <div style={{ fontSize: '0.75rem', color: 'var(--info)', marginTop: '0.25rem' }}>
                       = {+(Number(currentQty) / selectedAfaProduct.gramasiPerUnit).toFixed(2)} {selectedAfaProduct.unit}
                       {' '}({selectedAfaProduct.gramasiPerUnit} {selectedAfaProduct.unitGramasi}/{selectedAfaProduct.unit})
                     </div>
                   )}
                   {selectedAfaProduct && !(selectedAfaProduct.gramasiPerUnit && selectedAfaProduct.gramasiPerUnit > 0) && (
-                    <div style={{ fontSize: '0.75rem', color: '#b45309', marginTop: '0.25rem', background: '#fffbeb', padding: '0.3rem 0.5rem', borderRadius: 4 }}>
-                      ⚠️ Produk ini belum punya data isi per kemasan. Isi jumlah dalam <strong>{selectedAfaProduct.unit}</strong>.
+                    <div style={{ fontSize: '0.75rem', color: 'var(--warning)', marginTop: '0.25rem', background: 'var(--warning-bg)', padding: '0.3rem 0.5rem', borderRadius: 4 }}>
+                      Produk ini belum punya data isi per kemasan. Isi jumlah dalam <strong>{selectedAfaProduct.unit}</strong>.
                     </div>
                   )}
                 </div>
@@ -206,10 +207,10 @@ export default function FOStockRequestPage() {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead style={{ background: 'var(--surface-2)' }}>
                     <tr>
-                      <th style={{ ...tdStyle, fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>Produk</th>
-                      <th style={{ ...tdStyle, fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>Stok AFA</th>
-                      <th style={{ ...tdStyle, fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.04em' }}>Jumlah Diminta</th>
-                      <th style={{ ...tdStyle, width: 60, fontWeight: 700, fontSize: '0.78rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.04em' }}></th>
+                      <th style={{ ...tdStyle, fontWeight: 600, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Produk</th>
+                      <th style={{ ...tdStyle, fontWeight: 600, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Stok AFA</th>
+                      <th style={{ ...tdStyle, fontWeight: 600, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Jumlah Diminta</th>
+                      <th style={{ ...tdStyle, width: 60, fontWeight: 600, fontSize: '0.78rem', color: 'var(--text-muted)' }}></th>
                     </tr>
                   </thead>
                   <tbody>
@@ -217,11 +218,11 @@ export default function FOStockRequestPage() {
                       <tr key={p.productId}>
                         <td style={tdStyle}><strong>{p.name}</strong></td>
                         <td style={tdStyle}>
-                          <span style={{ color: '#16a34a', fontWeight: 600 }}>{p.afaBalance}</span> {p.unit}
+                          <span style={{ color: 'var(--success)', fontWeight: 600 }}>{p.afaBalance}</span> {p.unit}
                         </td>
                         <td style={tdStyle}>{p.qtyRequested} {p.unit}</td>
                         <td style={tdStyle}>
-                          <button type="button" onClick={() => setSelectedProducts(prev => prev.filter(x => x.productId !== p.productId))} style={{ color: 'var(--danger)', fontWeight: 700, background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem' }}>✕</button>
+                          <button type="button" onClick={() => setSelectedProducts(prev => prev.filter(x => x.productId !== p.productId))} style={{ color: 'var(--danger)', fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', fontSize: '1.1rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" /></button>
                         </td>
                       </tr>
                     ))}
@@ -234,12 +235,12 @@ export default function FOStockRequestPage() {
             </div>
 
             <div className="card" style={{ marginBottom: '1.5rem' }}>
-              <h3 style={{ marginBottom: '1rem' }}>📝 Catatan untuk AFA (Opsional)</h3>
+              <h3 style={{ marginBottom: '1rem' }}>Catatan untuk AFA (Opsional)</h3>
               <textarea className="form-control" rows={3} value={notes} onChange={e => setNotes(e.target.value)} placeholder="Contoh: Untuk demo plot di area Kec. Ngimbang bulan ini..." style={{ resize: 'none' }} />
             </div>
 
             <button type="submit" className="btn btn-primary" style={{ width: '100%', padding: '0.9rem', fontSize: '1rem' }} disabled={isPending}>
-              {isPending ? 'Mengirim Pengajuan...' : '📤 Kirim Pengajuan Stok ke AFA'}
+              {isPending ? 'Mengirim Pengajuan...' : 'Kirim Pengajuan Stok ke AFA'}
             </button>
           </form>
         </>

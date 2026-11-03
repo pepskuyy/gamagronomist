@@ -6,6 +6,7 @@ import { cldThumb } from '@/lib/cloudinary-url'
 import { redirect } from 'next/navigation'
 import ReportAdminActions from '@/components/ReportAdminActions'
 import { deleteDemoPlot } from '@/app/actions/demoplot-admin'
+import { CheckCircle2 } from 'lucide-react'
 
 
 export default async function DemoPlotDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -114,7 +115,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                 {dp.landSize && <div><strong>Luas Lahan:</strong> {dp.landSize} {(dp as any).landSizeUnit === 'm2' ? 'm²' : 'ha'}</div>}
                 {dp.latitude && dp.longitude && (
                   <div>
-                    <strong>Lokasi (GPS):</strong> <a href={`https://www.google.com/maps?q=${dp.latitude},${dp.longitude}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--secondary)' }}>{dp.latitude.toFixed(6)}, {dp.longitude.toFixed(6)} ↗</a>
+                    <strong>Lokasi (GPS):</strong> <a href={`https://www.google.com/maps?q=${dp.latitude},${dp.longitude}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--info)' }}>{dp.latitude.toFixed(6)}, {dp.longitude.toFixed(6)} ↗</a>
                   </div>
                 )}
               </div>
@@ -140,9 +141,9 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                       <td style={{ padding: '0.5rem', fontWeight: 600 }}>{det.actualUsage} {(det.product as any).unitGramasi || det.product.unit}</td>
                       <td style={{ padding: '0.5rem' }}>
                         {det.usedFarmerProduct ? (
-                          <span className="badge" style={{ background: '#fef3c7', color: '#b45309' }}>Produk Petani</span>
+                          <span className="badge" style={{ background: 'var(--warning-bg)', color: 'var(--warning)' }}>Produk Petani</span>
                         ) : (
-                          <span className="badge" style={{ background: '#dcfce7', color: '#15803d' }}>Stok Sendiri</span>
+                          <span className="badge" style={{ background: 'var(--success-bg)', color: 'var(--success)' }}>Stok Sendiri</span>
                         )}
                       </td>
                     </tr>
@@ -157,7 +158,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
                   if (photoUrls.length === 0) return null
                   return (
                     <div style={{ marginTop: '1rem' }}>
-                      <strong style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>📷 Dokumentasi</strong>
+                      <strong style={{ fontSize: '0.85rem', display: 'block', marginBottom: '0.5rem' }}>Dokumentasi</strong>
                       <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
                         {photoUrls.map((url, i) => (
                           <a key={i} href={url} target="_blank" rel="noopener noreferrer">
@@ -181,8 +182,8 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
               })()}
 
               {dp.isFinalSession && (
-                <div style={{ marginTop: '1rem', padding: '0.5rem', background: '#D1FAE5', color: '#065F46', borderRadius: '4px', fontSize: '0.85rem', textAlign: 'center', fontWeight: 600 }}>
-                  ✅ Sesi ini ditandai sebagai sesi terakhir. Demo plot selesai.
+                <div style={{ marginTop: '1rem', padding: '0.5rem', background: 'var(--success-bg)', color: 'var(--success)', borderRadius: '4px', fontSize: '0.85rem', textAlign: 'center', fontWeight: 600 }}>
+                  <CheckCircle2 size={16} strokeWidth={1.75} className="icon-inline" /> Sesi ini ditandai sebagai sesi terakhir. Demo plot selesai.
                 </div>
               )}
             </div>

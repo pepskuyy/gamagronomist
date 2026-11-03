@@ -15,7 +15,7 @@ export default function SimotandiPeriodSelect({
 }) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
-      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: '#64748b', textTransform: 'uppercase' }}>
+      <span style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)' }}>
         Periode SIMOTANDI
       </span>
       <select
@@ -23,12 +23,12 @@ export default function SimotandiPeriodSelect({
         onChange={(e) => onChange(Number(e.target.value))}
         disabled={loading || periods.length === 0}
         style={{
-          border: '1px solid #d1d5db',
+          border: '1px solid var(--border)',
           borderRadius: '0.5rem',
           padding: '0.4rem 0.65rem',
           fontSize: '0.85rem',
-          color: '#374151',
-          background: '#fff',
+          color: 'var(--text-secondary)',
+          background: 'var(--surface)',
           cursor: 'pointer',
           outline: 'none',
           minWidth: 260,

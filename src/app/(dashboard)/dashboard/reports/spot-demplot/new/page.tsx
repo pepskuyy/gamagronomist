@@ -11,6 +11,7 @@ import { submitSpotDemplot } from '@/app/actions/spot-demplot'
 import { useOfflineDraft } from '@/hooks/useOfflineDraft'
 import { useStockBalance } from '@/hooks/useStockBalance'
 import type { PhotoBlob } from '@/lib/offline-db'
+import { Save, WifiOff, Building2, Sprout } from 'lucide-react'
 
 type Product = { id: string; name: string; unit: string }
 const WEED_OPTIONS = ['Daun Lebar', 'Daun Sempit', 'Teki-tekian', 'Pakis-pakisan', 'Berkayu']
@@ -128,7 +129,7 @@ export default function NewSpotDemplotPage() {
   if (savedOffline) {
     return (
       <div className="form-container-wide" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💾</div>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}><Save size={40} strokeWidth={1.5} /></div>
         <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Tersimpan Offline!</h2>
         <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
           Laporan Spot Demplot Anda tersimpan di perangkat ini. Data beserta foto akan otomatis
@@ -156,14 +157,14 @@ export default function NewSpotDemplotPage() {
       {/* Status koneksi */}
       {!isOnline && (
         <div style={{
-          background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 'var(--radius-sm)',
+          background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
           padding: '0.75rem 1rem', marginBottom: '1.25rem',
           display: 'flex', alignItems: 'center', gap: '0.5rem'
         }}>
-          <span>📵</span>
+          <span style={{ display: 'inline-flex', color: 'var(--warning)' }}><WifiOff size={16} strokeWidth={1.75} className="icon-inline" /></span>
           <div>
-            <strong style={{ color: '#92400e' }}>Mode Offline</strong>
-            <div style={{ fontSize: '0.8rem', color: '#92400e' }}>
+            <strong style={{ color: 'var(--warning)' }}>Mode Offline</strong>
+            <div style={{ fontSize: '0.8rem', color: 'var(--warning)' }}>
               Isi form & ambil foto, lalu klik "Simpan Offline". Data akan otomatis terkirim saat sinyal tersedia.
             </div>
           </div>
@@ -174,7 +175,7 @@ export default function NewSpotDemplotPage() {
 
         {/* LOKASI */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📍 Info Lokasi</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Info Lokasi</h3>
           <div className="form-grid">
             <div style={{ gridColumn: '1 / -1' }}>
               <RegionSelect
@@ -201,7 +202,7 @@ export default function NewSpotDemplotPage() {
 
         {/* DETAIL KEGIATAN */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📝 Detail & Pengamatan</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Detail & Pengamatan</h3>
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Tanggal Pelaksanaan <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -244,7 +245,7 @@ export default function NewSpotDemplotPage() {
 
         {/* PENGGUNAAN PRODUK */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>🧪 Penggunaan Produk</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Penggunaan Produk</h3>
           <p style={{ marginBottom: '1.25rem', fontSize: '0.875rem' }}>Pilih produk yang digunakan. Stok kamu akan otomatis dikurangi setelah disimpan.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {usageList.map((usage, idx) => {
@@ -253,15 +254,15 @@ export default function NewSpotDemplotPage() {
               const onHand = selectedProduct ? stockBalance[selectedProduct.id] || 0 : 0
               const availableProducts = isFarmer ? products : products.filter(p => (stockBalance[p.id] || 0) > 0)
               return (
-                <div key={usage.id} style={{ padding: '1rem', borderRadius: 'var(--radius-sm)', background: isFarmer ? '#fefce8' : 'var(--surface-2)', border: `1px solid ${isFarmer ? '#fde68a' : 'var(--border)'}` }}>
+                <div key={usage.id} style={{ padding: '1rem', borderRadius: 'var(--radius-sm)', background: isFarmer ? 'var(--warning-bg)' : 'var(--surface-2)', border: `1px solid ${isFarmer ? 'rgba(180, 83, 9, 0.25)' : 'var(--border)'}` }}>
                   <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <button type="button" onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = false; nl[idx].productId = ''; setUsageList(nl) }}
-                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: !isFarmer ? '2px solid var(--primary)' : '1px solid var(--border)', background: !isFarmer ? 'var(--primary-light)' : 'transparent', color: !isFarmer ? 'var(--primary)' : 'var(--text-muted)', transition: 'all 0.15s' }}>
-                      🏢 Stok Sendiri
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem', border: !isFarmer ? '2px solid var(--primary)' : '1px solid var(--border)', background: !isFarmer ? 'var(--primary-light)' : 'transparent', color: !isFarmer ? 'var(--primary)' : 'var(--text-muted)', transition: 'var(--transition)' }}>
+                      <Building2 size={14} strokeWidth={1.75} className="icon-inline" />Stok Sendiri
                     </button>
                     <button type="button" onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = true; nl[idx].productId = ''; setUsageList(nl) }}
-                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: isFarmer ? '2px solid #d97706' : '1px solid var(--border)', background: isFarmer ? '#fef3c7' : 'transparent', color: isFarmer ? '#92400e' : 'var(--text-muted)', transition: 'all 0.15s' }}>
-                      🌾 Produk Petani
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem', border: isFarmer ? '2px solid var(--warning)' : '1px solid var(--border)', background: isFarmer ? 'var(--warning-bg)' : 'transparent', color: isFarmer ? 'var(--warning)' : 'var(--text-muted)', transition: 'var(--transition)' }}>
+                      <Sprout size={14} strokeWidth={1.75} className="icon-inline" />Produk Petani
                     </button>
                   </div>
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 120px auto', gap: '0.75rem', alignItems: 'center' }}>
@@ -275,7 +276,7 @@ export default function NewSpotDemplotPage() {
                       />
                       {selectedProduct && !isFarmer && (
                         <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
-                          Tersedia: <strong>{onHand} {(selectedProduct as any).unitGramasi || selectedProduct.unit}</strong>
+                          Tersedia: <strong className="num">{onHand}</strong> <span className="unit">{(selectedProduct as any).unitGramasi || selectedProduct.unit}</span>
                         </div>
                       )}
                     </div>
@@ -295,7 +296,7 @@ export default function NewSpotDemplotPage() {
             })}
             <button type="button"
               onClick={() => { setUsageList([...usageList, { id: nextUsageId, productId: '', qty: '', usedFarmerProduct: false }]); setNextUsageId(nextUsageId + 1) }}
-              style={{ padding: '0.75rem', background: 'var(--surface-hover)', border: '2px dashed var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 500, transition: 'all 0.15s', textAlign: 'center' }}>
+              style={{ padding: '0.75rem', background: 'var(--surface-hover)', border: '2px dashed var(--border)', borderRadius: 'var(--radius-sm)', cursor: 'pointer', color: 'var(--text-muted)', fontWeight: 500, transition: 'var(--transition)', textAlign: 'center' }}>
               + Tambah Penggunaan Produk
             </button>
           </div>
@@ -303,7 +304,7 @@ export default function NewSpotDemplotPage() {
 
         {/* DOKUMENTASI */}
         <div className="card">
-          <h3 style={{ marginBottom: '0.5rem' }}>📸 Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>
             {isOnline ? 'Minimal 1 foto wajib dilampirkan.' : 'Foto diambil dari kamera dan disimpan di perangkat — akan diunggah otomatis saat sinyal tersedia.'}
           </p>
@@ -326,9 +327,9 @@ export default function NewSpotDemplotPage() {
               onClick={handleSaveOffline}
               className="btn btn-primary"
               disabled={loading || latitude === null}
-              style={{ background: '#f59e0b', borderColor: '#f59e0b' }}
+              style={{ background: 'var(--warning)', borderColor: 'var(--warning)' }}
             >
-              {loading ? 'Menyimpan...' : latitude === null ? '📍 Ambil GPS Dulu' : '💾 Simpan Offline'}
+              {loading ? 'Menyimpan...' : latitude === null ? 'Ambil GPS Dulu' : 'Simpan Offline'}
             </button>
           ) : (
             /* ONLINE: Tombol Submit biasa */
@@ -340,7 +341,7 @@ export default function NewSpotDemplotPage() {
                 disabled={loading || latitude === null}
                 title="Simpan sebagai draft, kirim nanti"
               >
-                💾 Simpan sebagai Draft
+                <Save size={16} strokeWidth={1.75} className="icon-inline" />Simpan sebagai Draft
               </button>
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 {loading ? 'Menyimpan...' : 'Simpan Spot Demplot'}

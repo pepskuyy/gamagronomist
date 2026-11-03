@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { submitDemoPlotSession } from '@/app/actions/execute'
 import ImageUploader from '@/components/ImageUploader'
+import { MapPin, RefreshCw } from 'lucide-react'
 
 type ApprovedProduct = {
   id: string
@@ -150,7 +151,7 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
             <div>
               <h3 style={{ margin: 0, fontSize: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                📍 Lokasi GPS
+                <MapPin size={16} strokeWidth={1.75} className="icon-inline" /> Lokasi GPS
                 {gpsStatus === 'success' && <span className="badge badge-success">Aktif</span>}
                 {gpsStatus === 'loading' && <span className="badge badge-warning">Mencari...</span>}
                 {gpsStatus === 'error' && <span className="badge badge-danger">Gagal</span>}
@@ -162,18 +163,18 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
                     {latitude.toFixed(6)}, {longitude.toFixed(6)}
                   </span>
                   {' '}
-                  <a href={`https://www.google.com/maps?q=${latitude},${longitude}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--secondary)', fontSize: '0.8rem' }}>Lihat di Maps ↗</a>
+                  <a href={`https://www.google.com/maps?q=${latitude},${longitude}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--info)', fontSize: '0.8rem' }}>Lihat di Maps ↗</a>
                 </p>
               )}
-              {gpsError && <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--danger)' }}>⚠️ {gpsError}</p>}
+              {gpsError && <p style={{ margin: '0.5rem 0 0', fontSize: '0.85rem', color: 'var(--danger)' }}>{gpsError}</p>}
             </div>
             {gpsStatus !== 'success' && (
               <button type="button" onClick={requestGPS} className="btn btn-primary" disabled={gpsStatus === 'loading'} style={{ whiteSpace: 'nowrap' }}>
-                {gpsStatus === 'loading' ? '⏳ Mencari...' : '📍 Aktifkan GPS'}
+                {gpsStatus === 'loading' ? 'Mencari...' : 'Aktifkan GPS'}
               </button>
             )}
             {gpsStatus === 'success' && (
-              <button type="button" onClick={requestGPS} className="btn btn-outline" style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}>🔄 Perbarui Lokasi</button>
+              <button type="button" onClick={requestGPS} className="btn btn-outline" style={{ whiteSpace: 'nowrap', fontSize: '0.85rem' }}><RefreshCw size={16} strokeWidth={1.75} className="icon-inline" />Perbarui Lokasi</button>
             )}
           </div>
         </div>
@@ -266,7 +267,7 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
            </label>
 
            <button type="submit" className="btn btn-primary" style={{ padding: '1rem 2rem', fontSize: '1.125rem' }} disabled={loading || gpsStatus !== 'success'}>
-              {loading ? 'Menyimpan...' : gpsStatus !== 'success' ? '📍 Aktifkan GPS Terlebih Dahulu' : 'Simpan Realisasi & Potong Stok'}
+              {loading ? 'Menyimpan...' : gpsStatus !== 'success' ? 'Aktifkan GPS Terlebih Dahulu' : 'Simpan Realisasi & Potong Stok'}
            </button>
         </div>
       </div>

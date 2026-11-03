@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { approveRequest, rejectRequest } from '@/app/actions/approve'
 import UnitHoldBadge from '@/components/UnitHoldBadge'
+import { CheckCircle2 } from 'lucide-react'
 
 type Detail = {
   id: string
@@ -97,7 +98,7 @@ export default function ApprovePageClient({
     router.push('/dashboard/demoplot')
   }
 
-  const th: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.04em' }
+  const th: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', color: 'var(--text-muted)' }
   const td: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)' }
 
   const isAnyQtyChanged = request.details.some(d => approvedQties[d.id] !== d.qtyRequested)
@@ -124,7 +125,7 @@ export default function ApprovePageClient({
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
         <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
-        <h2 style={{ margin: 0 }}>📦 Review Pengajuan Stok dari FO</h2>
+        <h2 style={{ margin: 0 }}>Review Pengajuan Stok dari FO</h2>
       </div>
 
       <div className="card" style={{ marginBottom: '1.5rem' }}>
@@ -178,11 +179,11 @@ export default function ApprovePageClient({
                     <td style={td}>
                       {d.qtyRequested} {displayUnit}
                       {conv.isKemasan && (
-                        <div style={{ fontSize: '0.72rem', color: '#b45309' }}>= {conv.qty} {stockUnit} (dikonversi)</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--warning)' }}>= {conv.qty} {stockUnit} (dikonversi)</div>
                       )}
                     </td>
                     <td style={td}>
-                      <span style={{ color: enough ? '#059669' : '#dc2626', fontWeight: 600 }}>{stock}</span> {stockUnit}
+                      <span style={{ color: enough ? 'var(--success)' : 'var(--danger)', fontWeight: 600 }}>{stock}</span> {stockUnit}
                     </td>
                     <td style={td}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
@@ -195,8 +196,8 @@ export default function ApprovePageClient({
                           step="any"
                           style={{
                             width: 90, padding: '0.4rem 0.6rem', fontSize: '0.875rem', textAlign: 'center',
-                            fontWeight: 700,
-                            border: diff !== 0 ? '2px solid #f59e0b' : undefined,
+                            fontWeight: 600,
+                            border: diff !== 0 ? '2px solid var(--warning)' : undefined,
                           }}
                           disabled={approveStatus !== 'idle'}
                         />
@@ -207,9 +208,9 @@ export default function ApprovePageClient({
                       {diff === 0 ? (
                         <span className="badge badge-success" style={{ fontSize: '0.72rem' }}>Sesuai</span>
                       ) : diff > 0 ? (
-                        <span className="badge" style={{ background: '#dbeafe', color: '#1d4ed8', fontSize: '0.72rem' }}>+{diff} {displayUnit}</span>
+                        <span className="badge" style={{ background: 'var(--info-bg)', color: 'var(--info)', fontSize: '0.72rem' }}>+{diff} {displayUnit}</span>
                       ) : (
-                        <span className="badge" style={{ background: '#fef3c7', color: '#92400e', fontSize: '0.72rem' }}>{diff} {displayUnit}</span>
+                        <span className="badge" style={{ background: 'var(--warning-bg)', color: 'var(--warning)', fontSize: '0.72rem' }}>{diff} {displayUnit}</span>
                       )}
                     </td>
                   </tr>
@@ -222,8 +223,8 @@ export default function ApprovePageClient({
 
       {/* AFA Notes */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 700, marginBottom: '0.35rem' }}>
-          📝 Keterangan dari AFA {isAnyQtyChanged && <span style={{ color: '#d97706' }}>(disarankan jika ada perubahan jumlah)</span>}
+        <label style={{ display: 'block', fontSize: '0.82rem', fontWeight: 600, marginBottom: '0.35rem' }}>
+          Keterangan dari AFA {isAnyQtyChanged && <span style={{ color: 'var(--warning)' }}>(disarankan jika ada perubahan jumlah)</span>}
         </label>
         <textarea
           className="input"
@@ -237,8 +238,8 @@ export default function ApprovePageClient({
       </div>
 
       {shortages.length > 0 && approveStatus !== 'done' && (
-        <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', background: '#fffbeb', border: '1px solid #fcd34d', color: '#92400e', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
-          <strong>⚠️ Stok Anda tidak mencukupi:</strong>
+        <div style={{ marginBottom: '1rem', padding: '0.85rem 1rem', background: 'var(--warning-bg)', border: '1px solid var(--border)', color: 'var(--warning)', borderRadius: 'var(--radius-sm)', fontSize: '0.85rem' }}>
+          <strong>Stok Anda tidak mencukupi:</strong>
           <ul style={{ margin: '0.35rem 0 0', paddingLeft: '1.2rem' }}>
             {shortages.map(s => <li key={s}>{s}</li>)}
           </ul>
@@ -249,15 +250,15 @@ export default function ApprovePageClient({
       )}
 
       {error && (
-        <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: '#fee2e2', color: '#b91c1c', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>
+        <div style={{ marginBottom: '1rem', padding: '0.75rem 1rem', background: 'var(--danger-bg)', color: 'var(--danger)', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>
       )}
 
       {/* Confirmation prompt */}
       {approveStatus === 'confirming' && (
-        <div style={{ marginBottom: '1rem', padding: '1rem 1.25rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', color: '#1e40af' }}>
-          <strong>⚠️ Konfirmasi:</strong> Stok akan ditransfer dari akun AFA ke FO{isAnyQtyChanged ? '. Terdapat penyesuaian jumlah dari pengajuan awal.' : ' sesuai jumlah pengajuan.'}
+        <div style={{ marginBottom: '1rem', padding: '1rem 1.25rem', background: 'var(--info-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', color: 'var(--info)' }}>
+          <strong>Konfirmasi:</strong> Stok akan ditransfer dari akun AFA ke FO{isAnyQtyChanged ? '. Terdapat penyesuaian jumlah dari pengajuan awal.' : ' sesuai jumlah pengajuan.'}
           {shortages.length > 0 && (
-            <div style={{ marginTop: '0.5rem', fontSize: '0.82rem', color: '#b45309', fontWeight: 600 }}>
+            <div style={{ marginTop: '0.5rem', fontSize: '0.82rem', color: 'var(--warning)', fontWeight: 600 }}>
               {shortages.length} produk melebihi stok Anda — saldo akan menjadi minus.
             </div>
           )}
@@ -272,8 +273,8 @@ export default function ApprovePageClient({
       )}
 
       {approveStatus === 'done' && (
-        <div style={{ marginBottom: '1rem', padding: '1rem 1.25rem', background: '#dcfce7', border: '1px solid #86efac', borderRadius: 'var(--radius-md)', fontWeight: 600, color: '#166534' }}>
-          ✅ Berhasil disetujui! Mengalihkan ke halaman demoplot...
+        <div style={{ marginBottom: '1rem', padding: '1rem 1.25rem', background: 'var(--success-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', fontWeight: 600, color: 'var(--success)' }}>
+          <CheckCircle2 size={16} strokeWidth={1.75} className="icon-inline" /> Berhasil disetujui! Mengalihkan ke halaman demoplot...
         </div>
       )}
 
@@ -281,11 +282,11 @@ export default function ApprovePageClient({
         <div style={{ display: 'flex', gap: '1rem' }}>
           <button onClick={() => setRejectModalOpen(true)} disabled={rejectLoading} className="btn btn-outline"
             style={{ flex: 1, borderColor: 'var(--danger)', color: 'var(--danger)' }}>
-            {rejectLoading ? 'Menolak...' : '❌ Tolak Pengajuan'}
+            {rejectLoading ? 'Menolak...' : 'Tolak Pengajuan'}
           </button>
           <button onClick={handleApprove} disabled={approveStatus === 'loading'} className="btn btn-primary"
             style={{ flex: 2 }}>
-            {approveStatus === 'loading' ? '⏳ Sedang Memproses...' : '✅ Setujui & Transfer Stok'}
+            {approveStatus === 'loading' ? 'Sedang Memproses...' : 'Setujui & Transfer Stok'}
           </button>
         </div>
       )}
@@ -304,14 +305,14 @@ export default function ApprovePageClient({
             style={{ width: '100%', maxWidth: 480, padding: '1.75rem', position: 'relative' }}
             onClick={e => e.stopPropagation()}
           >
-            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.1rem', fontWeight: 700 }}>
-              ❌ Tolak Pengajuan
+            <h3 style={{ margin: '0 0 0.35rem', fontSize: '1.1rem', fontWeight: 600 }}>
+              Tolak Pengajuan
             </h3>
             <p style={{ margin: '0 0 1.25rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
               Silakan isi alasan penolakan agar FO mengetahui penyebab pengajuan ditolak.
             </p>
-            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              Keterangan Penolakan <span style={{ color: '#dc2626' }}>*</span>
+            <label style={{ display: 'block', fontSize: '0.78rem', fontWeight: 600, color: 'var(--text-muted)', marginBottom: '0.35rem' }}>
+              Keterangan Penolakan <span style={{ color: 'var(--danger)' }}>*</span>
             </label>
             <textarea
               className="input"
@@ -325,8 +326,8 @@ export default function ApprovePageClient({
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.6rem' }}>
               <button onClick={() => setRejectModalOpen(false)} className="btn" style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem' }}>Batal</button>
               <button onClick={handleReject} disabled={rejectLoading} className="btn"
-                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', background: '#dc2626', color: '#fff', border: 'none', fontWeight: 600 }}>
-                {rejectLoading ? '⏳ ...' : 'Konfirmasi Tolak'}
+                style={{ padding: '0.5rem 1.25rem', fontSize: '0.85rem', background: 'var(--danger)', color: '#fff', border: 'none', fontWeight: 600 }}>
+                {rejectLoading ? '...' : 'Konfirmasi Tolak'}
               </button>
             </div>
           </div>

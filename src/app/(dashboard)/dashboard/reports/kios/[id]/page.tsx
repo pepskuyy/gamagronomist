@@ -25,7 +25,7 @@ export default async function VisitKiosDetail({ params }: { params: { id: string
       <div className="card" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dicatat oleh</div>
-          <div style={{ fontWeight: 700 }}>{report.user.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.85rem' }}>({report.user.role})</span></div>
+          <div style={{ fontWeight: 600 }}>{report.user.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.85rem' }}>({report.user.role})</span></div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Tanggal</div>
@@ -34,7 +34,7 @@ export default async function VisitKiosDetail({ params }: { params: { id: string
       </div>
 
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>🏪 Informasi Kunjungan</h3>
+        <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Informasi Kunjungan</h3>
         {[
           { label: 'Nama Kios', value: report.kiosName },
           { label: 'Detail Aktivitas', value: report.activityDetail },
@@ -52,7 +52,7 @@ export default async function VisitKiosDetail({ params }: { params: { id: string
 
       {photos.length > 0 && (
         <div className="card">
-          <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>📷 Dokumentasi</h3>
+          <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Dokumentasi</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             {photos.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noreferrer">

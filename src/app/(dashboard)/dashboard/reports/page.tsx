@@ -5,6 +5,7 @@ import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
 import ExportExcelButton from '@/components/ExportExcelButton'
 import ExportPhotosButton from '@/components/ExportPhotosButton'
+import { Search, X, Plus, Play } from 'lucide-react'
 
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -102,9 +103,9 @@ function TableFilter({
         <input type="date" name={`${prefix}_end`} className="form-control" defaultValue={currentEnd} style={{ fontSize: '0.85rem', padding: '0.4rem 0.65rem' }} />
       </div>
       <div style={{ display: 'flex', gap: '0.4rem', alignItems: 'flex-end' }}>
-        <button type="submit" className="btn btn-primary" style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}>🔍 Filter</button>
+        <button type="submit" className="btn btn-primary" style={{ padding: '0.45rem 1rem', fontSize: '0.82rem' }}><Search size={16} strokeWidth={1.75} className="icon-inline" />Filter</button>
         {isActive && (
-          <Link href={`/dashboard/reports?${resetParams.toString()}`} className="btn btn-outline" style={{ padding: '0.45rem 0.75rem', fontSize: '0.82rem' }}>✕ Reset</Link>
+          <Link href={`/dashboard/reports?${resetParams.toString()}`} className="btn btn-outline" style={{ padding: '0.45rem 0.75rem', fontSize: '0.82rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" />Reset</Link>
         )}
       </div>
     </form>
@@ -242,7 +243,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const videoSlice  = videoRows.slice(0, take)
 
   const tdStyle = { padding: '0.75rem', borderBottom: '1px solid var(--border)' }
-  const thStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem', textTransform: 'uppercase', background: 'var(--surface-hover)' }
+  const thStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem', background: 'var(--surface-hover)' }
   const formatDate = (d: Date) => new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(d)
 
   const getStatusBadge = (status: string) => {
@@ -261,22 +262,22 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       <div className="page-header" style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Laporan Aktivitas Harian</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <Link href="/dashboard/reports/cb/new"           className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 📝 Customer Behavior</Link>
-          <Link href="/dashboard/reports/spot-demplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🌿 Spot Demplot</Link>
-          <Link href="/dashboard/reports/kios/new"         className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🏪 Visit Kios</Link>
-          <Link href="/dashboard/reports/gathering/new"    className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 👥 Gathering</Link>
-          <Link href="/dashboard/reports/company/new"      className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🏢 Visit Company</Link>
+          <Link href="/dashboard/reports/cb/new"           className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Customer Behavior</Link>
+          <Link href="/dashboard/reports/spot-demplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Spot Demplot</Link>
+          <Link href="/dashboard/reports/kios/new"         className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Visit Kios</Link>
+          <Link href="/dashboard/reports/gathering/new"    className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Gathering</Link>
+          <Link href="/dashboard/reports/company/new"      className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Visit Company</Link>
           {['FO', 'INTERN', 'AFA'].includes(session.role) && (
-            <Link href="/dashboard/demoplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 🌾 Rekam Demo Plot</Link>
+            <Link href="/dashboard/demoplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Rekam Demo Plot</Link>
           )}
-          <Link href="/dashboard/reports/video-konten/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}>+ 📹 Video Konten</Link>
+          <Link href="/dashboard/reports/video-konten/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Video Konten</Link>
         </div>
       </div>
 
       {/* ══ Customer Behavior ══════════════════════════════════════════════════ */}
       <div style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>📝 Customer Behavior</h3>
+          <h3 style={{ margin: 0 }}>Customer Behavior</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
             <ExportPhotosButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
@@ -293,7 +294,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* ══ Spot Demplot ═══════════════════════════════════════════════════════ */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>🌿 Riwayat Spot Demplot</h3>
+          <h3 style={{ margin: 0 }}>Riwayat Spot Demplot</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
             <ExportPhotosButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
@@ -337,7 +338,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* ══ Realisasi Demo Plot ════════════════════════════════════════════════ */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>🌾 Riwayat Realisasi Demo Plot</h3>
+          <h3 style={{ margin: 0 }}>Riwayat Realisasi Demo Plot</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
             <ExportPhotosButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
@@ -373,7 +374,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
                     <div className="action-row">
                       {req.status === 'APPROVED' && (req.foId === session.userId || req.afaId === session.userId) && (
                         <Link href={`/dashboard/demoplot/continue/${req.id}`}>
-                          <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
+                          <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><Play size={14} strokeWidth={1.75} className="icon-inline" />Lanjutkan Sesi</button>
                         </Link>
                       )}
                       <Link href={`/dashboard/demoplot/detail/${req.id}`}>
@@ -395,7 +396,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* ══ Visit Kios ════════════════════════════════════════════════════════ */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>🏪 Visit Kios</h3>
+          <h3 style={{ margin: 0 }}>Visit Kios</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
             <ExportPhotosButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
@@ -437,7 +438,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* ══ Farmer Gathering ══════════════════════════════════════════════════ */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>🤝 Farmer Gathering</h3>
+          <h3 style={{ margin: 0 }}>Farmer Gathering</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
             <ExportPhotosButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
@@ -479,7 +480,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* ══ Visit Company ══════════════════════════════════════════════════════ */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>🏢 Visit Company</h3>
+          <h3 style={{ margin: 0 }}>Visit Company</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="company" search={compQ} start={compStart} end={compEnd} />
             <ExportPhotosButton type="company" search={compQ} start={compStart} end={compEnd} />
@@ -521,7 +522,7 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
       {/* ══ Video Konten ══════════════════════════════════════════════════ */}
       <div className="card" style={{ marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>📹 Video Konten</h3>
+          <h3 style={{ margin: 0 }}>Video Konten</h3>
           <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
             <ExportExcelButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />
             <ExportPhotosButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />

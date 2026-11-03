@@ -10,6 +10,7 @@ import SearchableSelect from '@/components/SearchableSelect'
 import { useOfflineDraft } from '@/hooks/useOfflineDraft'
 import { useStockBalance } from '@/hooks/useStockBalance'
 import type { PhotoBlob } from '@/lib/offline-db'
+import { Save, WifiOff, ClipboardList, Pencil, Building2, Sprout, AlertTriangle, Trash2 } from 'lucide-react'
 
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
 type CbFarmer = { id: string; farmerName: string; phone?: string; district?: string; location?: string; address?: string; commodity?: string; constraints?: string }
@@ -128,7 +129,7 @@ export default function FoDemoPlotDirectPage() {
   if (savedOffline) {
     return (
       <div className="form-container-wide" style={{ textAlign: 'center', padding: '4rem 2rem' }}>
-        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}>💾</div>
+        <div style={{ fontSize: '4rem', marginBottom: '1rem' }}><Save size={40} strokeWidth={1.5} /></div>
         <h2 style={{ color: 'var(--primary)', marginBottom: '0.5rem' }}>Tersimpan Offline!</h2>
         <p style={{ color: 'var(--text-muted)', maxWidth: '400px', margin: '0 auto 1.5rem' }}>
           Data Demo Plot beserta foto tersimpan di perangkat. Akan otomatis terkirim begitu sinyal tersedia.
@@ -146,18 +147,18 @@ export default function FoDemoPlotDirectPage() {
       <div className="back-header">
         <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div>
-          <h2 style={{ margin: 0 }}>🌾 Rekam Realisasi Demo Plot</h2>
+          <h2 style={{ margin: 0 }}>Rekam Realisasi Demo Plot</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Rekam langsung tanpa perlu membuat pengajuan terlebih dahulu</p>
         </div>
       </div>
 
       {/* Banner offline */}
       {!isOnline && (
-        <div style={{ background: '#fef3c7', border: '1px solid #fde68a', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span>📵</span>
+        <div style={{ background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.75rem 1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ display: 'inline-flex', color: 'var(--warning)' }}><WifiOff size={16} strokeWidth={1.75} className="icon-inline" /></span>
           <div>
-            <strong style={{ color: '#92400e' }}>Mode Offline</strong>
-            <div style={{ fontSize: '0.8rem', color: '#92400e' }}>Realisasi demplot mandiri belum bisa disimpan offline. Isi form sekarang, lalu simpan saat koneksi kembali.</div>
+            <strong style={{ color: 'var(--warning)' }}>Mode Offline</strong>
+            <div style={{ fontSize: '0.8rem', color: 'var(--warning)' }}>Realisasi demplot mandiri belum bisa disimpan offline. Isi form sekarang, lalu simpan saat koneksi kembali.</div>
           </div>
         </div>
       )}
@@ -165,17 +166,17 @@ export default function FoDemoPlotDirectPage() {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* ── FARMER SECTION ── */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>👤 Data Petani</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Data Petani</h3>
 
           {/* Mode toggle */}
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
             <button type="button" onClick={() => setFarmerMode('cb')}
               className={farmerMode === 'cb' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, fontSize: '0.85rem' }}>
-              📋 Dari Database CB
+              <ClipboardList size={16} strokeWidth={1.75} className="icon-inline" />Dari Database CB
             </button>
             <button type="button" onClick={() => { setFarmerMode('manual'); setSelectedCb(null); setFarmerName(''); setFarmerPhone(''); setArea(''); setCommodity(''); setProblem('') }}
               className={farmerMode === 'manual' ? 'btn btn-primary' : 'btn btn-outline'} style={{ flex: 1, fontSize: '0.85rem' }}>
-              ✍️ Lainnya (Manual)
+              <Pencil size={16} strokeWidth={1.75} className="icon-inline" />Lainnya (Manual)
             </button>
           </div>
 
@@ -205,7 +206,7 @@ export default function FoDemoPlotDirectPage() {
                     <div><strong>Komoditas:</strong> {selectedCb.commodity || '-'}</div>
                     {selectedCb.constraints && <div style={{ gridColumn: '1/-1' }}><strong>Kendala:</strong> {selectedCb.constraints}</div>}
                   </div>
-                  <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--primary)', marginBottom: 0 }}>✅ Data otomatis terisi dari database CB. Kamu bisa ubah jika perlu.</p>
+                  <p style={{ marginTop: '0.5rem', fontSize: '0.8rem', color: 'var(--primary)', marginBottom: 0 }}>Data otomatis terisi dari database CB. Kamu bisa ubah jika perlu.</p>
                 </div>
               )}
             </div>
@@ -257,7 +258,7 @@ export default function FoDemoPlotDirectPage() {
 
         {/* ── SESSION DETAILS ── */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📅 Detail Sesi</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Detail Sesi</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
               <label className="form-label">Tanggal Sesi <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -267,7 +268,7 @@ export default function FoDemoPlotDirectPage() {
               <label className="form-label">Umur Tanaman <span style={{ color: 'var(--danger)' }}>*</span></label>
               <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
                 <input type="number" min="1" max="999" name="cropAgeDays" className="form-control" placeholder="45" required style={{ flex: 1 }} />
-                <span style={{ whiteSpace: 'nowrap', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.875rem' }}>HST</span>
+                <span className="unit" style={{ whiteSpace: 'nowrap', fontSize: '0.875rem' }}>HST</span>
               </div>
             </div>
             <div>
@@ -286,20 +287,20 @@ export default function FoDemoPlotDirectPage() {
           <div style={{ marginTop: '1rem', padding: '1rem', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', borderLeft: `4px solid ${gpsColor}` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.75rem' }}>
               <div>
-                <strong>📍 Lokasi GPS</strong>{' '}
+                <strong>Lokasi GPS</strong>{' '}
                 {gpsStatus === 'success' && <span className="badge badge-success">Aktif</span>}
                 {gpsStatus === 'loading' && <span className="badge badge-warning">Mencari...</span>}
                 {gpsStatus === 'error' && <span className="badge badge-danger">Gagal</span>}
                 {gpsStatus === 'idle' && <span className="badge badge-neutral">Belum Aktif</span>}
                 {gpsStatus === 'success' && latitude && longitude && (
                   <p style={{ margin: '0.3rem 0 0', fontSize: '0.82rem' }}>
-                    <span style={{ fontFamily: 'monospace', color: 'var(--success)' }}>{latitude.toFixed(6)}, {longitude.toFixed(6)}</span>{' '}
+                    <span className="mono num" style={{ color: 'var(--success)' }}>{latitude.toFixed(6)}, {longitude.toFixed(6)}</span>{' '}
                     <a href={`https://www.google.com/maps?q=${latitude},${longitude}`} target="_blank" rel="noreferrer" style={{ color: 'var(--info)', fontSize: '0.78rem' }}>Lihat Maps ↗</a>
                   </p>
                 )}
               </div>
               <button type="button" onClick={requestGPS} className={gpsStatus === 'success' ? 'btn btn-outline' : 'btn btn-primary'} disabled={gpsStatus === 'loading'} style={{ fontSize: '0.85rem', whiteSpace: 'nowrap' }}>
-                {gpsStatus === 'loading' ? '⏳ Mencari...' : gpsStatus === 'success' ? '🔄 Perbarui' : '📍 Aktifkan GPS'}
+                {gpsStatus === 'loading' ? 'Mencari...' : gpsStatus === 'success' ? 'Perbarui' : 'Aktifkan GPS'}
               </button>
             </div>
           </div>
@@ -307,7 +308,7 @@ export default function FoDemoPlotDirectPage() {
 
         {/* ── PRODUCT USAGE ── */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>🧪 Penggunaan Produk</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Penggunaan Produk</h3>
           <p style={{ marginBottom: '1.25rem', fontSize: '0.875rem' }}>Pilih produk yang digunakan dan masukkan jumlahnya. Stok kamu akan dikurangi secara otomatis.</p>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
@@ -320,27 +321,27 @@ export default function FoDemoPlotDirectPage() {
                 : products.filter(p => (stockBalance[p.id] || 0) > 0)
               
               return (
-                <div key={usage.id} style={{ padding: '1rem', borderRadius: 'var(--radius-sm)', background: isFarmer ? '#fefce8' : 'var(--surface-2)', border: `1px solid ${isFarmer ? '#fde68a' : 'var(--border)'}` }}>
+                <div key={usage.id} style={{ padding: '1rem', borderRadius: 'var(--radius-sm)', background: isFarmer ? 'var(--warning-bg)' : 'var(--surface-2)', border: `1px solid ${isFarmer ? 'rgba(180, 83, 9, 0.25)' : 'var(--border)'}` }}>
                   {/* Toggle sumber produk */}
                   <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <button
                       type="button"
                       onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = false; nl[idx].productId = ''; setUsageList(nl) }}
-                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: !isFarmer ? '2px solid var(--primary)' : '1px solid var(--border)', background: !isFarmer ? 'var(--primary-light)' : 'transparent', color: !isFarmer ? 'var(--primary)' : 'var(--text-muted)', transition: 'all 0.15s' }}
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem', border: !isFarmer ? '2px solid var(--primary)' : '1px solid var(--border)', background: !isFarmer ? 'var(--primary-light)' : 'transparent', color: !isFarmer ? 'var(--primary)' : 'var(--text-muted)', transition: 'var(--transition)' }}
                     >
-                      🏢 Stok Sendiri
+                      <Building2 size={14} strokeWidth={1.75} className="icon-inline" />Stok Sendiri
                     </button>
                     <button
                       type="button"
                       onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = true; nl[idx].productId = ''; setUsageList(nl) }}
-                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: isFarmer ? '2px solid #d97706' : '1px solid var(--border)', background: isFarmer ? '#fef3c7' : 'transparent', color: isFarmer ? '#92400e' : 'var(--text-muted)', transition: 'all 0.15s' }}
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem', border: isFarmer ? '2px solid var(--warning)' : '1px solid var(--border)', background: isFarmer ? 'var(--warning-bg)' : 'transparent', color: isFarmer ? 'var(--warning)' : 'var(--text-muted)', transition: 'var(--transition)' }}
                     >
-                      🌾 Produk Petani
+                      <Sprout size={14} strokeWidth={1.75} className="icon-inline" />Produk Petani
                     </button>
                   </div>
                   {isFarmer && (
-                    <p style={{ fontSize: '0.75rem', color: '#92400e', marginBottom: '0.5rem', background: '#fef3c7', padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>
-                      ⚠️ Produk milik petani — <strong>tidak memotong stok Anda</strong>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginBottom: '0.5rem', background: 'var(--warning-bg)', padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>
+                      <AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> Produk milik petani — <strong>tidak memotong stok Anda</strong>
                     </p>
                   )}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 120px auto', gap: '0.75rem', alignItems: 'center' }}>
@@ -358,7 +359,7 @@ export default function FoDemoPlotDirectPage() {
                       />
                       {selectedProduct && !isFarmer && (
                         <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
-                          Tersedia: <strong>{onHand} {selectedProduct.unitGramasi || selectedProduct.unit}</strong>
+                          Tersedia: <strong className="num">{onHand}</strong> <span className="unit">{selectedProduct.unitGramasi || selectedProduct.unit}</span>
                         </div>
                       )}
                     </div>
@@ -381,10 +382,10 @@ export default function FoDemoPlotDirectPage() {
                       type="button" 
                       onClick={() => setUsageList(usageList.filter(u => u.id !== usage.id))}
                       className="btn btn-outline"
-                      style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: '#fecaca', background: '#fef2f2' }}
+                      style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: 'var(--border)', background: 'var(--danger-bg)' }}
                       title="Hapus Produk"
                     >
-                      🗑️
+                      <Trash2 size={16} strokeWidth={1.75} className="icon-inline" />
                     </button>
                   </div>
                 </div>
@@ -410,7 +411,7 @@ export default function FoDemoPlotDirectPage() {
 
         {/* ── DOCUMENTATION ── */}
         <div className="card">
-          <h3 style={{ marginBottom: '0.5rem' }}>📷 Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>Dokumentasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Minimal 1 foto wajib dilampirkan.</p>
           <ImageUploader
             onUploadSuccess={setPhotos}
@@ -421,7 +422,7 @@ export default function FoDemoPlotDirectPage() {
           />
         </div>
 
-        {error && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
+        {error && <div style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
 
         {/* ── SUBMIT ROW ── */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', padding: '1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
@@ -433,15 +434,15 @@ export default function FoDemoPlotDirectPage() {
             <button
               type="button"
               className="btn btn-primary"
-              style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap', background: '#9ca3af', borderColor: '#9ca3af' }}
+              style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap', background: 'var(--text-light)', borderColor: 'var(--text-light)' }}
               disabled
             >
-              📵 Butuh Internet untuk Menyimpan
+              <WifiOff size={16} strokeWidth={1.75} className="icon-inline" />Butuh Internet untuk Menyimpan
             </button>
           ) : (
             <button type="submit" className="btn btn-primary" style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap' }}
               disabled={isPending || gpsStatus !== 'success'}>
-              {isPending ? 'Menyimpan...' : gpsStatus !== 'success' ? '📍 Aktifkan GPS Dulu' : '✅ Simpan Realisasi & Potong Stok'}
+              {isPending ? 'Menyimpan...' : gpsStatus !== 'success' ? 'Aktifkan GPS Dulu' : 'Simpan Realisasi & Potong Stok'}
             </button>
           )}
         </div>

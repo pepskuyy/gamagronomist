@@ -7,6 +7,7 @@ import 'leaflet/dist/leaflet.css'
 import FaseTanamLayer from '@/components/map/FaseTanamLayer'
 import KecamatanLayer from '@/components/map/KecamatanLayer'
 import type { SimotandiWilayahRow } from '@/lib/simotandi-fase'
+import { MapIcon, Satellite, CheckCircle2, Clock, Navigation, Store, MapPin } from 'lucide-react'
 
 type DemoPlotPoint = {
   id: string; lat: number; lng: number
@@ -99,20 +100,20 @@ export default function MapView({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '0.4rem',
-              padding: '0.45rem 0.85rem',
-              background: '#fff',
-              border: '1px solid rgba(0,0,0,0.2)',
-              borderRadius: '6px',
-              boxShadow: '0 2px 6px rgba(0,0,0,0.2)',
+              gap: '0.375rem',
+              padding: '0.5rem 0.75rem',
+              background: 'var(--surface)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-sm)',
+              boxShadow: 'var(--shadow-md)',
               fontSize: '0.8rem',
-              fontWeight: 700,
+              fontWeight: 500,
               cursor: 'pointer',
-              color: '#0f172a',
+              color: 'var(--text-main)',
             }}
             title="Ganti Mode Peta (Jalan / Satelit Esri)"
           >
-            {mapMode === 'satellite' ? '🗺️ Peta Jalan' : '🛰️ Satelit Esri'}
+            {mapMode === 'satellite' ? <><MapIcon size={16} strokeWidth={1.75} className="icon-inline" />Peta Jalan</> : <><Satellite size={16} strokeWidth={1.75} className="icon-inline" />Satelit Esri</>}
           </button>
         </div>
       )}
@@ -193,39 +194,38 @@ export default function MapView({
           >
             <Popup>
               <div style={{ minWidth: '200px', fontSize: '0.8rem', lineHeight: 1.5 }}>
-                <div style={{ fontWeight: 700, marginBottom: '0.25rem' }}>{cfg.emoji} {cfg.label}</div>
+                <div style={{ fontWeight: 600, marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}><span style={{ width: 8, height: 8, borderRadius: '50%', background: cfg.color, flexShrink: 0 }} />{cfg.label}</div>
                 {p.type !== 'spot' && (
                   <div style={{ marginBottom: '0.35rem' }}>
                     <span style={{
                       display: 'inline-flex',
                       alignItems: 'center',
                       gap: '0.25rem',
-                      padding: '0.15rem 0.5rem',
-                      borderRadius: '9999px',
+                      padding: '0.125rem 0.5rem',
+                      borderRadius: 'var(--radius-xs)',
                       fontSize: '0.72rem',
-                      fontWeight: 700,
-                      background: p.isCompleted ? '#dcfce7' : '#dbeafe',
-                      color: p.isCompleted ? '#15803d' : '#1d4ed8',
-                      border: `1px solid ${p.isCompleted ? '#bbf7d0' : '#bfdbfe'}`,
+                      fontWeight: 500,
+                      background: p.isCompleted ? 'var(--success-bg)' : 'var(--info-bg)',
+                      color: p.isCompleted ? 'var(--success)' : 'var(--info)',
                     }}>
-                      {p.isCompleted ? '✅ Selesai' : '⏳ Berlangsung'}
+                      {p.isCompleted ? <><CheckCircle2 size={12} strokeWidth={1.75} className="icon-inline" />Selesai</> : <><Clock size={12} strokeWidth={1.75} className="icon-inline" />Berlangsung</>}
                       {p.sessionCount && p.sessionCount > 1 ? ` (${p.sessionCount} Sesi)` : p.sessionCount === 1 ? ' (1 Sesi)' : ''}
                     </span>
                   </div>
                 )}
-                <div>🌾 <strong>Petani:</strong> {p.farmerName}</div>
-                <div>📍 <strong>Area:</strong> {p.area}</div>
-                <div>🌱 <strong>Komoditas:</strong> {p.commodity}</div>
-                <div>👤 <strong>FO:</strong> {p.foName}</div>
-                <div>🧪 <strong>Produk Akumulasi ({p.productCount}):</strong></div>
+                <div><strong>Petani:</strong> {p.farmerName}</div>
+                <div><strong>Area:</strong> {p.area}</div>
+                <div><strong>Komoditas:</strong> {p.commodity}</div>
+                <div><strong>FO:</strong> {p.foName}</div>
+                <div><strong>Produk Akumulasi ({p.productCount}):</strong></div>
                 {p.products.length > 0 && (
                   <ul style={{ paddingLeft: '1rem', margin: '0.15rem 0 0', listStyle: 'disc' }}>
                     {p.products.slice(0, 5).map((pr, i) => <li key={i}>{pr}</li>)}
                     {p.products.length > 5 && <li>+{p.products.length - 5} lainnya</li>}
                   </ul>
                 )}
-                <div style={{ marginTop: '0.35rem', color: '#6b7280' }}>
-                  📅 Sesi Terakhir: {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(p.date))}
+                <div style={{ marginTop: '0.375rem', color: 'var(--text-muted)' }}>
+                  Sesi Terakhir: {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(p.date))}
                 </div>
                 <a
                   href={gmapsUrl}
@@ -233,12 +233,12 @@ export default function MapView({
                   rel="noopener noreferrer"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                    marginTop: '0.5rem', padding: '0.35rem 0.7rem', borderRadius: '0.4rem',
+                    marginTop: '0.5rem', padding: '0.375rem 0.75rem', borderRadius: 'var(--radius-sm)',
                     background: '#4285F4', color: '#fff', fontSize: '0.75rem', fontWeight: 600,
                     textDecoration: 'none', border: 'none', cursor: 'pointer',
                   }}
                 >
-                  🗺️ Arahkan ke Google Maps
+                  <Navigation size={14} strokeWidth={1.75} className="icon-inline" />Arahkan ke Google Maps
                 </a>
               </div>
             </Popup>
@@ -264,7 +264,7 @@ export default function MapView({
           >
             <Popup>
               <div style={{ minWidth: '180px', fontSize: '0.8rem', lineHeight: 1.5 }}>
-                <div style={{ fontWeight: 700, marginBottom: '0.25rem', color: '#7c3aed' }}>🏪 Toko / Kios</div>
+                <div style={{ fontWeight: 600, marginBottom: '0.25rem', color: '#7c3aed', display: 'flex', alignItems: 'center', gap: '0.375rem' }}><Store size={14} strokeWidth={1.75} className="icon-inline" />Toko / Kios</div>
                 <div><strong>Nama:</strong> {s.name}</div>
                 {s.code    && <div><strong>Kode:</strong> {s.code}</div>}
                 {s.address && <div><strong>Alamat:</strong> {s.address}</div>}
@@ -275,12 +275,12 @@ export default function MapView({
                   rel="noopener noreferrer"
                   style={{
                     display: 'inline-flex', alignItems: 'center', gap: '0.35rem',
-                    marginTop: '0.5rem', padding: '0.35rem 0.7rem', borderRadius: '0.4rem',
+                    marginTop: '0.5rem', padding: '0.375rem 0.75rem', borderRadius: 'var(--radius-sm)',
                     background: '#4285F4', color: '#fff', fontSize: '0.75rem', fontWeight: 600,
                     textDecoration: 'none', border: 'none', cursor: 'pointer',
                   }}
                 >
-                  🗺️ Arahkan ke Google Maps
+                  <Navigation size={14} strokeWidth={1.75} className="icon-inline" />Arahkan ke Google Maps
                 </a>
               </div>
             </Popup>
@@ -295,8 +295,8 @@ export default function MapView({
           <Marker position={[userLocation.lat, userLocation.lng]} icon={userLocationIcon}>
             <Popup>
               <div style={{ fontSize: '0.82rem', lineHeight: 1.5, minWidth: 140 }}>
-                <div style={{ fontWeight: 700, color: '#3b82f6', marginBottom: '0.2rem' }}>📍 Lokasi Anda</div>
-                <div style={{ color: '#64748b', fontSize: '0.75rem' }}>
+                <div style={{ fontWeight: 600, color: 'var(--info)', marginBottom: '0.25rem', display: 'flex', alignItems: 'center', gap: '0.375rem' }}><MapPin size={14} strokeWidth={1.75} className="icon-inline" />Lokasi Anda</div>
+                <div className="num" style={{ color: 'var(--text-muted)', fontSize: '0.75rem' }}>
                   {userLocation.lat.toFixed(6)}, {userLocation.lng.toFixed(6)}
                 </div>
               </div>

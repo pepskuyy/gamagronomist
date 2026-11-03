@@ -33,7 +33,7 @@ export default function SimotandiSummaryCards({
             >
               <span style={{ fontSize: '1.3rem' }}>{g.icon}</span>
               <div style={{ minWidth: 0 }}>
-                <div style={{ fontSize: '1.1rem', fontWeight: 800, lineHeight: 1.1, color: g.color }}>
+                <div style={{ fontSize: '1.1rem', fontWeight: 600, lineHeight: 1.1, color: g.color }}>
                   {formatHa(value)}
                   <span style={{ fontSize: '0.7rem', fontWeight: 600, color: 'var(--text-muted)', marginLeft: 2 }}>Ha</span>
                 </div>

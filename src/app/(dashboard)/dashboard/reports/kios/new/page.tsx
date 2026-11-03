@@ -73,7 +73,7 @@ export default function NewVisitKios() {
          <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '2rem' }}>
           <button type="button" onClick={() => router.back()} className="btn btn-outline" disabled={loading}>Batal</button>
            <button type="submit" className="btn btn-primary" disabled={loading || lat === null}>
-             {loading ? 'Menyimpan...' : lat === null ? '📍 Ambil Lokasi Dulu' : 'Kirim Laporan Visit Kios'}
+             {loading ? 'Menyimpan...' : lat === null ? 'Ambil Lokasi Dulu' : 'Kirim Laporan Visit Kios'}
           </button>
          </div>
       </form>

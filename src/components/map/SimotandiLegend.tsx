@@ -33,7 +33,7 @@ export default function SimotandiLegend() {
           {FASE_CONFIG[key].label}
         </span>
       ))}
-      <span style={{ marginLeft: 'auto', fontSize: '0.72rem', fontStyle: 'italic' }}>
+      <span style={{ marginLeft: 'auto', fontSize: '0.72rem' }}>
         Sumber: SIMOTANDI — Kementerian Pertanian RI
       </span>
     </div>

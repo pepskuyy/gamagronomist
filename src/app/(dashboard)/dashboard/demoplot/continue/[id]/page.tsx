@@ -7,6 +7,7 @@ import { submitContinueDemoPlot } from '@/app/actions/standalone-demoplot'
 import ImageUploader from '@/components/ImageUploader'
 import GpsCapture from '@/components/GpsCapture'
 import { useStockBalance } from '@/hooks/useStockBalance'
+import { Info, Building2, Sprout, AlertTriangle, Trash2 } from 'lucide-react'
 
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null }
 type RequestData = {
@@ -67,7 +68,7 @@ export default function ContinueDemoPlotPage() {
       <div className="back-header">
         <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div>
-          <h2 style={{ margin: 0 }}>🌾 Lanjutkan Sesi Demo Plot</h2>
+          <h2 style={{ margin: 0 }}>Lanjutkan Sesi Demo Plot</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             Petani: <strong>{reqData.farmer?.name}</strong> · Area: {reqData.area} · Komoditas: {reqData.commodity}
           </p>
@@ -75,14 +76,14 @@ export default function ContinueDemoPlotPage() {
       </div>
 
       {/* Info banner */}
-      <div style={{ padding: '0.9rem 1.25rem', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem', color: '#1e40af' }}>
-        ℹ️ Ini adalah <strong>sesi lanjutan</strong> dari demo plot sebelumnya. Centang &ldquo;Tandai sebagai sesi terakhir&rdquo; jika ini kunjungan terakhir.
+      <div style={{ padding: '0.9rem 1.25rem', background: 'var(--info-bg)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)', marginBottom: '1.5rem', fontSize: '0.875rem', color: 'var(--info)' }}>
+        <Info size={16} strokeWidth={1.75} className="icon-inline" /> Ini adalah <strong>sesi lanjutan</strong> dari demo plot sebelumnya. Centang &ldquo;Tandai sebagai sesi terakhir&rdquo; jika ini kunjungan terakhir.
       </div>
 
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
         {/* Session date */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📅 Detail Sesi Ini</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Detail Sesi Ini</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
             <div>
               <label className="form-label">Tanggal Sesi <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -107,7 +108,7 @@ export default function ContinueDemoPlotPage() {
 
         {/* Product usage */}
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>🧪 Penggunaan Produk Sesi Ini</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Penggunaan Produk Sesi Ini</h3>
           <p style={{ marginBottom: '1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
             Stok akan dikurangi otomatis. Isi 0 jika tidak digunakan pada sesi ini.
           </p>
@@ -121,26 +122,26 @@ export default function ContinueDemoPlotPage() {
                 : products.filter(p => (stockBalance[p.id] || 0) > 0)
               
               return (
-                <div key={usage.id} style={{ padding: '1rem', borderRadius: 'var(--radius-sm)', background: isFarmer ? '#fefce8' : 'var(--surface-2)', border: `1px solid ${isFarmer ? '#fde68a' : 'var(--border)'}` }}>
+                <div key={usage.id} style={{ padding: '1rem', borderRadius: 'var(--radius-sm)', background: isFarmer ? 'var(--warning-bg)' : 'var(--surface-2)', border: `1px solid ${isFarmer ? 'rgba(180, 83, 9, 0.25)' : 'var(--border)'}` }}>
                   <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.75rem' }}>
                     <button
                       type="button"
                       onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = false; nl[idx].productId = ''; setUsageList(nl) }}
-                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: !isFarmer ? '2px solid var(--primary)' : '1px solid var(--border)', background: !isFarmer ? 'var(--primary-light)' : 'transparent', color: !isFarmer ? 'var(--primary)' : 'var(--text-muted)', transition: 'all 0.15s' }}
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem', border: !isFarmer ? '2px solid var(--primary)' : '1px solid var(--border)', background: !isFarmer ? 'var(--primary-light)' : 'transparent', color: !isFarmer ? 'var(--primary)' : 'var(--text-muted)', transition: 'var(--transition)' }}
                     >
-                      🏢 Stok Sendiri
+                      <Building2 size={14} strokeWidth={1.75} className="icon-inline" />Stok Sendiri
                     </button>
                     <button
                       type="button"
                       onClick={() => { const nl = [...usageList]; nl[idx].usedFarmerProduct = true; nl[idx].productId = ''; setUsageList(nl) }}
-                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: '9999px', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', border: isFarmer ? '2px solid #d97706' : '1px solid var(--border)', background: isFarmer ? '#fef3c7' : 'transparent', color: isFarmer ? '#92400e' : 'var(--text-muted)', transition: 'all 0.15s' }}
+                      style={{ flex: 1, padding: '0.35rem 0.75rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '0.375rem', border: isFarmer ? '2px solid var(--warning)' : '1px solid var(--border)', background: isFarmer ? 'var(--warning-bg)' : 'transparent', color: isFarmer ? 'var(--warning)' : 'var(--text-muted)', transition: 'var(--transition)' }}
                     >
-                      🌾 Produk Petani
+                      <Sprout size={14} strokeWidth={1.75} className="icon-inline" />Produk Petani
                     </button>
                   </div>
                   {isFarmer && (
-                    <p style={{ fontSize: '0.75rem', color: '#92400e', marginBottom: '0.5rem', background: '#fef3c7', padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>
-                      ⚠️ Produk milik petani — <strong>tidak memotong stok Anda</strong>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--warning)', marginBottom: '0.5rem', background: 'var(--warning-bg)', padding: '0.4rem 0.6rem', borderRadius: 'var(--radius-sm)' }}>
+                      <AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> Produk milik petani — <strong>tidak memotong stok Anda</strong>
                     </p>
                   )}
                   <div style={{ display: 'grid', gridTemplateColumns: 'minmax(200px, 1fr) 120px auto', gap: '0.75rem', alignItems: 'center' }}>
@@ -162,7 +163,7 @@ export default function ContinueDemoPlotPage() {
                       </select>
                       {selectedProduct && !isFarmer && (
                         <div style={{ fontSize: '0.78rem', color: onHand > 0 ? 'var(--primary)' : 'var(--text-muted)', marginTop: '0.4rem' }}>
-                          Tersedia: <strong>{onHand} {selectedProduct.unitGramasi || selectedProduct.unit}</strong>
+                          Tersedia: <strong className="num">{onHand}</strong> <span className="unit">{selectedProduct.unitGramasi || selectedProduct.unit}</span>
                         </div>
                       )}
                     </div>
@@ -181,10 +182,10 @@ export default function ContinueDemoPlotPage() {
                       type="button" 
                       onClick={() => setUsageList(usageList.filter(u => u.id !== usage.id))}
                       className="btn btn-outline"
-                      style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: '#fecaca', background: '#fef2f2' }}
+                      style={{ padding: '0.5rem', color: 'var(--danger)', borderColor: 'var(--border)', background: 'var(--danger-bg)' }}
                       title="Hapus Produk"
                     >
-                      🗑️
+                      <Trash2 size={16} strokeWidth={1.75} className="icon-inline" />
                     </button>
                   </div>
                 </div>
@@ -204,7 +205,7 @@ export default function ContinueDemoPlotPage() {
 
         {/* Documentation + GPS */}
         <div className="card">
-          <h3 style={{ marginBottom: '0.5rem' }}>📷 Dokumentasi &amp; Lokasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>Dokumentasi &amp; Lokasi <span style={{ color: 'var(--danger)' }}>*</span></h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Minimal 1 foto wajib dilampirkan.</p>
           <GpsCapture onCapture={(la, lo) => { setLat(la); setLng(lo) }} onClear={() => { setLat(null); setLng(null) }} />
           <div style={{ marginTop: '1rem' }}>
@@ -212,7 +213,7 @@ export default function ContinueDemoPlotPage() {
           </div>
         </div>
 
-        {error && <div style={{ background: '#fee2e2', color: '#b91c1c', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
+        {error && <div style={{ background: 'var(--danger-bg)', color: 'var(--danger)', padding: '0.75rem 1rem', borderRadius: 'var(--radius-sm)', fontSize: '0.875rem' }}>{error}</div>}
 
         {/* Submit Row */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', flexWrap: 'wrap', padding: '1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-md)', border: '1px solid var(--border)' }}>
@@ -223,7 +224,7 @@ export default function ContinueDemoPlotPage() {
           <button type="submit" className="btn btn-primary"
             style={{ padding: '0.8rem 2rem', fontSize: '0.95rem', whiteSpace: 'nowrap' }}
             disabled={isPending || lat === null}>
-            {isPending ? 'Menyimpan...' : lat === null ? '📍 Ambil GPS Dulu' : '✅ Simpan Sesi Lanjutan'}
+            {isPending ? 'Menyimpan...' : lat === null ? 'Ambil GPS Dulu' : 'Simpan Sesi Lanjutan'}
           </button>
         </div>
       </form>

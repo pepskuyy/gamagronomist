@@ -43,7 +43,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
   }
 
   const infoStyle: React.CSSProperties = { display: 'flex', flexDirection: 'column', gap: '0.15rem' }
-  const labelStyle: React.CSSProperties = { fontSize: '0.78rem', color: '#6b7280', fontWeight: 500 }
+  const labelStyle: React.CSSProperties = { fontSize: '0.78rem', color: 'var(--text-muted)', fontWeight: 500 }
   const valueStyle: React.CSSProperties = { fontWeight: 600, fontSize: '0.95rem' }
 
   return (
@@ -51,7 +51,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
       <div className="back-header">
         <Link href="/dashboard/reports" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-          <h2 style={{ margin: 0 }}>🌿 Detail Spot Demplot</h2>
+          <h2 style={{ margin: 0 }}>Detail Spot Demplot</h2>
           {isAdmin && (
             <ReportAdminActions type="spot-demplot" id={spot.id} deleteAction={deleteSpotDemplot} />
           )}
@@ -64,7 +64,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem' }}>
           <div style={infoStyle}>
             <span style={labelStyle}>Pelaksana</span>
-            <span style={valueStyle}>{spot.user.name} <span style={{ fontSize: '0.72rem', fontWeight: 700, background: '#e5e7eb', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{spot.user.role}</span></span>
+            <span style={valueStyle}>{spot.user.name} <span style={{ fontSize: '0.72rem', fontWeight: 600, background: 'var(--surface-3)', padding: '0.1rem 0.4rem', borderRadius: '4px' }}>{spot.user.role}</span></span>
           </div>
           <div style={infoStyle}>
             <span style={labelStyle}>Area</span>
@@ -76,14 +76,14 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
           </div>
           <div style={infoStyle}>
             <span style={labelStyle}>Dibuat Pada</span>
-            <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>{formatDate(spot.createdAt)}</span>
+            <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{formatDate(spot.createdAt)}</span>
           </div>
         </div>
       </div>
 
       {/* Lokasi */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>📍 Lokasi</h3>
+        <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Lokasi</h3>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1.25rem' }}>
           {spot.districtKab && (
             <div style={infoStyle}>
@@ -121,7 +121,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
 
       {/* Pengamatan */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>📝 Hasil Pengamatan</h3>
+        <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Hasil Pengamatan</h3>
 
         {weeds.length > 0 && (
           <div style={{ marginBottom: '1rem' }}>
@@ -129,8 +129,8 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
             <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '0.4rem' }}>
               {weeds.map((w, i) => (
                 <span key={i} style={{
-                  background: '#ecfdf5', color: '#065f46', border: '1px solid #a7f3d0',
-                  padding: '0.3rem 0.75rem', borderRadius: '999px', fontSize: '0.82rem', fontWeight: 600
+                  background: 'var(--success-bg)', color: 'var(--success)', border: '1px solid var(--border)',
+                  padding: '0.3rem 0.75rem', borderRadius: 'var(--radius-xs)', fontSize: '0.82rem', fontWeight: 600
                 }}>{w}</span>
               ))}
             </div>
@@ -138,14 +138,14 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
         )}
 
         <div style={{ background: 'var(--surface-hover)', padding: '1rem', borderRadius: 'var(--radius-md)', fontSize: '0.9rem', lineHeight: 1.6 }}>
-          {spot.observationResult || <span style={{ color: '#9ca3af', fontStyle: 'italic' }}>Tidak ada catatan.</span>}
+          {spot.observationResult || <span style={{ color: 'var(--text-muted)' }}>Tidak ada catatan.</span>}
         </div>
       </div>
 
       {/* Produk */}
       {spot.details.length > 0 && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>🧪 Penggunaan Produk</h3>
+          <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Penggunaan Produk</h3>
           <div className="table-responsive">
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead style={{ background: 'var(--surface-hover)' }}>
@@ -162,8 +162,8 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
                     <td style={{ padding: '0.65rem', fontWeight: 600 }}>{det.usage} {ledgerUnit(det.product)}</td>
                     <td style={{ padding: '0.65rem' }}>
                       {det.usedFarmerProduct
-                        ? <span style={{ background: '#fef3c7', color: '#92400e', padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600 }}>🌾 Petani</span>
-                        : <span style={{ background: '#dbeafe', color: '#1e40af', padding: '0.15rem 0.5rem', borderRadius: '999px', fontSize: '0.78rem', fontWeight: 600 }}>🏢 Stok Sendiri</span>
+                        ? <span style={{ background: 'var(--warning-bg)', color: 'var(--warning)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 500 }}>Petani</span>
+                        : <span style={{ background: 'var(--info-bg)', color: 'var(--info)', padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-xs)', fontSize: '0.78rem', fontWeight: 500 }}>Stok Sendiri</span>
                       }
                     </td>
                   </tr>
@@ -177,7 +177,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
       {/* Dokumentasi */}
       {photos.length > 0 && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>📷 Dokumentasi</h3>
+          <h3 style={{ margin: '0 0 1rem', borderBottom: '1px solid var(--border)', paddingBottom: '0.5rem' }}>Dokumentasi</h3>
           <div style={{ display: 'flex', gap: '0.75rem', flexWrap: 'wrap' }}>
             {photos.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noopener noreferrer">

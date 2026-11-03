@@ -69,7 +69,7 @@ export default function NewVideoKontenPage() {
       <form onSubmit={handleSubmit}>
         
         <div className="card">
-          <h3 style={{ marginBottom: '1rem' }}>📝 Detail Video</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Detail Video</h3>
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Tanggal Upload <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -132,7 +132,7 @@ export default function NewVideoKontenPage() {
         </div>
 
         <div className="card">
-          <h3 style={{ marginBottom: '0.5rem' }}>📸 Dokumentasi (Screenshot Video) <span style={{ color: 'var(--danger)' }}>*</span></h3>
+          <h3 style={{ marginBottom: '0.5rem' }}>Dokumentasi (Screenshot Video) <span style={{ color: 'var(--danger)' }}>*</span></h3>
           <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1rem' }}>Minimal 1 foto wajib dilampirkan.</p>
           <ImageUploader onUploadSuccess={(urls) => setPhotos(urls)} />
           {photos.length > 0 && (

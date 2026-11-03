@@ -72,7 +72,7 @@ export default async function VideoKontenDetailPage({ params }: { params: Promis
       </div>
 
       <div className="card">
-        <h3 style={{ marginBottom: '1rem' }}>📸 Dokumentasi Screenshot</h3>
+        <h3 style={{ marginBottom: '1rem' }}>Dokumentasi Screenshot</h3>
         {photos.length > 0 ? (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '1rem' }}>
             {photos.map((url, i) => (

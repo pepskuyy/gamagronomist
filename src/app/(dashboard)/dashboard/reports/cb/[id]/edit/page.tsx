@@ -63,7 +63,7 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
 
       <form onSubmit={handleSubmit}>
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>👤 Profil Petani</h3>
+          <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Profil Petani</h3>
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Nama Petani <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -105,7 +105,7 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
         </div>
 
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>🌾 Data Pertanian &amp; Kendala</h3>
+          <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Data Pertanian &amp; Kendala</h3>
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Komoditas <span style={{ color: 'var(--danger)' }}>*</span></label>
@@ -132,7 +132,7 @@ export default function EditCustomerBehavior({ params }: { params: { id: string 
         </div>
 
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>🛒 Preferensi Produk</h3>
+          <h3 style={{ marginBottom: '1.5rem', color: 'var(--primary)' }}>Preferensi Produk</h3>
           <div className="form-grid">
             <div className="form-group">
               <label className="form-label">Produk Preferensi <span style={{ color: 'var(--danger)' }}>*</span></label>

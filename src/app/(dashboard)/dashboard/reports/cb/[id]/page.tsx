@@ -62,7 +62,7 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
       <div className="card" style={{ marginBottom: '1.5rem', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
         <div>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Dicatat oleh</div>
-          <div style={{ fontWeight: 700, fontSize: '1rem' }}>{report.user.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.85rem' }}>({report.user.role})</span></div>
+          <div style={{ fontWeight: 600, fontSize: '1rem' }}>{report.user.name} <span style={{ fontWeight: 400, color: 'var(--text-muted)', fontSize: '0.85rem' }}>({report.user.role})</span></div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Tanggal</div>
@@ -72,7 +72,7 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
 
       {/* Profil Petani */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>👤 Profil Petani</h3>
+        <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>Profil Petani</h3>
         {row('Nama Petani', report.farmerName)}
         {row('Umur', report.age)}
         {row('No. HP', report.phone)}
@@ -82,7 +82,7 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
 
       {/* Data Pertanian */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>🌾 Data Pertanian &amp; Kendala</h3>
+        <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>Data Pertanian &amp; Kendala</h3>
         {row('Komoditas', report.commodity)}
         {row('Alasan Komoditas', report.reasonChoice)}
         {row('Kendala', report.constraints)}
@@ -102,7 +102,7 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
 
       {/* Preferensi Produk */}
       <div className="card" style={{ marginBottom: '1.5rem' }}>
-        <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>🛒 Preferensi Produk</h3>
+        <h3 style={{ marginBottom: '0.5rem', color: 'var(--primary)' }}>Preferensi Produk</h3>
         {row('Produk yang Dipakai', report.usedProducts)}
         {row('Kios Tempat Membeli', report.buyLocation)}
         {row('Alasan Beli', report.buyReason)}
@@ -113,7 +113,7 @@ export default async function CustomerBehaviorDetail({ params }: { params: { id:
       {/* Foto */}
       {photos.length > 0 && (
         <div className="card" style={{ marginBottom: '1.5rem' }}>
-          <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>📷 Dokumentasi</h3>
+          <h3 style={{ marginBottom: '1rem', color: 'var(--primary)' }}>Dokumentasi</h3>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
             {photos.map((url, i) => (
               <a key={i} href={url} target="_blank" rel="noreferrer">

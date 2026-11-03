@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import Link from 'next/link'
 import { bulkDeleteCustomerBehaviors } from '@/app/actions/cb-admin'
+import { Trash2, X } from 'lucide-react'
 
 type CB = {
   id: string
@@ -20,7 +21,7 @@ interface Props {
 }
 
 const tdStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)' }
-const thStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem', textTransform: 'uppercase' }
+const thStyle: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontWeight: 600, color: 'var(--text-muted)', fontSize: '0.82rem' }
 const formatDate = (d: string) => new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(d))
 
 export default function CbReportTable({ reports, isAdmin, onDeleted, exportNode }: Props) {
@@ -54,19 +55,19 @@ export default function CbReportTable({ reports, isAdmin, onDeleted, exportNode 
   return (
     <div className="card" style={{ marginBottom: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h3 style={{ margin: 0 }}>📝 Customer Behavior</h3>
+        <h3 style={{ margin: 0 }}>Customer Behavior</h3>
         {exportNode}
       </div>
 
       {error && <div style={{ color: 'var(--danger)', marginBottom: '0.75rem', fontSize: '0.875rem' }}>{error}</div>}
 
       {isAdmin && selected.size > 0 && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#fef9c3', border: '1px solid #fde047', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: 'var(--warning-bg)', border: '1px solid var(--border)', borderRadius: '0.5rem', padding: '0.6rem 1rem', marginBottom: '1rem' }}>
           <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>{selected.size} item dipilih</span>
           <button onClick={handleBulkDelete} disabled={isPending} className="btn" style={{ background: 'var(--danger)', color: '#fff', padding: '0.35rem 0.9rem', fontSize: '0.82rem' }}>
-            🗑️ Hapus yang Dipilih
+            <Trash2 size={16} strokeWidth={1.75} className="icon-inline" />Hapus yang Dipilih
           </button>
-          <button onClick={() => setSelected(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}>✕ Batal</button>
+          <button onClick={() => setSelected(new Set())} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.82rem' }}><X size={16} strokeWidth={1.75} className="icon-inline" />Batal</button>
         </div>
       )}
 

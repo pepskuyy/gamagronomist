@@ -8,6 +8,7 @@ import SimotandiPeriodSelect, { PeriodeOption } from '@/components/map/Simotandi
 import SimotandiSummaryCards from '@/components/map/SimotandiSummaryCards'
 import SimotandiLegend from '@/components/map/SimotandiLegend'
 import RegionDetailPanel from '@/components/map/RegionDetailPanel'
+import { LocateFixed, Sprout, Compass, Satellite, Store, ChevronUp, ChevronDown, X, MapIcon, MapPin, AlertTriangle } from 'lucide-react'
 
 type DemoPlotPoint = {
   id: string
@@ -68,8 +69,8 @@ const TYPE_CONFIG = {
 const MapView = dynamic(() => import('@/components/MapView'), {
   ssr: false,
   loading: () => (
-    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f1f5f9', color: '#64748b', borderRadius: 'var(--radius-md)' }}>
-      🗺️ Memuat peta...
+    <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--surface-2)', color: 'var(--text-muted)', borderRadius: 'var(--radius-md)' }}>
+      Memuat peta...
     </div>
   ),
 })
@@ -403,11 +404,14 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
   }, [])
 
   const chip = (active: boolean, activeColor: string, activeBg: string) => ({
-    padding: '0.35rem 0.9rem',
-    borderRadius: '999px',
+    padding: '0.375rem 0.875rem',
+    borderRadius: 'var(--radius-sm)',
     fontSize: '0.8rem',
     cursor: 'pointer',
-    fontWeight: 600,
+    fontWeight: 500,
+    display: 'inline-flex',
+    alignItems: 'center',
+    gap: '0.375rem',
     border: active ? `2px solid ${activeColor}` : '1px solid var(--border)',
     background: active ? activeBg : 'var(--surface-hover)',
     color: active ? activeColor : 'var(--text-muted)',
@@ -418,7 +422,7 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
       {/* Header & Legend */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>🗺️ Peta Sebaran Demo Plot</h2>
+          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Peta Sebaran Demo Plot</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
             {loading
               ? 'Memuat data...'
@@ -432,10 +436,11 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
             onClick={() => (gpsTracking ? stopGpsTracking() : startGpsTracking())}
             style={chip(gpsTracking, '#3b82f6', '#eff6ff')}
           >
-            {gpsTracking ? '📍 Lokasi Aktif' : '📍 Lokasi Saya'}
+            <LocateFixed size={14} strokeWidth={1.75} className="icon-inline" />
+            {gpsTracking ? 'Lokasi Aktif' : 'Lokasi Saya'}
           </button>
           <button onClick={toggleFaseTanam} style={chip(showFaseTanam, '#16a34a', '#f0fdf4')}>
-            🌾 Fase Tanam Padi {showFaseTanam ? 'Aktif' : ''}
+            <Sprout size={14} strokeWidth={1.75} className="icon-inline" />Fase Tanam Padi {showFaseTanam ? 'Aktif' : ''}
           </button>
           <button
             onClick={toggleBatasKecamatan}
@@ -447,21 +452,22 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
               cursor: selectedKdkb ? 'pointer' : 'not-allowed',
             }}
           >
-            🧭 Batas Kecamatan
+            <Compass size={14} strokeWidth={1.75} className="icon-inline" />Batas Kecamatan
           </button>
           <button
             type="button"
             onClick={() => setMapMode(m => (m === 'satellite' ? 'osm' : 'satellite'))}
             style={chip(mapMode === 'satellite', '#059669', '#ecfdf5')}
           >
-            {mapMode === 'satellite' ? '🛰️ Mode Satelit (Esri)' : '🛰️ Lihat Satelit'}
+            <Satellite size={14} strokeWidth={1.75} className="icon-inline" />
+            {mapMode === 'satellite' ? 'Mode Satelit (Esri)' : 'Lihat Satelit'}
           </button>
         </div>
       </div>
 
       {/* SIMOTANDI controls — hanya saat layer aktif */}
       {showFaseTanam && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
           <SimotandiPeriodSelect periods={periods} value={periodeId} onChange={setPeriodeId} loading={loadingSimotandi} />
           <SimotandiSummaryCards
             totals={summaryTotals}
@@ -485,45 +491,45 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
             type="button"
             onClick={() => setDropdownOpen(v => !v)}
             style={{
-              display: 'flex', alignItems: 'center', gap: '0.6rem',
-              padding: '0.5rem 0.9rem', borderRadius: 'var(--radius-sm)',
-              border: dropdownOpen ? '2px solid #7c3aed' : '1px solid #c4b5fd',
-              background: '#f5f3ff', cursor: 'pointer', fontSize: '0.83rem',
-              fontWeight: 600, color: '#5b21b6', width: '100%', textAlign: 'left',
+              display: 'flex', alignItems: 'center', gap: '0.5rem',
+              padding: '0.5rem 0.875rem', borderRadius: 'var(--radius-sm)',
+              border: dropdownOpen ? '1px solid #7c3aed' : '1px solid var(--border)',
+              background: 'var(--surface)', cursor: 'pointer', fontSize: '0.83rem',
+              fontWeight: 500, color: 'var(--text-main)', width: '100%', textAlign: 'left',
             }}
           >
-            <span>🏪 Filter Toko:</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}><Store size={16} strokeWidth={1.75} className="icon-inline" style={{ color: '#7c3aed' }} />Filter Toko:</span>
             {selectedStoreIds.size === stores.length ? (
               <span style={{ color: '#7c3aed' }}>Semua toko ({stores.length})</span>
             ) : selectedStoreIds.size === 0 ? (
-              <span style={{ color: '#b45309' }}>Tidak ada toko dipilih</span>
+              <span style={{ color: 'var(--warning)' }}>Tidak ada toko dipilih</span>
             ) : (
-              <span style={{ color: '#5b21b6' }}>{selectedStoreIds.size} toko dipilih dari {stores.length}</span>
+              <span className="num" style={{ color: 'var(--text-secondary)' }}>{selectedStoreIds.size} toko dipilih dari {stores.length}</span>
             )}
-            <span style={{ marginLeft: 'auto', fontSize: '0.75rem' }}>{dropdownOpen ? '▲' : '▼'}</span>
+            <span style={{ marginLeft: 'auto', display: 'inline-flex', color: 'var(--text-muted)' }}>{dropdownOpen ? <ChevronUp size={16} strokeWidth={1.75} className="icon-inline" /> : <ChevronDown size={16} strokeWidth={1.75} className="icon-inline" />}</span>
           </button>
 
           {dropdownOpen && (
             <div style={{
               position: 'absolute', zIndex: 1000, top: 'calc(100% + 4px)', left: 0, right: 0,
-              background: '#fff', border: '1px solid #c4b5fd', borderRadius: 'var(--radius-md)',
-              boxShadow: '0 8px 24px rgba(0,0,0,0.12)',
+              background: 'var(--surface)', border: '1px solid var(--border)', borderRadius: 'var(--radius-md)',
+              boxShadow: 'var(--shadow-lg)',
               maxHeight: '320px', display: 'flex', flexDirection: 'column',
             }}>
-              <div style={{ padding: '0.6rem 0.75rem', borderBottom: '1px solid #ede9fe', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <div style={{ padding: '0.625rem 0.75rem', borderBottom: '1px solid var(--border-light)', display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <input
                   type="text"
                   value={storeSearch}
                   onChange={e => setStoreSearch(e.target.value)}
-                  placeholder="🔍 Cari nama atau kode toko..."
-                  style={{ flex: 1, minWidth: '160px', border: '1px solid #c4b5fd', borderRadius: '0.4rem', padding: '0.3rem 0.6rem', fontSize: '0.82rem', outline: 'none' }}
+                  placeholder="Cari nama atau kode toko..."
+                  style={{ flex: 1, minWidth: '160px', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '0.375rem 0.625rem', fontSize: '0.82rem', outline: 'none', background: 'var(--surface)', color: 'var(--text-main)' }}
                 />
                 <button type="button" onClick={selectAll}
-                  style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', border: '1px solid #c4b5fd', borderRadius: '0.4rem', background: '#ede9fe', color: '#5b21b6', cursor: 'pointer', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  style={{ fontSize: '0.75rem', padding: '0.25rem 0.625rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--surface-2)', color: 'var(--text-secondary)', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap' }}>
                   Pilih Semua
                 </button>
                 <button type="button" onClick={clearAll}
-                  style={{ fontSize: '0.75rem', padding: '0.25rem 0.6rem', border: '1px solid #fca5a5', borderRadius: '0.4rem', background: '#fee2e2', color: '#b91c1c', cursor: 'pointer', fontWeight: 600, whiteSpace: 'nowrap' }}>
+                  style={{ fontSize: '0.75rem', padding: '0.25rem 0.625rem', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', background: 'var(--danger-bg)', color: 'var(--danger)', cursor: 'pointer', fontWeight: 500, whiteSpace: 'nowrap' }}>
                   Hapus Semua
                 </button>
               </div>
@@ -536,14 +542,14 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
                     const checked = selectedStoreIds.has(s.id)
                     return (
                       <label key={s.id} style={{
-                        display: 'flex', alignItems: 'center', gap: '0.6rem',
+                        display: 'flex', alignItems: 'center', gap: '0.5rem',
                         padding: '0.5rem 0.75rem', cursor: 'pointer', fontSize: '0.83rem',
-                        background: checked ? '#f5f3ff' : 'transparent',
-                        borderBottom: '1px solid #f3f4f6',
+                        background: checked ? 'var(--surface-2)' : 'transparent',
+                        borderBottom: '1px solid var(--border-light)',
                       }}>
                         <input type="checkbox" checked={checked} onChange={() => toggleStore(s.id)}
                           style={{ accentColor: '#7c3aed', width: '14px', height: '14px', flexShrink: 0 }} />
-                        <span style={{ fontWeight: checked ? 600 : 400, color: checked ? '#5b21b6' : 'var(--text-main)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        <span style={{ fontWeight: checked ? 500 : 400, color: 'var(--text-main)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           {s.name}
                         </span>
                         {s.code && <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)', flexShrink: 0 }}>{s.code}</span>}
@@ -559,7 +565,7 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
 
       {/* Stat cards — sekaligus filter jenis titik */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '0.5rem' }}>
-        <span style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        <span style={{ fontSize: '0.78rem', fontWeight: 500, color: 'var(--text-muted)' }}>
           Filter Titik — klik kartu untuk menyaring
         </span>
         {(activeFilter !== 'all' || !showStores) && (
@@ -568,10 +574,11 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
             onClick={() => { setActiveFilter('all'); setShowStores(true) }}
             style={{
               background: 'transparent', border: 'none', color: 'var(--danger)',
-              fontSize: '0.8rem', cursor: 'pointer', fontWeight: 600, padding: 0,
+              fontSize: '0.8rem', cursor: 'pointer', fontWeight: 500, padding: 0,
+              display: 'inline-flex', alignItems: 'center', gap: '0.25rem',
             }}
           >
-            ✕ Tampilkan Semua
+            <X size={14} strokeWidth={1.75} className="icon-inline" />Tampilkan Semua
           </button>
         )}
       </div>
@@ -583,17 +590,17 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
               padding: '1rem', borderRadius: 'var(--radius-md)', cursor: 'pointer',
               border: `1px solid ${activeFilter === t || activeFilter === 'all' ? TYPE_CONFIG[t].border : 'var(--border)'}`,
               background: activeFilter === t ? TYPE_CONFIG[t].bg : 'var(--surface)',
-              transition: 'all 0.15s',
+              transition: 'var(--transition)',
               opacity: activeFilter !== 'all' && activeFilter !== t ? 0.5 : 1,
             }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
               <div>
-                <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: TYPE_CONFIG[t].textColor }}>{TYPE_CONFIG[t].label}</div>
-                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>{TYPE_CONFIG[t].desc}</div>
+                <div style={{ fontSize: '0.8rem', fontWeight: 500, color: TYPE_CONFIG[t].textColor }}>{TYPE_CONFIG[t].label}</div>
+                <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>{TYPE_CONFIG[t].desc}</div>
               </div>
-              <div style={{ width: 12, height: 12, borderRadius: '50%', background: TYPE_CONFIG[t].color, boxShadow: `0 0 0 3px ${TYPE_CONFIG[t].border}`, marginTop: '0.2rem' }} />
+              <div style={{ width: 10, height: 10, borderRadius: '50%', background: TYPE_CONFIG[t].color, marginTop: '0.25rem' }} />
             </div>
-            <div style={{ marginTop: '0.75rem', fontSize: '2rem', fontWeight: 800, color: TYPE_CONFIG[t].color, lineHeight: 1 }}>{counts[t]}</div>
+            <div className="num" style={{ marginTop: '0.75rem', fontSize: '1.75rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1 }}>{counts[t]}</div>
           </div>
         ))}
         <div onClick={() => setShowStores(v => !v)}
@@ -601,18 +608,18 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
             padding: '1rem', borderRadius: 'var(--radius-md)', cursor: 'pointer',
             border: `1px solid ${showStores ? '#c4b5fd' : 'var(--border)'}`,
             background: showStores ? '#f5f3ff' : 'var(--surface)',
-            transition: 'all 0.15s',
+            transition: 'var(--transition)',
           }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
             <div>
-              <div style={{ fontSize: '0.75rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#5b21b6' }}>Toko / Kios</div>
-              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.1rem' }}>
+              <div style={{ fontSize: '0.8rem', fontWeight: 500, color: '#5b21b6' }}>Toko / Kios</div>
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', marginTop: '0.125rem' }}>
                 {showStores ? `${visibleStores.length} tampil` : 'Tersembunyi'}
               </div>
             </div>
-            <div style={{ width: 12, height: 12, borderRadius: '50%', background: '#7c3aed', boxShadow: '0 0 0 3px #c4b5fd', marginTop: '0.2rem' }} />
+            <div style={{ width: 10, height: 10, borderRadius: '50%', background: '#7c3aed', marginTop: '0.25rem' }} />
           </div>
-          <div style={{ marginTop: '0.75rem', fontSize: '2rem', fontWeight: 800, color: '#7c3aed', lineHeight: 1 }}>{stores.length}</div>
+          <div className="num" style={{ marginTop: '0.75rem', fontSize: '1.75rem', fontWeight: 600, color: 'var(--text-main)', lineHeight: 1 }}>{stores.length}</div>
         </div>
       </div>
 
@@ -625,7 +632,7 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
           borderRadius: 'var(--radius-md)',
           overflow: 'hidden',
           border: '1px solid var(--border)',
-          background: '#f1f5f9',
+          background: 'var(--surface-2)',
         }}>
           {!loading && (
             <MapView
@@ -641,8 +648,8 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
             />
           )}
           {loading && (
-            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '0.75rem', color: '#64748b' }}>
-              <div style={{ width: 40, height: 40, border: '3px solid #e2e8f0', borderTop: '3px solid #6366f1', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: '0.75rem', color: 'var(--text-muted)' }}>
+              <div style={{ width: 40, height: 40, border: '3px solid var(--border)', borderTop: '3px solid var(--primary)', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
               <p style={{ margin: 0, fontSize: '0.875rem' }}>Memuat data peta...</p>
             </div>
           )}
@@ -663,27 +670,28 @@ export default function DemoPlotMap({ filterQuery = '' }: { filterQuery?: string
 
       {/* Legend indicator */}
       <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', padding: '0.75rem 1rem', background: 'var(--surface-2)', borderRadius: 'var(--radius-sm)', fontSize: '0.8rem', color: 'var(--text-muted)', alignItems: 'center' }}>
-        <span style={{ color: mapMode === 'satellite' ? '#047857' : '#2563eb', fontWeight: 600 }}>
-          {mapMode === 'satellite' ? '🛰️ Satelit Esri (Penampakan Bumi)' : '🗺️ Peta Jalan (OSM)'}
+        <span style={{ color: 'var(--text-secondary)', fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: '0.375rem' }}>
+          {mapMode === 'satellite' ? <Satellite size={14} strokeWidth={1.75} className="icon-inline" /> : <MapIcon size={14} strokeWidth={1.75} className="icon-inline" />}
+          {mapMode === 'satellite' ? 'Satelit Esri (Penampakan Bumi)' : 'Peta Jalan (OSM)'}
         </span>
-        <span>⭐ Spot Demo Plot — kegiatan terpisah (amber)</span>
-        <span>🔵 Mini Demo Plot — 1–3 produk (biru)</span>
-        <span>🟢 Full Demo Plot — ≥4 produk (hijau)</span>
-        <span style={{ color: '#7c3aed', fontWeight: 600 }}>🟣 Toko/Kios (ungu)</span>
+        <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: TYPE_CONFIG.spot.color, marginRight: '0.375rem', verticalAlign: 'middle' }} />Spot Demo Plot — kegiatan terpisah (amber)</span>
+        <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: TYPE_CONFIG.mini.color, marginRight: '0.375rem', verticalAlign: 'middle' }} />Mini Demo Plot — 1–3 produk (biru)</span>
+        <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: TYPE_CONFIG.full.color, marginRight: '0.375rem', verticalAlign: 'middle' }} />Full Demo Plot — ≥4 produk (hijau)</span>
+        <span><span style={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', background: '#7c3aed', marginRight: '0.375rem', verticalAlign: 'middle' }} />Toko/Kios (ungu)</span>
         {selectedKdkb && (
-          <span style={{ color: '#0f172a', fontWeight: 600 }}>
-            🔎 Filter wilayah: {selectedRegionName} ({regionPoints.length} demo plot, {storesInRegion.length} toko)
+          <span style={{ color: 'var(--text-main)', fontWeight: 500 }}>
+            Filter wilayah: {selectedRegionName} ({regionPoints.length} demo plot, {storesInRegion.length} toko)
           </span>
         )}
         {gpsTracking && userLocation && (
-          <span style={{ color: '#3b82f6', fontWeight: 600 }}>📍 Lokasi Anda ({userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)})</span>
+          <span style={{ color: 'var(--info)', fontWeight: 500 }}><MapPin size={14} strokeWidth={1.75} className="icon-inline" /> Lokasi Anda <span className="num">({userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)})</span></span>
         )}
-        {gpsError && <span style={{ color: '#dc2626', fontWeight: 600 }}>⚠️ {gpsError}</span>}
+        {gpsError && <span style={{ color: 'var(--danger)', fontWeight: 500 }}><AlertTriangle size={14} strokeWidth={1.75} className="icon-inline" /> {gpsError}</span>}
       </div>
 
       {!loading && points.length === 0 && stores.length === 0 && (
         <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--text-muted)', background: 'var(--surface-hover)', borderRadius: 'var(--radius-md)' }}>
-          <div style={{ fontSize: '3rem' }}>📍</div>
+          <div style={{ display: 'flex', justifyContent: 'center' }}><MapPin size={40} strokeWidth={1.5} /></div>
           <p style={{ marginTop: '0.5rem', fontWeight: 500 }}>Belum ada data dengan koordinat GPS.</p>
         </div>
       )}

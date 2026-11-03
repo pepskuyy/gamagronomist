@@ -3,6 +3,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
 import { formatLedgerQty, formatKemasanQty, hasGramasi } from '@/lib/stock-units'
+import { Package, Plus, ClipboardList, Play } from 'lucide-react'
 
 /**
  * Satuan qty detail pengajuan:
@@ -58,16 +59,16 @@ export default async function DemoPlotIndexPage() {
   return (
     <div>
       <div className="page-header">
-        <h2 style={{ margin: 0 }}>🌾 Demo Plot</h2>
+        <h2 style={{ margin: 0 }}>Demo Plot</h2>
         <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
           {/* FO: request stock + direct demo plot */}
           {(session.role === 'FO' || session.role === 'INTERN') && (
             <>
               <Link href="/dashboard/demoplot/request">
-                <button className="btn btn-outline">📦 Minta Stok dari AFA</button>
+                <button className="btn btn-outline"><Package size={16} strokeWidth={1.75} className="icon-inline" />Minta Stok dari AFA</button>
               </Link>
               <Link href="/dashboard/demoplot/new">
-                <button className="btn btn-primary">➕ Rekam Demo Plot</button>
+                <button className="btn btn-primary"><Plus size={16} strokeWidth={1.75} className="icon-inline" />Rekam Demo Plot</button>
               </Link>
             </>
           )}
@@ -75,10 +76,10 @@ export default async function DemoPlotIndexPage() {
           {['AFA', 'PLANTATION'].includes(session.role) && (
             <>
               <Link href="/dashboard/demoplot/afa-plan">
-                <button className="btn btn-outline">📋 Perencanaan Mandiri</button>
+                <button className="btn btn-outline"><ClipboardList size={16} strokeWidth={1.75} className="icon-inline" />Perencanaan Mandiri</button>
               </Link>
               <Link href="/dashboard/demoplot/new">
-                <button className="btn btn-primary">➕ Rekam Demo Plot</button>
+                <button className="btn btn-primary"><Plus size={16} strokeWidth={1.75} className="icon-inline" />Rekam Demo Plot</button>
               </Link>
             </>
           )}
@@ -89,9 +90,9 @@ export default async function DemoPlotIndexPage() {
       {['AFA', 'PLANTATION'].includes(session.role) && stockRequests.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
           <h3 style={{ marginBottom: '1rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-            📦 Permintaan Stok FO
+            Permintaan Stok FO
             {stockRequests.filter(r => r.status === 'SUBMITTED').length > 0 && (
-              <span style={{ background: 'var(--danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '0.15rem 0.5rem', borderRadius: '9999px' }}>
+              <span style={{ background: 'var(--danger)', color: '#fff', fontSize: '0.7rem', fontWeight: 600, padding: '0.15rem 0.5rem', borderRadius: 'var(--radius-xs)' }}>
                 {stockRequests.filter(r => r.status === 'SUBMITTED').length} baru
               </span>
             )}
@@ -145,7 +146,7 @@ export default async function DemoPlotIndexPage() {
       {/* FO: show own stock requests */}
       {(session.role === 'FO' || session.role === 'INTERN') && stockRequests.length > 0 && (
         <div style={{ marginBottom: '2rem' }}>
-          <h3 style={{ marginBottom: '1rem' }}>📦 Permintaan Stok Saya</h3>
+          <h3 style={{ marginBottom: '1rem' }}>Permintaan Stok Saya</h3>
           <div className="table-card">
             <div className="table-responsive">
               <table>
@@ -167,7 +168,7 @@ export default async function DemoPlotIndexPage() {
                         <div className="action-row">
                           {req.status === 'APPROVED' && req.demoPlots?.length > 0 && req.foId === session.userId && (
                             <Link href={`/dashboard/demoplot/continue/${req.id}`}>
-                              <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
+                              <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><Play size={14} strokeWidth={1.75} className="icon-inline" />Lanjutkan Sesi</button>
                             </Link>
                           )}
                           <Link href={`/dashboard/demoplot/detail/${req.id}`}><button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button></Link>
@@ -183,7 +184,7 @@ export default async function DemoPlotIndexPage() {
       )}
 
       {/* Demo Plot Records */}
-      <h3 style={{ marginBottom: '1rem' }}>🌾 Riwayat Realisasi Demo Plot</h3>
+      <h3 style={{ marginBottom: '1rem' }}>Riwayat Realisasi Demo Plot</h3>
       <div className="table-card">
         <div className="table-responsive">
           <table>
@@ -214,7 +215,7 @@ export default async function DemoPlotIndexPage() {
                     <div className="action-row">
                       {req.status === 'APPROVED' && (req.foId === session.userId || req.afaId === session.userId) && (
                         <Link href={`/dashboard/demoplot/continue/${req.id}`}>
-                          <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>▶ Lanjutkan Sesi</button>
+                          <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><Play size={14} strokeWidth={1.75} className="icon-inline" />Lanjutkan Sesi</button>
                         </Link>
                       )}
                       <Link href={`/dashboard/demoplot/detail/${req.id}`}>

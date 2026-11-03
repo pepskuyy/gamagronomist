@@ -1,6 +1,7 @@
 'use client'
 
 import { dominantFase, FASE_CONFIG, FASE_ORDER, formatHa, SimotandiWilayahRow } from '@/lib/simotandi-fase'
+import { X } from 'lucide-react'
 
 type StorePoint = {
   id: string
@@ -42,7 +43,7 @@ export default function RegionDetailPanel({
       <div style={{ padding: '0.9rem 1rem', borderBottom: '1px solid var(--border)' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '0.5rem' }}>
           <div style={{ minWidth: 0 }}>
-            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+            <h3 style={{ margin: 0, fontSize: '1.05rem', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis' }}>
               {nama}
             </h3>
             {subtitle && <p style={{ margin: '0.15rem 0 0', fontSize: '0.78rem', color: 'var(--text-muted)' }}>{subtitle}</p>}
@@ -54,15 +55,18 @@ export default function RegionDetailPanel({
             style={{
               border: 'none',
               background: 'var(--surface-2)',
-              borderRadius: '999px',
+              borderRadius: 'var(--radius-xs)',
               width: 26,
               height: 26,
               cursor: 'pointer',
               color: 'var(--text-muted)',
               flexShrink: 0,
+              display: 'inline-flex',
+              alignItems: 'center',
+              justifyContent: 'center',
             }}
           >
-            ✕
+            <X size={14} strokeWidth={1.75} className="icon-inline" />
           </button>
         </div>
 
@@ -71,17 +75,17 @@ export default function RegionDetailPanel({
             <span
               style={{
                 fontSize: '0.75rem',
-                fontWeight: 700,
+                fontWeight: 600,
                 padding: '0.2rem 0.6rem',
-                borderRadius: '999px',
+                borderRadius: 'var(--radius-xs)',
                 background: FASE_CONFIG[fase].color,
-                color: '#1f2937',
+                color: 'var(--text-main)',
               }}
             >
               {FASE_CONFIG[fase].label}
             </span>
             <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
-              Standing Crop <strong>{formatHa(row!.standingCrop)} Ha</strong>
+              Standing Crop <strong className="num">{formatHa(row!.standingCrop)}</strong> <span className="unit">Ha</span>
             </span>
           </div>
         )}
@@ -100,7 +104,7 @@ export default function RegionDetailPanel({
                 <div key={key}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', marginBottom: 2 }}>
                     <span style={{ color: 'var(--text-muted)' }}>{FASE_CONFIG[key].short}</span>
-                    <span style={{ fontWeight: 700 }}>{formatHa(val)} Ha</span>
+                    <span><span className="num" style={{ fontWeight: 600 }}>{formatHa(val)}</span> <span className="unit">Ha</span></span>
                   </div>
                   <div style={{ height: 6, background: 'var(--border)', borderRadius: 999, overflow: 'hidden' }}>
                     <div
@@ -122,8 +126,8 @@ export default function RegionDetailPanel({
 
       {/* Daftar toko */}
       <div style={{ padding: '0.85rem 1rem', overflowY: 'auto', flex: 1 }}>
-        <div style={{ fontSize: '0.78rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-          🏪 Toko di wilayah ini ({stores.length})
+        <div style={{ fontSize: '0.78rem', fontWeight: 600, marginBottom: '0.5rem' }}>
+          Toko di wilayah ini ({stores.length})
         </div>
         {stores.length === 0 ? (
           <p style={{ margin: 0, fontSize: '0.78rem', color: 'var(--text-muted)' }}>Tidak ada toko di wilayah ini.</p>
