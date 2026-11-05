@@ -152,7 +152,9 @@ function checkSchedule() {
 
   // 2. SIMOTANDI Sync Job: Jadwal 22:20 UTC (05:20 WIB)
   // Berjalan 20 menit setelah Sales Dashboard agar tidak rebutan I/O
-  if (utcHours === 22 && utcMinutes >= 20 && utcMinutes <= 25) {
+  // Dilewati bila SIMOTANDI_VIA_RELAY=true: IP server diblokir Cloudflare Kementan,
+  // data dikirim relay ber-IP Indonesia ke POST /api/simotandi-sync.
+  if (utcHours === 22 && utcMinutes >= 20 && utcMinutes <= 25 && process.env.SIMOTANDI_VIA_RELAY !== 'true') {
     if (state.simotandiJob.lastRunDate !== dateKey) {
       executeSimotandiSyncJob(dateKey).catch((e) =>
         console.error('[Scheduler] Unhandled error in executeSimotandiSyncJob:', e)

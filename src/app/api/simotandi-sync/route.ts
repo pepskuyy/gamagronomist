@@ -50,3 +50,41 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * POST /api/simotandi-sync — terima data dari relay (scripts/simotandi-relay.py).
+ * Body: { periode: number, periodsHtml: string, provinces: { [kdpr]: string } }
+ * Auth WAJIB: Authorization: Bearer <CRON_SECRET>. Tanpa CRON_SECRET, POST ditolak
+ * agar orang lain tidak bisa menulis data ke database.
+ */
+export async function POST(req: Request) {
+  const cronSecret = process.env.CRON_SECRET
+  if (!cronSecret || req.headers.get('authorization') !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+  }
+
+  let body: any
+  try {
+    body = await req.json()
+  } catch {
+    return NextResponse.json({ error: 'Body harus JSON' }, { status: 400 })
+  }
+  const periode = Number(body?.periode)
+  const provinces = body?.provinces
+  if (!Number.isInteger(periode) || typeof body?.periodsHtml !== 'string' || !provinces || typeof provinces !== 'object'
+    || Object.values(provinces).some((v) => typeof v !== 'string')) {
+    return NextResponse.json({ error: 'Format body tidak valid' }, { status: 400 })
+  }
+
+  try {
+    const result = await runSimotandiSync({
+      periode,
+      triggerType: 'OTOMATIS',
+      prefetched: { periodsHtml: body.periodsHtml, provinces },
+    })
+    revalidatePath('/dashboard')
+    return NextResponse.json(result)
+  } catch (err: any) {
+    console.error('[simotandi-sync relay] error:', err)
+    return NextResponse.json({ error: err.message ?? 'Unknown error' }, { status: 500 })
+  }
+}

@@ -13,6 +13,11 @@ export type SimotandiSyncOptions = {
   mode?: string | null
   periode?: number | null
   triggerType?: 'MANUAL' | 'OTOMATIS'
+  /**
+   * Respons SIMOTANDI yang sudah diambil relay (server Coolify di Singapura diblokir
+   * Cloudflare Kementan). provinces: kdpr → teks JSON endpoint data-tabular/data.
+   */
+  prefetched?: { periodsHtml?: string; provinces: Record<string, string> }
 }
 
 export type SimotandiSyncResult = {
@@ -32,7 +37,7 @@ export async function runSimotandiSync(
   options: SimotandiSyncOptions = {}
 ): Promise<SimotandiSyncResult> {
   const startTime = Date.now()
-  const { mode, periode: periodeParam, triggerType = 'MANUAL' } = options
+  const { mode, periode: periodeParam, triggerType = 'MANUAL', prefetched } = options
 
   const logId = await startSyncLog({
     dataType: 'Fase Padi (SIMOTANDI Kementan)',
@@ -41,7 +46,7 @@ export async function runSimotandiSync(
   })
 
   try {
-    const periods = await scrapePeriods()
+    const periods = await scrapePeriods(prefetched?.periodsHtml)
     if (periods.length === 0) {
       throw new Error('Daftar periode SIMOTANDI kosong')
     }
@@ -85,8 +90,8 @@ export async function runSimotandiSync(
         }
       }
     } else {
-      // Periode terbaru (opsi pertama pada <select> = paling baru)
-      target = periods.reduce((a, b) => (a.id > b.id ? a : b))
+      // Periode terbaru menurut kode (YYYYNN). ID tidak berurutan: id 120 = 202430 (Des 2024).
+      target = periods.reduce((a, b) => (a.kode > b.kode ? a : b))
     }
 
     // Upsert header periode
@@ -111,7 +116,9 @@ export async function runSimotandiSync(
     // Tarik & simpan data per provinsi
     let totalRows = 0
     for (const kdpr of SUPPORTED_PROVINCES) {
-      const rows = await fetchProvinceData(target.id, kdpr)
+      const pre = prefetched?.provinces[kdpr]
+      if (prefetched && pre === undefined) throw new Error(`Relay tidak mengirim data provinsi ${kdpr}`)
+      const rows = await fetchProvinceData(target.id, kdpr, pre)
 
       if (rows.length > 0) {
         await prisma.simotandiWilayah.deleteMany({ where: { periodeId: target.id, kdpr } })
@@ -121,7 +128,7 @@ export async function runSimotandiSync(
         totalRows += rows.length
       }
 
-      await simotandiSleep(1000)
+      if (!prefetched) await simotandiSleep(1000)
     }
 
     // Invalidasi cache data SIMOTANDI (/api/simotandi/*). Bila dipanggil dari

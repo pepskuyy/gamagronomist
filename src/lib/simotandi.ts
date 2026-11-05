@@ -153,10 +153,13 @@ export function parsePeriodeLabel(label: string): {
   return { kode, startDate, endDate }
 }
 
-/** Ambil daftar periode dari <select id="periode"> pada halaman data-tabular */
-export async function scrapePeriods(): Promise<SimotandiPeriodeInfo[]> {
+/**
+ * Ambil daftar periode dari <select id="periode"> pada halaman data-tabular.
+ * `prefetchedHtml`: halaman yang sudah diambil relay ber-IP Indonesia (lihat scripts/simotandi-relay.py).
+ */
+export async function scrapePeriods(prefetchedHtml?: string): Promise<SimotandiPeriodeInfo[]> {
   try {
-    const html = await politeText(`${SIMOTANDI_BASE}/data-tabular`)
+    const html = prefetchedHtml ?? await politeText(`${SIMOTANDI_BASE}/data-tabular`)
 
     const selectStart = html.indexOf('id="periode"')
     if (selectStart < 0) throw new Error('Elemen <select id="periode"> tidak ditemukan')
@@ -204,9 +207,9 @@ export async function fetchKabupatenList(kdpr: string): Promise<{ kode: string; 
  * Ambil seluruh baris (provinsi + kabupaten + kecamatan) untuk satu provinsi
  * pada satu periode.
  */
-export async function fetchProvinceData(periodeId: number, kdpr: string): Promise<SimotandiRow[]> {
+export async function fetchProvinceData(periodeId: number, kdpr: string, prefetchedText?: string): Promise<SimotandiRow[]> {
   const url = `${SIMOTANDI_BASE}/data-tabular/data?periode=${periodeId}&provinsi=${kdpr}`
-  const text = await politeText(url, { json: true })
+  const text = prefetchedText ?? await politeText(url, { json: true })
   const json = JSON.parse(text)
   const data: any[] = Array.isArray(json?.data) ? json.data : []
 
