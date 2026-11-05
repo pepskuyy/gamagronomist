@@ -221,11 +221,11 @@ export default function DemoplotImpactMapInner({
               <CircleMarker
                 key={`store-${st.customer_id}`}
                 center={[st.latitude, st.longitude]}
-                radius={isImpacted ? 9 : 6}
+                radius={isImpacted ? 6 : 4}
                 pathOptions={{
                   fillColor: isImpacted ? '#059669' : '#2563eb',
                   color: isImpacted ? '#064e3b' : '#ffffff',
-                  weight: isImpacted ? 2.5 : 1.5,
+                  weight: isImpacted ? 2 : 1,
                   fillOpacity: 0.95,
                 }}
                 eventHandlers={{
@@ -255,14 +255,14 @@ export default function DemoplotImpactMapInner({
 
           let fillColor = isImpacted ? '#10b981' : '#8b5cf6'
           let borderColor = isImpacted ? '#059669' : '#7c3aed'
-          let radius = 7
+          let radius = 5
           let weight = 1.5
 
           if (isSelected) {
             fillColor = '#ef4444'
             borderColor = '#b91c1c'
-            radius = 11
-            weight = 3
+            radius = 8
+            weight = 2.5
           }
 
           return (

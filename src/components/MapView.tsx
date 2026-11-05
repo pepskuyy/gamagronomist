@@ -183,7 +183,7 @@ export default function MapView({
           <CircleMarker
             key={p.id}
             center={[p.lat, p.lng]}
-            radius={p.type === 'full' ? 10 : p.type === 'mini' ? 8 : 6}
+            radius={p.type === 'full' ? 6 : p.type === 'mini' ? 5 : 4}
             pathOptions={{
               fillColor: cfg.color,
               color: '#fff',
@@ -253,12 +253,12 @@ export default function MapView({
           <CircleMarker
             key={`store-${s.id}`}
             center={[s.lat, s.lng]}
-            radius={9}
+            radius={5}
             pathOptions={{
               fillColor: '#7c3aed',
               color: '#fff',
-              weight: 2,
-              fillOpacity: 0.9,
+              weight: 1.5,
+              fillOpacity: 0.85,
             }}
             eventHandlers={{ click: (e) => e.target.openPopup() }}
           >

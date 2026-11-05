@@ -337,7 +337,7 @@ export default function OpportunityMapInner({
               {/* Titik Pusat Rekomendasi (Centroid Marker) */}
               <CircleMarker
                 center={[zone.centroid.latitude, zone.centroid.longitude]}
-                radius={isSelected ? 14 : 10}
+                radius={isSelected ? 10 : 7}
                 pathOptions={{
                   color: '#ffffff',
                   weight: 2,
@@ -436,10 +436,10 @@ export default function OpportunityMapInner({
                 <CircleMarker
                   key={store.id}
                   center={[store.latitude, store.longitude]}
-                  radius={hasStock ? 9 : 6}
+                  radius={hasStock ? 6 : 4}
                   pathOptions={{
                     color: hasStock ? '#7c2d12' : '#1d4ed8',
-                    weight: hasStock ? 2.5 : 1.5,
+                    weight: hasStock ? 2 : 1,
                     fillColor: hasStock ? '#ea580c' : '#3b82f6',
                     fillOpacity: 0.95,
                   }}
@@ -482,7 +482,7 @@ export default function OpportunityMapInner({
                   selectedZone.centroid.latitude,
                   selectedZone.centroid.longitude,
                 ]}
-                radius={7}
+                radius={5}
                 pathOptions={{
                   color: '#5b21b6',
                   weight: 2,
