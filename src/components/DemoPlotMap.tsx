@@ -84,7 +84,7 @@ let storesFetchedAt = 0
 function loadStores(): Promise<any[]> {
   if (!storesPromise || Date.now() - storesFetchedAt > STORES_TTL_MS) {
     storesFetchedAt = Date.now()
-    storesPromise = fetch('/api/master/stores')
+    storesPromise = fetch('/api/master/stores?gps=sales')
       .then(r => r.json())
       .catch(err => { storesPromise = null; throw err })
   }
