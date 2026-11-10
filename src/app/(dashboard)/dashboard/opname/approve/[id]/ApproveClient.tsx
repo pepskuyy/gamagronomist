@@ -4,6 +4,9 @@ import { useState, useTransition } from 'react'
 import { useRouter } from 'next/navigation'
 import { approveStockOpname, rejectStockOpname } from '@/app/actions/opname-spv'
 
+// Opname lama menyimpan sisa pembulatan Float (84.20000000000005); tampilkan maks. 2 desimal
+const fmt = (n: number) => Number(n).toLocaleString('id-ID', { maximumFractionDigits: 2 })
+
 export default function ApproveClient({ opname }: { opname: any }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
@@ -81,14 +84,14 @@ export default function ApproveClient({ opname }: { opname: any }) {
                   <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono-stack)' }}>{d.product.code}</div>
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
-                  <span className="num">{d.systemStock}</span><span className="unit">{d.product.unitGramasi || d.product.unit}</span>
+                  <span className="num">{fmt(d.systemStock)}</span><span className="unit">{d.product.unitGramasi || d.product.unit}</span>
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', fontWeight: 600 }}>
-                  <span className="num">{d.physicalStock}</span><span className="unit">{d.product.unitGramasi || d.product.unit}</span>
+                  <span className="num">{fmt(d.physicalStock)}</span><span className="unit">{d.product.unitGramasi || d.product.unit}</span>
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                   <span style={{ fontWeight: 600, color: d.variance > 0 ? 'var(--success)' : d.variance < 0 ? 'var(--danger)' : 'var(--text-muted)', whiteSpace: 'nowrap' }}>
-                    <span className="num">{d.variance > 0 ? '+' : ''}{d.variance}</span><span className="unit">{d.product.unitGramasi || d.product.unit}</span>
+                    <span className="num">{d.variance > 0 ? '+' : ''}{fmt(d.variance)}</span><span className="unit">{d.product.unitGramasi || d.product.unit}</span>
                   </span>
                 </td>
                 <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', color: d.variance === 0 ? 'var(--text-muted)' : 'inherit' }}>

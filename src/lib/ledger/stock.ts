@@ -26,7 +26,8 @@ export async function getStockBalance(userId: string, opts: { includeNegative?: 
   return ledgers
     .map(l => ({
       product: productMap.get(l.productId)!,
-      quantity: l._sum.quantity || 0
+      // Ledger berupa Float: jumlah seperti 200 - 115.8 menghasilkan 84.20000000000005
+      quantity: Math.round((l._sum.quantity || 0) * 1e4) / 1e4
     }))
     .filter(item => item.product && (
       opts.includeNegative

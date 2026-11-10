@@ -44,7 +44,7 @@ export async function submitStockOpname(formData: FormData) {
       const systemStockObj = currentStocks.find(s => s.product.id === count.productId)
       const systemStock    = systemStockObj ? systemStockObj.quantity : 0
       const physicalStock  = Number(count.physicalQty)
-      const variance       = physicalStock - systemStock
+      const variance       = Math.round((physicalStock - systemStock) * 1e4) / 1e4
 
       // Jika ada selisih tapi tidak ada keterangan, tolak sebelum masuk DB
       if (variance !== 0 && (!count.notes || count.notes.trim() === '')) {
