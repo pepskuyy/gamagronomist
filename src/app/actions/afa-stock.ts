@@ -641,7 +641,8 @@ export async function approveFamStockRequest(requestId: string) {
 // ─── STEP 3: WH Manager approves → APPROVED_WHM + INVOICE ──────────
 export async function approveWhmStockRequest(
   requestId: string,
-  qtyApprovedMap?: Record<string, number>   // detailId → qtyApproved (WHM input)
+  qtyApprovedMap?: Record<string, number>,  // detailId → qtyApproved (WHM input)
+  warehouseMap?: Record<string, string>,    // detailId → gudang Accurate (revisi WHM)
 ) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
@@ -673,6 +674,13 @@ export async function approveWhmStockRequest(
           if (approved !== undefined && approved >= 0) {
             await tx.requestDetail.update({ where: { id: d.id }, data: { qtyApproved: approved } })
           }
+        }
+      }
+      // Revisi gudang sumber: dipakai saat faktur Accurate dibuat di tahap penerimaan SPV
+      for (const d of req.details) {
+        const wh = warehouseMap?.[d.id]?.trim()
+        if (wh && wh.length <= 100 && wh !== d.accurateWarehouse) {
+          await tx.requestDetail.update({ where: { id: d.id }, data: { accurateWarehouse: wh } })
         }
       }
       await transitionRequest(tx, requestId, 'APPROVED_FAM', { status: 'APPROVED_WHM' })
@@ -1100,12 +1108,13 @@ export async function resetRequestToSubmitted(requestId: string) {
   try {
     const req = await prisma.request.findUnique({
       where: { id: requestId },
-      include: { details: { select: { id: true } } }
+      include: { details: { select: { id: true, qtyRequested: true } } }
     })
 
     if (!req) return { error: 'Pengajuan tidak ditemukan.' }
-    if (!['APPROVED_SPV', 'APPROVED', 'SUBMITTED'].includes(req.status)) {
-      return { error: `Status '${req.status}' tidak dapat di-reset. Hanya status APPROVED_SPV atau APPROVED yang bisa di-rollback ke SPV.` }
+    // APPROVED_FAM/APPROVED_WHM aman di-reset: stok AFA & faktur Accurate baru dibuat saat SPV menerima
+    if (!['APPROVED_SPV', 'APPROVED_FAM', 'APPROVED_WHM', 'APPROVED', 'SUBMITTED'].includes(req.status)) {
+      return { error: `Status '${req.status}' tidak dapat di-reset.` }
     }
     if (req.status === 'SUBMITTED') {
       return { error: 'Pengajuan sudah dalam status SUBMITTED.' }
@@ -1179,7 +1188,13 @@ export async function resetRequestToSubmitted(requestId: string) {
           error: 'Tidak dapat mereset — stok untuk pengajuan ini sudah tercatat. Gunakan penyesuaian stok bila perlu koreksi.',
         }
       }
-      await transitionRequest(prisma, requestId, req.status, { status: 'SUBMITTED', afaId: null, rejectReason: null })
+      await prisma.$transaction(async (tx) => {
+        await transitionRequest(tx, requestId, req.status, { status: 'SUBMITTED', afaId: null, rejectReason: null })
+        // Jumlah yang sempat diubah WHM dikembalikan ke jumlah pengajuan agar tidak terbawa ke putaran berikutnya
+        for (const d of req.details) {
+          await tx.requestDetail.update({ where: { id: d.id }, data: { qtyApproved: d.qtyRequested } })
+        }
+      })
     }
 
     revalidatePath('/dashboard/stock')

@@ -81,6 +81,21 @@ export default function AfaStockRequestTable({
 
   // WHM modal state — show qty confirmation modal before approving
   const [whmModalId, setWhmModalId] = useState<string | null>(null)
+  // WHM: revisi gudang Accurate per detail (detailId → nama gudang) + opsi gudang per produk
+  const [whmWarehouse, setWhmWarehouse] = useState<Record<string, string>>({})
+  const [warehouseOptions, setWarehouseOptions] = useState<Record<string, { name: string; qty: number }[]>>({})
+
+  useEffect(() => {
+    const req = requests.find(r => r.id === whmModalId)
+    if (!req) return
+    for (const d of req.details) {
+      if (warehouseOptions[d.product.id]) continue
+      fetch(`/api/accurate-warehouses?productId=${d.product.id}`)
+        .then(r => r.json())
+        .then(data => setWarehouseOptions(prev => ({ ...prev, [d.product.id]: data.warehouses ?? [] })))
+        .catch(() => setWarehouseOptions(prev => ({ ...prev, [d.product.id]: [] })))
+    }
+  }, [whmModalId]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // SPV Sample partial-approval modal state
   const [sampleModalId, setSampleModalId] = useState<string | null>(null)
@@ -263,7 +278,8 @@ export default function AfaStockRequestTable({
     setWhmModalId(null)
     setActionId(requestId)
     startTransition(async () => {
-      const res = await approveWhmStockRequest(requestId, qtyApprovedMap)
+      const warehouseMap = Object.fromEntries(req.details.filter(d => whmWarehouse[d.id]).map(d => [d.id, whmWarehouse[d.id]]))
+      const res = await approveWhmStockRequest(requestId, qtyApprovedMap, warehouseMap)
       if (res?.error) {
         alert(res.error)
       } else {
@@ -581,7 +597,7 @@ export default function AfaStockRequestTable({
                             </button>
                           )}
 
-                          {role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED'].includes(req.status) && !(req as any).accurateInvoiceNo && (
+                          {role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED_FAM', 'APPROVED_WHM', 'APPROVED'].includes(req.status) && !(req as any).accurateInvoiceNo && (
                             <button
                               onClick={(e) => { e.stopPropagation(); handleReset(req.id) }}
                               className="btn btn-outline"
@@ -776,7 +792,7 @@ export default function AfaStockRequestTable({
                 Konfirmasi Kuantitas Final — WH Manager
               </h3>
               <p style={{ margin: '0 0 1.25rem', fontSize: '0.875rem', color: 'var(--text-muted)' }}>
-                Periksa ketersediaan stok Accurate dan tentukan kuantitas final yang akan diberikan ke AFA <strong style={{ fontWeight: 500, color: 'var(--text-main)' }}>{req.fo?.name}</strong>.
+                Periksa ketersediaan stok Accurate, gudang sumber, dan tentukan kuantitas final yang akan diberikan ke AFA <strong style={{ fontWeight: 500, color: 'var(--text-main)' }}>{req.fo?.name}</strong>.
                 Invoice akan dibuat otomatis berdasarkan kuantitas ini.
               </p>
 
@@ -801,7 +817,27 @@ export default function AfaStockRequestTable({
                     const hasConflict = avail && avail.availableToSell !== null && avail.availableToSell < d.qtyRequested
                     return (
                       <tr key={d.id} style={{ borderTop: idx > 0 ? '1px solid var(--border-light)' : undefined }}>
-                        <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>{d.product.name}<UnitHoldBadge product={d.product} /></td>
+                        <td style={{ padding: '0.5rem 0.75rem', fontWeight: 500 }}>
+                          {d.product.name}<UnitHoldBadge product={d.product} />
+                          {req.warehouseSource !== 'SAMPLE' && (() => {
+                            const current = whmWarehouse[d.id] ?? d.accurateWarehouse ?? 'Gudang Baik'
+                            const opts = warehouseOptions[d.product.id] ?? []
+                            const names = opts.some(o => o.name === current) ? opts : [{ name: current, qty: NaN }, ...opts]
+                            return (
+                              <select
+                                aria-label="Gudang sumber"
+                                value={current}
+                                onChange={e => setWhmWarehouse(prev => ({ ...prev, [d.id]: e.target.value }))}
+                                className="form-control"
+                                style={{ marginTop: '0.25rem', padding: '0.25rem 0.5rem', fontSize: '0.78rem', fontWeight: 400, maxWidth: 240 }}
+                              >
+                                {names.map(o => (
+                                  <option key={o.name} value={o.name}>{o.name}{Number.isFinite(o.qty) ? ` (stok ${o.qty})` : ''}</option>
+                                ))}
+                              </select>
+                            )
+                          })()}
+                        </td>
                         <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right', whiteSpace: 'nowrap' }}><span className="num">{d.qtyRequested}</span><span className="unit">{d.product.unit}</span></td>
                         <td style={{ padding: '0.5rem 0.75rem', textAlign: 'right' }}>
                           {isLoadingAvail ? <span style={{ color: 'var(--text-muted)', display: 'inline-flex' }}><Clock size={14} strokeWidth={1.75} /></span>
