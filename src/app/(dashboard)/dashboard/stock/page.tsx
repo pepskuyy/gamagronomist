@@ -297,10 +297,10 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       )}
 
       {/* 3. PENGAJUAN STOK AFA / BD */}
-      {['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role) && (
+      {isAfaStockViewer && (
         <div style={{ marginBottom: '3rem' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Pengajuan Stok {['AFA', 'PLANTATION', 'BD'].includes(session.role) ? 'Saya' : session.role === 'SPV' ? 'dari Tim' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
+            <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Pengajuan Stok {['AFA', 'PLANTATION', 'BD'].includes(session.role) ? 'Saya' : session.role === 'SPV' ? 'dari Tim' : session.role === 'ADMIN' ? 'AFA' : `(${session.role === 'FAM' ? 'FA Manager' : 'WH Manager'})`}</h2>
           </div>
           <TableFilter prefix="a" showDateRange={true} />
 
