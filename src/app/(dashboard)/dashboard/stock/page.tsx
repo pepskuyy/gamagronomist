@@ -394,7 +394,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
                               <button className="btn btn-primary" style={{ padding: '0.375rem 0.75rem', fontSize: '0.8rem' }}><Play size={14} strokeWidth={1.75} className="icon-inline" />Lanjutkan Sesi</button>
                             </Link>
                           )}
-                          {session.role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED'].includes(req.status) && !req.accurateInvoiceNo && (
+                          {session.role === 'ADMIN' && ['APPROVED_SPV', 'APPROVED_FAM', 'APPROVED_WHM', 'APPROVED'].includes(req.status) && !req.accurateInvoiceNo && (
                             <AdminResetButton requestId={req.id} />
                           )}
                           <Link href={`/dashboard/demoplot/detail/${req.id}`}>
