@@ -36,7 +36,7 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
 
   // Build query conditions first (needed before parallel fetch)
   const isTeamViewer = ['ADMIN', 'SPV', 'AFA', 'PLANTATION'].includes(session.role)
-  const isAfaStockViewer = ['SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role)
+  const isAfaStockViewer = ['ADMIN', 'SPV', 'AFA', 'PLANTATION', 'FAM', 'WHM', 'BD'].includes(session.role)
 
   const userWhere: any = {
     role: { in: ['AFA', 'PLANTATION', 'FO', 'INTERN'] },
@@ -64,7 +64,8 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
     if (end_a) afaStockWhere.createdAt.lte = end_a
   }
 
-  let foStockWhere: any = { OR: [{ commodity: '-' }, { farmerId: null }] }
+  // Restock AFA (jumlah dalam kemasan) punya tabel sendiri; di tabel FO angkanya terbaca sebagai ml/gr
+  let foStockWhere: any = { commodity: { not: 'AFA_STOCK_IN' }, OR: [{ commodity: '-' }, { farmerId: null }] }
   if (['FO', 'INTERN'].includes(session.role)) {
     foStockWhere.foId = session.userId
   } else if (['AFA', 'PLANTATION'].includes(session.role)) {
