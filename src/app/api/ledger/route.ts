@@ -19,9 +19,15 @@ export async function GET(request: Request) {
     const product = searchParams.get('product') || ''
     const targetUserId = searchParams.get('userId') || ''
 
-    let effectiveUserId = session.userId
+    let effectiveUserId: string | null = session.userId
 
-    if (targetUserId && targetUserId !== session.userId) {
+    // Audit: ADMIN/SPV bisa melihat ledger semua akun sekaligus (userId=ALL)
+    if (targetUserId === 'ALL') {
+      if (session.role !== 'ADMIN' && session.role !== 'SPV') {
+        return NextResponse.json({ error: 'Unauthorized to view all ledgers' }, { status: 403 })
+      }
+      effectiveUserId = null
+    } else if (targetUserId && targetUserId !== session.userId) {
       if (['AFA', 'PLANTATION'].includes(session.role)) {
         // Verify target is an FO in the same area
         const targetUser = await prisma.user.findUnique({ where: { id: targetUserId } })
@@ -36,7 +42,7 @@ export async function GET(request: Request) {
       }
     }
 
-    const where: any = { userId: effectiveUserId }
+    const where: any = effectiveUserId ? { userId: effectiveUserId } : {}
     if (type)    where.transactionType = type
     if (product) where.productId = product
     if (from || to) {
@@ -49,7 +55,8 @@ export async function GET(request: Request) {
     const ledgers = await prisma.ledger.findMany({
       where,
       include: {
-        product: { select: { id: true, name: true, unit: true, unitGramasi: true } }
+        product: { select: { id: true, name: true, unit: true, unitGramasi: true } },
+        user: { select: { name: true, role: true } },
       },
       orderBy: { createdAt: 'desc' },
       take: 1000,
@@ -62,22 +69,24 @@ export async function GET(request: Request) {
     // then compute running balance — this gives us stockBefore and stockAfter per transaction.
 
     const productIds = [...new Set(ledgers.map(l => l.productId))]
+    const userIds = [...new Set(ledgers.map(l => l.userId))]
 
-    // Fetch full ledger history per product (for running balance calculation)
+    // Fetch full ledger history per user+product (for running balance calculation)
     const allByProduct = await prisma.ledger.findMany({
-      where: { userId: effectiveUserId, productId: { in: productIds } },
-      select: { id: true, productId: true, quantity: true, createdAt: true },
+      where: { userId: { in: userIds }, productId: { in: productIds } },
+      select: { id: true, userId: true, productId: true, quantity: true, createdAt: true },
       orderBy: { createdAt: 'asc' },
     })
 
     // Build running balance map: ledgerId → { stockBefore, stockAfter }
     const balanceMap = new Map<string, { stockBefore: number; stockAfter: number }>()
 
-    // Group by productId
+    // Group by user + product (saldo berjalan per akun)
     const grouped: Record<string, typeof allByProduct> = {}
     for (const row of allByProduct) {
-      if (!grouped[row.productId]) grouped[row.productId] = []
-      grouped[row.productId].push(row)
+      const key = `${row.userId}|${row.productId}`
+      if (!grouped[key]) grouped[key] = []
+      grouped[key].push(row)
     }
 
     for (const rows of Object.values(grouped)) {

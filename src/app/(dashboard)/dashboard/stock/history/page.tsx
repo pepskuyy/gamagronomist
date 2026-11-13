@@ -14,6 +14,7 @@ type LedgerItem = {
   stockBefore: number | null
   stockAfter: number | null
   product: { id: string; name: string; unit: string; unitGramasi?: string | null }
+  user?: { name: string; role: string }
 }
 
 const TRANSACTION_TYPES = [
@@ -104,6 +105,10 @@ export default function LedgerHistoryPage() {
       .catch(console.error)
   }, [])
 
+  // Daftar akun ADMIN/SPV berisi semua user (termasuk ADMIN/SPV); daftar AFA hanya FO
+  const canSeeAll = subordinates.some(u => u.role === 'ADMIN' || u.role === 'SPV')
+  const showAccount = filterUserId === 'ALL'
+
   // Build unique product list from ledgers for filter dropdown
   useEffect(() => {
     const seen = new Set<string>()
@@ -135,6 +140,7 @@ export default function LedgerHistoryPage() {
       const unit = item.product.unitGramasi || item.product.unit
       return {
         'Tanggal'          : new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(item.createdAt)),
+        ...(showAccount ? { 'Akun': item.user ? `${item.user.name} (${item.user.role})` : '-' } : {}),
         'Jenis Transaksi'  : TRANSACTION_TYPES.find(t => t.value === item.transactionType)?.label || item.transactionType,
         'Produk'           : item.product.name,
         'Stok Awal'        : item.stockBefore ?? '-',
@@ -202,6 +208,7 @@ export default function LedgerHistoryPage() {
               <label style={{ fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', display: 'block', marginBottom: '0.25rem' }}>Akun</label>
               <select className="form-control" value={filterUserId} onChange={e => setFilterUserId(e.target.value)}>
                 <option value="">Stok Sendiri</option>
+                {canSeeAll && <option value="ALL">Semua akun (audit)</option>}
                 {subordinates.map(u => <option key={u.id} value={u.id}>{u.name} ({u.role})</option>)}
               </select>
             </div>
@@ -308,6 +315,9 @@ export default function LedgerHistoryPage() {
                       </td>
                       <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }}>
                         {item.product.name}
+                        {showAccount && item.user && (
+                          <div style={{ fontSize: '0.75rem', fontWeight: 400, color: 'var(--text-muted)' }}>{item.user.name} · {item.user.role}</div>
+                        )}
                       </td>
                       {/* Stok Awal */}
                       <td style={balanceTdStyle}>
