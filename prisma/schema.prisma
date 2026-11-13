@@ -45,6 +45,8 @@ model User {
   requestsAsFo      Request[]  @relation("FoRequests")
   requestsAsAfa     Request[]  @relation("AfaApprovals")
   stockOpnames      StockOpname[]
+  transfersSent     StockTransfer[] @relation("TransferFrom")
+  transfersReceived StockTransfer[] @relation("TransferTo")
 
   // Laporan Aktivitas
   customerBehaviors CustomerBehavior[]
@@ -168,6 +170,7 @@ model Product {
   opnameDetails     OpnameDetail[]
   spotDemplotDetails SpotDemplotDetail[]
   contentVideoProducts ContentVideoProduct[]
+  stockTransferItems StockTransferItem[]
 }
 
 model Farmer {
@@ -699,4 +702,37 @@ model DevelopmentProduct {
 
   @@map("development_products")
   @@index([isActive])
+}
+
+// Transfer stok antar AFA: diajukan pengirim → disetujui SPV (jumlah bisa dikurangi)
+// → stok berpindah saat penerima konfirmasi terima (ledger TRANSFER_ACCOUNT_OUT/IN).
+model StockTransfer {
+  id           String    @id @default(cuid())
+  fromUserId   String
+  fromUser     User      @relation("TransferFrom", fields: [fromUserId], references: [id])
+  toUserId     String
+  toUser       User      @relation("TransferTo", fields: [toUserId], references: [id])
+  status       String    @default("SUBMITTED") // SUBMITTED | APPROVED | REJECTED | RECEIVED | CANCELLED
+  notes        String?
+  approvedById String?
+  rejectReason String?
+  createdAt    DateTime  @default(now())
+  approvedAt   DateTime?
+  receivedAt   DateTime?
+  items        StockTransferItem[]
+
+  @@index([fromUserId, status])
+  @@index([toUserId, status])
+}
+
+model StockTransferItem {
+  id           String        @id @default(cuid())
+  transferId   String
+  transfer     StockTransfer @relation(fields: [transferId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product       @relation(fields: [productId], references: [id])
+  qtyRequested Float         // satuan ledger (ml/gr bila bergramasi, selain itu kemasan)
+  qtyApproved  Float?
+
+  @@index([transferId])
 }

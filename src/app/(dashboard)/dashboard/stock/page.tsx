@@ -8,6 +8,7 @@ import TeamStockTable from '@/components/TeamStockTable'
 import TableFilter from '@/components/TableFilter'
 import TablePager from '@/components/TablePager'
 import { AdminResetButton } from '@/components/AdminResetButton'
+import StockTransferPanel from '@/components/StockTransferPanel'
 import { Plus, Package, History, Play, ArrowRight } from 'lucide-react'
 
 
@@ -152,6 +153,33 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
         orderBy: [{ role: 'asc' }, { name: 'asc' }],
       })
     : []
+
+  // ── Transfer stok antar AFA (pengajuan → approval SPV → konfirmasi penerima) ──
+  const isTransferViewer = ['ADMIN', 'SPV', 'AFA', 'PLANTATION'].includes(session.role)
+  const transferWhere: any = session.role === 'ADMIN' ? {}
+    : session.role === 'SPV' ? (session.areaId ? { fromUser: { areaId: session.areaId } } : {})
+    : { OR: [{ fromUserId: session.userId }, { toUserId: session.userId }] }
+  const unitSelect = { name: true, unit: true, unitGramasi: true, gramasiPerUnit: true }
+  const [rawTransfers, transferReceivers] = isTransferViewer
+    ? await Promise.all([
+        prisma.stockTransfer.findMany({
+          where: transferWhere,
+          include: {
+            fromUser: { select: { id: true, name: true } },
+            toUser: { select: { id: true, name: true } },
+            items: { select: { id: true, qtyRequested: true, qtyApproved: true, product: { select: unitSelect } } },
+          },
+          orderBy: { createdAt: 'desc' },
+          take: 50,
+        }),
+        prisma.user.findMany({
+          where: { isActive: true, role: { in: ['AFA', 'PLANTATION'] }, id: { not: session.userId } },
+          select: { id: true, name: true },
+          orderBy: { name: 'asc' },
+        }),
+      ])
+    : [[], []]
+  const stockTransfers = rawTransfers.map(t => ({ ...t, createdAt: t.createdAt.toISOString() }))
 
   // ── Stok tim: jalankan setelah list user diketahui (tetap paralel antar user) ──
   const stocksMap: Record<string, { product: any, quantity: number }[]> = {}
@@ -315,6 +343,17 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
             </>
           )}
         </div>
+      )}
+
+      {/* 3b. TRANSFER STOK ANTAR AFA */}
+      {isTransferViewer && (
+        <StockTransferPanel
+          role={session.role}
+          meId={session.userId}
+          transfers={stockTransfers}
+          targets={transferReceivers}
+          balances={myStocks.map(s => ({ productId: s.product.id, quantity: s.quantity, product: s.product }))}
+        />
       )}
 
       {/* 4. PERMINTAAN STOK FO (hidden for FAM/WHM) */}
