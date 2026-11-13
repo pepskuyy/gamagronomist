@@ -88,7 +88,7 @@ export default function NewSpotDemplotPage() {
       reloadStock()
       setLoading(false)
     } else {
-      router.push('/dashboard/reports')
+      router.push('/dashboard/reports?tab=spot')
     }
   }
 
@@ -139,7 +139,7 @@ export default function NewSpotDemplotPage() {
           <Link href="/dashboard/offline-queue" className="btn btn-outline">
             Lihat Antrian ({'>'}0)
           </Link>
-          <Link href="/dashboard/reports" className="btn btn-primary">
+          <Link href="/dashboard/reports?tab=spot" className="btn btn-primary">
             Kembali ke Laporan
           </Link>
         </div>
@@ -150,7 +150,7 @@ export default function NewSpotDemplotPage() {
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/reports" style={{ textDecoration: 'none', color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=spot" style={{ textDecoration: 'none', color: 'var(--text-muted)' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Spot Demplot</h2>
       </div>
 

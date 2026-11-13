@@ -17,7 +17,7 @@ export default async function VisitCompanyDetail({ params }: { params: { id: str
   return (
     <div className="form-container">
       <div className="back-header">
-        <Link href="/dashboard/reports" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=comp" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Detail Visit Company</h2>
       </div>
 

@@ -31,7 +31,7 @@ export default function NewFarmerGathering() {
        setError(res.error)
        setLoading(false)
     } else {
-       router.push('/dashboard/reports')
+       router.push('/dashboard/reports?tab=gather')
     }
   }
 

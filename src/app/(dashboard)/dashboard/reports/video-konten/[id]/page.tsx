@@ -28,7 +28,7 @@ export default async function VideoKontenDetailPage({ params }: { params: Promis
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/reports" style={{ textDecoration: 'none', color: 'var(--text-muted)' }}>← Kembali ke Laporan</Link>
+        <Link href="/dashboard/reports?tab=video" style={{ textDecoration: 'none', color: 'var(--text-muted)' }}>← Kembali ke Laporan</Link>
         <h2 style={{ margin: 0 }}>Detail Laporan Video Konten</h2>
       </div>
 

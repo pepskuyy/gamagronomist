@@ -16,7 +16,7 @@ export default async function FarmerGatheringDetail({ params }: { params: { id: 
   return (
     <div className="form-container">
       <div className="back-header">
-        <Link href="/dashboard/reports" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=gather" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Detail Farmer Gathering</h2>
       </div>
 

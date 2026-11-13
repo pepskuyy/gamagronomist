@@ -49,7 +49,7 @@ export default async function SpotDemplotDetailPage({ params }: { params: Promis
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/reports" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=spot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <h2 style={{ margin: 0 }}>Detail Spot Demplot</h2>
           {isAdmin && (

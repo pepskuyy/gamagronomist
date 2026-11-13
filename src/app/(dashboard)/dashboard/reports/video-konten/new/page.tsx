@@ -55,14 +55,14 @@ export default function NewVideoKontenPage() {
       setError(res.error)
       setLoading(false)
     } else {
-      router.push('/dashboard/reports')
+      router.push('/dashboard/reports?tab=video')
     }
   }
 
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/reports" style={{ textDecoration: 'none', color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=video" style={{ textDecoration: 'none', color: 'var(--text-muted)' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Laporan Video Konten</h2>
       </div>
 

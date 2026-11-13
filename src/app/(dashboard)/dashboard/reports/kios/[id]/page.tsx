@@ -18,7 +18,7 @@ export default async function VisitKiosDetail({ params }: { params: { id: string
   return (
     <div className="form-container">
       <div className="back-header">
-        <Link href="/dashboard/reports" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=kios" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Detail Visit Kios</h2>
       </div>
 

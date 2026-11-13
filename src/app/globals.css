@@ -217,6 +217,7 @@ p  { color: var(--text-muted); line-height: 1.6; }
 
 .main-content {
   flex: 1;
+  min-width: 0; /* tabel lebar scroll di dalam .table-responsive, bukan melebarkan halaman */
   display: flex;
   flex-direction: column;
   overflow-x: clip;

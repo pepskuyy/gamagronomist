@@ -5,7 +5,7 @@ import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
 import ExportExcelButton from '@/components/ExportExcelButton'
 import ExportPhotosButton from '@/components/ExportPhotosButton'
-import { Search, X, Plus, Play } from 'lucide-react'
+import { Search, X, Plus, Play, Users, Leaf, Sprout, Store, UsersRound, Building2, Video } from 'lucide-react'
 
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -112,6 +112,14 @@ function TableFilter({
   )
 }
 
+function AddButton({ href, label }: { href: string; label: string }) {
+  return (
+    <Link href={href} className="btn btn-primary" style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}>
+      <Plus size={16} strokeWidth={1.75} className="icon-inline" />{label}
+    </Link>
+  )
+}
+
 // ──────────────────────────────────────────────────────────────────────────────
 // Page
 // ──────────────────────────────────────────────────────────────────────────────
@@ -146,6 +154,18 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   const allParams = new URLSearchParams(
     Object.fromEntries(Object.entries(rp).filter(([, v]) => v !== undefined)) as Record<string, string>
   )
+
+  // ── Tabs: satu tabel per tab, hanya tab aktif yang di-query ────────────────
+  const TABS = [
+    { key: 'cb',     label: 'Customer Behavior', icon: Users },
+    { key: 'spot',   label: 'Spot Demplot',      icon: Leaf },
+    { key: 'dp',     label: 'Demo Plot',         icon: Sprout },
+    { key: 'kios',   label: 'Visit Kios',        icon: Store },
+    { key: 'gather', label: 'Gathering',         icon: UsersRound },
+    { key: 'comp',   label: 'Visit Company',     icon: Building2 },
+    { key: 'video',  label: 'Video Konten',      icon: Video },
+  ]
+  const tab = TABS.some(t => t.key === rp.tab) ? (rp.tab as string) : 'cb'
 
   // ── User scope ─────────────────────────────────────────────────────────────
   let userIds: string[] | null = null // null = no restriction (ADMIN/SPV sees all)
@@ -188,42 +208,42 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
 
   // ── Fetch all tables ────────────────────────────────────────────────────────
   const [cbRows, dpRows, kiosRows, gatherRows, compRows, spotRows, videoRows] = await Promise.all([
-    prisma.customerBehavior.findMany({
+    tab === 'cb' ? prisma.customerBehavior.findMany({
       where: activityWhere('farmerName', cbQ, cbStart, cbEnd),
       include: { user: true }, orderBy: { createdAt: 'desc' },
       skip: (pcb - 1) * take, take: take + 1,
-    }),
-    prisma.request.findMany({
+    }) : [],
+    tab === 'dp' ? prisma.request.findMany({
       where: dpWhere(dpQ, dpStart, dpEnd),
       include: { fo: true, afa: true, farmer: true, details: { include: { product: true } }, demoPlots: { select: { id: true, isFinalSession: true } } },
       orderBy: { createdAt: 'desc' },
       skip: (pdp - 1) * take, take: take + 1,
-    }),
-    prisma.visitKios.findMany({
+    }) : [],
+    tab === 'kios' ? prisma.visitKios.findMany({
       where: activityWhere('kiosName', kiosQ, kiosStart, kiosEnd),
       include: { user: true }, orderBy: { createdAt: 'desc' },
       skip: (pkios - 1) * take, take: take + 1,
-    }),
-    prisma.farmerGathering.findMany({
+    }) : [],
+    tab === 'gather' ? prisma.farmerGathering.findMany({
       where: activityWhere('leaderName', gatherQ, gatherStart, gatherEnd),
       include: { user: true }, orderBy: { createdAt: 'desc' },
       skip: (pgather - 1) * take, take: take + 1,
-    }),
-    prisma.visitCompany.findMany({
+    }) : [],
+    tab === 'comp' ? prisma.visitCompany.findMany({
       where: activityWhere('companyName', compQ, compStart, compEnd),
       include: { user: true }, orderBy: { createdAt: 'desc' },
       skip: (pcomp - 1) * take, take: take + 1,
-    }),
-    prisma.spotDemplot.findMany({
+    }) : [],
+    tab === 'spot' ? prisma.spotDemplot.findMany({
       where: activityWhere('districtDesa', spotQ, spotStart, spotEnd),
       include: { user: true }, orderBy: { createdAt: 'desc' },
       skip: (pspot - 1) * take, take: take + 1,
-    }),
-    prisma.contentVideo.findMany({
+    }) : [],
+    tab === 'video' ? prisma.contentVideo.findMany({
       where: activityWhere('theme', videoQ, videoStart, videoEnd),
       include: { user: true, products: { include: { product: true } } }, orderBy: { createdAt: 'desc' },
       skip: (pvideo - 1) * take, take: take + 1,
-    }),
+    }) : [],
   ])
 
   const cbHasMore     = cbRows.length     > take
@@ -259,308 +279,333 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
   return (
     <div>
       {/* ── Header ── */}
-      <div className="page-header" style={{ marginBottom: '2rem' }}>
+      <div className="page-header" style={{ marginBottom: '1rem' }}>
         <h2 style={{ fontSize: '1.5rem', margin: 0 }}>Laporan Aktivitas Harian</h2>
-        <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-          <Link href="/dashboard/reports/cb/new"           className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Customer Behavior</Link>
-          <Link href="/dashboard/reports/spot-demplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Spot Demplot</Link>
-          <Link href="/dashboard/reports/kios/new"         className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Visit Kios</Link>
-          <Link href="/dashboard/reports/gathering/new"    className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Gathering</Link>
-          <Link href="/dashboard/reports/company/new"      className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Visit Company</Link>
-          {['FO', 'INTERN', 'AFA'].includes(session.role) && (
-            <Link href="/dashboard/demoplot/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Rekam Demo Plot</Link>
-          )}
-          <Link href="/dashboard/reports/video-konten/new" className="btn btn-outline" style={{ fontSize: '0.85rem' }}><Plus size={16} strokeWidth={1.75} className="icon-inline" />Video Konten</Link>
-        </div>
       </div>
 
-      {/* ══ Customer Behavior ══════════════════════════════════════════════════ */}
-      <div style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>Customer Behavior</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ExportExcelButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
-            <ExportPhotosButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
-          </div>
-        </div>
-        <TableFilter prefix="cb" searchLabel="Cari Nama Petani" currentQ={cbQ} currentStart={cbStart} currentEnd={cbEnd} allParams={allParams} />
-        <CbReportTable
-          reports={cbSlice.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
-          isAdmin={session.role === 'ADMIN'}
-        />
-        {(cbHasMore || pcb > 1) && <TablePager paramName="pcb" currentPage={pcb} hasMore={cbHasMore} allParams={allParams} />}
+      <div role="tablist" aria-label="Jenis aktivitas" style={{ display: 'flex', overflowX: 'auto', overflowY: 'hidden', borderBottom: '1px solid var(--border)', marginBottom: '1.5rem' }}>
+        {TABS.map(t => {
+          const active = t.key === tab
+          const Icon = t.icon
+          return (
+            <Link
+              key={t.key}
+              href={buildHref(allParams, 'tab', t.key)}
+              role="tab"
+              aria-selected={active}
+              style={{
+                padding: '0.625rem 1rem', fontWeight: 500, fontSize: '0.875rem', whiteSpace: 'nowrap', textDecoration: 'none',
+                borderBottom: active ? '2px solid var(--primary)' : '2px solid transparent',
+                color: active ? 'var(--text-main)' : 'var(--text-muted)',
+                marginBottom: '-1px', transition: 'var(--transition)',
+                display: 'inline-flex', alignItems: 'center', gap: '0.5rem',
+              }}
+            ><Icon size={16} strokeWidth={1.75} />{t.label}</Link>
+          )
+        })}
       </div>
 
-      {/* ══ Spot Demplot ═══════════════════════════════════════════════════════ */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>Riwayat Spot Demplot</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ExportExcelButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
-            <ExportPhotosButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
+      {tab === 'cb' && (
+        <div style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0 }}>Customer Behavior</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <AddButton href="/dashboard/reports/cb/new" label="Customer Behavior" />
+              <ExportExcelButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
+              <ExportPhotosButton type="cb" search={cbQ} start={cbStart} end={cbEnd} />
+            </div>
           </div>
+          <TableFilter prefix="cb" searchLabel="Cari Nama Petani" currentQ={cbQ} currentStart={cbStart} currentEnd={cbEnd} allParams={allParams} />
+          <CbReportTable
+            reports={cbSlice.map(r => ({ ...r, createdAt: r.createdAt.toISOString() }))}
+            isAdmin={session.role === 'ADMIN'}
+          />
+          {(cbHasMore || pcb > 1) && <TablePager paramName="pcb" currentPage={pcb} hasMore={cbHasMore} allParams={allParams} />}
         </div>
-        <TableFilter prefix="spot" searchLabel="Cari Desa / Kecamatan" currentQ={spotQ} currentStart={spotStart} currentEnd={spotEnd} allParams={allParams} />
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Tanggal</th>
-                <th style={thStyle}>Pembuat</th>
-                <th style={thStyle}>Lokasi</th>
-                <th style={thStyle}>Hasil Pengamatan</th>
-                <th style={thStyle}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {spotSlice.map(rp => (
-                <tr key={rp.id}>
-                  <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
-                  <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
-                  <td style={tdStyle}>{rp.districtDesa || rp.districtKab || '-'}</td>
-                  <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.observationResult || '-'}</td>
-                  <td style={tdStyle}>
-                    <Link href={`/dashboard/reports/spot-demplot/${rp.id}`}>
-                      <button className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</button>
-                    </Link>
-                  </td>
+      )}
+
+      {tab === 'spot' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0 }}>Riwayat Spot Demplot</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <AddButton href="/dashboard/reports/spot-demplot/new" label="Spot Demplot" />
+              <ExportExcelButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
+              <ExportPhotosButton type="spot-demplot" search={spotQ} start={spotStart} end={spotEnd} />
+            </div>
+          </div>
+          <TableFilter prefix="spot" searchLabel="Cari Desa / Kecamatan" currentQ={spotQ} currentStart={spotStart} currentEnd={spotEnd} allParams={allParams} />
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Tanggal</th>
+                  <th style={thStyle}>Pembuat</th>
+                  <th style={thStyle}>Lokasi</th>
+                  <th style={thStyle}>Hasil Pengamatan</th>
+                  <th style={thStyle}>Aksi</th>
                 </tr>
-              ))}
-              {spotSlice.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {(spotHasMore || pspot > 1) && <TablePager paramName="pspot" currentPage={pspot} hasMore={spotHasMore} allParams={allParams} />}
-      </div>
-
-      {/* ══ Realisasi Demo Plot ════════════════════════════════════════════════ */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>Riwayat Realisasi Demo Plot</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ExportExcelButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
-            <ExportPhotosButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
-          </div>
-        </div>
-        <TableFilter prefix="dp" searchLabel="Cari Nama Petani" currentQ={dpQ} currentStart={dpStart} currentEnd={dpEnd} allParams={allParams} />
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>ID</th>
-                <th style={thStyle}>Tanggal</th>
-                {!['FO', 'INTERN'].includes(session.role) && <th style={thStyle}>Pelaksana</th>}
-                <th style={thStyle}>Petani / Area</th>
-                <th style={thStyle}>Komoditas</th>
-                <th style={thStyle}>Status</th>
-                <th style={thStyle}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {dpSlice.map((req: any) => (
-                <tr key={req.id}>
-                  <td style={{ ...tdStyle, fontSize: '0.8rem', fontFamily: 'monospace' }}>{req.id.slice(0, 8).toUpperCase()}</td>
-                  <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{formatDate(req.createdAt)}</td>
-                  {!['FO', 'INTERN'].includes(session.role) && <td style={{ ...tdStyle, color: 'var(--primary)', fontWeight: 500 }}>{req.fo?.name}</td>}
-                  <td style={tdStyle}>
-                    <div style={{ fontWeight: 600 }}>{req.farmer?.name}</div>
-                    <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{req.area}</div>
-                  </td>
-                  <td style={{ ...tdStyle, fontSize: '0.85rem' }}>{req.commodity}</td>
-                  <td style={tdStyle}>{getStatusBadge(req.status)}</td>
-                  <td style={tdStyle}>
-                    <div className="action-row">
-                      {req.status === 'APPROVED' && (req.foId === session.userId || req.afaId === session.userId) && (
-                        <Link href={`/dashboard/demoplot/continue/${req.id}`}>
-                          <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><Play size={14} strokeWidth={1.75} className="icon-inline" />Lanjutkan Sesi</button>
-                        </Link>
-                      )}
-                      <Link href={`/dashboard/demoplot/detail/${req.id}`}>
-                        <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
+              </thead>
+              <tbody>
+                {spotSlice.map(rp => (
+                  <tr key={rp.id}>
+                    <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
+                    <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
+                    <td style={tdStyle}>{rp.districtDesa || rp.districtKab || '-'}</td>
+                    <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.observationResult || '-'}</td>
+                    <td style={tdStyle}>
+                      <Link href={`/dashboard/reports/spot-demplot/${rp.id}`}>
+                        <button className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</button>
                       </Link>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-              {dpSlice.length === 0 && (
-                <tr><td colSpan={7} style={{ ...tdStyle, padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada realisasi demo plot.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {(dpHasMore || pdp > 1) && <TablePager paramName="pdp" currentPage={pdp} hasMore={dpHasMore} allParams={allParams} />}
-      </div>
-
-      {/* ══ Visit Kios ════════════════════════════════════════════════════════ */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>Visit Kios</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ExportExcelButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
-            <ExportPhotosButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
+                    </td>
+                  </tr>
+                ))}
+                {spotSlice.length === 0 && (
+                  <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
+                )}
+              </tbody>
+            </table>
           </div>
+          {(spotHasMore || pspot > 1) && <TablePager paramName="pspot" currentPage={pspot} hasMore={spotHasMore} allParams={allParams} />}
         </div>
-        <TableFilter prefix="kios" searchLabel="Cari Nama Kios" currentQ={kiosQ} currentStart={kiosStart} currentEnd={kiosEnd} allParams={allParams} />
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Tanggal</th>
-                <th style={thStyle}>Pembuat</th>
-                <th style={thStyle}>Nama Kios</th>
-                <th style={thStyle}>Hasil Kunjungan</th>
-                <th style={thStyle}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {kiosSlice.map(rp => (
-                <tr key={rp.id}>
-                  <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
-                  <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{rp.kiosName}</td>
-                  <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.visitResult || '-'}</td>
-                  <td style={tdStyle}>
-                    <Link href={`/dashboard/reports/kios/${rp.id}`} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</Link>
-                  </td>
-                </tr>
-              ))}
-              {kiosSlice.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-        {(kiosHasMore || pkios > 1) && <TablePager paramName="pkios" currentPage={pkios} hasMore={kiosHasMore} allParams={allParams} />}
-      </div>
+      )}
 
-      {/* ══ Farmer Gathering ══════════════════════════════════════════════════ */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>Farmer Gathering</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ExportExcelButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
-            <ExportPhotosButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
+      {tab === 'dp' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0 }}>Riwayat Realisasi Demo Plot</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              {['FO', 'INTERN', 'AFA'].includes(session.role) && <AddButton href="/dashboard/demoplot/new" label="Rekam Demo Plot" />}
+              <ExportExcelButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
+              <ExportPhotosButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
+            </div>
           </div>
-        </div>
-        <TableFilter prefix="gather" searchLabel="Cari Ketua Kelompok" currentQ={gatherQ} currentStart={gatherStart} currentEnd={gatherEnd} allParams={allParams} />
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Tanggal</th>
-                <th style={thStyle}>Pembuat</th>
-                <th style={thStyle}>Ketua Kelompok</th>
-                <th style={thStyle}>Lokasi</th>
-                <th style={thStyle}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {gatherSlice.map(rp => (
-                <tr key={rp.id}>
-                  <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
-                  <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{rp.leaderName || '-'}</td>
-                  <td style={tdStyle}>{rp.district || rp.address || '-'}</td>
-                  <td style={tdStyle}>
-                    <Link href={`/dashboard/reports/gathering/${rp.id}`} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</Link>
-                  </td>
+          <TableFilter prefix="dp" searchLabel="Cari Nama Petani" currentQ={dpQ} currentStart={dpStart} currentEnd={dpEnd} allParams={allParams} />
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>ID</th>
+                  <th style={thStyle}>Tanggal</th>
+                  {!['FO', 'INTERN'].includes(session.role) && <th style={thStyle}>Pelaksana</th>}
+                  <th style={thStyle}>Petani / Area</th>
+                  <th style={thStyle}>Komoditas</th>
+                  <th style={thStyle}>Status</th>
+                  <th style={thStyle}>Aksi</th>
                 </tr>
-              ))}
-              {gatherSlice.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {dpSlice.map((req: any) => (
+                  <tr key={req.id}>
+                    <td style={{ ...tdStyle, fontSize: '0.8rem', fontFamily: 'monospace' }}>{req.id.slice(0, 8).toUpperCase()}</td>
+                    <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.85rem' }}>{formatDate(req.createdAt)}</td>
+                    {!['FO', 'INTERN'].includes(session.role) && <td style={{ ...tdStyle, color: 'var(--primary)', fontWeight: 500 }}>{req.fo?.name}</td>}
+                    <td style={tdStyle}>
+                      <div style={{ fontWeight: 600 }}>{req.farmer?.name}</div>
+                      <div style={{ fontSize: '0.82rem', color: 'var(--text-muted)' }}>{req.area}</div>
+                    </td>
+                    <td style={{ ...tdStyle, fontSize: '0.85rem' }}>{req.commodity}</td>
+                    <td style={tdStyle}>{getStatusBadge(req.status)}</td>
+                    <td style={tdStyle}>
+                      <div className="action-row">
+                        {req.status === 'APPROVED' && (req.foId === session.userId || req.afaId === session.userId) && (
+                          <Link href={`/dashboard/demoplot/continue/${req.id}`}>
+                            <button className="btn btn-primary" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}><Play size={14} strokeWidth={1.75} className="icon-inline" />Lanjutkan Sesi</button>
+                          </Link>
+                        )}
+                        <Link href={`/dashboard/demoplot/detail/${req.id}`}>
+                          <button className="btn btn-outline" style={{ padding: '0.4rem 0.8rem', fontSize: '0.8rem' }}>Detail</button>
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+                {dpSlice.length === 0 && (
+                  <tr><td colSpan={7} style={{ ...tdStyle, padding: '1.5rem', textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada realisasi demo plot.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {(dpHasMore || pdp > 1) && <TablePager paramName="pdp" currentPage={pdp} hasMore={dpHasMore} allParams={allParams} />}
         </div>
-        {(gatherHasMore || pgather > 1) && <TablePager paramName="pgather" currentPage={pgather} hasMore={gatherHasMore} allParams={allParams} />}
-      </div>
+      )}
 
-      {/* ══ Visit Company ══════════════════════════════════════════════════════ */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>Visit Company</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ExportExcelButton type="company" search={compQ} start={compStart} end={compEnd} />
-            <ExportPhotosButton type="company" search={compQ} start={compStart} end={compEnd} />
+      {tab === 'kios' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0 }}>Visit Kios</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <AddButton href="/dashboard/reports/kios/new" label="Visit Kios" />
+              <ExportExcelButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
+              <ExportPhotosButton type="kios" search={kiosQ} start={kiosStart} end={kiosEnd} />
+            </div>
           </div>
-        </div>
-        <TableFilter prefix="comp" searchLabel="Cari Nama Perusahaan" currentQ={compQ} currentStart={compStart} currentEnd={compEnd} allParams={allParams} />
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Tanggal</th>
-                <th style={thStyle}>Pembuat</th>
-                <th style={thStyle}>Nama Perusahaan</th>
-                <th style={thStyle}>Kecamatan</th>
-                <th style={thStyle}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {compSlice.map(rp => (
-                <tr key={rp.id}>
-                  <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
-                  <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
-                  <td style={{ ...tdStyle, fontWeight: 600 }}>{rp.companyName}</td>
-                  <td style={tdStyle}>{rp.district || '-'}</td>
-                  <td style={tdStyle}>
-                    <Link href={`/dashboard/reports/company/${rp.id}`} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</Link>
-                  </td>
+          <TableFilter prefix="kios" searchLabel="Cari Nama Kios" currentQ={kiosQ} currentStart={kiosStart} currentEnd={kiosEnd} allParams={allParams} />
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Tanggal</th>
+                  <th style={thStyle}>Pembuat</th>
+                  <th style={thStyle}>Nama Kios</th>
+                  <th style={thStyle}>Hasil Kunjungan</th>
+                  <th style={thStyle}>Aksi</th>
                 </tr>
-              ))}
-              {compSlice.length === 0 && (
-                <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {kiosSlice.map(rp => (
+                  <tr key={rp.id}>
+                    <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
+                    <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{rp.kiosName}</td>
+                    <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{rp.visitResult || '-'}</td>
+                    <td style={tdStyle}>
+                      <Link href={`/dashboard/reports/kios/${rp.id}`} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</Link>
+                    </td>
+                  </tr>
+                ))}
+                {kiosSlice.length === 0 && (
+                  <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {(kiosHasMore || pkios > 1) && <TablePager paramName="pkios" currentPage={pkios} hasMore={kiosHasMore} allParams={allParams} />}
         </div>
-        {(compHasMore || pcomp > 1) && <TablePager paramName="pcomp" currentPage={pcomp} hasMore={compHasMore} allParams={allParams} />}
-      </div>
+      )}
 
-      {/* ══ Video Konten ══════════════════════════════════════════════════ */}
-      <div className="card" style={{ marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-          <h3 style={{ margin: 0 }}>Video Konten</h3>
-          <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <ExportExcelButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />
-            <ExportPhotosButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />
+      {tab === 'gather' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0 }}>Farmer Gathering</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <AddButton href="/dashboard/reports/gathering/new" label="Gathering" />
+              <ExportExcelButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
+              <ExportPhotosButton type="gathering" search={gatherQ} start={gatherStart} end={gatherEnd} />
+            </div>
           </div>
-        </div>
-        <TableFilter prefix="video" searchLabel="Cari Tema Video" currentQ={videoQ} currentStart={videoStart} currentEnd={videoEnd} allParams={allParams} />
-        <div className="table-responsive">
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
-            <thead>
-              <tr>
-                <th style={thStyle}>Tanggal Upload</th>
-                {['ADMIN', 'SPV'].includes(session.role) && <th style={thStyle}>Pelapor</th>}
-                <th style={thStyle}>Tema</th>
-                <th style={thStyle}>Produk Terkait</th>
-                <th style={thStyle}>Catatan</th>
-                <th style={thStyle}>Aksi</th>
-              </tr>
-            </thead>
-            <tbody>
-              {videoSlice.length === 0 ? (
-                <tr><td colSpan={6} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada data Video Konten.</td></tr>
-              ) : videoSlice.map((i: any) => (
-                <tr key={i.id}>
-                  <td style={tdStyle}>{formatDate(new Date(i.uploadDate))}</td>
-                  {['ADMIN', 'SPV'].includes(session.role) && <td style={tdStyle}>{i.user?.name}</td>}
-                  <td style={tdStyle}>{i.theme}</td>
-                  <td style={tdStyle}>{i.products?.map((p: any) => p.product?.name).join(', ') || '-'}</td>
-                  <td style={tdStyle}>{i.notes || '-'}</td>
-                  <td style={tdStyle}>
-                    <Link href={`/dashboard/reports/video-konten/${i.id}`} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>Detail</Link>
-                  </td>
+          <TableFilter prefix="gather" searchLabel="Cari Ketua Kelompok" currentQ={gatherQ} currentStart={gatherStart} currentEnd={gatherEnd} allParams={allParams} />
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Tanggal</th>
+                  <th style={thStyle}>Pembuat</th>
+                  <th style={thStyle}>Ketua Kelompok</th>
+                  <th style={thStyle}>Lokasi</th>
+                  <th style={thStyle}>Aksi</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {gatherSlice.map(rp => (
+                  <tr key={rp.id}>
+                    <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
+                    <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{rp.leaderName || '-'}</td>
+                    <td style={tdStyle}>{rp.district || rp.address || '-'}</td>
+                    <td style={tdStyle}>
+                      <Link href={`/dashboard/reports/gathering/${rp.id}`} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</Link>
+                    </td>
+                  </tr>
+                ))}
+                {gatherSlice.length === 0 && (
+                  <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {(gatherHasMore || pgather > 1) && <TablePager paramName="pgather" currentPage={pgather} hasMore={gatherHasMore} allParams={allParams} />}
         </div>
-        {(videoHasMore || pvideo > 1) && <TablePager paramName="pvideo" currentPage={pvideo} hasMore={videoHasMore} allParams={allParams} />}
-      </div>
+      )}
+
+      {tab === 'comp' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0 }}>Visit Company</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <AddButton href="/dashboard/reports/company/new" label="Visit Company" />
+              <ExportExcelButton type="company" search={compQ} start={compStart} end={compEnd} />
+              <ExportPhotosButton type="company" search={compQ} start={compStart} end={compEnd} />
+            </div>
+          </div>
+          <TableFilter prefix="comp" searchLabel="Cari Nama Perusahaan" currentQ={compQ} currentStart={compStart} currentEnd={compEnd} allParams={allParams} />
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Tanggal</th>
+                  <th style={thStyle}>Pembuat</th>
+                  <th style={thStyle}>Nama Perusahaan</th>
+                  <th style={thStyle}>Kecamatan</th>
+                  <th style={thStyle}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {compSlice.map(rp => (
+                  <tr key={rp.id}>
+                    <td style={tdStyle}>{formatDate(rp.createdAt)}</td>
+                    <td style={tdStyle}>{rp.user.name}<div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>{rp.user.role}</div></td>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{rp.companyName}</td>
+                    <td style={tdStyle}>{rp.district || '-'}</td>
+                    <td style={tdStyle}>
+                      <Link href={`/dashboard/reports/company/${rp.id}`} className="btn btn-outline" style={{ padding: '0.35rem 0.75rem', fontSize: '0.8rem' }}>Detail</Link>
+                    </td>
+                  </tr>
+                ))}
+                {compSlice.length === 0 && (
+                  <tr><td colSpan={5} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)', padding: '1.5rem' }}>Belum ada laporan yang cocok.</td></tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+          {(compHasMore || pcomp > 1) && <TablePager paramName="pcomp" currentPage={pcomp} hasMore={compHasMore} allParams={allParams} />}
+        </div>
+      )}
+
+      {tab === 'video' && (
+        <div className="card" style={{ marginBottom: '2rem' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+            <h3 style={{ margin: 0 }}>Video Konten</h3>
+            <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              <AddButton href="/dashboard/reports/video-konten/new" label="Video Konten" />
+              <ExportExcelButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />
+              <ExportPhotosButton type="video-konten" search={videoQ} start={videoStart} end={videoEnd} />
+            </div>
+          </div>
+          <TableFilter prefix="video" searchLabel="Cari Tema Video" currentQ={videoQ} currentStart={videoStart} currentEnd={videoEnd} allParams={allParams} />
+          <div className="table-responsive">
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9rem' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Tanggal Upload</th>
+                  {['ADMIN', 'SPV'].includes(session.role) && <th style={thStyle}>Pelapor</th>}
+                  <th style={thStyle}>Tema</th>
+                  <th style={thStyle}>Produk Terkait</th>
+                  <th style={thStyle}>Catatan</th>
+                  <th style={thStyle}>Aksi</th>
+                </tr>
+              </thead>
+              <tbody>
+                {videoSlice.length === 0 ? (
+                  <tr><td colSpan={6} style={{ ...tdStyle, textAlign: 'center', color: 'var(--text-muted)' }}>Belum ada data Video Konten.</td></tr>
+                ) : videoSlice.map((i: any) => (
+                  <tr key={i.id}>
+                    <td style={tdStyle}>{formatDate(new Date(i.uploadDate))}</td>
+                    {['ADMIN', 'SPV'].includes(session.role) && <td style={tdStyle}>{i.user?.name}</td>}
+                    <td style={tdStyle}>{i.theme}</td>
+                    <td style={tdStyle}>{i.products?.map((p: any) => p.product?.name).join(', ') || '-'}</td>
+                    <td style={tdStyle}>{i.notes || '-'}</td>
+                    <td style={tdStyle}>
+                      <Link href={`/dashboard/reports/video-konten/${i.id}`} className="btn btn-outline" style={{ padding: '0.25rem 0.5rem', fontSize: '0.8rem' }}>Detail</Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {(videoHasMore || pvideo > 1) && <TablePager paramName="pvideo" currentPage={pvideo} hasMore={videoHasMore} allParams={allParams} />}
+        </div>
+      )}
     </div>
   )
 }
