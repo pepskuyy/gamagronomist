@@ -74,7 +74,7 @@ export default function FOStockRequestPage() {
       else {
         // Produk tanpa isi per kemasan: pengajuan tersimpan, tapi stoknya tertahan sampai admin melengkapi
         if (res && 'warning' in res && res.warning) alert(res.warning)
-        router.push('/dashboard/demoplot')
+        router.push('/dashboard/stock')
       }
     })
   }
@@ -96,7 +96,7 @@ export default function FOStockRequestPage() {
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div>
           <h2 style={{ margin: 0 }}>Pengajuan Pengambilan Stok</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Ajukan kebutuhan produk sample kepada AFA supervisormu</p>

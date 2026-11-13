@@ -27,7 +27,7 @@ export default async function ExecuteDemoPlotPage({ params }: { params: Promise<
     return (
       <div style={{ textAlign: 'center', marginTop: '3rem' }}>
         <h3>Pengajuan Tidak Valid atau Belum Disetujui</h3>
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--primary)', marginTop: '1rem', display: 'inline-block' }}>
+        <Link href="/dashboard/reports?tab=dp" style={{ color: 'var(--primary)', marginTop: '1rem', display: 'inline-block' }}>
           Kembali ke Daftar
         </Link>
       </div>
@@ -53,7 +53,7 @@ export default async function ExecuteDemoPlotPage({ params }: { params: Promise<
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=dp" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Realisasi Demo Plot (Sesi)</h2>
       </div>
 

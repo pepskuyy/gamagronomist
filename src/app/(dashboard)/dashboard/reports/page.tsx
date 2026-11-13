@@ -5,7 +5,7 @@ import Link from 'next/link'
 import CbReportTable from '@/components/CbReportTable'
 import ExportExcelButton from '@/components/ExportExcelButton'
 import ExportPhotosButton from '@/components/ExportPhotosButton'
-import { Search, X, Plus, Play, Users, Leaf, Sprout, Store, UsersRound, Building2, Video } from 'lucide-react'
+import { Search, X, Plus, Play, ClipboardList, Users, Leaf, Sprout, Store, UsersRound, Building2, Video } from 'lucide-react'
 
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -375,6 +375,11 @@ export default async function ReportsPage({ searchParams }: { searchParams: Prom
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <h3 style={{ margin: 0 }}>Riwayat Realisasi Demo Plot</h3>
             <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
+              {['AFA', 'PLANTATION'].includes(session.role) && (
+                <Link href="/dashboard/demoplot/afa-plan" className="btn btn-outline" style={{ padding: '0.4rem 0.85rem', fontSize: '0.82rem' }}>
+                  <ClipboardList size={16} strokeWidth={1.75} className="icon-inline" />Perencanaan Mandiri
+                </Link>
+              )}
               {['FO', 'INTERN', 'AFA'].includes(session.role) && <AddButton href="/dashboard/demoplot/new" label="Rekam Demo Plot" />}
               <ExportExcelButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />
               <ExportPhotosButton type="demoplot" search={dpQ} start={dpStart} end={dpEnd} />

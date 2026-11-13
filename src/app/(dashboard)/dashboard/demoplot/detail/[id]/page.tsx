@@ -50,7 +50,7 @@ export default async function DemoPlotDetailPage({ params }: { params: Promise<{
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=dp" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Detail Pengajuan Demo Plot</h2>
       </div>
 

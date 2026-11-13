@@ -115,8 +115,8 @@ export default function FoDemoPlotDirectPage() {
       const res = await submitStandaloneDemoPlot(fd)
       if (res?.error) { setError(res.error); reloadStock() }
       else {
-        navigator.serviceWorker?.controller?.postMessage({ type: 'CLEAR_PAGE_CACHE', urls: ['/dashboard/demoplot'] })
-        router.push('/dashboard/demoplot')
+        navigator.serviceWorker?.controller?.postMessage({ type: 'CLEAR_PAGE_CACHE', urls: ['/dashboard/demoplot', '/dashboard/reports'] })
+        router.push('/dashboard/reports?tab=dp')
       }
     })
   }
@@ -136,7 +136,7 @@ export default function FoDemoPlotDirectPage() {
         </p>
         <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center', flexWrap: 'wrap' }}>
           <Link href="/dashboard/offline-queue" className="btn btn-outline">Lihat Antrian</Link>
-          <Link href="/dashboard/demoplot" className="btn btn-primary">Kembali ke Demo Plot</Link>
+          <Link href="/dashboard/reports?tab=dp" className="btn btn-primary">Kembali ke Demo Plot</Link>
         </div>
       </div>
     )
@@ -145,7 +145,7 @@ export default function FoDemoPlotDirectPage() {
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=dp" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div>
           <h2 style={{ margin: 0 }}>Rekam Realisasi Demo Plot</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem' }}>Rekam langsung tanpa perlu membuat pengajuan terlebih dahulu</p>

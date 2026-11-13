@@ -80,7 +80,7 @@ export default function ApprovePageClient({
         setApproveStatus('idle')
       } else {
         setApproveStatus('done')
-        setTimeout(() => router.push('/dashboard/demoplot'), 1200)
+        setTimeout(() => router.push('/dashboard/stock'), 1200)
       }
     }
   }
@@ -95,7 +95,7 @@ export default function ApprovePageClient({
     fd.append('requestId', request.id)
     fd.append('rejectReason', rejectReason.trim())
     await rejectRequest(fd)
-    router.push('/dashboard/demoplot')
+    router.push('/dashboard/stock')
   }
 
   const th: React.CSSProperties = { padding: '0.75rem', borderBottom: '1px solid var(--border)', fontSize: '0.8rem', color: 'var(--text-muted)' }
@@ -124,7 +124,7 @@ export default function ApprovePageClient({
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/stock" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <h2 style={{ margin: 0 }}>Review Pengajuan Stok dari FO</h2>
       </div>
 

@@ -57,7 +57,7 @@ export default function ContinueDemoPlotPage() {
     start(async () => {
       const res = await submitContinueDemoPlot(id, fd)
       if (res?.error) { setError(res.error); reloadStock() }
-      else router.push('/dashboard/demoplot')
+      else router.push('/dashboard/reports?tab=dp')
     })
   }
 
@@ -66,7 +66,7 @@ export default function ContinueDemoPlotPage() {
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=dp" style={{ color: 'var(--text-muted)' }}>← Kembali</Link>
         <div>
           <h2 style={{ margin: 0 }}>Lanjutkan Sesi Demo Plot</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.85rem', color: 'var(--text-muted)' }}>

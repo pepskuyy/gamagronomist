@@ -129,7 +129,7 @@ export default function ExecuteForm({ requestId, products }: { requestId: string
       setError(res.error)
       setLoading(false)
     } else {
-      router.push('/dashboard/demoplot')
+      router.push('/dashboard/reports?tab=dp')
     }
   }
 

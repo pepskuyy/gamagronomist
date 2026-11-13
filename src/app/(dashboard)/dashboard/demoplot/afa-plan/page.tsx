@@ -51,7 +51,7 @@ export default function AfaSelfPlanPage() {
     fd.append('longitude', String(lng))
     const res = await submitAfaSelfPlan(fd)
     if (res?.error) { setError(res.error); setLoading(false) }
-    else router.push('/dashboard/demoplot')
+    else router.push('/dashboard/reports?tab=dp')
   }
 
   const tdStyle = { padding: '0.65rem', borderBottom: '1px solid var(--border)' }
@@ -59,7 +59,7 @@ export default function AfaSelfPlanPage() {
   return (
     <div className="form-container-wide">
       <div className="back-header">
-        <Link href="/dashboard/demoplot" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
+        <Link href="/dashboard/reports?tab=dp" style={{ color: 'var(--text-muted)', textDecoration: 'none' }}>← Kembali</Link>
         <div>
           <h2 style={{ margin: 0 }}>Perencanaan Demo Plot Mandiri</h2>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: '0.4rem', marginTop: '0.3rem', fontSize: '0.8rem', fontWeight: 600, color: 'var(--success)', background: 'var(--success-bg)', padding: '0.2rem 0.6rem', borderRadius: 'var(--radius-xs)' }}>
