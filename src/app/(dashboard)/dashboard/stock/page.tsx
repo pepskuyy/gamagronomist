@@ -302,6 +302,12 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
               <h2 style={{ margin: 0 }}>Pantauan Stok User</h2>
             </div>
+            {/* ADMIN/SPV tidak punya kartu stok pribadi (tempat tombol ini untuk role lain) */}
+            {['ADMIN', 'SPV'].includes(session.role) && (
+              <Link href="/dashboard/stock/history">
+                <button className="btn btn-outline"><History size={16} strokeWidth={1.75} className="icon-inline" />Histori Ledger</button>
+              </Link>
+            )}
           </div>
           <TableFilter prefix="u" showDateRange={false} />
 
