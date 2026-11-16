@@ -204,6 +204,14 @@ export async function submitContinueDemoPlot(requestId: string, formData: FormDa
     return { error: 'Hanya FO dan AFA yang dapat menambah sesi demo plot.' }
   }
 
+  // Hanya pelaksana (FO/AFA) dari demo plot yang masih aktif yang boleh menambah sesi
+  {
+    const owner = await prisma.request.findUnique({ where: { id: requestId }, select: { status: true, foId: true, afaId: true } })
+    if (!owner) return { error: 'Data demo plot tidak ditemukan.' }
+    if (owner.foId !== session.userId && owner.afaId !== session.userId) return { error: 'Anda bukan pelaksana demo plot ini.' }
+    if (owner.status !== 'APPROVED') return { error: 'Demo plot ini sudah selesai atau belum disetujui.' }
+  }
+
   const date           = (formData.get('date')        as string)
   const landSize       = formData.get('landSize') ? parseFloat(formData.get('landSize') as string) : null
   const landSizeUnit   = (formData.get('landSizeUnit') as string) || 'ha'

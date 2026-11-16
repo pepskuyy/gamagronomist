@@ -50,6 +50,10 @@ export async function approveRequest(formData: FormData) {
     if (request.commodity === 'AFA_STOCK_IN') {
       return { error: 'Pengajuan ini adalah restock gudang dan tidak diproses dari sini.' }
     }
+    // AFA hanya memproses pengajuan yang ditujukan kepadanya (stok dipotong dari saldo AFA ini)
+    if (session?.role !== 'ADMIN' && request.afaId !== session?.userId) {
+      return { error: 'Pengajuan ini tidak ditujukan kepada Anda.' }
+    }
 
     // Angka pengajuan bisa kemasan atau ml/gr; tanpa isi per kemasan tidak bisa dibaca dengan benar
     const held = await findUndecidedUnitProducts(prisma, request.details
@@ -184,6 +188,9 @@ export async function rejectRequest(formData: FormData) {
     if (!request) return { error: 'Request tidak valid' }
     if (request.commodity === 'AFA_STOCK_IN') {
       return { error: 'Pengajuan restock gudang ditolak dari halaman stok, bukan dari sini.' }
+    }
+    if (session?.role !== 'ADMIN' && request.afaId !== session?.userId) {
+      return { error: 'Pengajuan ini tidak ditujukan kepada Anda.' }
     }
     if (request.status !== 'SUBMITTED') {
       // Setelah disetujui, stok sudah pindah ke FO; menolak sekarang membuat laporan tidak sesuai ledger.
