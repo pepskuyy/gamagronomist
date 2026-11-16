@@ -1,6 +1,7 @@
 'use server'
 
 import prisma from '@/lib/prisma'
+import { getActionSession } from '@/lib/session'
 
 import { revalidatePath } from 'next/cache'
 import bcrypt from 'bcryptjs'
@@ -77,6 +78,7 @@ export async function submitAccountRequest(formData: FormData) {
 
 // SPV: Approve a request → create real User
 export async function approveAccountRequest(requestId: string) {
+  if (!(await getActionSession(['ADMIN', 'SPV']))) return { error: 'Unauthorized' }
   try {
     const req = await prisma.accountRequest.findUnique({ where: { id: requestId } })
     if (!req) return { error: 'Permintaan tidak ditemukan.' }
@@ -123,6 +125,7 @@ export async function approveAccountRequest(requestId: string) {
 
 // SPV: Reject a request
 export async function rejectAccountRequest(requestId: string, reason: string) {
+  if (!(await getActionSession(['ADMIN', 'SPV']))) return { error: 'Unauthorized' }
   try {
     await prisma.accountRequest.update({
       where: { id: requestId },

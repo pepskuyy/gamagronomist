@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { encrypt } from '@/lib/auth'
 import bcrypt from 'bcryptjs'
+import { FIELD_ROLES, passwordVersion } from '@/lib/field-api'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,12 +10,14 @@ export async function POST(req: Request) {
   try {
     let username = ''
     let password = ''
+    let isApp = false // App Lapangan (APK): minta token di body, tanpa cookie
 
     const contentType = req.headers.get('content-type') || ''
     if (contentType.includes('application/json')) {
       const body = await req.json().catch(() => null)
       username = body?.username?.trim() || ''
       password = body?.password || ''
+      isApp = body?.client === 'app'
     } else {
       const formData = await req.formData().catch(() => null)
       if (formData) {
@@ -52,6 +55,10 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Password salah!' }, { status: 401 })
     }
 
+    if (isApp && !FIELD_ROLES.includes(user.role)) {
+      return NextResponse.json({ error: 'App Lapangan hanya untuk tim lapangan. Gunakan dashboard web.' }, { status: 403 })
+    }
+
     // Create session token
     const sessionToken = await encrypt({
       userId: user.id,
@@ -61,13 +68,18 @@ export async function POST(req: Request) {
       photo: user.photo,
       areaId: user.areaId,
       afaId: user.afaId,
-      isActive: user.isActive
+      isActive: user.isActive,
+      pv: passwordVersion(user.password),
     })
 
     const proto = req.headers.get('x-forwarded-proto') || ''
     const isHttps = proto === 'https' || req.url.startsWith('https:')
 
     console.log(`[Auth Login] Login success for user: "${user.name}" (${user.role}), https: ${isHttps}`)
+
+    if (isApp) {
+      return NextResponse.json({ success: true, token: sessionToken, name: user.name, role: user.role })
+    }
 
     const response = NextResponse.json({ success: true, name: user.name, role: user.role })
     response.cookies.set('session', sessionToken, {
