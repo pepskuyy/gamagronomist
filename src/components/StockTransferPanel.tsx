@@ -26,7 +26,7 @@ type Props = {
   meId: string
   transfers: TransferRow[]
   targets: { id: string; name: string }[]
-  balances: { productId: string; quantity: number; product: UnitProduct }[]
+  balances: { productId: string; quantity: number; product: UnitProduct & { code?: string | null } }[]
 }
 
 const STATUS: Record<string, { label: string; cls: string }> = {
@@ -50,7 +50,7 @@ export default function StockTransferPanel({ role, meId, transfers, targets, bal
   const isApprover = role === 'SPV' || role === 'ADMIN'
   const isSender = role === 'AFA' || role === 'PLANTATION'
 
-  // Form pengajuan (AFA)
+  // Form pengajuan (AFA → AFA/FO)
   const [formOpen, setFormOpen] = useState(false)
   const [toUserId, setToUserId] = useState('')
   const [rows, setRows] = useState<{ productId: string; qty: string }[]>([{ productId: '', qty: '' }])
@@ -74,7 +74,7 @@ export default function StockTransferPanel({ role, meId, transfers, targets, bal
   function submit() {
     setFormError(null)
     const items = rows.filter(r => r.productId && Number(r.qty) > 0).map(r => ({ productId: r.productId, quantity: Number(r.qty) }))
-    if (!toUserId) return setFormError('Pilih AFA penerima.')
+    if (!toUserId) return setFormError('Pilih penerima.')
     if (items.length === 0) return setFormError('Isi minimal 1 produk dengan jumlah > 0.')
     const over = items.find(i => i.quantity > (balanceOf(i.productId)?.quantity ?? 0) + 1e-9)
     if (over) return setFormError(`${balanceOf(over.productId)?.product.name}: jumlah melebihi saldo.`)
@@ -94,7 +94,7 @@ export default function StockTransferPanel({ role, meId, transfers, targets, bal
     <div style={{ marginBottom: '3rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap' }}>
         <div>
-          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Transfer Stok Antar AFA</h2>
+          <h2 style={{ margin: 0, fontSize: '1.25rem' }}>Transfer Stok</h2>
           <p style={{ margin: '0.25rem 0 0', fontSize: '0.82rem' }}>
             Diajukan pengirim, disetujui SPV, stok berpindah saat penerima konfirmasi terima.
           </p>
@@ -190,8 +190,8 @@ export default function StockTransferPanel({ role, meId, transfers, targets, bal
           <div className="card" style={{ width: '100%', maxWidth: 560, maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
             <h3 style={{ marginBottom: '1rem' }}>Ajukan Transfer Stok</h3>
             <div className="form-group">
-              <label className="form-label">AFA penerima</label>
-              <SearchableSelect options={targets.map(t => ({ value: t.id, label: t.name }))} value={toUserId} onChange={setToUserId} placeholder="-- Cari AFA penerima --" />
+              <label className="form-label">Penerima (AFA / FO)</label>
+              <SearchableSelect options={targets.map(t => ({ value: t.id, label: t.name }))} value={toUserId} onChange={setToUserId} placeholder="-- Cari penerima --" />
             </div>
             {rows.map((r, idx) => {
               const bal = balanceOf(r.productId)
@@ -202,7 +202,7 @@ export default function StockTransferPanel({ role, meId, transfers, targets, bal
                     <div style={{ flex: 1 }}>
                       <SearchableSelect
                         options={balances.filter(b => b.quantity > 0 && (!used.has(b.productId) || b.productId === r.productId))
-                          .map(b => ({ value: b.productId, label: `${b.product.name} — saldo ${fmt(b.quantity)} ${ledgerUnit(b.product)}` }))}
+                          .map(b => ({ value: b.productId, label: `${b.product.code ? `${b.product.code} · ` : ''}${b.product.name} — saldo ${fmt(b.quantity)} ${ledgerUnit(b.product)}` }))}
                         value={r.productId}
                         onChange={v => setRows(prev => prev.map((x, i) => i === idx ? { ...x, productId: v } : x))}
                         placeholder="-- Pilih produk --"

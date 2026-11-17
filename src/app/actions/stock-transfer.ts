@@ -1,7 +1,7 @@
 'use server'
 
 /**
- * Transfer stok antar AFA:
+ * Transfer stok dari AFA ke AFA lain atau ke FO:
  *   SUBMITTED (pengirim mengajukan) → APPROVED (SPV/ADMIN, jumlah bisa dikurangi)
  *   → RECEIVED (penerima konfirmasi; baru di sini stok berpindah)
  *   REJECTED: SPV/ADMIN dari SUBMITTED/APPROVED · CANCELLED: pengirim dari SUBMITTED.
@@ -21,6 +21,7 @@ import {
 } from '@/lib/ledger/stock'
 
 const SENDER_ROLES = ['AFA', 'PLANTATION']
+const RECEIVER_ROLES = [...SENDER_ROLES, 'FO']
 const SHORTAGE_HINT = 'Saldo pengirim tidak cukup. Minta pengirim menambah stok, atau SPV menolak transfer ini.'
 
 async function getSession() {
@@ -83,14 +84,14 @@ export async function submitStockTransfer(data: {
   const items = (data.items ?? []).filter(i => i.productId)
   if (items.length === 0 || items.some(i => !(Number(i.quantity) > 0))) return { error: 'Isi minimal 1 produk dengan jumlah > 0.' }
   if (new Set(items.map(i => i.productId)).size !== items.length) return { error: 'Tidak boleh ada produk yang sama dalam satu transfer.' }
-  if (!data.toUserId || data.toUserId === session.userId) return { error: 'Pilih AFA penerima yang lain.' }
+  if (!data.toUserId || data.toUserId === session.userId) return { error: 'Pilih penerima yang lain.' }
 
   try {
     const [to, from] = await Promise.all([
       prisma.user.findUnique({ where: { id: data.toUserId }, select: { name: true, role: true, isActive: true } }),
       prisma.user.findUnique({ where: { id: session.userId }, select: { name: true, areaId: true } }),
     ])
-    if (!to || !to.isActive || !SENDER_ROLES.includes(to.role)) return { error: 'Penerima harus AFA yang aktif.' }
+    if (!to || !to.isActive || !RECEIVER_ROLES.includes(to.role)) return { error: 'Penerima harus AFA atau FO yang aktif.' }
 
     const held = await findUndecidedUnitProducts(prisma, items.map(i => i.productId))
     if (held.length > 0) return { error: unitHoldMessage(held) }
@@ -187,7 +188,7 @@ export async function receiveStockTransfer(id: string) {
         toUser: { select: { name: true, areaId: true } },
       },
     })
-    if (!t || t.toUserId !== session?.userId) return { error: 'Hanya AFA penerima yang dapat mengonfirmasi transfer ini.' }
+    if (!t || t.toUserId !== session?.userId) return { error: 'Hanya penerima yang dapat mengonfirmasi transfer ini.' }
     if (t.status !== 'APPROVED') return { error: 'Transfer ini belum disetujui atau sudah diproses.' }
 
     const moves = t.items.filter(it => (it.qtyApproved ?? 0) > 0).map(it => ({ productId: it.productId, qty: it.qtyApproved as number }))

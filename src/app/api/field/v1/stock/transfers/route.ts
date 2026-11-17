@@ -6,15 +6,15 @@ import { formatLedgerQty } from '@/lib/stock-units'
 export const dynamic = 'force-dynamic'
 
 /**
- * Transfer stok antar AFA di mana user pengirim atau penerima, plus daftar calon penerima.
- * Sama dengan stockTransfer.findMany di dashboard/stock/page.tsx (hanya AFA/PLANTATION).
+ * Transfer stok (AFA → AFA/FO) di mana user pengirim atau penerima, plus daftar calon penerima.
+ * Sama dengan stockTransfer.findMany di dashboard/stock/page.tsx (AFA/PLANTATION kirim & terima, FO hanya terima).
  */
 export async function GET() {
   const auth = await requireFieldSession()
   if (auth instanceof NextResponse) return auth
   const { user } = auth
-  if (!['AFA', 'PLANTATION'].includes(user.role)) {
-    return NextResponse.json({ error: 'Transfer stok hanya untuk AFA.' }, { status: 403 })
+  if (!['AFA', 'PLANTATION', 'FO'].includes(user.role)) {
+    return NextResponse.json({ error: 'Transfer stok hanya untuk AFA dan FO.' }, { status: 403 })
   }
 
   const [transfers, receivers] = await Promise.all([
@@ -29,10 +29,10 @@ export async function GET() {
       take: 50,
     }),
     prisma.user.findMany({
-      where: { isActive: true, role: { in: ['AFA', 'PLANTATION'] }, id: { not: user.id } },
-      select: { id: true, name: true },
+      where: { isActive: true, role: { in: ['AFA', 'PLANTATION', 'FO'] }, id: { not: user.id } },
+      select: { id: true, name: true, role: true },
       orderBy: { name: 'asc' },
-    }),
+    }).then(us => us.map(u => ({ id: u.id, name: `${u.name} (${u.role})` }))),
   ])
 
   return NextResponse.json({

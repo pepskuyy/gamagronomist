@@ -154,8 +154,8 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
       })
     : []
 
-  // ── Transfer stok antar AFA (pengajuan → approval SPV → konfirmasi penerima) ──
-  const isTransferViewer = ['ADMIN', 'SPV', 'AFA', 'PLANTATION'].includes(session.role)
+  // ── Transfer stok AFA → AFA/FO (pengajuan → approval SPV → konfirmasi penerima) ──
+  const isTransferViewer = ['ADMIN', 'SPV', 'AFA', 'PLANTATION', 'FO'].includes(session.role)
   const transferWhere: any = session.role === 'ADMIN' ? {}
     : session.role === 'SPV' ? (session.areaId ? { fromUser: { areaId: session.areaId } } : {})
     : { OR: [{ fromUserId: session.userId }, { toUserId: session.userId }] }
@@ -173,10 +173,10 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
           take: 50,
         }),
         prisma.user.findMany({
-          where: { isActive: true, role: { in: ['AFA', 'PLANTATION'] }, id: { not: session.userId } },
-          select: { id: true, name: true },
+          where: { isActive: true, role: { in: ['AFA', 'PLANTATION', 'FO'] }, id: { not: session.userId } },
+          select: { id: true, name: true, role: true },
           orderBy: { name: 'asc' },
-        }),
+        }).then(us => us.map(u => ({ id: u.id, name: `${u.name} (${u.role})` }))),
       ])
     : [[], []]
   const stockTransfers = rawTransfers.map(t => ({ ...t, createdAt: t.createdAt.toISOString() }))
