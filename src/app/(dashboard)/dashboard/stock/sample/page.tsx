@@ -12,7 +12,7 @@ type Balance  = {
 type LedgerRow = {
   id: string; transactionType: string; quantity: number; notes: string | null
   referenceId: string | null; createdAt: string; stockBefore: number; stockAfter: number
-  product: { name: string; unit: string }
+  product: { name: string; unit: string; code?: string | null }
 }
 type Product = { id: string; name: string; unit: string; unitGramasi?: string | null; gramasiPerUnit?: number | null }
 type Owner = { id: string; name: string; role: string }
@@ -700,7 +700,7 @@ export default function SampleStockPage() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead>
                 <tr>
-                  {['Tanggal', 'Produk', 'Jenis', 'Stok Awal', 'Jumlah', 'Stok Akhir', 'Catatan'].map(h => (
+                  {['Tanggal', 'Kode SKU', 'Produk', 'Jenis', 'Stok Awal', 'Jumlah', 'Stok Akhir', 'Catatan'].map(h => (
                     <th key={h} style={thStyle}>{h}</th>
                   ))}
                 </tr>
@@ -732,6 +732,7 @@ export default function SampleStockPage() {
                       <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'var(--text-secondary)' }}>
                         {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(row.createdAt))}
                       </td>
+                      <td style={{ ...tdStyle, whiteSpace: 'nowrap', fontSize: '0.8rem', color: 'var(--text-secondary)', fontFamily: 'var(--font-mono-stack)' }}>{row.product.code || '-'}</td>
                       <td style={{ ...tdStyle, fontWeight: 500, color: 'var(--text-main)' }}>{row.product.name}</td>
                       <td style={tdStyle}>
                         <span style={{
