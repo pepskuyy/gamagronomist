@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     const flatStocks = stocks.map(s => ({
       id: s.product.id,
       name: s.product.name,
+      code: s.product.code,
       unit: (s.product as any).unitGramasi || s.product.unit,
       systemStock: s.quantity
     }))

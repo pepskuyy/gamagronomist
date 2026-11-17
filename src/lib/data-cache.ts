@@ -121,12 +121,13 @@ export const getProductOptions = unstable_cache(
       select: {
         id: true,
         name: true,
+        code: true,
         unit: true,
         unitGramasi: true,
         gramasiPerUnit: true,
       },
       orderBy: { name: 'asc' },
     }),
-  ['products-options-v1'],
+  ['products-options-v2'],
   { tags: [CACHE_TAGS.products], revalidate: 300 }
 )

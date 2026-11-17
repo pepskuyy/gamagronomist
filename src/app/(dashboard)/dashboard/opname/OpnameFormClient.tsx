@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'
 import { submitStockOpname } from '@/app/actions/opname'
 import Link from 'next/link'
 import { ArrowLeft, CheckCircle2, Plus } from 'lucide-react'
+import SearchableSelect from '@/components/SearchableSelect'
 
 type ProductStock = {
   id: string
   name: string
+  code?: string | null
   unit: string
   systemStock: number
 }
@@ -16,6 +18,7 @@ type ProductStock = {
 type ProductMaster = {
   id: string
   name: string
+  code: string | null
   unit: string
   unitGramasi: string | null
   gramasiPerUnit: number | null
@@ -29,10 +32,10 @@ export default function OpnameFormClient() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
-  
+
   const [counts, setCounts] = useState<Record<string, number>>({})
   const [notes, setNotes] = useState<Record<string, string>>({})
-  
+
   // State for newly added product rows
   const [addedProductIds, setAddedProductIds] = useState<string[]>([])
   const [showAddRow, setShowAddRow] = useState(false)
@@ -46,7 +49,7 @@ export default function OpnameFormClient() {
       .then(([summaryData, productsData]) => {
         setProducts(summaryData)
         setAllProducts(productsData)
-        
+
         const initialCounts: Record<string, number> = {}
         summaryData.forEach((p: ProductStock) => {
           initialCounts[p.id] = p.systemStock
@@ -70,7 +73,7 @@ export default function OpnameFormClient() {
 
   const handleAddNewProduct = () => {
     if (!selectedNewProduct) return
-    
+
     if (products.some(p => p.id === selectedNewProduct) || addedProductIds.includes(selectedNewProduct)) {
       alert('Produk ini sudah ada di dalam list opname.')
       return
@@ -90,19 +93,19 @@ export default function OpnameFormClient() {
     setSubmitting(true)
     setError(null)
     setSuccess(false)
-    
+
     const formData = new FormData(e.currentTarget)
-    
+
     const countsArray = Object.keys(counts).map(key => ({
       productId: key,
       physicalQty: counts[key],
       notes: notes[key] || ""
     }))
-    
+
     formData.append('counts', JSON.stringify(countsArray))
 
     const res = await submitStockOpname(formData)
-    
+
     if (res?.error) {
       setError(res.error)
     } else {
@@ -121,7 +124,7 @@ export default function OpnameFormClient() {
     ...products,
     ...addedProductIds.map(id => {
       const p = allProducts.find(x => x.id === id)!
-      return { id: p.id, name: p.name, unit: p.unitGramasi || p.unit, systemStock: 0 }
+      return { id: p.id, name: p.name, code: p.code, unit: p.unitGramasi || p.unit, systemStock: 0 }
     })
   ]
 
@@ -163,6 +166,7 @@ export default function OpnameFormClient() {
                  <tr key={p.id} style={{ background: isAdded ? 'var(--success-bg)' : undefined }}>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', fontWeight: 500 }}>
                      {p.name}
+                     {p.code && <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'var(--font-mono-stack)', fontWeight: 400 }}>{p.code}</span>}
                      {isAdded && <span style={{ display: 'block', fontSize: '0.75rem', color: 'var(--success)', fontWeight: 500 }}>+ Ditambahkan Manual</span>}
                    </td>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)', color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>
@@ -170,11 +174,11 @@ export default function OpnameFormClient() {
                    </td>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                        <input 
-                          type="number" 
+                        <input
+                          type="number"
                           min="0"
-                          step="0.01" 
-                          className="form-control" 
+                          step="0.01"
+                          className="form-control"
                           style={{ padding: '0.375rem 0.5rem', margin: 0, minWidth: '80px', borderColor: isAdded ? 'var(--success)' : undefined }}
                           value={counts[p.id] ?? ''}
                           onChange={(e) => handleCountChange(p.id, e.target.value)}
@@ -183,8 +187,8 @@ export default function OpnameFormClient() {
                       </div>
                    </td>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
-                      <span style={{ 
-                        fontWeight: 600, 
+                      <span style={{
+                        fontWeight: 600,
                         color: diff > 0 ? 'var(--success)' : diff < 0 ? 'var(--danger)' : 'var(--text-muted)',
                         whiteSpace: 'nowrap'
                       }}>
@@ -192,9 +196,9 @@ export default function OpnameFormClient() {
                       </span>
                    </td>
                    <td style={{ padding: '0.75rem', borderBottom: '1px solid var(--border-light)' }}>
-                      <input 
-                          type="text" 
-                          className="form-control" 
+                      <input
+                          type="text"
+                          className="form-control"
                           placeholder={diff !== 0 ? "Wajib diisi..." : "-"}
                           style={{ padding: '0.375rem 0.5rem', margin: 0, borderColor: diff !== 0 && !notes[p.id] ? 'var(--danger)' : undefined }}
                           value={notes[p.id] || ''}
@@ -211,8 +215,8 @@ export default function OpnameFormClient() {
 
           <div style={{ marginBottom: '2rem', background: 'var(--surface)', padding: '1rem', borderRadius: 'var(--radius-sm)', border: '1px dashed var(--border)' }}>
             {!showAddRow ? (
-              <button 
-                type="button" 
+              <button
+                type="button"
                 onClick={() => setShowAddRow(true)}
                 style={{ background: 'none', border: 'none', color: 'var(--primary)', fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '0.5rem' }}
               >
@@ -222,16 +226,15 @@ export default function OpnameFormClient() {
               <div style={{ display: 'flex', gap: '1rem', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                 <div style={{ flex: 1, minWidth: '250px' }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 500, color: 'var(--text-secondary)', marginBottom: '0.375rem' }}>Pilih Produk</label>
-                  <select 
-                    className="form-control" 
-                    value={selectedNewProduct} 
-                    onChange={e => setSelectedNewProduct(e.target.value)}
-                  >
-                    <option value="">-- Pilih produk dari database --</option>
-                    {availableProducts.map(p => (
-                      <option key={p.id} value={p.id}>{p.name} ({(p as any).unitGramasi || p.unit})</option>
-                    ))}
-                  </select>
+                  <SearchableSelect
+                    value={selectedNewProduct}
+                    onChange={setSelectedNewProduct}
+                    placeholder="Cari nama atau kode SKU…"
+                    options={availableProducts.map(p => ({
+                      value: p.id,
+                      label: `${p.code ? `${p.code} · ` : ''}${p.name} (${p.unitGramasi || p.unit})`,
+                    }))}
+                  />
                 </div>
                 <button type="button" onClick={handleAddNewProduct} className="btn btn-primary" disabled={!selectedNewProduct}>
                   Tambahkan ke List

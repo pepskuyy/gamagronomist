@@ -7,7 +7,7 @@ import { approveStockOpname, rejectStockOpname } from '@/app/actions/opname-spv'
 // Opname lama menyimpan sisa pembulatan Float (84.20000000000005); tampilkan maks. 2 desimal
 const fmt = (n: number) => Number(n).toLocaleString('id-ID', { maximumFractionDigits: 2 })
 
-export default function ApproveClient({ opname }: { opname: any }) {
+export default function ApproveClient({ opname, readOnly = false }: { opname: any; readOnly?: boolean }) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -102,7 +102,7 @@ export default function ApproveClient({ opname }: { opname: any }) {
           </tbody>
         </table>
 
-        {opname.status === 'SUBMITTED' && (
+        {opname.status === 'SUBMITTED' && !readOnly && (
           <div style={{ display: 'flex', gap: '1rem', marginTop: '1.5rem' }}>
             <button onClick={handleApprove} disabled={isPending} className="btn btn-primary" style={{ flex: 1, padding: '0.75rem 1rem', fontSize: '1rem' }}>
               {isPending ? 'Memproses...' : 'Approve & Sesuaikan Ledger'}

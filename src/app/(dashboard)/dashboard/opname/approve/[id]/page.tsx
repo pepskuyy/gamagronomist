@@ -15,9 +15,10 @@ export default async function OpnameApproveDetail({ params }: { params: Promise<
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
 
-  if (!session?.userId || !['ADMIN', 'SPV'].includes(session.role as string)) {
+  if (!session?.userId) {
     return <div className="card p-4">Akses Ditolak.</div>
   }
+  const isReviewer = ['ADMIN', 'SPV'].includes(session.role as string)
 
   const opname = await prisma.stockOpname.findUnique({
     where: { id },
@@ -33,7 +34,7 @@ export default async function OpnameApproveDetail({ params }: { params: Promise<
     }
   })
 
-  if (!opname) {
+  if (!opname || (!isReviewer && opname.userId !== session.userId)) {
     redirect('/dashboard/opname')
   }
 
@@ -42,11 +43,11 @@ export default async function OpnameApproveDetail({ params }: { params: Promise<
       <div className="flex-between">
         <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
           <Link href="/dashboard/opname" style={{ color: 'var(--text-muted)', display: 'inline-flex', alignItems: 'center', gap: '0.25rem' }}><ArrowLeft size={16} strokeWidth={1.75} className="icon-inline" />Kembali</Link>
-          <h2 style={{ margin: 0 }}>Review Opname: {opname.user.name}</h2>
+          <h2 style={{ margin: 0 }}>{isReviewer ? 'Review Opname' : 'Detail Opname'}: {opname.user.name}</h2>
         </div>
       </div>
 
-      <ApproveClient opname={opname} />
+      <ApproveClient opname={opname} readOnly={!isReviewer} />
     </div>
   )
 }

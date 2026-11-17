@@ -2,9 +2,13 @@ import prisma from '@/lib/prisma'
 import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import Link from 'next/link'
+import TableFilter from '@/components/TableFilter'
+import TablePager from '@/components/TablePager'
 
 
-export default async function OpnameApproveListPage() {
+const HISTORY_TAKE = 20
+
+export default async function OpnameApproveListPage({ searchParams = {} }: { searchParams?: Record<string, string | undefined> }) {
   const cookieStore = await cookies()
   const sessionToken = cookieStore.get('session')?.value
   const session = await decrypt(sessionToken as string)
@@ -25,9 +29,17 @@ export default async function OpnameApproveListPage() {
     orderBy: { createdAt: 'desc' }
   })
 
-  // Get recently approved/rejected to show history
-  const history = await prisma.stockOpname.findMany({
-    where: { status: { in: ['APPROVED', 'REJECTED'] } },
+  // Riwayat semua opname yang sudah diproses: filter nama user + rentang tanggal update (WIB), paging
+  const q = searchParams.qu?.trim() || ''
+  const start = searchParams.start_u ? new Date(`${searchParams.start_u}T00:00:00+07:00`) : null
+  const end = searchParams.end_u ? new Date(`${searchParams.end_u}T23:59:59.999+07:00`) : null
+  const page = Math.max(1, parseInt(searchParams.pu || '1') || 1)
+  const historyRows = await prisma.stockOpname.findMany({
+    where: {
+      status: { in: ['APPROVED', 'REJECTED'] },
+      ...(q ? { user: { name: { contains: q, mode: 'insensitive' as const } } } : {}),
+      ...(start || end ? { updatedAt: { ...(start ? { gte: start } : {}), ...(end ? { lte: end } : {}) } } : {}),
+    },
     include: {
       user: {
         select: { name: true, role: true }
@@ -35,8 +47,11 @@ export default async function OpnameApproveListPage() {
       details: true
     },
     orderBy: { updatedAt: 'desc' },
-    take: 10
+    skip: (page - 1) * HISTORY_TAKE,
+    take: HISTORY_TAKE + 1,
   })
+  const history = historyRows.slice(0, HISTORY_TAKE)
+  const historyHasMore = historyRows.length > HISTORY_TAKE
 
   return (
     <div className="space-y-6">
@@ -94,9 +109,13 @@ export default async function OpnameApproveListPage() {
         )}
       </div>
 
-      {history.length > 0 && (
-        <div className="card">
-          <h3>Riwayat Persetujuan (Terbaru)</h3>
+      <div className="card">
+          <h3 style={{ marginBottom: '1rem' }}>Riwayat Persetujuan</h3>
+          <TableFilter prefix="u" showDateRange />
+          {history.length === 0 ? (
+            <div className="alert alert-info mt-4">Tidak ada riwayat yang cocok dengan filter.</div>
+          ) : (
+          <div className="table-responsive">
           <table className="mt-4" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
             <thead style={{ background: 'var(--surface-2)' }}>
               <tr>
@@ -127,8 +146,10 @@ export default async function OpnameApproveListPage() {
               ))}
             </tbody>
           </table>
-        </div>
-      )}
+          </div>
+          )}
+          {(historyHasMore || page > 1) && <TablePager prefix="u" currentPage={page} hasMore={historyHasMore} />}
+      </div>
     </div>
   )
 }
