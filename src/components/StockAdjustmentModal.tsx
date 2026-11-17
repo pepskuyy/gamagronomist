@@ -20,19 +20,19 @@ type StockAdjustmentModalProps = {
 type AdjustmentRow = {
   id: string
   productId: string
-  type: 'plus' | 'minus'
+  /** Koreksi: stok akhir · Pindah: jumlah yang dipindah */
   quantity: string
 }
 
 function newRow(): AdjustmentRow {
-  return { id: Math.random().toString(36).substring(2, 9), productId: '', type: 'plus', quantity: '' }
+  return { id: Math.random().toString(36).substring(2, 9), productId: '', quantity: '' }
 }
 
 export default function StockAdjustmentModal({ isOpen, onClose, user, products, balances = [], transferTargets = [], onSuccess }: StockAdjustmentModalProps) {
   const [isPending, start] = useTransition()
   const [error, setError] = useState<string | null>(null)
   const [rows, setRows] = useState<AdjustmentRow[]>(() => [
-    { id: Math.random().toString(36).substring(2, 9), productId: user.initialProductId || '', type: 'plus', quantity: '' }
+    { id: Math.random().toString(36).substring(2, 9), productId: user.initialProductId || '', quantity: '' }
   ])
   const [notes, setNotes] = useState('')
   // 'adjust' = koreksi saldo akun ini; 'transfer' = pindahkan stok ke akun lain (dua sisi tercatat sekaligus)
@@ -57,9 +57,9 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
     e.preventDefault()
     setError(null)
 
-    const validRows = rows.filter(r => r.productId && r.quantity && parseFloat(r.quantity) > 0)
+    const validRows = rows.filter(r => r.productId && r.quantity !== '' && (mode === 'adjust' ? parseFloat(r.quantity) >= 0 : parseFloat(r.quantity) > 0))
     if (validRows.length === 0) {
-      setError('Minimal 1 produk harus diisi dengan jumlah > 0.')
+      setError(mode === 'adjust' ? 'Minimal 1 produk harus diisi stok akhirnya.' : 'Minimal 1 produk harus diisi dengan jumlah > 0.')
       return
     }
     if (!notes.trim()) {
@@ -74,8 +74,8 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
       return
     }
 
-    // Pengurangan / pemindahan tidak boleh melebihi saldo (server juga mengecek ulang)
-    const over = validRows.find(r => (mode === 'transfer' || r.type === 'minus') && parseFloat(r.quantity) > (balanceMap.get(r.productId) ?? 0) + 1e-9)
+    // Pemindahan tidak boleh melebihi saldo (server juga mengecek ulang)
+    const over = validRows.find(r => mode === 'transfer' && parseFloat(r.quantity) > (balanceMap.get(r.productId) ?? 0) + 1e-9)
     if (over) {
       const p = products.find(x => x.id === over.productId)
       setError(`${p?.name ?? 'Produk'}: jumlah melebihi saldo (${fmtQty(Math.max(0, balanceMap.get(over.productId) ?? 0))} ${unitOf(over.productId)}). Periksa apakah SKU yang dipilih sudah benar.`)
@@ -86,16 +86,10 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
       return
     }
 
-    const items = validRows.map(r => ({
-      productId: r.productId,
-      type: r.type as 'plus' | 'minus',
-      quantity: parseFloat(r.quantity),
-    }))
-
     start(async () => {
       const res = mode === 'transfer'
-        ? await transferStockBetweenUsers({ fromUserId: user.id, toUserId, items: items.map(i => ({ productId: i.productId, quantity: i.quantity })), notes: notes.trim() })
-        : await adjustStockBatch({ userId: user.id, items, notes: notes.trim() })
+        ? await transferStockBetweenUsers({ fromUserId: user.id, toUserId, items: validRows.map(r => ({ productId: r.productId, quantity: parseFloat(r.quantity) })), notes: notes.trim() })
+        : await adjustStockBatch({ userId: user.id, items: validRows.map(r => ({ productId: r.productId, target: parseFloat(r.quantity) })), notes: notes.trim() })
       if (res?.error) {
         setError(res.error)
       } else {
@@ -196,35 +190,37 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
                   </div>
 
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    {mode === 'adjust' && <div style={{ flex: 1 }}>
-                      <select
-                        className="form-control"
-                        value={row.type}
-                        onChange={e => updateRow(row.id, 'type', e.target.value)}
-                        style={{ fontSize: '0.875rem' }}
-                      >
-                        <option value="plus">Tambah (+)</option>
-                        <option value="minus">Kurangi (-)</option>
-                      </select>
-                    </div>}
                     <div style={{ flex: 1 }}>
                       <input
                         type="number"
-                        min="0.01"
-                        step="0.01"
+                        min={mode === 'adjust' ? '0' : '0.01'}
+                        step="any"
                         className="form-control"
                         value={row.quantity}
                         onChange={e => updateRow(row.id, 'quantity', e.target.value)}
-                        placeholder={`Jumlah${(() => { const p = products.find(x => x.id === row.productId); return p ? ` (${p.unitGramasi || p.unit})` : '' })()}`}
+                        aria-label={mode === 'adjust' ? 'Stok akhir' : 'Jumlah dipindah'}
+                        placeholder={`${mode === 'adjust' ? 'Stok akhir' : 'Jumlah'}${(() => { const p = products.find(x => x.id === row.productId); return p ? ` (${p.unitGramasi || p.unit})` : '' })()}`}
                         style={{ fontSize: '0.875rem' }}
                       />
                     </div>
                   </div>
-                  {row.productId && (
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.375rem' }}>
-                      Saldo saat ini: <strong className="num" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{fmtQty(balanceMap.get(row.productId) ?? 0)}</strong><span className="unit">{unitOf(row.productId)}</span>
-                    </div>
-                  )}
+                  {row.productId && (() => {
+                    const bal = balanceMap.get(row.productId) ?? 0
+                    const target = parseFloat(row.quantity)
+                    const diff = mode === 'adjust' && row.quantity !== '' && target >= 0 ? Math.round((target - bal) * 1e6) / 1e6 : null
+                    return (
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: '0.375rem' }}>
+                        Saldo saat ini: <strong className="num" style={{ fontWeight: 600, color: 'var(--text-main)' }}>{fmtQty(bal)}</strong><span className="unit">{unitOf(row.productId)}</span>
+                        {diff !== null && (
+                          <> · {diff === 0 ? 'tidak berubah' : (
+                            <strong className="num" style={{ fontWeight: 600, color: diff > 0 ? 'var(--success)' : 'var(--danger)' }}>
+                              {diff > 0 ? 'ditambah +' : 'dikurangi −'}{fmtQty(Math.abs(diff))}
+                            </strong>
+                          )}{diff !== 0 && <span className="unit">{unitOf(row.productId)}</span>}</>
+                        )}
+                      </div>
+                    )
+                  })()}
                 </div>
               ))}
             </div>
@@ -261,7 +257,7 @@ export default function StockAdjustmentModal({ isOpen, onClose, user, products, 
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '0.5rem' }}>
               <button type="button" className="btn btn-outline" onClick={onClose} disabled={isPending}>Batal</button>
               <button type="submit" className="btn btn-primary" disabled={isPending}>
-                {isPending ? 'Memproses...' : `${mode === 'transfer' ? 'Pindahkan' : 'Simpan'} (${rows.filter(r => r.productId && r.quantity).length} produk)`}
+                {isPending ? 'Memproses...' : `${mode === 'transfer' ? 'Pindahkan' : 'Simpan'} (${rows.filter(r => r.productId && r.quantity !== '').length} produk)`}
               </button>
             </div>
           </form>

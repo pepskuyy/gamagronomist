@@ -6,7 +6,7 @@ import { cookies } from 'next/headers'
 import { decrypt } from '@/lib/auth'
 import { revalidatePath } from 'next/cache'
 import { randomUUID } from 'crypto'
-import { assertStockAvailable, StockShortageError, findUndecidedUnitProducts, unitHoldMessage } from '@/lib/ledger/stock'
+import { assertStockAvailable, StockShortageError, findUndecidedUnitProducts, unitHoldMessage, lockUserStock } from '@/lib/ledger/stock'
 
 // Pengurangan tidak boleh melebihi saldo produk itu. Saldo minus akibat penyesuaian
 // biasanya berarti SKU yang dipilih keliru (ada produk kembar) atau angka salah ketik.
@@ -90,10 +90,10 @@ export async function adjustStock(formData: FormData) {
 
 // ── Batch adjustment (multi-product) ──────────────────────────────────────
 
+/** Koreksi saldo: SPV/ADMIN mengisi stok akhir, server menghitung selisih dari saldo terkini. */
 type AdjustItem = {
   productId: string
-  type: 'plus' | 'minus'
-  quantity: number
+  target: number
 }
 
 export async function adjustStockBatch(data: {
@@ -117,8 +117,8 @@ export async function adjustStockBatch(data: {
 
     // Validate all items
     for (const item of items) {
-      if (!item.productId || item.quantity <= 0) {
-        return { error: 'Semua produk harus memiliki jumlah > 0.' }
+      if (!item.productId || !Number.isFinite(item.target) || item.target < 0) {
+        return { error: 'Stok akhir setiap produk harus diisi (minimal 0).' }
       }
     }
 
@@ -133,19 +133,25 @@ export async function adjustStockBatch(data: {
     })
     const productMap = new Map(productsData.map(p => [p.id, p]))
 
-    await prisma.$transaction(async (tx) => {
-      await assertStockAvailable(
-        tx,
-        userId,
-        items.filter(i => i.type === 'minus').map(i => ({ productId: i.productId, qty: i.quantity })),
-        ADJUST_SHORTAGE_HINT,
-      )
+    const changed = await prisma.$transaction(async (tx) => {
+      // Kunci saldo user lalu hitung selisih dari saldo terkini (bukan dari angka di layar)
+      await lockUserStock(tx, userId)
+      const sums = await tx.ledger.groupBy({
+        by: ['productId'],
+        where: { userId, productId: { in: productIds } },
+        _sum: { quantity: true },
+      })
+      const current = new Map(sums.map(s => [s.productId, s._sum.quantity ?? 0]))
+      let count = 0
 
       for (const item of items) {
         const product = productMap.get(item.productId)
         if (!product) continue
 
-        const qty = item.type === 'minus' ? -item.quantity : item.quantity
+        const before = current.get(item.productId) ?? 0
+        const qty = Math.round((item.target - before) * 1e6) / 1e6
+        if (qty === 0) continue
+        count++
 
         await tx.ledger.create({
           data: {
@@ -159,17 +165,20 @@ export async function adjustStockBatch(data: {
         })
 
         const sign = qty > 0 ? '+' : ''
+        const unit = product.unitGramasi || product.unit
         await tx.notification.create({
           data: {
             userId,
             title: '🔄 Penyesuaian Stok',
-            message: `Stok ${product.name} disesuaikan sebesar ${sign}${qty} ${product.unitGramasi || product.unit}.\nKeterangan: ${notes}`,
+            message: `Stok ${product.name} disesuaikan dari ${before} menjadi ${item.target} ${unit} (${sign}${qty}).\nKeterangan: ${notes}`,
             link: '/dashboard/stock/history'
           }
         })
       }
+      return count
     })
 
+    if (changed === 0) return { error: 'Stok akhir sama dengan saldo saat ini. Tidak ada yang diubah.' }
     revalidatePath('/dashboard/stock')
     return { success: true }
   } catch (error) {
