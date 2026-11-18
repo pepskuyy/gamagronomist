@@ -135,13 +135,14 @@ export default async function StockDashboardPage(props: { searchParams: Promise<
   ])
 
   // ── Resolve team variables ──
-  let teamUsers: { id: string; name: string; role: string; parentName?: string }[] = []
+  let teamUsers: { id: string; name: string; role: string; areaName: string; afaName: string | null }[] = []
   let hasMoreUsers = false
   if (isTeamViewer) {
     hasMoreUsers = (pu * take) < totalUsers
     teamUsers = (rawUsers as any[]).map((u: any) => ({
       id: u.id, name: u.name, role: u.role,
-      parentName: ['AFA', 'PLANTATION'].includes(u.role) ? (u.area?.name || 'Pusat') : (u.afa?.name || u.area?.name || '-')
+      areaName: u.area?.name || (['AFA', 'PLANTATION'].includes(u.role) ? 'Pusat' : '-'),
+      afaName: ['AFA', 'PLANTATION'].includes(u.role) ? null : (u.afa?.name || null),
     }))
   }
 
